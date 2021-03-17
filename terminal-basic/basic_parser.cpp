@@ -92,6 +92,12 @@ void Parser::addModule(FunctionBlock *module)
 	_internal.setNext(module);
 }
 
+void
+Parser::stop()
+{
+	_stopParse = true;
+}
+
 bool
 Parser::parse(const char *s)
 {
@@ -140,6 +146,7 @@ Parser::fOperators()
  * OPERATOR =
  *	KW_DIM ARRAYS_LIST |
  *      KW_END |
+ *	KW_STOP |
  *	KW_FOR FOR_CONDS |
  *	KW_GOSUB EXPRESSION |
  *	KW_IF EXPRESSION IF_STATEMENT |
@@ -314,7 +321,8 @@ Parser::fImplicitAssignment(char *varName)
 /*
  * PRINT_LIST =
  * PRINT_ITEM |
- * PRINT_ITEM COMMA PRINT_LIST
+ * PRINT_ITEM COMMA PRINT_LIST |
+ * PRINT_ITEM SEMI PRINT_LIST
  */
 bool
 Parser::fPrintList()
@@ -330,17 +338,13 @@ Parser::fPrintList()
 		case Token::COMMA:
 			if (_mode == EXECUTE)
 				_interpreter.print('\t');
-			if (!_lexer.getNext() || !fPrintItem()) {
-				_error = EXPRESSION_EXPECTED;
+			if (!_lexer.getNext() || !fPrintItem())
 				return (false);
-			}
 			break;
 		case Token::SEMI:
-			if (_lexer.getNext()) {
-				if (!fPrintItem()) {
-					_error = EXPRESSION_EXPECTED;
+			if (_lexer.getNext() && _lexer.getToken() != Token::COLON) {
+				if (!fPrintItem())
 					return (false);
-				}
 			} else
 				return (true);
 			break;
@@ -360,23 +364,26 @@ Parser::fPrintList()
 bool
 Parser::fPrintItem()
 {
-	Value v;
-	if (_lexer.getToken() == Token::KW_TAB) {
-		if (_lexer.getNext() && _lexer.getToken() == Token::LPAREN &&
-		    _lexer.getNext() && fExpression(v) &&
-		    _lexer.getToken() == Token::RPAREN) {
-			_interpreter.printTab(Integer(v));
-			_lexer.getNext();
-		} else
-			return (false);
-	} else {
-		if (!fExpression(v)) {
-			_error = EXPRESSION_EXPECTED;
-			return (false);
+	Token t = _lexer.getToken();
+	if (_lexer.getToken() != Token::COMMA && _lexer.getToken() != Token::COLON) {
+		Value v;
+		if (_lexer.getToken() == Token::KW_TAB) {
+			if (_lexer.getNext() && _lexer.getToken() == Token::LPAREN &&
+			    _lexer.getNext() && fExpression(v) &&
+			    _lexer.getToken() == Token::RPAREN) {
+				_interpreter.printTab(Integer(v));
+				_lexer.getNext();
+			} else
+				return (false);
+		} else {
+			if (!fExpression(v)) {
+				_error = EXPRESSION_EXPECTED;
+				return (false);
+			}
+
+			if (_mode == EXECUTE)
+				_interpreter.print(v);
 		}
-		
-		if (_mode == EXECUTE)
-			_interpreter.print(v);
 	}
 	return (true);
 }
@@ -392,20 +399,11 @@ Parser::fExpression(Value &v)
 {
 	LOG_TRACE;
 	
-	Token t = _lexer.getToken();
-	if(t == Token::OP_NOT) {
-		if (!_lexer.getNext() || !fSimpleExpression(v))
-			return (false);
-		if (_mode == EXECUTE)
-			v = !bool(v);
-		return (true);
-	}
-	
 	if (!fSimpleExpression(v))
 		return (false);
 
 	while (true) {
-		t = _lexer.getToken();
+		Token t = _lexer.getToken();
 		Value v2;
 		switch (t) {
 		case Token::LT:
@@ -480,13 +478,20 @@ Parser::fSimpleExpression(Value &v)
 				if (v.type == Value::STRING &&
 				    v2.type == Value::STRING)
 					_interpreter.strConcat(v,v2);
-				v += v2;
+				else
+					v += v2;
 				continue;
 			} else
 				return (false);
 		case Token::MINUS:
 			if (_lexer.getNext() && fTerm(v2)) {
 				v -= v2;
+				continue;
+			} else
+				return (false);
+		case Token::OP_OR:
+			if (_lexer.getNext() && fTerm(v2)) {
+				v |= v2;
 				continue;
 			} else
 				return (false);
@@ -521,6 +526,12 @@ Parser::fTerm(Value &v)
 				continue;
 			} else
 				return (false);
+		case Token::OP_AND:
+			if (_lexer.getNext() && fFactor(v2)) {
+				v &= v2;
+				continue;
+			} else
+				return (false);	
 		default:
 			return (true);
 		}
@@ -566,6 +577,12 @@ Parser::fFinal(Value &v)
 				return (false);
 			if (_mode == EXECUTE)
 				v.switchSign();
+			return (true);
+		case Token::OP_NOT:
+			if (!_lexer.getNext() || !fFinal(v))
+				return (false);
+			if (_mode == EXECUTE)
+				v.notOp();
 			return (true);
 		case Token::C_INTEGER:
 		case Token::C_REAL:
@@ -661,11 +678,19 @@ Parser::fCommand()
 	Token t = _lexer.getToken();
 	LOG(t);
 	switch (t) {
+#if USE_SAVE_LOAD
+	case Token::COM_CHAIN:
+		if (_mode == EXECUTE)
+			_interpreter.chain();
+		_lexer.getNext();
+		return (true);
+#endif
 	case Token::COM_CLS:
 		if (_mode == EXECUTE)
 			_interpreter.cls();
 		_lexer.getNext();
 		return (true);
+#if USE_DUMP
 	case Token::COM_DUMP:
 	{
 		Interpreter::DumpMode mode = Interpreter::MEMORY;
@@ -682,6 +707,7 @@ Parser::fCommand()
 			_interpreter.dump(mode);
 		return (true);
 	}
+#endif
 	case Token::COM_LIST:
 	{
 		Integer start = 1, stop = 0;
@@ -704,11 +730,13 @@ Parser::fCommand()
 			_interpreter.list(start, stop);
 	}
 		return (true);
+#if USE_SAVE_LOAD
 	case Token::COM_LOAD:
 		if (_mode == EXECUTE)
 			_interpreter.load();
 		_lexer.getNext();
 		return (true);
+#endif
 	case Token::COM_NEW:
 		if (_mode == EXECUTE)
 			_interpreter.newProgram();
@@ -719,11 +747,13 @@ Parser::fCommand()
 			_interpreter.run();
 		_lexer.getNext();
 		return (true);
+#if USE_SAVE_LOAD
 	case Token::COM_SAVE:
 		if (_mode == EXECUTE)
 			_interpreter.save();
 		_lexer.getNext();
 		return (true);
+#endif
 	case Token::REAL_IDENT:
 	case Token::INTEGER_IDENT:
 		FunctionBlock::command c;

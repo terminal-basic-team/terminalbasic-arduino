@@ -10,23 +10,42 @@ arduino-ide and uses its toolchain.
 1. Build from sources
 
 Full source code is available at https://bitbucket.org/starling13/ucbasic/
-and https://sourceforge.net/p/terminal-basic/
-
-The script ./make_sketch.sh makes an archive with arduino-ide sketch
-from source tree. It depends on the arduinoext library, which is being
-hosted at https://bitbucket.org/starling13/libarduinoext/
-(it should be placed at the same directory, where terminal-basic
+and https://sourceforge.net/p/terminal-basic/ repositories.
+It depends on the libarduino, libarduinoext and libarduinoemulator libraries,
+which are being hosted at 
+    https://bitbucket.org/starling13/libarduino/
+    https://bitbucket.org/starling13/libarduinoext/
+    https://bitbucket.org/starling13/libarduinoemulator/
+respectively (libs should be placed at the same directory, where terminal-basic
 directory is placed i.e.
    .../REPO/-|
              |-terminal-basic from https://bitbucket.org/starling13/ucbasic/
-             |-libarduinoext from https://bitbucket.org/starling13/libarduinoext/ )
+             |-libarduino from https://bitbucket.org/starling13/libarduino/
+             |-libarduinoext from https://bitbucket.org/starling13/libarduinoext/
+             |-libarduinoemulator from https://bitbucket.org/starling13/libarduinoemulator/ )
+
+The script ./make_sketch.sh makes an archive with arduino-ide sketch from source tree.
 
 Use netbeans 8.2 IDE to work with sources. Building for PC (using
 linux Arduino API emulation library) depends
 on posixcpp library from https://bitbucket.org/starling13/posixcpp/
 installed.
 
-2. Terminal-BASIC language
+2. Installing and using
+
+After building from sources or flashing precompiled hex file use appropriate input/output
+devices, selected in config_arduino.hpp or config_linux.hpp before building.
+By default terminal-basic use USART0 with default settings, 115200 baud rate.
+Terminal program must:
+    * support vt100 control codes
+    * use no local echo and line editing.
+
+Variants, using HX8357B based 480x320 TFT displays or composite video out
+using UTFT library from http://www.rinkydinkelectronics.com/library.php?id=51
+and TVoutEx library from https://starling13@bitbucket.org/starling13/tvoutex
+respectively also works.
+
+3. Terminal-BASIC language
 
 Primary goal for project is a support of ANSI/ECMA Minimal BASIC
 standards.
@@ -34,40 +53,54 @@ standards.
 A set of sources for test programs can be downloaded from
 https://cloud.mail.ru/public/45SG/gGc2kFpBk
 
-The language, which ucBASIC will support one day is:
+The language, which TerminalBASIC will support one day is:
 
 Lexems:
- * COM_CLS = "CLS"
- * COM_DATA = "DATA"
- * COM_DUMP = "DUMP"
- * COM_LIST = "LIST"
- * COM_LOAD = "LOAD"
- * COM_NEW = "NEW"
+ * OP_AND = "AND"       // 1
+ * KW_ARRAYS = "ARRAYS" // 1
+ * KW_BASE = "BASE"     // 2
+ * COM_CHAIN = "CHAIN"  // 3
+ * COM_CLS = "CLS"      // 4
+ * KW_DATA = "DATA"     // 5
+ * KW_DEF = "DEF"       // 6
+ * COM_DELAY = "DELAY"  // 7
+ * KW_DIM = "DIM"       // 8
+ * COM_DUMP = "DUMP"    // 9
+ * KW_END = "END"       // 10
+ * KW_FALSE = "FALSE"   // 11
+ * KW_FOR = "FOR"       // 12
+ * KW_GOSUB = "GOSUB"   // 13
+ * KW_GOTO = "GOTO"     // 14
+ * KW_GO = "GO"         // 15
+ * KW_IF = "IF"         // 16
+ * KW_INPUT = "INPUT"   // 17
+ * KW_LET = "LET"       // 18
+ * COM_LIST = "LIST"    // 19
+ * COM_LOAD = "LOAD"    // 20
+ * COM_NEW = "NEW"      // 21
+ * KW_NEXT = "NEXT"     // 22
+ * OP_NOT = "NOT"
+ * KW_ON = "ON"         // 23
+ * KW_OPTION = "OPTION" // 24
+ * OP_OR = "OR"
+ * KW_PRINT = "PRINT"   // 25
+ * KW_RANDOMIZE = "RANDOMIZE"
+ * KW_READ = "READ"
+ * KW_REM = "REM"
+ * KW_RETURN = "RETURN"
  * COM_RUN = "RUN"
  * COM_SAVE = "SAVE"
- * 
- * KW_DIM = "DIM"
- * KW_END = "END"
- * KW_FOR = "FOR"
- * KW_GOSUB = "GOSUB"
- * KW_GOTO = "GOTO"
- * KW_IF = "IF"
- * KW_INPUT = "INPUT"
- * KW_LET = "LET"
- * KW_NEXT = "NEXT"
- * KW_PRINT = "PRINT"
- * KW_RETURN = "RETURN"
- * 
- * KW_ARRAYS = "ARRAYS"
+ * KW_STEP = "STEP"
+ * KW_STOP = "STOP"
+ * KW_TAB = "TAB"
  * KW_THEN = "THEN"
  * KW_TO = "TO"
- * KW_STEP = "STEP"
+ * KW_TRUE = "TRUE"
  * KW_VARS = "VARS"
  * 
- * OP_AND = "AND"
- * OP_OR = "OR"
- * OP_NOT = "NOT"
- * 
+ * STAR = '*'
+ * SLASH = '/'
+ * PLUS = '+'
  * COLON = ':'
  * SEMI = ';'
  * LT = '<'
@@ -78,9 +111,6 @@ Lexems:
  * NE = "<>"
  * NEA = "><"
  * MINUS = '-'
- * PLUS = '+'
- * STAR = '*'
- * SLASH = '/'
  * POW = '^'
  * IDENT = [A-Z][A-Z0-9]*
  * C_INTEGER = [0-9]+
@@ -89,18 +119,21 @@ Lexems:
 Grammar:
  * TEXT = OPERATORS | C_INTEGER OPERATORS
  * OPERATORS = OPERATOR | OPERATOR COLON OPERATORS
- * OPERATOR = COMMAND |
+ * OPERATOR =
+ *	KW_DIM ARRAYS_LIST |
  *      KW_END |
- *	KW_RETURN |
- *	KW_INPUT VAR_LIST |
- *	KW_PRINT PRINT_LIST |
- *	KW_IF EXPRESSION IF_STATEMENT |
  *	KW_FOR FOR_CONDS |
+ *	KW_GOSUB EXPRESSION |
+ *	KW_IF EXPRESSION IF_STATEMENT |
+ *	KW_INPUT VAR_LIST |
+ *	KW_LET IMPLICIT_ASSIGNMENT |
  *	KW_NEXT IDENT |
- *	ASSIGNMENT |TURN |
+ *	KW_PRINT | KW_PRINT PRINT_LIST |
+ *	KW_REM TEXT |
+ *	KW_RETURN |
+ *	KW_RANDOMIZE |
  *	GOTO_STATEMENT |
- *	KW_GOSUB INTEGER |
- *	KW_DIM ARRAYS_LIST
+ *	COMMAND
  * COMMAND = COM_DUMP | COM_DUMP KW_VARS | COM_DUMP KW_ARRAYS
  *	COM_LIST | COM_NEW | COM_RUN | COM_SAVE | COM_LOAD
  * ASSIGNMENT = KW_LET IMPLICIT_ASSIGNMENT | IMPLICIT_ASSIGNMENT

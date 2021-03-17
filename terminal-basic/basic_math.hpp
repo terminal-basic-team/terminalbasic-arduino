@@ -35,28 +35,35 @@ class Math : public FunctionBlock
 public:
 	explicit Math(FunctionBlock* =NULL);
 private:
+#if M_REVERSE_TRIGONOMETRIC
 	static bool func_acs(Interpreter&);
 	static bool func_asn(Interpreter&);
 	static bool func_atn(Interpreter&);
+#endif
+#if M_TRIGONOMETRIC
 	static bool func_cos(Interpreter&);
 	static bool func_cot(Interpreter&);
+	static bool func_sin(Interpreter&);
+	static bool func_tan(Interpreter&);
+#endif
 	static bool func_exp(Interpreter&);
 	static bool func_log(Interpreter&);
-	static bool func_sin(Interpreter&);
 	static bool func_sqr(Interpreter&);
 	static bool func_pi(Interpreter&);
-	static bool func_tan(Interpreter&);
-	
+#if M_REVERSE_TRIGONOMETRIC
 	static Real acs_r(Real);
 	static Real asn_r(Real);
 	static Real atn_r(Real);
-	static Real sin_r(Real);
+#endif
+#if M_TRIGONOMETRIC
 	static Real cos_r(Real);
 	static Real cot_r(Real);
+	static Real sin_r(Real);
+	static Real tan_r(Real);
+#endif
 	static Real exp_r(Real);
 	static Real log_r(Real);
 	static Real sqr_r(Real);
-	static Real tan_r(Real);
 	
 	static const FunctionBlock::function funcs[] PROGMEM;;
 };

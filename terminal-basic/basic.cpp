@@ -25,6 +25,7 @@ static const char strStatic[] PROGMEM = "STATIC";
 static const char strDynamic[] PROGMEM = "DYNAMIC";
 static const char strError[] PROGMEM = "ERROR";
 static const char strSemantic[] PROGMEM = "SEMANTIC";
+static const char strAt[] PROGMEM = "AT";
 static const char strReady[] PROGMEM = "READY";
 static const char strBytes[] PROGMEM = "BYTES";
 static const char strAvailable[] PROGMEM = "AVAILABLE";
@@ -45,6 +46,7 @@ static PGM_P const progmemStrings[uint8_t(ProgMemStrings::NUM_STRINGS)] PROGMEM 
 	strDynamic, // DYNAMAIC
 	strError, // ERROR
 	strSemantic, // SEMANTIC
+	strAt,     // AT
 	strReady, // READY
 	strBytes, // BYTES
 	strAvailable, // AVAILABLE
@@ -58,42 +60,46 @@ static PGM_P const progmemStrings[uint8_t(ProgMemStrings::NUM_STRINGS)] PROGMEM 
 	strSTACK, // STACK
 	strDIR, // DIR
 	strREALLY, // REALLY
-	strEND
+	strEND // END
 };
 
-bool
+uint8_t*
 scanTable(const uint8_t *token, const uint8_t table[], uint8_t &index)
 {
 	uint8_t tokPos = 0, tabPos = 0;
-	while (token[tokPos] != 0) {
+	while (true) {
 		uint8_t c = pgm_read_byte(table);
 		uint8_t ct = token[tokPos];
 		if (c == 0)
-			return (false);
+			return (NULL);
 		
-		if (ct == c)
+		if (ct == c) {
 			++tokPos, ++table;
-		else if (ct+uint8_t(0x80) == c) {
+			continue;
+		} else if (ct+uint8_t(0x80) == c) {
 			index = tabPos;
-			if (token[++tokPos] != 0) {
-				while ((pgm_read_byte(table++) & uint8_t(0x80)) ==
-				    0);
-				++tabPos, tokPos=0;
-			} else
-				return (true);
+			++tokPos;
+			return ((uint8_t*)token+tokPos);
 		} else {
 			if (c & uint8_t(0x80))
 				c &= ~uint8_t(0x80);
-			if (c > ct)
-				return (false);
+			if (c > ct && ct != 0)
+				return (NULL);
 			else {
 				while ((pgm_read_byte(table++) & uint8_t(0x80)) ==
 				    0);
 				++tabPos, tokPos=0;
 			}
+			continue;
+		}
+		
+		if (ct == 0) {
+			while ((pgm_read_byte(table++) & uint8_t(0x80)) ==
+				    0);
+			++tabPos, tokPos=0;
 		}
 	}
-	return (false);
+	return (NULL);
 }
 
 PGM_P progmemString(ProgMemStrings index)

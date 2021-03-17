@@ -23,6 +23,7 @@
 #include "basic_lexer.hpp"
 #include "basic_parser.hpp"
 #include "helper.hpp"
+#include "vt100.hpp"
 
 namespace BASIC
 {
@@ -37,7 +38,7 @@ public:
 	 * @brief BASIC program memory
 	 */
 	class CPS_PACKED Program;
-	
+
 	/**
 	 * Variable type
 	 */
@@ -53,7 +54,7 @@ public:
 		VF_BOOLEAN,
 		VF_STRING
 	};
-	
+
 	/**
 	 * Dynamic (runtime error codes)
 	 */
@@ -75,16 +76,16 @@ public:
 		INVALID_TAB_VALUE,
 		INTERNAL_ERROR = 255
 	};
-	
+
 	/**
-	 * Type of the occurederror
+	 * Type of the occured error
 	 */
 	enum ErrorType : uint8_t
 	{
 		STATIC_ERROR, // syntax
 		DYNAMIC_ERROR // runtime
 	};
-	
+
 	/**
 	 * @brief variable memory frame
 	 */
@@ -100,7 +101,7 @@ public:
 		 * @brief getValue from Variable frame
 		 * @param T value type
 		 * @return value
-		 */		
+		 */
 		template <typename T>
 		T get() const
 		{
@@ -112,7 +113,7 @@ public:
 			_U.b = bytes;
 			return *_U.i;
 		}
-		
+
 		// Variable name
 		char name[VARSIZE];
 		// Variable type
@@ -120,7 +121,7 @@ public:
 		// Frame body
 		char bytes[];
 	};
-	
+
 	/**
 	 * Array memory frame
 	 */
@@ -131,26 +132,26 @@ public:
 		 * @return size
 		 */
 		size_t size() const;
-		
+
 		/**
 		 * @brief get array raw data pointer
 		 * @return pointer
 		 */
 		uint8_t *data()
 		{
-			return (reinterpret_cast<uint8_t*>(this+1) +
-			    sizeof (size_t)*numDimensions);
+			return (reinterpret_cast<uint8_t*> (this+1) +
+			    sizeof (size_t) * numDimensions);
 		}
-		
+
 		/**
 		 * @brief Overloaded version
 		 */
 		const uint8_t *data() const
 		{
-			return (reinterpret_cast<const uint8_t*>(this+1) +
-			    sizeof (size_t)*numDimensions);
+			return (reinterpret_cast<const uint8_t*> (this+1) +
+			    sizeof (size_t) * numDimensions);
 		}
-		
+
 		/**
 		 * @brief get array value by raw index
 		 * @param index shift in array data
@@ -167,17 +168,18 @@ public:
 			_U.b = this->data();
 			return _U.i[index];
 		}
-		
+
 		// Array data
 		char name[VARSIZE];
 		// Array type
 		Type type;
 		// Number of dimensions
 		uint8_t numDimensions;
-		// dimensions values
+		// Actual dimensions values
 		size_t dimension[];
 	};
 	// Interpreter FSM state
+
 	enum State : uint8_t
 	{
 		SHELL,		// Wait for user input of line or command
@@ -188,42 +190,19 @@ public:
 		GET_VAR_VALUE,
 		CONFIRM_INPUT	// Input of the confirmation
 	};
+#if USE_DUMP
 	// Memory dump modes
 	enum DumpMode : uint8_t
 	{
 		MEMORY, VARS, ARRAYS
 	};
-	// Terminal text attributes to use when printing
-	enum TextAttr : uint8_t
-	{
-		NO_ATTR = 0x0,
-		BRIGHT = 0x1,
-		UNDERSCORE = 0x2,
-		BLINK = 0x4,
-		REVERSE = 0x8,
-		C_WHITE = 0x00,
-		C_BLACK = 0x10,
-		C_RED = 0x20,
-		C_GREEN = 0x30,
-		C_YELLOW = 0x40,
-		C_BLUE = 0x50,
-		C_MAGENTA = 0x60,
-		C_CYAN = 0x70,
-		CB_BLACK = 0x80,
-		CB_RED = 0x90,
-		CB_GREEN = 0xA0,
-		CB_YELLOW = 0xB0,
-		CB_BLUE = 0xC0,
-		CB_MAGENTA = 0xD0,
-		CB_CYAN = 0xE0,
-		CB_WHITE = 0xF0,
-	};
+#endif
 	
 	/**
 	 * @brief constructor
-	 * @param stream Boundary object for I/O
+	 * @param stream Boundary output object
+	 * @param print Boundary input object
 	 * @param program Program object
-	 * @param firstModule First module in chain
 	 */
 	explicit Interpreter(Stream&, Print&, Program&);
 	
@@ -235,31 +214,33 @@ public:
 	void step();
 	// Execute entered command (command or inputed program line)
 	void exec();
-	// Tokenize inputed program string
-	//void tokenize();
 	// Clear screen
 	void cls();
 	// Output program memory
-	void list(uint16_t=1, uint16_t=0);
+	void list(uint16_t = 1, uint16_t = 0);
+#if USE_DUMP
 	// Dump program memory
 	void dump(DumpMode);
-	
+#endif
+	// Add module on tail of the modules list
 	void addModule(FunctionBlock*);
-	
+
+	// New print line
 	void newline();
 	void print(char);
 #if USE_REALS
 	void print(Real);
 #endif
-	void print(Integer, TextAttr=NO_ATTR);
+
+	void print(Integer, VT100::TextAttr = VT100::NO_ATTR);
 	void printTab(Integer);
-	void print(long, TextAttr=NO_ATTR);
-	void print(ProgMemStrings, TextAttr=NO_ATTR);
+	void print(long, VT100::TextAttr = VT100::NO_ATTR);
+	void print(ProgMemStrings, VT100::TextAttr = VT100::NO_ATTR);
 	void print(Token);
-	void print(const char *, TextAttr=NO_ATTR);
+	void print(const char *, VT100::TextAttr = VT100::NO_ATTR);
 	// print value
-	void print(const Parser::Value&, TextAttr=NO_ATTR);
-	
+	void print(const Parser::Value&, VT100::TextAttr = VT100::NO_ATTR);
+
 	// run program
 	void run();
 	// goto new line
@@ -287,15 +268,25 @@ public:
 	 * @return loop end flag
 	 */
 	bool next(const char*);
-	
+
+	// Internal EEPROM commands
+#if USE_SAVE_LOAD
+
+	struct EEpromHeader_t
+	{
+		uint16_t len;
+		uint16_t magic_FFFFminuslen;
+		uint16_t crc16;
+	};
 	void save();
-	
 	void load();
+	void chain();
+#endif // USE_SAVE_LOAD
 	/**
 	 * @breif Input variables
 	 */
 	void input();
-	
+
 	void end();
 	/**
 	 * @brief set value to initialized object
@@ -328,11 +319,11 @@ public:
 	 * @return frame pointer
 	 */
 	const VariableFrame *getVariable(const char*);
-	
+
 	void valueFromVar(Parser::Value&, const char*);
-	
+
 	bool valueFromArray(Parser::Value&, const char*);
-	
+
 	/**
 	 * @brief push string constant on the stack
 	 */
@@ -348,13 +339,18 @@ public:
 	 * @param num number of dimensions
 	 */
 	void pushDimensions(uint8_t);
-	
+
 	void strConcat(Parser::Value&, Parser::Value&);
 	/**
 	 * @brief request user confirmation
 	 * @return 
 	 */
 	bool confirm();
+
+	void stop()
+	{
+		_parser.stop();
+	}
 
 	Program &_program;
 private:
@@ -363,10 +359,10 @@ private:
 	bool nextInput();
 	// Place input values to objects
 	void doInput();
-	
+
 	void print(Lexer&);
-	
-	void raiseError(ErrorType, ErrorCodes=NO_ERROR);
+
+	void raiseError(ErrorType, ErrorCodes = NO_ERROR);
 	/**
 	 * @brief read and buffer one symbol
 	 * @return input finished flag
@@ -380,9 +376,25 @@ private:
 	 * @return 
 	 */
 	ArrayFrame *addArray(const char*, uint8_t, uint32_t);
-	
+
 	bool arrayElementIndex(ArrayFrame*, size_t&);
-	
+#if USE_SAVE_LOAD
+	/**
+	 * @brief Check program text
+	 * @param len Length of the program
+	 * @return Flag of success
+	 */
+	bool checkText(uint16_t&);
+	/**
+	 * @brief load program memory from eeprom
+	 * @param len Length of program
+	 * @param showPogress show loading progress
+	 */
+	void loadText(uint16_t, bool=true);
+#if SAVE_LOAD_CHECKSUM
+	uint16_t eepromProgramChecksum(uint16_t);
+#endif
+#endif // USE_SAVE_LOAD
 	// Interpreter FSM state
 	State			 _state;
 	// Input oject

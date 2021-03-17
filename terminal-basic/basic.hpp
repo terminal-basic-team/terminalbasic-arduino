@@ -59,47 +59,59 @@ typedef float Real;
 enum class Token : uint8_t
 {
 	NOTOKENS = 0,
-
-	// Commands
-	COM_CLS,
-	COM_DELAY,
-	COM_DUMP,
-	COM_LIST,
-	COM_LOAD,
-	COM_NEW,
-	COM_RUN,
-	COM_SAVE,
-
-	// Statements
-	KW_DATA,
-	KW_DIM,
-	KW_END,
-	KW_FOR,
-	KW_GO,
-	KW_GOSUB,
-	KW_GOTO,
-	KW_IF,
-	KW_INPUT,
-	KW_LET,
+	OP_AND,        // 1
+#if USE_DUMP
+	KW_ARRAYS,     // 1
+#endif
+	KW_BASE,       // 2
+#if USE_SAVE_LOAD
+	COM_CHAIN,     // 3
+#endif
+	COM_CLS,       // 4
+	KW_DATA,       // 5
+	KW_DEF,        // 6
+	COM_DELAY,     // 7
+	KW_DIM,        // 8
+#if USE_DUMP
+	COM_DUMP,      // 9
+#endif
+	KW_END,        // 10
+	KW_FALSE,      // 11
+	KW_FOR,        // 12
+	KW_GOSUB,      // 13
+	KW_GOTO,       // 14
+	KW_GO,         // 15
+	KW_IF,         // 16
+	KW_INPUT,      // 17
+	KW_LET,        // 18
+	COM_LIST,      // 19
+#if USE_SAVE_LOAD
+	COM_LOAD,      // 20
+#endif
+	COM_NEW,       // 21
 	KW_NEXT,
+	OP_NOT,
+	KW_ON,
+	KW_OPTION,
+	OP_OR,
 	KW_PRINT,
 	KW_RANDOMIZE,
+	KW_READ,
 	KW_REM,
 	KW_RETURN,
-	KW_STOP,
-	// other keywords
-	KW_ARRAYS,
-	KW_FALSE,
+	COM_RUN,
+#if USE_SAVE_LOAD
+	COM_SAVE,
+#endif
 	KW_STEP,
+	KW_STOP,
 	KW_TAB,
 	KW_THEN,
 	KW_TO,
 	KW_TRUE,
+#if USE_DUMP
 	KW_VARS,
-
-	OP_AND,
-	OP_NOT,
-	OP_OR,
+#endif
 
 	// *
 	STAR,
@@ -156,7 +168,8 @@ enum class ProgMemStrings : uint8_t
 	S_DYNAMIC,
 	S_ERROR,
 	S_SEMANTIC,
-	READY,
+	S_AT,
+	S_READY,
 	BYTES,
 	AVAILABLE,
 	TERMINAL,
@@ -183,7 +196,7 @@ extern PGM_P progmemString(ProgMemStrings);
  * @param index
  * @return find flag
  */
-bool scanTable(const uint8_t*, const uint8_t[], uint8_t&);
+uint8_t *scanTable(const uint8_t*, const uint8_t[], uint8_t&);
 
 }
 

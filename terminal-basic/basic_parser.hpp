@@ -44,8 +44,8 @@ public:
 	enum ErrorCodes : uint8_t
 	{
 		NO_ERROR = 0,
-		OPERATOR_EXPECTED,
-		EXPRESSION_EXPECTED,
+		OPERATOR_EXPECTED = 1,
+		EXPRESSION_EXPECTED = 2,
 		INTEGER_CONSTANT_EXPECTED,
 		THEN_OR_GOTO_EXPECTED,
 		VARIABLES_LIST_EXPECTED
@@ -65,6 +65,8 @@ public:
 	 * @return successfull parsing flag
 	 */
 	bool parse(const char*);
+	
+	void stop();
 	/**
 	 * @brief get last static error code
 	 * @return error code

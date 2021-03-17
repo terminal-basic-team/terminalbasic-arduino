@@ -134,6 +134,15 @@ public:
 
 	Program(size_t=PROGRAMSIZE);
 	/**
+	 * @brief Clear program text, but not vars and arrays
+	 */
+	void clearProg();
+	/**
+	 * @brief Move program state (variables and arrays to dest)
+	 * @param dest New Data start
+	 */
+	void moveData(uint16_t);
+	/**
 	 * @brief Clear program memory
 	 */
 	void newProg();
@@ -222,12 +231,12 @@ public:
 #else
 	char _text[PROGRAMSIZE];
 #endif
-	const size_t programSize;
+	const uint16_t programSize;
 private:
 	void pushBottom(StackFrame*);
 	// End of program text
-	size_t _textEnd;
-	size_t _current, _variablesEnd, _arraysEnd, _sp, _jump;
+	uint16_t _textEnd;
+	uint16_t _current, _variablesEnd, _arraysEnd, _sp, _jump;
 	bool _jumpFlag;
 	uint8_t _textPosition;
 };

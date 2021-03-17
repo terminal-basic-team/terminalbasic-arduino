@@ -79,26 +79,12 @@ public:
 	 * @brief token strings array
 	 */
 	static PGM_P const tokenStrings[uint8_t(Token::NUM_TOKENS)];
+	
+	const uint8_t *getTokenString(Token) const;
 private:
 
 	void pushSYM();
 	void next();
-
-	void first_A();
-	void first_C();
-	void first_D();
-	void first_E();
-	void first_F();
-	void first_G();
-	void first_I();
-	void first_L();
-	void first_N();
-	void first_O();
-	void first_P();
-	void first_R();
-	void first_S();
-	void first_T();
-	void first_V();
 
 	void fitst_LT();
 	void fitst_GT();

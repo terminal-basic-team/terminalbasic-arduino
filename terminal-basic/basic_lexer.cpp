@@ -25,45 +25,48 @@
 #include <math.h>
 
 /*
- * COM_CLS = "CLS"
- * COM_DELAY = "DELAY"
- * COM_DUMP = "DUMP"
- * COM_LIST = "LIST"
- * COM_LOAD = "LOAD"
- * COM_NEW = "NEW"
- * COM_RUN = "RUN"
- * COM_SAVE = "SAVE"
- * 
- * KW_DATA = "DATA"
- * KW_DIM = "DIM"
- * KW_END = "END"
- * KW_FOR = "FOR"
- * KW_FOR = "GO"
- * KW_GOSUB = "GOSUB"
- * KW_GOTO = "GOTO"
- * KW_IF = "IF"
- * KW_INPUT = "INPUT"
- * KW_LET = "LET"
- * KW_NEXT = "NEXT"
- * KW_PRINT = "PRINT"
+ * OP_AND = "AND"       // 1
+ * KW_ARRAYS = "ARRAYS" // 1
+ * KW_BASE = "BASE"     // 2
+ * COM_CHAIN = "CHAIN"  // 3
+ * COM_CLS = "CLS"      // 4
+ * KW_DATA = "DATA"     // 5
+ * KW_DEF = "DEF"       // 6
+ * COM_DELAY = "DELAY"  // 7
+ * KW_DIM = "DIM"       // 8
+ * COM_DUMP = "DUMP"    // 9
+ * KW_END = "END"       // 10
+ * KW_FALSE = "FALSE"   // 11
+ * KW_FOR = "FOR"       // 12
+ * KW_GOSUB = "GOSUB"   // 13
+ * KW_GOTO = "GOTO"     // 14
+ * KW_GO = "GO"         // 15
+ * KW_IF = "IF"         // 16
+ * KW_INPUT = "INPUT"   // 17
+ * KW_LET = "LET"       // 18
+ * COM_LIST = "LIST"    // 19
+ * COM_LOAD = "LOAD"    // 20
+ * COM_NEW = "NEW"      // 21
+ * KW_NEXT = "NEXT"     // 22
+ * OP_NOT = "NOT"
+ * KW_ON = "ON"         // 23
+ * KW_OPTION = "OPTION" // 24
+ * OP_OR = "OR"
+ * KW_PRINT = "PRINT"   // 25
  * KW_RANDOMIZE = "RANDOMIZE"
+ * KW_READ = "READ"
  * KW_REM = "REM"
  * KW_RETURN = "RETURN"
- * KW_STOP = "STOP"
- * 
- * KW_ARRAYS = "ARRAYS"
- * KW_FALSE = "FALSE"
+ * COM_RUN = "RUN"
+ * COM_SAVE = "SAVE"
  * KW_STEP = "STEP"
+ * KW_STOP = "STOP"
  * KW_TAB = "TAB"
  * KW_THEN = "THEN"
  * KW_TO = "TO"
  * KW_TRUE = "TRUE"
  * KW_VARS = "VARS"
  * 
- * OP_AND = "AND"
- * OP_NOT = "NOT"
- * OP_OR = "OR"
- *
  * STAR = '*'
  * SLASH = '/'
  * PLUS = '+'
@@ -86,46 +89,60 @@
 namespace BASIC
 {
 
-const char sNOTOKENS[] PROGMEM = "NOTOKENS";
-
-const char sCLS[] PROGMEM = "CLS";
-const char sDELAY[] PROGMEM = "DELAY";
-const char sDUMP[] PROGMEM = "DUMP";
-const char sLIST[] PROGMEM = "LIST";
-const char sLOAD[] PROGMEM = "LOAD";
-const char sNEW[] PROGMEM = "NEW";
+const char sNOTOKENS[] PROGMEM = "NOTOKENS";  // 0
+const char sOP_AND[] PROGMEM = "AND";         // 1
+#if USE_DUMP
+const char sARRAYS[] PROGMEM = "ARRAYS";      // 2
+#endif
+const char sBASE[] PROGMEM = "BASE";          // 3
+#if USE_SAVE_LOAD
+const char sCHAIN[] PROGMEM = "CHAIN";        // 4
+#endif
+const char sCLS[] PROGMEM = "CLS";            // 5
+const char sDATA[] PROGMEM = "DATA";          // 6
+const char sDEF[] PROGMEM = "DEF";            // 7
+const char sDELAY[] PROGMEM = "DELAY";        // 8
+const char sDIM[] PROGMEM = "DIM";            // 9
+#if USE_DUMP
+const char sDUMP[] PROGMEM = "DUMP";          // 10
+#endif
+const char sEND[] PROGMEM = "END";            // 11
+const char sFALSE[] PROGMEM = "FALSE";        // 12
+const char sFOR[] PROGMEM = "FOR";            // 13
+const char sGOSUB[] PROGMEM = "GOSUB";        // 14
+const char sGOTO[] PROGMEM = "GOTO";          // 15
+const char sGO[] PROGMEM = "GO";              // 16
+const char sIF[] PROGMEM = "IF";              // 17
+const char sINPUT[] PROGMEM = "INPUT";        // 18
+const char sLET[] PROGMEM = "LET";            // 19
+const char sLIST[] PROGMEM = "LIST";          // 20
+#if USE_SAVE_LOAD
+const char sLOAD[] PROGMEM = "LOAD";          // 21
+#endif
+const char sNEW[] PROGMEM = "NEW";            // 22
+const char sNEXT[] PROGMEM = "NEXT";          // 23
+const char sOP_NOT[] PROGMEM = "NOT";
+const char sON[] PROGMEM = "ON";              // 24
+const char sOPTION[] PROGMEM = "OPTION";      // 25
+const char sOP_OR[] PROGMEM = "OR";
+const char sPRINT[] PROGMEM = "PRINT";        // 26
+const char sRANDOMIZE[] PROGMEM = "RANDOMIZE";// 27
+const char sREAD[] PROGMEM = "READ";          // 28
+const char sREM[] PROGMEM = "REM";            // 29
+const char sRETURN[] PROGMEM = "RETURN";      // 30
 const char sRUN[] PROGMEM = "RUN";
+#if USE_SAVE_LOAD
 const char sSAVE[] PROGMEM = "SAVE";
-
-const char sDATA[] PROGMEM = "DATA";
-const char sDIM[] PROGMEM = "DIM";
-const char sEND[] PROGMEM = "END";
-const char sFOR[] PROGMEM = "FOR";
-const char sGO[] PROGMEM = "GO";
-const char sGOSUB[] PROGMEM = "GOSUB";
-const char sGOTO[] PROGMEM = "GOTO";
-const char sIF[] PROGMEM = "IF";
-const char sINPUT[] PROGMEM = "INPUT";
-const char sLET[] PROGMEM = "LET";
-const char sNEXT[] PROGMEM = "NEXT";
-const char sPRINT[] PROGMEM = "PRINT";
-const char sRANDOMIZE[] PROGMEM = "RANDOMIZE";
-const char sREM[] PROGMEM = "REM";
-const char sRETURN[] PROGMEM = "RETURN";
-const char sSTOP[] PROGMEM = "STOP";
-
-const char sARRAYS[] PROGMEM = "ARRAYS";
-const char sFALSE[] PROGMEM = "FALSE";
+#endif
 const char sSTEP[] PROGMEM = "STEP";
+const char sSTOP[] PROGMEM = "STOP";
 const char sTAB[] PROGMEM = "TAB";
 const char sTHEN[] PROGMEM = "THEN";
 const char sTO[] PROGMEM = "TO";
 const char sTRUE[] PROGMEM = "TRUE";
+#if USE_DUMP
 const char sVARS[] PROGMEM = "VARS";
-
-const char sOP_AND[] PROGMEM = "AND";
-const char sOP_NOT[] PROGMEM = "NOT";
-const char sOP_OR[] PROGMEM = "OR";
+#endif
 
 const char sSTAR[] PROGMEM = "*";
 const char sSLASH[] PROGMEM = "/";
@@ -157,16 +174,60 @@ const char sBOOLEAN[] PROGMEM = "C_BOOLEAN";
 const char sSTRING[] PROGMEM = "C_STRING";
 
 PGM_P const Lexer::tokenStrings[uint8_t(Token::NUM_TOKENS)] PROGMEM = {
-	sNOTOKENS,
-
-	sCLS, sDELAY, sDUMP, sLIST, sLOAD, sNEW, sRUN, sSAVE,
-
-	sDATA, sDIM, sEND, sFOR, sGO, sGOSUB, sGOTO, sIF, sINPUT,
-	sLET, sNEXT, sPRINT, sRANDOMIZE, sREM, sRETURN, sSTOP,
-
-	sARRAYS, sFALSE, sSTEP, sTAB, sTHEN, sTO, sTRUE, sVARS,
-
-	sOP_AND, sOP_NOT, sOP_OR,
+	sNOTOKENS,  // 0
+	sOP_AND,
+#if USE_DUMP
+	sARRAYS,    // 1
+#endif
+	sBASE,      // 2
+#if USE_SAVE_LOAD
+	sCHAIN,     // 3
+#endif
+	sCLS,       // 4
+	sDATA,      // 5
+	sDEF,       // 6
+	sDELAY,     // 7
+	sDIM,       // 8
+#if USE_DUMP
+	sDUMP,      // 9
+#endif
+	sEND,       // 10
+	sFALSE,     // 11
+	sFOR,       // 12
+	sGOSUB,     // 13
+	sGOTO,      // 14
+	sGO,        // 15
+	sIF,        // 16
+	sINPUT,     // 17
+	sLET,       // 18
+	sLIST,      // 19
+#if USE_SAVE_LOAD
+	sLOAD,      // 20
+#endif
+	sNEW,       // 21
+	sNEXT,      // 22
+	sOP_NOT,
+	sON,        // 23
+	sOPTION,    // 24
+	sOP_OR,
+	sPRINT,     // 25
+	sRANDOMIZE,
+	sREAD,
+	sREM,
+	sRETURN,
+	sRUN,
+#if USE_SAVE_LOAD
+	sSAVE,
+#endif
+	sSTEP,
+	sSTOP,
+	sTAB,
+	sTHEN,
+	sTO,
+	sTRUE,
+#if USE_DUMP
+	sVARS,
+#endif
 
 	sSTAR, sSLASH, sPLUS, sMINUS,
 
@@ -185,6 +246,58 @@ PGM_P const Lexer::tokenStrings[uint8_t(Token::NUM_TOKENS)] PROGMEM = {
 	sINTEGER, sREAL, sBOOLEAN, sSTRING
 };
 
+static const uint8_t tokenTable[] PROGMEM = {
+	0x80,
+	'A', 'N', 'D'+0x80,
+#if USE_DUMP
+	'A', 'R', 'R', 'A', 'Y', 'S'+0x80, // 1
+#endif
+	'B', 'A', 'S', 'E'+0x80,           // 2
+	'C', 'H', 'A', 'I', 'N'+0x80,      // 3
+	'C', 'L', 'S'+0x80,                // 4
+	'D', 'A', 'T', 'A'+0x80,           // 5
+	'D', 'E', 'F'+0x80,                // 6
+	'D', 'E', 'L', 'A', 'Y'+0x80,      // 7
+	'D', 'I', 'M'+0x80,                // 8
+#if USE_DUMP
+	'D', 'U', 'M', 'P'+0x80,           // 9
+#endif
+	'E', 'N', 'D'+0x80,                // 10
+	'F', 'A', 'L', 'S', 'E'+0x80,      // 11
+	'F', 'O', 'R'+0x80,                // 12
+	'G', 'O', 'S', 'U', 'B'+0x80,      // 13
+	'G', 'O', 'T', 'O'+0x80,           // 14
+	'G', 'O'+0x80,                     // 15
+	'I', 'F'+0x80,                     // 16
+	'I', 'N', 'P', 'U', 'T'+0x80,      // 17
+	'L', 'E', 'T'+0x80,                // 18
+	'L', 'I', 'S', 'T'+0x80,           // 19
+	'L', 'O', 'A', 'D'+0x80,           // 20
+	'N', 'E', 'W'+0x80,                // 21
+	'N', 'E', 'X', 'T'+0x80,           // 22
+	'N', 'O', 'T'+0x80,
+	'O', 'N'+0x80,                     // 23
+	'O', 'P', 'T', 'I', 'O', 'N'+0x80, // 24
+	'O', 'R'+0x80,
+	'P', 'R', 'I', 'N', 'T'+0x80,      // 25
+	'R', 'A', 'N', 'D', 'O', 'M', 'I', 'Z', 'E'+0x80, //26
+	'R', 'E', 'A', 'D'+0x80,           // 27
+	'R', 'E', 'M'+0x80,
+	'R', 'E', 'T', 'U', 'R', 'N'+0x80,
+	'R', 'U', 'N'+0x80,
+	'S', 'A', 'V', 'E'+0x80,
+	'S', 'T', 'E', 'P'+0x80,
+	'S', 'T', 'O', 'P'+0x80,
+	'T', 'A', 'B'+0x80,
+	'T', 'H', 'E', 'N'+0x80,
+	'T', 'O'+0x80,
+	'T', 'R', 'U', 'E'+0x80,
+#if USE_DUMP
+	'V', 'A', 'R', 'S'+0x80,
+#endif
+	0
+};
+
 #if ARDUINO_LOG
 
 Logger&
@@ -199,6 +312,22 @@ operator<<(Logger &logger, Token tok)
 #endif
 
 #define SYM (uint8_t(_string[_pointer]))
+
+const uint8_t*
+Lexer::getTokenString(Token t) const
+{
+	const uint8_t *result = tokenTable;
+	
+	uint8_t c; uint8_t index = 0;
+	while ((c = pgm_read_byte(result)) != 0) {
+		if (index == uint8_t(t))
+			return (result);
+		if (c&0x80)
+			++index;
+		c=pgm_read_byte(++result);
+	}
+	return NULL;
+}
 
 void
 Lexer::init(const char *string)
@@ -219,144 +348,93 @@ Lexer::getNext()
 	while (SYM > 0) {
 		if (isdigit(SYM)) {
 			decimalNumber();
-			return true;
-		} else
-			switch (SYM) {
-			case 'A':
-				_id[_valuePointer++] = SYM;
-				first_A();
-				return true;
-			case 'C':
-				_id[_valuePointer++] = SYM;
-				first_C();
-				return true;
-			case 'D':
-				_id[_valuePointer++] = SYM;
-				first_D();
-				return true;
-			case 'E':
-				_id[_valuePointer++] = SYM;
-				first_E();
-				return true;
-			case 'F':
-				_id[_valuePointer++] = SYM;
-				first_F();
-				return true;
-			case 'G':
-				_id[_valuePointer++] = SYM;
-				first_G();
-				return true;
-			case 'I':
-				_id[_valuePointer++] = SYM;
-				first_I();
-				return true;
-			case 'L':
-				_id[_valuePointer++] = SYM;
-				first_L();
-				return true;
-			case 'N':
-				_id[_valuePointer++] = SYM;
-				first_N();
-				return true;
-			case 'O':
-				_id[_valuePointer++] = SYM;
-				first_O();
-				return true;
-			case 'P':
-				_id[_valuePointer++] = SYM;
-				first_P();
-				return true;
-			case 'R':
-				_id[_valuePointer++] = SYM;
-				first_R();
-				return true;
-			case 'S':
-				_id[_valuePointer++] = SYM;
-				first_S();
-				return true;
-			case 'T':
-				_id[_valuePointer++] = SYM;
-				first_T();
-				return true;
-			case 'V':
-				_id[_valuePointer++] = SYM;
-				first_V();
-				return true;
-			case '=':
-				_token = Token::EQUALS;
-				next();
-				return true;
-			case ';':
-				_token = Token::SEMI;
-				next();
-				return true;
-			case ',':
-				_token = Token::COMMA;
-				next();
-				return true;
-			case ':':
-				_token = Token::COLON;
-				next();
-				return true;
-			case '<':
-				fitst_LT();
-				return true;
-			case '>':
-				fitst_GT();
-				return true;
-			case '(':
-				_token = Token::LPAREN;
-				next();
-				return true;
-			case ')':
-				_token = Token::RPAREN;
-				next();
-				return true;
-			case '+':
-				_token = Token::PLUS;
-				next();
-				return true;
-			case '-':
-				_token = Token::MINUS;
-				next();
-				return true;
-			case '*':
-				_token = Token::STAR;
-				next();
-				return true;
-			case '/':
-				_token = Token::SLASH;
-				next();
-				return true;
-			case '^':
-				_token = Token::POW;
-				next();
-				return true;
-			case '"':
-				next();
-				stringConst();
-				return true;
-			case ' ':
-			case '\t':
-			case '\r':
-			case '\n':
-				next();
-				break;
-			default:
-				if (SYM >= 0x80) {
-					_token = Token(SYM & 0x7F);
-					next();
-					if (_token == Token::C_INTEGER)
-						binaryInteger();
-				} else if (isalpha(SYM)) {
-					pushSYM();
-					ident();
-				} else
-					next();
-				return true;
+			return (true);
+		} else if (isalpha(SYM)) {
+			uint8_t index;
+			uint8_t *pos = (uint8_t*)_string+_pointer;
+			if ((pos = scanTable(pos, tokenTable, index)) != NULL) {
+				_token = Token(index);
+				_pointer += uint8_t(pos - ((uint8_t*)_string+
+				    _pointer));
+				return (true);
 			}
+		}
+		switch (SYM) {
+		case '=':
+			_token = Token::EQUALS;
+			next();
+			return true;
+		case ';':
+			_token = Token::SEMI;
+			next();
+			return true;
+		case ',':
+			_token = Token::COMMA;
+			next();
+			return true;
+		case ':':
+			_token = Token::COLON;
+			next();
+			return true;
+		case '<':
+			fitst_LT();
+			return true;
+		case '>':
+			fitst_GT();
+			return true;
+		case '(':
+			_token = Token::LPAREN;
+			next();
+			return true;
+		case ')':
+			_token = Token::RPAREN;
+			next();
+			return true;
+		case '+':
+			_token = Token::PLUS;
+			next();
+			return true;
+		case '-':
+			_token = Token::MINUS;
+			next();
+			return true;
+		case '*':
+			_token = Token::STAR;
+			next();
+			return true;
+		case '/':
+			_token = Token::SLASH;
+			next();
+			return true;
+		case '^':
+			_token = Token::POW;
+			next();
+			return true;
+		case '"':
+			next();
+			stringConst();
+			return true;
+		case ' ':
+		case '\t':
+		case '\r':
+		case '\n':
+			next();
+			break;
+		default:
+			if (SYM >= 0x80) {
+				_token = Token(SYM & 0x7F);
+				next();
+				if (_token == Token::C_INTEGER)
+					binaryInteger();
+			} else if (isalpha(SYM)) {
+				pushSYM();
+				ident();
+			} else
+				next();
+			return true;
+		}
 	}
-	return false;
+	return (false);
 }
 
 void
@@ -371,557 +449,6 @@ void
 Lexer::next()
 {
 	++_pointer;
-}
-
-void
-Lexer::first_A()
-{
-	next();
-	switch (SYM) {
-	case 'N':
-		pushSYM();
-		switch (SYM) {
-		case 'D':
-			next();
-			_token = Token::OP_AND;
-			return;
-		}
-		break;
-	case 'R':
-		pushSYM();
-		switch (SYM) {
-		case 'R':
-			pushSYM();
-			switch (SYM) {
-			case 'A':
-				pushSYM();
-				switch (SYM) {
-				case 'Y':
-					pushSYM();
-					switch (SYM) {
-					case 'S':
-						next();
-						_token = Token::KW_ARRAYS;
-						return;
-					}
-					break;
-				}
-				break;
-			}
-			break;
-		}
-		break;
-	}
-	ident();
-}
-
-void
-Lexer::first_C()
-{
-	next();
-	switch (SYM) {
-	case 'L':
-		pushSYM();
-		switch (SYM) {
-		case 'S':
-			next();
-			_token = Token::COM_CLS;
-			return;
-		}
-		break;
-	}
-	ident();
-}
-
-void
-Lexer::first_D()
-{
-	next();
-	switch (SYM) {
-	case 'A':
-		pushSYM();
-		switch (SYM) {
-		case 'T':
-			pushSYM();
-			switch (SYM) {
-			case 'A':
-				next();
-				_token = Token::KW_DATA;
-				return;
-			}
-			break;
-		}
-		break;
-	case 'I':
-		pushSYM();
-		switch (SYM) {
-		case 'M':
-			next();
-			_token = Token::KW_DIM;
-			return;
-		}
-		break;
-	case 'U':
-		pushSYM();
-		switch (SYM) {
-		case 'M':
-			pushSYM();
-			switch (SYM) {
-			case 'P':
-				next();
-				_token = Token::COM_DUMP;
-				return;
-			}
-			break;
-		}
-		break;
-	}
-	ident();
-}
-
-void
-Lexer::first_E()
-{
-	next();
-	switch (SYM) {
-	case 'N':
-		pushSYM();
-		switch (SYM) {
-		case 'D':
-			next();
-			_token = Token::KW_END;
-			return;
-		}
-		break;
-	}
-	ident();
-}
-
-void
-Lexer::first_F()
-{
-	next();
-	switch (SYM) {
-	case 'A':
-		pushSYM();
-		switch (SYM) {
-		case 'L':
-			pushSYM();
-			switch (SYM) {
-			case 'S':
-				pushSYM();
-				switch (SYM) {
-				case 'E':
-					next();
-					_token = Token::KW_FALSE;
-					return;
-				}
-				break;
-			}
-			break;
-		}
-		break;
-	case 'O':
-		pushSYM();
-		switch (SYM) {
-		case 'R':
-			next();
-			_token = Token::KW_FOR;
-			return;
-		}
-		break;
-	}
-	ident();
-}
-
-void
-Lexer::first_G()
-{
-	next();
-	switch (SYM) {
-	case 'O':
-		pushSYM();
-		switch (SYM) {
-		case 'T':
-			pushSYM();
-			switch (SYM) {
-			case 'O':
-				next();
-				_token = Token::KW_GOTO;
-				return;
-			}
-			break;
-		case 'S':
-			pushSYM();
-			switch (SYM) {
-			case 'U':
-				pushSYM();
-				switch (SYM) {
-				case 'B':
-					next();
-					_token = Token::KW_GOSUB;
-					return;
-				}
-				break;
-			}
-			break;
-		default:
-			_token = Token::KW_GO;
-			return;
-		}
-		break;
-	}
-	ident();
-}
-
-void
-Lexer::first_I()
-{
-	next();
-	switch (SYM) {
-	case 'F':
-		next();
-		_token = Token::KW_IF;
-		return;
-	case 'N':
-		pushSYM();
-		switch (SYM) {
-		case 'P':
-			pushSYM();
-			switch (SYM) {
-			case 'U':
-				pushSYM();
-				switch (SYM) {
-				case 'T':
-					next();
-					_token = Token::KW_INPUT;
-					return;
-				}
-			}
-		}
-	}
-	ident();
-}
-
-void
-Lexer::first_L()
-{
-	next();
-	switch (SYM) {
-	case 'I':
-		pushSYM();
-		switch (SYM) {
-		case 'S':
-			pushSYM();
-			switch (SYM) {
-			case 'T':
-				next();
-				_token = Token::COM_LIST;
-				return;
-			}
-			break;
-		}
-		break;
-	case 'E':
-		pushSYM();
-		switch (SYM) {
-		case 'T':
-			next();
-			_token = Token::KW_LET;
-			return;
-		}
-		break;
-	case 'O':
-		pushSYM();
-		switch (SYM) {
-		case 'A':
-			pushSYM();
-			switch (SYM) {
-			case 'D':
-				next();
-				_token = Token::COM_LOAD;
-				return;
-			}
-			break;
-		}
-		break;
-	}
-	ident();
-}
-
-void
-Lexer::first_N()
-{
-	next();
-	switch (SYM) {
-	case 'E':
-		pushSYM();
-		switch (SYM) {
-		case 'X':
-			pushSYM();
-			switch (SYM) {
-			case 'T':
-				next();
-				_token = Token::KW_NEXT;
-				return;
-			}
-			break;
-		case 'W':
-			next();
-			_token = Token::COM_NEW;
-			return;
-		}
-		break;
-	case 'O':
-		pushSYM();
-		switch (SYM) {
-		case 'T':
-			next();
-			_token = Token::OP_NOT;
-			return;
-		}
-		break;
-	}
-	ident();
-}
-
-void
-Lexer::first_O()
-{
-	next();
-	switch (SYM) {
-	case 'R':
-		next();
-		_token = Token::OP_OR;
-		return;
-	}
-	ident();
-}
-
-void
-Lexer::first_P()
-{
-	next();
-	switch (SYM) {
-	case 'R':
-		pushSYM();
-		switch (SYM) {
-		case 'I':
-			pushSYM();
-			switch (SYM) {
-			case 'N':
-				pushSYM();
-				switch (SYM) {
-				case 'T':
-					next();
-					_token = Token::KW_PRINT;
-					return;
-				}
-			}
-		}
-	}
-	ident();
-}
-
-void
-Lexer::first_R()
-{
-	next();
-	switch (SYM) {
-	case 'A':
-		pushSYM();
-		switch (SYM) {
-		case 'N':
-			pushSYM();
-			switch (SYM) {
-			case 'D':
-				pushSYM();
-				switch (SYM) {
-				case 'O':
-					pushSYM();
-					switch (SYM) {
-					case 'M':
-						pushSYM();
-						switch (SYM) {
-						case 'I':
-							pushSYM();
-							switch (SYM) {
-							case 'Z':
-								pushSYM();
-								switch (SYM) {
-								case 'E':
-									next();
-									_token = Token::KW_RANDOMIZE;
-									return;
-								}
-								break;
-							}
-							break;
-						}
-						break;
-					}
-					break;
-				}
-				break;
-			}
-			break;
-		}
-		break;
-	case 'E':
-		pushSYM();
-		switch (SYM) {
-		case 'M':
-			next();
-			_token = Token::KW_REM;
-			return;
-		case 'T':
-			pushSYM();
-			switch (SYM) {
-			case 'U':
-				pushSYM();
-				switch (SYM) {
-				case 'R':
-					pushSYM();
-					switch (SYM) {
-					case 'N':
-						next();
-						_token = Token::KW_RETURN;
-						return;
-					}
-					break;
-				}
-				break;
-			}
-			break;
-		}
-		break;
-	case 'U':
-		pushSYM();
-		switch (SYM) {
-		case 'N':
-			next();
-			_token = Token::COM_RUN;
-			return;
-		}
-	}
-	ident();
-}
-
-void
-Lexer::first_S()
-{
-	next();
-	switch (SYM) {
-	case 'A':
-		pushSYM();
-		switch (SYM) {
-		case 'V':
-			pushSYM();
-			switch (SYM) {
-			case 'E':
-				next();
-				_token = Token::COM_SAVE;
-				return;
-			}
-			break;
-		}
-		break;
-	case 'T':
-		pushSYM();
-		switch (SYM) {
-		case 'E':
-			pushSYM();
-			switch (SYM) {
-			case 'P':
-				next();
-				_token = Token::KW_STEP;
-				return;
-			}
-			break;
-		case 'O':
-			pushSYM();
-			switch (SYM) {
-			case 'P':
-				next();
-				_token = Token::KW_STOP;
-				return;
-			}
-		}
-	}
-	ident();
-}
-
-void
-Lexer::first_T()
-{
-	next();
-	switch (SYM) {
-	case 'A':
-		pushSYM();
-		switch (SYM) {
-		case 'B':
-			next();
-			_token = Token::KW_TAB;
-			return;
-		}
-		break;
-	case 'H':
-		pushSYM();
-		switch (SYM) {
-		case 'E':
-			pushSYM();
-			switch (SYM) {
-			case 'N':
-				next();
-				_token = Token::KW_THEN;
-				return;
-			}
-			break;
-		}
-		break;
-	case 'O':
-		next();
-		_token = Token::KW_TO;
-		return;
-	case 'R':
-		pushSYM();
-		switch (SYM) {
-		case 'U':
-			pushSYM();
-			switch (SYM) {
-			case 'E':
-				next();
-				_token = Token::KW_TRUE;
-				return;
-			}
-			break;
-		}
-		break;
-	}
-	ident();
-}
-
-void
-Lexer::first_V()
-{
-	next();
-	switch (SYM) {
-	case 'A':
-		pushSYM();
-		switch (SYM) {
-		case 'R':
-			pushSYM();
-			switch (SYM) {
-			case 'S':
-				next();
-				_token = Token::KW_VARS;
-				return;
-			}
-			break;
-		}
-		break;
-	}
-	ident();
 }
 
 void

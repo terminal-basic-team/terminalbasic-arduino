@@ -119,13 +119,32 @@ Interpreter::Program::StackFrame::size(Type t)
 }
 
 void
-Interpreter::Program::newProg()
+Interpreter::Program::clearProg()
 {
-	_textEnd = _current = _variablesEnd = _arraysEnd = _jump = 0;
 	_jumpFlag = false;
 	_textPosition = 0;
 	_sp = programSize;
+	_current = 0;
+}
+
+void
+Interpreter::Program::moveData(uint16_t dest)
+{
+	int32_t diff = _textEnd-dest;
+	memmove(_text+dest, _text+_textEnd, _arraysEnd-_textEnd);
+	_variablesEnd -= diff;
+	_arraysEnd -= diff;
+	_textEnd = dest;
+}
+
+void
+Interpreter::Program::newProg()
+{
+	clearProg();
+	_textEnd = _variablesEnd = _arraysEnd = _jump = 0;
+#if CLEAR_PROGRAM_MEMORY
 	memset(_text, 0xFF, programSize);
+#endif
 }
 
 Interpreter::VariableFrame*
@@ -281,7 +300,7 @@ Interpreter::Program::addLine(uint16_t num, const char *line)
 	while (_lexer.getNext()) {
 		uint8_t t = uint8_t(0x80) + uint8_t(_lexer.getToken());
 		;
-		if (_lexer.getToken() <= Token::OP_NOT) { // One byte tokens
+		if (_lexer.getToken() < Token::STAR) { // One byte tokens
 			tempBuffer[position++] = t;
 			lexerPosition = _lexer.getPointer();
 			if (_lexer.getToken() == Token::KW_REM) { // Save rem text as is

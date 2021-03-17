@@ -1,19 +1,20 @@
 /*
- * Terminal-BASIC is a lightweight BASIC-like language interpreter
+ * ArduinoExt is a set of utility libraries for Arduino
  * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
+ * This program is free software: is free software: you can redistribute it
+ * and/or modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation, either version 3 of
+ * the License, or (at your option) any later version.
+
+ * ArduinoExt library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with Posixcpp library. If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 
 #include <avr/io.h>
@@ -88,6 +89,7 @@ SerialLight::peek()
 	else if (*_ucsra & (1<<RXC0)) {
 		_byte = *_udr;
 		_hasByte = true;
+		return (_byte);
 	} else
 		return (-1);
 }
@@ -112,5 +114,5 @@ SerialLight::write(uint8_t c)
 	/* Put data into buffer, sends the data */
 	*_udr = c;
 	
-	return (1);
+	return 1;
 }

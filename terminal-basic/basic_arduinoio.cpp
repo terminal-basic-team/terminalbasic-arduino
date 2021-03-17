@@ -25,19 +25,19 @@ namespace BASIC
 {
 
 static const uint8_t arduinoIOFuncs[] PROGMEM = {
+	'A', 'R', 'E', 'A', 'D', '%'+0x80,
 #if USE_REALS
 	'A', 'R', 'E', 'A', 'D'+0x80,
 #endif
-	'A', 'R', 'E', 'A', 'D', '%'+0x80,
 	'D', 'R', 'E', 'A', 'D'+0x80,
 	0
 };
 
 const FunctionBlock::function ArduinoIO::_funcs[] PROGMEM = {
+	ArduinoIO::func_aread_int,
 #if USE_REALS
 	ArduinoIO::func_aread,
 #endif
-	ArduinoIO::func_aread_int,
 	ArduinoIO::func_dread
 };
 

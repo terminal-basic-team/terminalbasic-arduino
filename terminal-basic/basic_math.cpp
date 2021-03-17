@@ -19,6 +19,7 @@
 #include "basic.hpp"
 
 #if USEMATH
+
 #include "basic_math.hpp"
 #include <math.h>
 #include <string.h>
@@ -30,32 +31,48 @@ namespace BASIC
 {
 
 static const uint8_t mathTokens[] PROGMEM = {
+#if M_REVERSE_TRIGONOMETRIC
 	'A', 'C', 'S'+0x80,
 	'A', 'S', 'N'+0x80,
 	'A', 'T', 'N'+0x80,
+#endif // M_REVERSE_TRIGONOMETRIC
+#if M_TRIGONOMETRIC
 	'C', 'O', 'S'+0x80,
 	'C', 'O', 'T'+0x80,
+#endif // M_TRIGONOMETRIC
 	'E', 'X', 'P'+0x80,
 	'L', 'O', 'G'+0x80,
 	'P', 'I'+0x80,
+#if M_TRIGONOMETRIC
 	'S', 'I', 'N'+0x80,
+#endif
 	'S', 'Q', 'R'+0x80,
+#if M_TRIGONOMETRIC
 	'T', 'A', 'N'+0x80,
+#endif
 	0
 };
 
 const FunctionBlock::function Math::funcs[] PROGMEM = {
+#if M_REVERSE_TRIGONOMETRIC
 	Math::func_acs,
 	Math::func_asn,
 	Math::func_atn,
+#endif
+#if M_TRIGONOMETRIC
 	Math::func_cos,
 	Math::func_cot,
+#endif
 	Math::func_exp,
 	Math::func_log,
 	Math::func_pi,
+#if M_TRIGONOMETRIC
 	Math::func_sin,
-	Math::func_sqr,
-	Math::func_tan
+#endif
+	Math::func_sqr
+#if M_TRIGONOMETRIC
+	,Math::func_tan
+#endif
 };
 
 Math::Math(FunctionBlock *next) :
@@ -64,6 +81,8 @@ FunctionBlock(next)
 	functions = funcs;
 	functionTokens = mathTokens;
 }
+
+#if M_REVERSE_TRIGONOMETRIC
 
 bool
 Math::func_acs(Interpreter &i)
@@ -83,17 +102,7 @@ Math::func_atn(Interpreter &i)
 	return general_func(i, &atn_r);
 }
 
-bool
-Math::func_cos(Interpreter &i)
-{
-	return general_func(i, &cos_r);
-}
-
-bool
-Math::func_cot(Interpreter &i)
-{
-	return general_func(i, &cot_r);
-}
+#endif // M_REVERSE_TRIGONOMETRIC
 
 bool
 Math::func_exp(Interpreter &i)
@@ -107,6 +116,20 @@ Math::func_log(Interpreter &i)
 	return general_func(i, &log_r);
 }
 
+#if M_TRIGONOMETRIC
+
+bool
+Math::func_cos(Interpreter &i)
+{
+	return general_func(i, &cos_r);
+}
+
+bool
+Math::func_cot(Interpreter &i)
+{
+	return general_func(i, &cot_r);
+}
+
 bool
 Math::func_sin(Interpreter &i)
 {
@@ -114,35 +137,9 @@ Math::func_sin(Interpreter &i)
 }
 
 bool
-Math::func_sqr(Interpreter &i)
-{
-	return general_func(i, &sqr_r);
-}
-
-bool
-Math::func_pi(Interpreter &i)
-{
-	Parser::Value v(Real(M_PI));
-	i.pushValue(v);
-	return (true);
-}
-
-bool
 Math::func_tan(Interpreter &i)
 {
 	return general_func(i, &tan_r);
-}
-
-Real
-Math::acs_r(Real v)
-{
-	return (acos(v));
-}
-
-Real
-Math::asn_r(Real v)
-{
-	return (asin(v));
 }
 
 Real
@@ -164,6 +161,50 @@ Math::cot_r(Real v)
 }
 
 Real
+Math::tan_r(Real v)
+{
+	return (tan(v));
+}
+
+#endif // M_TRIGONOMETRIC
+
+bool
+Math::func_sqr(Interpreter &i)
+{
+	return general_func(i, &sqr_r);
+}
+
+bool
+Math::func_pi(Interpreter &i)
+{
+	Parser::Value v(Real(M_PI));
+	i.pushValue(v);
+	return (true);
+}
+
+#if M_REVERSE_TRIGONOMETRIC
+
+Real
+Math::acs_r(Real v)
+{
+	return (acos(v));
+}
+
+Real
+Math::asn_r(Real v)
+{
+	return (asin(v));
+}
+
+Real
+Math::atn_r(Real v)
+{
+	return (atan(v));
+}
+
+#endif // M_REVERSE_TRIGONOMETRIC
+
+Real
 Math::exp_r(Real v)
 {
 	return (exp(v));
@@ -181,18 +222,6 @@ Math::sqr_r(Real v)
 	return (sqrt(v));
 }
 
-Real
-Math::atn_r(Real v)
-{
-	return (atan(v));
 }
 
-Real
-Math::tan_r(Real v)
-{
-	return (tan(v));
-}
-
-}
-
-#endif
+#endif // USEMATH

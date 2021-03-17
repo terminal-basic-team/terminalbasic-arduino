@@ -20,7 +20,6 @@
 #include "arduino_logger.hpp"
 #include "basic_program.hpp"
 #include "basic_arduinoio.hpp"
-
 #include "seriallight.hpp"
 
 #if USESD
@@ -35,6 +34,10 @@
 #include "basic_math.hpp"
 #endif
 
+#if USETVOUT
+#include "TVoutPrint.hpp"
+#endif
+
 /**
  * Instantiating modules
  */
@@ -42,6 +45,8 @@
 #if USEUTFT
 static UTFT	utft(CTE32HR, 38, 39, 40, 41);
 static UTFTTerminal utftPrint(utft);
+#elif USETVOUT
+static TVoutPrint tvoutPrint;
 #endif
 
 #if USESD
@@ -74,7 +79,9 @@ static BASIC::Interpreter basic3(Serial3, Serial3, program3);
 #else
 static BASIC::Interpreter::Program program(BASIC::PROGRAMSIZE);
 #if USEUTFT
-static BASIC::Interpreter basic(Serial, utftPrint, program);
+static BASIC::Interpreter basic(SerialL, utftPrint, program);
+#elif USETVOUT
+static BASIC::Interpreter basic(SerialL, tvoutPrint, program);
 #else
 #ifdef ARDUINO
 static BASIC::Interpreter basic(SerialL, SerialL, program);
@@ -91,6 +98,9 @@ setup()
 	XMCRA |= 1ul<<7; // Switch ext mem iface on
 	XMCRB = 0;
 #endif
+#if USETVOUT
+	tvoutPrint.begin();
+#endif
 #ifdef ARDUINO
 	SerialL.begin(115200);
 #else
@@ -99,7 +109,7 @@ setup()
 #if USEUTFT
 	utftPrint.begin();
 #endif
-
+	
 #if BASIC_MULTITERMINAL
 #if HAVE_HWSERIAL1
 	Serial1.begin(57600);
@@ -112,7 +122,7 @@ setup()
 #endif
 #endif
 
-	LOG_INIT(Serial);
+	LOG_INIT(SerialL);
 
 	LOG_TRACE;
 

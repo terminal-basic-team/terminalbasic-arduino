@@ -17,46 +17,41 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ASCII_HPP
-#define ASCII_HPP
+#ifndef VT100_HPP
+#define VT100_HPP
 
-#include <inttypes.h>
+#include "cps.hpp"
 
-/**
- * @brief ASCII characters
- */
-enum class ASCII : uint8_t
+class VT100
 {
-	NUL = 0x00,
-	SOH = 0x01,
-	STX = 0x02,
-	ETX = 0x03,
-	EOT = 0x04,
-	ENQ = 0x05,
-	ACK = 0x06,
-	BEL = 0x07,
-	BS = 0x08,
-	HT = 0x09,
-	LF = 0x0A,
-	VT = 0x0B,
-	FF = 0x0C,
-	CR = 0x0D,
-	SO = 0x0E,
-	SI = 0x0F,
-	NAK = 0x15,
-	SYN = 0x16,
-	CAN = 0x18,
-	ESC = 0x1B,
-	SPACE = ' ',
-	QMARK = '?',
-	DOT = '.',
-	COLON = ':',
-	QUMARK = '\"',
-	LPAREN = '(',
-	RPAREN = ')',
-	COMMA = ',',
-	TILDE = 0x7E,
-	DEL = 0x7F
+	CPS_PACKAGE(VT100);
+public:
+	// Terminal text attributes to use when printing
+	enum TextAttr : uint8_t
+	{
+		NO_ATTR = 0x0,
+		BRIGHT = 0x1,
+		UNDERSCORE = 0x2,
+		BLINK = 0x4,
+		REVERSE = 0x8,
+		C_WHITE = 0x00,
+		C_BLACK = 0x10,
+		C_RED = 0x20,
+		C_GREEN = 0x30,
+		C_YELLOW = 0x40,
+		C_BLUE = 0x50,
+		C_MAGENTA = 0x60,
+		C_CYAN = 0x70,
+		CB_BLACK = 0x80,
+		CB_RED = 0x90,
+		CB_GREEN = 0xA0,
+		CB_YELLOW = 0xB0,
+		CB_BLUE = 0xC0,
+		CB_MAGENTA = 0xD0,
+		CB_CYAN = 0xE0,
+		CB_WHITE = 0xF0,
+	};
 };
 
-#endif
+#endif /* VT100_HPP */
+

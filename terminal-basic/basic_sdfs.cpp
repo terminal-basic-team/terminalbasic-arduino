@@ -30,7 +30,7 @@ namespace BASIC
 File SDFSModule::_root;
 
 static const uint8_t sdfsCommands[] PROGMEM = {
-	'C', 'H', 'A', 'I', 'N'+0x80,
+	'D', 'C', 'H', 'A', 'I', 'N'+0x80,
 	'D', 'I', 'R', 'E', 'C', 'T', 'O', 'R', 'Y'+0x80,
 	'D', 'L', 'O', 'A', 'D'+0x80,
 	'D', 'S', 'A', 'V', 'E'+0x80,
@@ -40,7 +40,7 @@ static const uint8_t sdfsCommands[] PROGMEM = {
 };
 
 const FunctionBlock::function  SDFSModule::_commands[] PROGMEM = {
-	SDFSModule::chain,
+	SDFSModule::dchain,
 	SDFSModule::directory,
 	SDFSModule::dload,
 	SDFSModule::dsave,
@@ -110,9 +110,21 @@ SDFSModule::scratch(Interpreter &i)
 }
 
 bool
-SDFSModule::chain(Interpreter &i)
+SDFSModule::dchain(Interpreter &i)
 {
-	return (true);
+	char ss[16];
+	if (!getFileName(i, ss))
+		return false;
+	
+	File f = SD.open(ss);
+	if (!f)
+		return false;
+	
+	i._program.clearProg();
+	i._program.moveData(0);
+	i._program.jump(0);
+	i.stop();
+	return _loadText(f, i);
 }
 
 bool
@@ -163,18 +175,11 @@ SDFSModule::dsave(Interpreter &i)
 }
 
 bool
-SDFSModule::dload(Interpreter &i)
+SDFSModule::_loadText(File &f, Interpreter &i)
 {
-	char ss[16];
-	if (!getFileName(i, ss))
-		return (false);
-	File f = SD.open(ss);
-	if (!f)
-		return (false);
-	
-	i._program.newProg();
 	while (true) {
 		char buf[PROGSTRINGSIZE] = {0, };
+		f.setTimeout(10);
 		size_t res = f.readBytesUntil('\n', buf, PROGSTRINGSIZE-1);
 		if (res > 0) {
 			Lexer lex;
@@ -191,7 +196,24 @@ SDFSModule::dload(Interpreter &i)
 	
 	f.close();
 	i._program.reset();
-	return (true);
+	
+	return true;
+}
+
+bool
+SDFSModule::dload(Interpreter &i)
+{
+	char ss[16];
+	if (!getFileName(i, ss))
+		return false;
+	
+	File f = SD.open(ss);
+	if (!f)
+		return false;
+	
+	i._program.newProg();
+	
+	return _loadText(f, i);
 }
 
 bool

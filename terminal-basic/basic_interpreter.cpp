@@ -46,42 +46,43 @@ class Interpreter::AttrKeeper
 {
 public:
 
-	explicit AttrKeeper(Interpreter &i, TextAttr a) :
+	explicit AttrKeeper(Interpreter &i, VT100::TextAttr a) :
 	_i(i), _a(a)
 	{
-		if (_a == NO_ATTR)
+		if (_a == VT100::NO_ATTR)
 			return;
-		if ((uint8_t(a) & uint8_t(BRIGHT)) != uint8_t(NO_ATTR))
+		if ((uint8_t(a) & uint8_t(VT100::BRIGHT)) != uint8_t(VT100::NO_ATTR))
 			_i._output.print("\x1B[1m");
-		if ((uint8_t(a) & uint8_t(UNDERSCORE)) != uint8_t(NO_ATTR))
+		if ((uint8_t(a) & uint8_t(VT100::UNDERSCORE)) != uint8_t(VT100::NO_ATTR))
 			_i._output.print("\x1B[4m");
-		if ((uint8_t(a) & uint8_t(REVERSE)) != uint8_t(NO_ATTR))
+		if ((uint8_t(a) & uint8_t(VT100::REVERSE)) != uint8_t(VT100::NO_ATTR))
 			_i._output.print("\x1B[7m");
-		if ((uint8_t(a) & 0xF0) == C_YELLOW)
+		if ((uint8_t(a) & 0xF0) == VT100::C_YELLOW)
 			_i._output.print("\x1B[33m");
-		else if ((uint8_t(a) & 0xF0) == C_GREEN)
+		else if ((uint8_t(a) & 0xF0) == VT100::C_GREEN)
 			_i._output.print("\x1B[32m");
-		else if ((uint8_t(a) & 0xF0) == C_RED)
+		else if ((uint8_t(a) & 0xF0) == VT100::C_RED)
 			_i._output.print("\x1B[31m");
-		else if ((uint8_t(a) & 0xF0) == C_BLUE)
+		else if ((uint8_t(a) & 0xF0) == VT100::C_BLUE)
 			_i._output.print("\x1B[34m");
-		else if ((uint8_t(a) & 0xF0) == C_MAGENTA)
+		else if ((uint8_t(a) & 0xF0) == VT100::C_MAGENTA)
 			_i._output.print("\x1B[35m");
-		else if ((uint8_t(a) & 0xF0) == C_CYAN)
+		else if ((uint8_t(a) & 0xF0) == VT100::C_CYAN)
 			_i._output.print("\x1B[36m");
-		else if ((uint8_t(a) & 0xF0) == C_WHITE)
+		else if ((uint8_t(a) & 0xF0) == VT100::C_WHITE)
 			_i._output.print("\x1B[37m");
 	}
 
 	~AttrKeeper()
 	{
-		if (_a == NO_ATTR)
+		if (_a == VT100::NO_ATTR)
 			return;
 		_i._output.print("\x1B[0m");
 	}
 private:
+	
 	Interpreter &_i;
-	TextAttr _a;
+	VT100::TextAttr _a;
 };
 
 uint8_t Interpreter::_termnoGen = 0;
@@ -181,15 +182,15 @@ Interpreter::init()
 	_parser.init();
 	_program.newProg();
 
-	print(ProgMemStrings::TERMINAL, BRIGHT);
-	print(ProgMemStrings::S_TERMINAL_BASIC, BRIGHT);
+	print(ProgMemStrings::TERMINAL, VT100::BRIGHT);
+	print(ProgMemStrings::S_TERMINAL_BASIC, VT100::BRIGHT);
 	print(ProgMemStrings::S_VERSION);
-	print(VERSION, BRIGHT), newline();
+	print(VERSION, VT100::BRIGHT), newline();
 #if BASIC_MULTITERMINAL
 	print(ProgMemStrings::TERMINAL, NO_ATTR), print(Integer(_termno), BRIGHT),
 	_output.print(':'), _output.print(' ');
 #endif
-	print(long(_program.programSize - _program._arraysEnd), BRIGHT);
+	print(long(_program.programSize - _program._arraysEnd), VT100::BRIGHT);
 	print(ProgMemStrings::BYTES), print(ProgMemStrings::AVAILABLE), newline();
 	_state = SHELL;
 }
@@ -205,7 +206,7 @@ Interpreter::step()
 		// waiting for user input command or program line
 	case SHELL:
 	{
-		print(ProgMemStrings::READY, BRIGHT);
+		print(ProgMemStrings::S_READY, VT100::BRIGHT);
 		newline();
 	}
 		// fall through
@@ -289,7 +290,7 @@ Interpreter::list(uint16_t start, uint16_t stop)
 		if (stop > 0 && s->number > stop)
 			break;
 
-		print(long(s->number), C_YELLOW);
+		print(long(s->number), VT100::C_YELLOW);
 
 		Lexer lex;
 		lex.init(s->text);
@@ -310,6 +311,7 @@ Interpreter::addModule(FunctionBlock *module)
 	_parser.addModule(module);
 }
 
+#if USE_DUMP
 void
 Interpreter::dump(DumpMode mode)
 {
@@ -318,13 +320,13 @@ Interpreter::dump(DumpMode mode)
 	{
 		ByteArray ba((uint8_t*) _program._text, _program.programSize);
 		_output.println(ba);
-		print(Token::KW_END), print(ProgMemStrings::S_OF);
+		print(ProgMemStrings::S_END), print(ProgMemStrings::S_OF);
 		print(ProgMemStrings::S_TEXT), _output.print('\t');
 		_output.println(unsigned(_program._textEnd), HEX);
-		print(Token::KW_END), print(ProgMemStrings::S_OF);
+		print(ProgMemStrings::S_END), print(ProgMemStrings::S_OF);
 		print(ProgMemStrings::S_VARS), _output.print('\t');
 		_output.println(unsigned(_program._variablesEnd), HEX);
-		print(Token::KW_END), print(ProgMemStrings::S_OF);
+		print(ProgMemStrings::S_END), print(ProgMemStrings::S_OF);
 		print(ProgMemStrings::S_ARRAYS), _output.print('\t');
 		_output.println(unsigned(_program._arraysEnd), HEX);
 		print(ProgMemStrings::S_STACK), _output.print('\t');
@@ -368,9 +370,10 @@ Interpreter::dump(DumpMode mode)
 		break;
 	}
 }
+#endif
 
 void
-Interpreter::print(const Parser::Value &v, TextAttr attr)
+Interpreter::print(const Parser::Value &v, VT100::TextAttr attr)
 {
 	AttrKeeper keeper(*this, attr);
 
@@ -434,7 +437,13 @@ Interpreter::print(Real number)
 {
 	char buf[17];
 #ifdef ARDUINO
-	::dtostrf(number, 12, 9, buf);
+	uint8_t decWhole = 1;
+	Real n = number;
+	while (n > 1) {
+		n /= 10;
+		++decWhole;
+	}
+	::dtostrf(number, 9, 8-decWhole, buf);
 #else
 	::sprintf(buf, "% .7G", number);
 #endif
@@ -453,11 +462,11 @@ Interpreter::print(Lexer &l)
 		case Token::C_INTEGER:
 		case Token::C_REAL:
 		case Token::C_BOOLEAN:
-			print(l.getValue(), C_CYAN);
+			print(l.getValue(), VT100::C_CYAN);
 			break;
 		case Token::C_STRING:
 		{
-			AttrKeeper a(*this, C_MAGENTA);
+			AttrKeeper a(*this, VT100::C_MAGENTA);
 			_output.write("\"");
 			_output.print(l.id());
 			_output.write("\" ");
@@ -470,7 +479,7 @@ Interpreter::print(Lexer &l)
 #endif
 		case Token::BOOL_IDENT:
 		case Token::STRING_IDENT:
-			print(l.id(), C_BLUE);
+			print(l.id(), VT100::C_BLUE);
 			break;
 		default:
 			_output.print('?');
@@ -630,61 +639,129 @@ Interpreter::next(const char *varName)
 	return (false);
 }
 
+#if USE_SAVE_LOAD
 void
 Interpreter::save()
 {
-	/**
-	 * struct SavedProgram_t
-	 * {
-	 *	uint16_t	length;
-	 *	uint8_t		data[length];
-	 *	uint16_t	crc;
-	 * };
-	 */
-	
-	// Program text buffer length
-	size_t len = _program._textEnd;
-	uint16_t crc = 0;
-
-	EEPROMClass e;
-	for (uint16_t ind = 0; ind < e.length(); ++ind)
-		e.update(ind, 0xFF);
-	
-	// First 2 bytes is program length
-	e.update(0, (len << 8) >> 8);
-	e.update(1, len >> 8);
-	size_t p;
-	for (p = 0; p < _program._textEnd; ++p) {
-		e.update(p + 2, _program._text[p]);
-		crc = _crc16_update(crc, _program._text[p]);
-		_output.print('.');
+	EEpromHeader_t h = {
+		// Program text buffer length
+		.len = _program._textEnd,
+		.magic_FFFFminuslen = uint16_t(0xFFFFu)-_program._textEnd,
+		// Checksum
+		.crc16 = 0
+	};
+#if SAVE_LOAD_CHECKSUM
+	// Compute program checksum
+	for (size_t p = 0; p < _program._textEnd; ++p)
+		h.crc16 = _crc16_update(h.crc16, _program._text[p]);
+#endif
+	{
+		EEPROMClass e;
+		// Write program to EEPROM
+		for (size_t p = 0; p < _program._textEnd; ++p) {
+			e.update(p + sizeof (EEpromHeader_t), _program._text[p]);
+			_output.print('.');
+		}
 	}
-	e.update(p + 2, (crc << 8) >> 8);
-	e.update(p + 3, crc >> 8);
 	newline();
+#if SAVE_LOAD_CHECKSUM	
+	// Compute checksum
+	uint16_t crc = eepromProgramChecksum(h.len);
+	
+	if (crc == h.crc16) {
+#endif
+		EEPROMClass e;
+		e.put(0, h);
+#if SAVE_LOAD_CHECKSUM
+	} else
+		raiseError(DYNAMIC_ERROR, BAD_CHECKSUM);
+#endif
 }
 
-void Interpreter::load()
+void
+Interpreter::load()
 {
+	uint16_t len;
 	_program.newProg();
-	EEPROMClass e;
+	if (!checkText(len))
+		return;
 
-	uint16_t crc = 0;
-	size_t len = size_t(e.read(0));
-	len |= size_t(e.read(1)) << 8;
-	size_t p;
-	for (p = 0; p < len; ++p) {
-		_program._text[p] = e.read(p + 2);
-		crc = _crc16_update(crc, _program._text[p]);
-		_output.print('.');
-	}
-	uint16_t pCrc = uint16_t(e.read(p + 2));
-	pCrc |= size_t(e.read(p + 3)) << 8;
-	if (pCrc != crc)
-		newline(), raiseError(DYNAMIC_ERROR, BAD_CHECKSUM);
-	newline();
+	loadText(len);
 	_program._textEnd = _program._variablesEnd = _program._arraysEnd = len;
 }
+
+void
+Interpreter::chain()
+{
+	uint16_t len;
+	if (!checkText(len))
+		return;
+	
+	_program.clearProg();
+	_program.moveData(len);
+	// Load programm memory without progress
+	loadText(len, false);
+	_program.jump(0);
+	_parser.stop();
+}
+
+#if SAVE_LOAD_CHECKSUM
+uint16_t
+Interpreter::eepromProgramChecksum(uint16_t len)
+{
+	EEPROMClass e;
+	// Compute checksum
+	uint16_t crc = 0, p;
+	for (p = sizeof (EEpromHeader_t); p < len+sizeof (EEpromHeader_t);
+	    ++p) {
+		uint8_t b = e.read(p);
+		crc = _crc16_update(crc, b);
+		_output.print('.');
+	}
+	newline();
+	return crc;
+}
+#endif
+
+bool
+Interpreter::checkText(uint16_t &len)
+{
+	EEpromHeader_t h;
+	
+	{
+		EEPROMClass e;
+		e.get(0, h);
+	}
+	
+	if ((h.len > PROGRAMSIZE) ||
+	    (h.magic_FFFFminuslen != uint16_t(0xFFFF)-h.len)) {
+		raiseError(DYNAMIC_ERROR, INTERNAL_ERROR);
+		return false;
+	}
+#if SAVE_LOAD_CHECKSUM
+	uint16_t crc = eepromProgramChecksum(h.len);
+	if (h.crc16 != crc) {
+		raiseError(DYNAMIC_ERROR, BAD_CHECKSUM);
+		return false;
+	}
+#endif
+	len = h.len;
+	return true;
+}
+
+void
+Interpreter::loadText(uint16_t len, bool showProgress)
+{
+	EEPROMClass e;
+
+	for (uint16_t p = 0; p < len; ++p) {
+		_program._text[p] = e.read(p + sizeof (EEpromHeader_t));
+		if (showProgress)
+			_output.print('.');
+	}
+	newline();
+}
+#endif // USE_SAVE_LOAD
 
 void
 Interpreter::input()
@@ -931,6 +1008,8 @@ Interpreter::readInput()
 			if (_inputPosition > 0) {
 				--_inputPosition;
 				_output.write(char(ASCII::BS));
+				_output.write(char(ASCII::SPACE));
+				_output.write(char(ASCII::BS));
 			}
 			break;
 		case char(ASCII::CR):
@@ -938,15 +1017,19 @@ Interpreter::readInput()
 			_inputBuffer[i] = 0;
 			return (true);
 		default:
-			++_inputPosition;
-			_output.write(c);
+			// Only acept character if there is room for upcoming
+			// control one (line end or del/bs)
+			if (availableSize > 1) {
+				++_inputPosition;
+				_output.write(c);
+			}
 		}
 	}
 	return (false);
 }
 
 void
-Interpreter::print(const char *text, TextAttr attr)
+Interpreter::print(const char *text, VT100::TextAttr attr)
 {
 	AttrKeeper _a(*this, attr);
 
@@ -954,7 +1037,7 @@ Interpreter::print(const char *text, TextAttr attr)
 }
 
 void
-Interpreter::print(ProgMemStrings index, TextAttr attr)
+Interpreter::print(ProgMemStrings index, VT100::TextAttr attr)
 {
 	char buf[16];
 	strcpy_P(buf, progmemString(index));
@@ -970,15 +1053,15 @@ Interpreter::print(Token t)
 	char buf[16];
 	strcpy_P(buf, (PGM_P) pgm_read_word(&(Lexer::tokenStrings[
 	    uint8_t(t)])));
-	if (t <= Token::KW_VARS)
-		print(buf, TextAttr(uint8_t(BRIGHT) |
-	    uint8_t(C_GREEN)));
+	if (t < Token::STAR)
+		print(buf, VT100::TextAttr(uint8_t(VT100::BRIGHT) |
+		    uint8_t(VT100::C_GREEN)));
 	else
 		print(buf);
 }
 
 void
-Interpreter::print(Integer i, TextAttr attr)
+Interpreter::print(Integer i, VT100::TextAttr attr)
 {
 	AttrKeeper _a(*this, attr);
 
@@ -995,7 +1078,7 @@ Interpreter::printTab(Integer tabs)
 }
 
 void
-Interpreter::print(long i, TextAttr attr)
+Interpreter::print(long i, VT100::TextAttr attr)
 {
 	AttrKeeper _a(*this, attr);
 
@@ -1004,25 +1087,22 @@ Interpreter::print(long i, TextAttr attr)
 
 void
 Interpreter::raiseError(ErrorType type, ErrorCodes errorCode)
-{
-	char buf[16];
-	if (type == DYNAMIC_ERROR)
-		strcpy_P(buf, progmemString(ProgMemStrings::S_DYNAMIC));
-	else // STATIC_ERROR
-		strcpy_P(buf, progmemString(ProgMemStrings::S_STATIC));
-	_output.print(buf);
-	_output.print(' ');
-	strcpy_P(buf, progmemString(ProgMemStrings::S_SEMANTIC));
-	_output.print(buf);
-	_output.print(' ');
-	strcpy_P(buf, progmemString(ProgMemStrings::S_ERROR));
-	_output.print(buf);
+{	
+	if (_program.current())
+		print(long(_program.current()->number), VT100::C_YELLOW);
 	_output.print(':');
-	if (type == DYNAMIC_ERROR) {
-		_output.println(uint8_t(errorCode));
-	} else { // STATIC_ERROR
-		_output.println(int(_parser.getError()));
-	}
+	if (type == DYNAMIC_ERROR)
+		print(ProgMemStrings::S_DYNAMIC);
+	else // STATIC_ERROR
+		print(ProgMemStrings::S_STATIC);
+	print(ProgMemStrings::S_SEMANTIC);
+	print(ProgMemStrings::S_ERROR, VT100::C_RED);
+	if (type == DYNAMIC_ERROR)
+		print(Integer(errorCode));
+	else // STATIC_ERROR
+		print(Integer(_parser.getError()));
+	newline();
+	
 	_state = SHELL;
 }
 

@@ -54,7 +54,7 @@ FunctionBlock::getFunction(const char *name) const
 	if (((result = _getFunction(name)) == NULL) &&
 	    _next != NULL)
 		result = _next->getFunction(name);
-	return result;
+	return (result);
 }
 
 FunctionBlock::command
@@ -110,9 +110,9 @@ FunctionBlock::general_func(Interpreter &i, _funcReal f)
 	    v.type == Parser::Value::REAL) {
 		v = (*f)(Real(v));
 		i.pushValue(v);
-		return true;
+		return (true);
 	} else
-		return false;
+		return (false);
 }
 #endif
 
