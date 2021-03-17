@@ -108,6 +108,7 @@ private:
 	// Parse Binary number
 	void binaryInteger();
 #if USE_REALS
+	void binaryReal();
 	bool numberScale();
 #endif
 	void ident();

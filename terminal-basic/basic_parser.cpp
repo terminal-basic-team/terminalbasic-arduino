@@ -513,9 +513,9 @@ Parser::fImplicitAssignment(char *varName)
 	LOG_TRACE;
 
 	if (fIdentifier(varName) && _lexer.getNext()) {
-		uint8_t dimensions;
 		bool array;
 		if (_lexer.getToken() == Token::LPAREN) {
+			uint8_t dimensions;
 			if (fArray(dimensions))
 				array = true;
 			else
@@ -1059,13 +1059,13 @@ Parser::fIfStatement()
 	LOG(t);
 	if (t == Token::KW_THEN) {
 		if (_lexer.getNext()) {
-			bool res;
 			if (_lexer.getToken() == Token::C_INTEGER) {
 				if (_mode == EXECUTE)
 					_interpreter.gotoLine(_lexer.getValue());
 				_lexer.getNext();
 				return true;
 			} else {
+				bool res;
 				while (fOperators(res)) {
 					if (!res)
 						return false;
@@ -1156,9 +1156,8 @@ Parser::fCommand()
 	case Token::COM_DELAY: {
 		Parser::Value v;
 		if (_lexer.getNext() && fExpression(v)) {
-			if (_mode == EXECUTE) {
+			if (_mode == EXECUTE)
 				_interpreter.delay(Integer(v));
-			}
 			return true;
 		} else
 			return false;
@@ -1383,8 +1382,8 @@ Parser::fIdentifierExpr(char *varName, Value &v)
 				}
 			} while (_lexer.getToken() == Token::COMMA);
 			_lexer.getNext();
-			bool result = true;
 			if (_mode == EXECUTE) {
+				bool result = true;
 				result = ((*f)(_interpreter));
 				if (!result || !_interpreter.popValue(v))
 					return false;

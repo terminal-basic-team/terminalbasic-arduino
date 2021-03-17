@@ -82,26 +82,26 @@ Program::last() const
 }
 
 void
-Program::jump(uint16_t newVal)
+Program::jump(Pointer newVal)
 {
 	_jump = newVal;
 	_jumpFlag = true;
 }
 
 Program::Line*
-Program::lineByIndex(uint16_t index) const
+Program::lineByIndex(Pointer address) const
 {
 	return const_cast<Line*> (reinterpret_cast<const Line*> (
-	    _text + index));
+	    _text + address));
 }
 
 Program::Line*
-Program::lineByNumber(uint16_t number, uint16_t index)
+Program::lineByNumber(uint16_t number, Pointer address)
 {
 	Program::Line *result = nullptr;
 
-	if (index <= _textEnd) {
-		_current.index = index;
+	if (address <= _textEnd) {
+		_current.index = address;
 		for (Line *cur = getNextLine(); cur != nullptr;
 		    cur = getNextLine()) {
 			if (cur->number == number) {
@@ -163,7 +163,7 @@ Program::clearProg()
 }
 
 void
-Program::moveData(uint16_t dest)
+Program::moveData(Pointer dest)
 {
 	int32_t diff = _textEnd-dest;
 	memmove(_text+dest, _text+_textEnd, _arraysEnd-_textEnd);
@@ -185,9 +185,9 @@ Program::newProg()
 VariableFrame*
 Program::variableByName(const char *name)
 {
-	uint16_t index = _textEnd;
+	auto index = _textEnd;
 
-	for (VariableFrame *f = variableByIndex(index); f != nullptr;
+	for (auto f = variableByIndex(index); f != nullptr;
 	    f = variableByIndex(index)) {
 		int8_t res = strncmp(name, f->name, VARSIZE);
 		if (res == 0) {
@@ -199,22 +199,28 @@ Program::variableByName(const char *name)
 	return nullptr;
 }
 
-uint16_t
-Program::lineIndex(const Line *s) const
-{
-	return ((char*) s) - _text;
-}
+//Pointer
+//Program::lineIndex(const Line *s) const
+//{
+//	return ((char*) s) - _text;
+//}
 
-uint16_t
-Program::variableIndex(VariableFrame *f) const
-{
-	return ((char*) f) - _text;
-}
+//Pointer
+//Program::variableIndex(VariableFrame *f) const
+//{
+//	return ((char*) f) - _text;
+//}
 
-uint16_t
-Program::arrayIndex(ArrayFrame *f) const
+//Pointer
+//Program::arrayIndex(ArrayFrame *f) const
+//{
+//	return ((char*) f) - _text;
+//}
+
+Pointer
+Program::objectIndex(const void *obj) const
 {
-	return ((char*) f) - _text;
+	return reinterpret_cast<const char*>(obj) - _text;
 }
 
 Program::StackFrame*
@@ -256,13 +262,13 @@ Program::reverseLast(StackFrame::Type type)
 void
 Program::pushBottom(StackFrame *f)
 {
-	StackFrame *newFrame = this->currentStackFrame();
+	auto newFrame = this->currentStackFrame();
 	if ((newFrame == nullptr) || (newFrame->_type != f->_type)) {
 		newFrame = this->push(f->_type);
 		memcpy(newFrame, f, StackFrame::size(f->_type));
 	} else {
 		char buf[sizeof (StackFrame)];
-		StackFrame *fr = reinterpret_cast<StackFrame*> (buf);
+		auto fr = reinterpret_cast<StackFrame*> (buf);
 		memcpy(fr, newFrame, StackFrame::size(f->_type));
 		this->pop();
 		pushBottom(f);
@@ -272,10 +278,10 @@ Program::pushBottom(StackFrame *f)
 }
 
 Program::StackFrame*
-Program::stackFrameByIndex(uint16_t index)
+Program::stackFrameByIndex(Pointer address)
 {
-	if ((index > 0) && (index < programSize))
-		return reinterpret_cast<StackFrame*> (_text + index);
+	if ((address > 0) && (address < programSize))
+		return reinterpret_cast<StackFrame*> (_text + address);
 	else
 		return nullptr;
 }
@@ -292,9 +298,9 @@ Program::currentStackFrame()
 ArrayFrame*
 Program::arrayByName(const char *name)
 {
-	uint16_t index = _variablesEnd;
+	auto index = _variablesEnd;
 
-	for (ArrayFrame *f = arrayByIndex(index); index < _arraysEnd;
+	for (auto f = arrayByIndex(index); index < _arraysEnd;
 	    index += f->size(),
 	    f = arrayByIndex(index)) {
 		const int8_t res = strcmp(name, f->name);
@@ -307,7 +313,7 @@ Program::arrayByName(const char *name)
 }
 
 VariableFrame*
-Program::variableByIndex(uint16_t index)
+Program::variableByIndex(Pointer index)
 {
 	if (index < _variablesEnd)
 		return reinterpret_cast<VariableFrame*> (_text + index);
@@ -316,7 +322,7 @@ Program::variableByIndex(uint16_t index)
 }
 
 ArrayFrame*
-Program::arrayByIndex(uint16_t index)
+Program::arrayByIndex(Pointer index)
 {
 	return reinterpret_cast<ArrayFrame*> (_text + index);
 }
@@ -334,7 +340,7 @@ Program::addLine(uint16_t num, const char *line)
 	while (_lexer.getNext()) {
 		if (position >= (PROGSTRINGSIZE-1))
 			return false;
-		uint8_t t = uint8_t(0x80) + uint8_t(_lexer.getToken());
+		const uint8_t t = uint8_t(0x80) + uint8_t(_lexer.getToken());
 		if (_lexer.getToken() < Token::STAR) { // One byte tokens
 			tempBuffer[position++] = t;
 			lexerPosition = _lexer.getPointer();
@@ -350,23 +356,25 @@ Program::addLine(uint16_t num, const char *line)
 			}
 		} else if (_lexer.getToken() == Token::C_INTEGER) {
 			tempBuffer[position++] = t;
-#if USE_LONGINT
-			if ((position + 4) >= PROGSTRINGSIZE-1)
+			if ((position + sizeof(INT)) >= PROGSTRINGSIZE-1)
 				return false;
-			const LongInteger v = LongInteger(_lexer.getValue());
-			tempBuffer[position++] = v >> 24;
-			tempBuffer[position++] = (v >> 16) & 0xFF;
-			tempBuffer[position++] = (v >> 8) & 0xFF;
-			tempBuffer[position++] = v & 0xFF;
-#else
-			if ((position + 2) >= PROGSTRINGSIZE-1)
-				return false;
-			const Integer v = Integer(_lexer.getValue());
-			tempBuffer[position++] = (v >> 8) & 0xFF;
-			tempBuffer[position++] = v & 0xFF;
-#endif
+			const INT v = INT(_lexer.getValue());
+			*reinterpret_cast<INT*>(tempBuffer+position) = v;
+			position += sizeof(INT);
 			lexerPosition = _lexer.getPointer();
-		} else { // Other tokens
+		}
+#if USE_REALS
+		 else if (_lexer.getToken() == Token::C_REAL) {
+			tempBuffer[position++] = t;
+			if ((position + sizeof(Real)) >= PROGSTRINGSIZE-1)
+				return false;
+			const Real v = Real(_lexer.getValue());
+			*reinterpret_cast<Real*>(tempBuffer+position) = v;
+			position += sizeof(Real);
+			lexerPosition = _lexer.getPointer();
+		}
+#endif // USE_REALS
+		else { // Other tokens
 			while (line[lexerPosition] == ' ' ||
 			    line[lexerPosition] == '\t')
 				++lexerPosition;
@@ -390,7 +398,7 @@ Program::removeLine(uint16_t num)
 {
 	const Line *line = this->lineByNumber(num, 0);
 	if (line != nullptr) {
-		const uint16_t index = lineIndex(line);
+		const uint16_t index = objectIndex(line);
 		assert(index < _textEnd);
 		const uint16_t next = index+line->size;
 		const uint16_t len = _arraysEnd-next;
@@ -459,14 +467,14 @@ Program::insert(uint16_t num, const char *text, uint8_t len)
 }
 
 void
-Program::reset(uint16_t size)
+Program::reset(Pointer size)
 {
 	_reset();
 	if (size > 0)
 		_textEnd = _variablesEnd = _arraysEnd = size;
 }
 
-uint16_t
+Pointer
 Program::size() const
 {
 	return _textEnd;

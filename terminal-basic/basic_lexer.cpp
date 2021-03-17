@@ -306,7 +306,7 @@ static const uint8_t tokenTable[] PROGMEM = {
 	'N', 'E', 'W'+0x80,                // 21
 	'N', 'E', 'X', 'T'+0x80,           // 22
 	'N', 'O', 'T'+0x80,
-//	'O', 'N'+0x80,                     // 23
+	'O', 'N'+0x80,                     // 23
 //	'O', 'P', 'T', 'I', 'O', 'N'+0x80, // 24
 	'O', 'R'+0x80,
 	'P', 'R', 'I', 'N', 'T'+0x80,      // 25
@@ -344,6 +344,7 @@ static const uint8_t tokenTable[] PROGMEM = {
 #if USE_DUMP
 	'V', 'A', 'R', 'S'+0x80,
 #endif
+	'X', 'O', 'R'+0x80,
 #if USE_MATRIX
 	'Z', 'E', 'R'+0x80,
 #endif
@@ -394,7 +395,7 @@ void
 Lexer::init(const char *string)
 {
 	LOG_TRACE;
-	assert(string != NULL);
+	assert(string != nullptr);
 
 	_pointer = 0, _string = string;
 }
@@ -413,6 +414,10 @@ Lexer::getNext()
 			next();
 			if (_token == Token::C_INTEGER)
 				binaryInteger();
+#if USE_REALS
+                        else if (_token == Token::C_REAL)
+				binaryReal();
+#endif
 			return true;
 		} else if (isdigit(SYM)) {
 			decimalNumber();
@@ -710,26 +715,33 @@ Lexer::binaryInteger()
 {
 #if USE_LONGINT
 	_value.type = Parser::Value::LONG_INTEGER;
-	LongInteger *val = &_value.value.longInteger;
-	*val = LongInteger(SYM) << 24;
-	next();
-	*val |= LongInteger(SYM) << 16;
-	next();
-	*val |= LongInteger(SYM) << 8;
-	next();
-	*val |= LongInteger(SYM);
-	next();
 #else
 	_value.type = Parser::Value::INTEGER;
-	Integer *val = &_value.value.integer;
-	*val = Integer(SYM) << uint8_t(8);
-	next();
-	*val |= Integer(SYM);
-	next();
+#endif
+	char buf[sizeof(INT)];
+	for (uint8_t i=0; i<sizeof(INT); ++i) {
+		buf[i] = SYM;
+		next();
+	}
+#if USE_LONGINT
+	_value.value.longInteger = *reinterpret_cast<const LongInteger*>(buf);
+#else
+	_value.value.integer = *reinterpret_cast<const Integer*>(buf);
 #endif
 }
 
 #if USE_REALS
+void
+Lexer::binaryReal()
+{
+	_value.type = Parser::Value::REAL;
+	char buf[sizeof(Real)];
+	for (uint8_t i=0; i<sizeof(Real); ++i) {
+		buf[i] = SYM;
+		next();
+	}
+	_value.value.real = *reinterpret_cast<const Real*>(buf);
+}
 
 bool
 Lexer::numberScale()
@@ -765,7 +777,7 @@ Lexer::numberScale()
 		}
 	}
 }
-#endif
+#endif // USE_REALS
 
 void
 Lexer::ident()

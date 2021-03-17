@@ -1,2 +1,165 @@
-./terminal-basic-...  - directory, containing Arduino IDE project
-Other directories contain necessary Arduino libraries
+Terminal-BASIC is a lightweight BASIC-like language interpreter for
+microcontroller-based systems.  It was inspired by the TinyBASIC port
+for popular 8-bit AVR uc boards.
+
+Arduino mega 2560-like boards are primary target for this project.
+However the source code is not an arduino-ide sketch, but the set
+of Netbeans C/C++ IDE projects. Moreover projects depend on the
+arduino-ide and uses its toolchain.
+
+1. Build from sources
+
+Full source code is available at https://bitbucket.org/starling13/ucbasic/
+and https://sourceforge.net/p/terminal-basic/ repositories.
+It depends on the libarduino, libarduinoext, libutft, libsdcard, tvoutex  and
+libarduinoemulator libraries, which are being hosted at
+    https://bitbucket.org/starling13/libarduino/
+    https://bitbucket.org/starling13/libarduinoext/
+    https://bitbucket.org/starling13/libutft/
+    https://bitbucket.org/starling13/libsdcard/
+    https://bitbucket.org/starling13/tvoutex/
+    https://bitbucket.org/starling13/libarduinoemulator/
+respectively (libs should be placed at the same directory, where terminal-basic
+directory is placed i.e.
+   .../REPO/-|
+             |-terminal-basic from https://bitbucket.org/starling13/ucbasic/
+             |-libarduino from https://bitbucket.org/starling13/libarduino/
+             |-libarduinoext from https://bitbucket.org/starling13/libarduinoext/
+             |-libutft from https://bitbucket.org/starling13/libutft/
+             |-libsdcard from https://bitbucket.org/starling13/libsdcard/
+             |-tvoutex from https://bitbucket.org/starling13/tvoutex/
+             |-libarduinoemulator from https://bitbucket.org/starling13/libarduinoemulator/ )
+
+The script ./make_sketch.sh makes an archive with arduino-ide sketch from source tree.
+
+Use netbeans 8.2 IDE to work with sources. Building for PC (using
+linux Arduino API emulation library) depends
+on posixcpp library from https://bitbucket.org/starling13/posixcpp/
+installed.
+
+2. Installing and using
+
+After building from sources or flashing precompiled hex file use appropriate input/output
+devices, selected in config_arduino.hpp or config_linux.hpp before building.
+By default terminal-basic use USART0 with default settings, 115200 baud rate.
+Terminal program must:
+    * support vt100 control codes
+    * use no local echo and line editing.
+
+Variants, using HX8357B based 480x320 TFT displays or composite video out
+using UTFT library from http://www.rinkydinkelectronics.com/library.php?id=51
+and TVoutEx library from https://starling13@bitbucket.org/starling13/tvoutex
+respectively also works.
+
+3. Terminal-BASIC language
+
+Primary goal for project is a support of ANSI/ECMA Minimal BASIC
+standards.
+
+A set of sources for test programs can be downloaded from
+https://cloud.mail.ru/public/45SG/gGc2kFpBk
+
+The language, which TerminalBASIC will support one day is:
+
+Lexems:
+ * OP_AND = "AND"       // 1
+ * KW_ARRAYS = "ARRAYS" // 1
+ * KW_BASE = "BASE"     // 2
+ * COM_CHAIN = "CHAIN"  // 3
+ * COM_CLS = "CLS"      // 4
+ * KW_DATA = "DATA"     // 5
+ * KW_DEF = "DEF"       // 6
+ * COM_DELAY = "DELAY"  // 7
+ * KW_DIM = "DIM"       // 8
+ * COM_DUMP = "DUMP"    // 9
+ * KW_END = "END"       // 10
+ * KW_FALSE = "FALSE"   // 11
+ * KW_FOR = "FOR"       // 12
+ * KW_GOSUB = "GOSUB"   // 13
+ * KW_GOTO = "GOTO"     // 14
+ * KW_GO = "GO"         // 15
+ * KW_IF = "IF"         // 16
+ * KW_INPUT = "INPUT"   // 17
+ * KW_LET = "LET"       // 18
+ * COM_LIST = "LIST"    // 19
+ * COM_LOAD = "LOAD"    // 20
+ * COM_NEW = "NEW"      // 21
+ * KW_NEXT = "NEXT"     // 22
+ * OP_NOT = "NOT"
+ * KW_ON = "ON"         // 23
+ * KW_OPTION = "OPTION" // 24
+ * OP_OR = "OR"
+ * KW_PRINT = "PRINT"   // 25
+ * KW_RANDOMIZE = "RANDOMIZE"
+ * KW_READ = "READ"
+ * KW_REM = "REM"
+ * KW_RETURN = "RETURN"
+ * COM_RUN = "RUN"
+ * COM_SAVE = "SAVE"
+ * KW_STEP = "STEP"
+ * KW_STOP = "STOP"
+ * KW_TAB = "TAB"
+ * KW_THEN = "THEN"
+ * KW_TO = "TO"
+ * KW_TRUE = "TRUE"
+ * KW_VARS = "VARS"
+ * 
+ * STAR = '*'
+ * SLASH = '/'
+ * PLUS = '+'
+ * COLON = ':'
+ * SEMI = ';'
+ * LT = '<'
+ * LTE = "<="
+ * GT = '>'
+ * GTE = ">="
+ * EQUALS = '='
+ * NE = "<>"
+ * NEA = "><"
+ * MINUS = '-'
+ * POW = '^'
+ * IDENT = [A-Z][A-Z0-9]*
+ * C_INTEGER = [0-9]+
+ * C_REAL = [0-9]+[.][0-9]*
+ 
+Grammar:
+ * TEXT = OPERATORS | C_INTEGER OPERATORS
+ * OPERATORS = OPERATOR | OPERATOR COLON OPERATORS
+ * OPERATOR =
+ *	KW_DIM ARRAYS_LIST |
+ *      KW_END |
+ *	KW_FOR FOR_CONDS |
+ *	KW_GOSUB EXPRESSION |
+ *	KW_IF EXPRESSION IF_STATEMENT |
+ *	KW_INPUT VAR_LIST |
+ *	KW_LET IMPLICIT_ASSIGNMENT |
+ *	KW_NEXT IDENT |
+ *	KW_PRINT | KW_PRINT PRINT_LIST |
+ *	KW_REM TEXT |
+ *	KW_RETURN |
+ *	KW_RANDOMIZE |
+ *	GOTO_STATEMENT |
+ *	COMMAND
+ * COMMAND = COM_DUMP | COM_DUMP KW_VARS | COM_DUMP KW_ARRAYS
+ *	COM_LIST | COM_NEW | COM_RUN | COM_SAVE | COM_LOAD
+ * ASSIGNMENT = KW_LET IMPLICIT_ASSIGNMENT | IMPLICIT_ASSIGNMENT
+ * IMPLICIT_ASSIGNMENT = VAR EQUALS EXPRESSION | VAR ARRAY EQUALS EXPRESSION
+ * EXPRESSION = SIMPLE_EXPRESSION | SIMPLE_EXPRESSION REL SIMPLE_EXPRESSION
+ * REL = LT | LTE | EQUALS | GT | GTE | NE | NEA
+ * SIMPLE_EXPRESSION = TERM | TERM ADD TERM
+ * ADD = PLUS MINUS KW_OR
+ * TERM = FACTOR | FACTOR MUL FACTOR
+ * MUL = STAR | SLASH | DIV | MOD | KW_AND
+ * FACTOR = FINAL | FINAL POW FINAL
+ * FINAL = C_INTEGER | C_REAL | C_STRING | VAR | VAR ARRAY |
+ *	LPAREN EXPRESSION RPAREN | MINUS FINAL
+ * VAR = REAL_IDENT | INTEGER_IDENT | STRING_IDENT
+ * VAR_LIST = VAR | VAR VAR_LIST
+ * PRINT_LIST = EXPRESSION | EXPRESSION COMMA PRINT_LIST
+ * IF_STATEMENT = GOTO_STATEMEMNT | KW_THEN OPERATORS
+ * GOTO_STATEMENT = KW_GOTO C_INTEGER
+ * FOR_CONDS = IMPLICIT_ASSIGNMENT KW_TO EXPRESSION |
+ *	IMPLICIT_ASSIGNMENT KW_TO EXPRESSION KW_STEP EXPRESSION
+ * ARRAYS_LIST = VAR ARRAY | VAR ARRAY ARRAYS_LIST
+ * ARRAY = LPAREN DIMENSIONS RPAREN
+ * DIMENSIONS = C_INTEGER | C_INTEGER COMMA DIMENSIONS

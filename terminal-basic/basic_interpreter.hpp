@@ -213,7 +213,7 @@ public:
 	 * @param print Boundary input object
 	 * @param program Program size
 	 */
-	explicit Interpreter(Stream&, Print&, uint16_t);
+	explicit Interpreter(Stream&, Print&, Pointer);
 	
 	/**
 	 * [re]initialize interpreter object
@@ -358,8 +358,8 @@ public:
 
 	struct EEpromHeader_t
 	{
-		uint16_t len;
-		uint16_t magic_FFFFminuslen;
+		Pointer len;
+		Pointer magic_FFFFminuslen;
 		uint16_t crc16;
 	};
 	void save();

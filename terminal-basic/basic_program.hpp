@@ -37,7 +37,7 @@ class Program
 {
 	friend class Interpreter;
 public:
-
+	
 	/**
 	 * @brief BASIC program string object
 	 */
@@ -57,7 +57,7 @@ public:
 	struct EXT_PACKED Position
 	{
 		// line index in program memory
-		uint16_t index;
+		Pointer index;
 		// position in line text
 		uint8_t position;
 	};
@@ -161,7 +161,7 @@ public:
 	 * @brief Move program state (variables and arrays) to dest
 	 * @param dest New Data start
 	 */
-	void moveData(uint16_t);
+	void moveData(Pointer);
 	/**
 	 * @brief Clear program memory
 	 */
@@ -171,12 +171,12 @@ public:
 	 * @brief newSize 0 if use existing program, text size if clear vars
 	 *   and arrays
 	 */
-	void reset(uint16_t = 0);
+	void reset(Pointer = 0);
 	/**
 	 * @brief get actual size of stored program in bytes
 	 * @return program size
 	 */
-	uint16_t size() const;
+	Pointer size() const;
 	/**
 	 * @brief get next program line
 	 * @return line object or nullptr if beyond last line
@@ -201,40 +201,34 @@ public:
 	
 	Line *last() const;
 	
-	void jump(uint16_t newVal);
+	void jump(Pointer);
 	/**
-	 * @brief program line at given index
-	 * @param index
+	 * @brief program line at given address
+	 * @param address
 	 * @return string pointer or nullptr if not exists
 	 */
-	Line *lineByIndex(uint16_t) const;
+	Line *lineByIndex(Pointer) const;
 	/**
 	 * @brief program line of given number
 	 * @param number Program line number to get
-	 * @param index start of the search
-	 * @return string pointer or NULL if not found
+	 * @param address start of the search
+	 * @return Line pointer or NULL if not found
 	 */
-	Line *lineByNumber(uint16_t, uint16_t = 0);
-	/**
-	 * @brief 
-	 * @param string pointer
-	 * @return index
-	 */
-	uint16_t lineIndex(const Line*) const;
+	Line *lineByNumber(uint16_t, Pointer = 0);
 	/**
 	 * @brief get variable frame at a given index
 	 * @param index basic memory address
 	 * @return pointer
 	 */
-	VariableFrame *variableByIndex(uint16_t);
+	VariableFrame *variableByIndex(Pointer);
 	VariableFrame *variableByName(const char*);
-	uint16_t variableIndex(VariableFrame*) const;
 	
-	ArrayFrame *arrayByIndex(uint16_t);
+	ArrayFrame *arrayByIndex(Pointer);
 	ArrayFrame *arrayByName(const char*);
-	uint16_t arrayIndex(ArrayFrame*) const;
+	
+	Pointer objectIndex(const void*) const;
 
-	StackFrame *stackFrameByIndex(uint16_t index);
+	StackFrame *stackFrameByIndex(Pointer);
 	StackFrame *currentStackFrame();
 	/**
 	 * @brief create new stack frame of given type and get its pointer
@@ -265,39 +259,16 @@ public:
 	 * @brief Insert line at current position
 	 * @param num line number
 	 * @param text line text
+	 * @param len line length
 	 */
 	bool insert(uint16_t, const char*, uint8_t);
-	
-	uint16_t textEnd() const { return _textEnd; }
-	void setTextEnd(uint16_t newVal)
-	{
-		_textEnd = newVal;
-	}
-	
-	uint16_t varsEnd() const { return _variablesEnd; }
-	void setVarsEnd(uint16_t newVal)
-	{
-		_variablesEnd = newVal;
-	}
-	
-	uint16_t arraysEnd() const { return _arraysEnd; }
-	void setArraysEnd(uint16_t newVal)
-	{
-		_arraysEnd = newVal;
-	}
-	
-	uint16_t sp() const { return _sp; }
-	void setSP(uint16_t newVal)
-	{
-		_sp = newVal;
-	}
 	
 #if USE_EXTMEM
 	char *_text;
 #else
 	char _text[PROGRAMSIZE];
 #endif
-	const uint16_t programSize;
+	const Pointer programSize;
 private:
 	
 	void _reset();
@@ -313,13 +284,13 @@ private:
 	bool addLine(uint16_t, const char*, uint16_t);
 	
 	// End of program text
-	uint16_t _textEnd;
+	Pointer _textEnd;
 	// End of variables area
-	uint16_t _variablesEnd;
+	Pointer _variablesEnd;
 	// End of arrays area
-	uint16_t _arraysEnd;
+	Pointer _arraysEnd;
 	// Stack pointer
-	uint16_t _sp;
+	Pointer _sp;
 	// Position of main execution thread
 	Position _current;
 #if USE_DATA
@@ -329,7 +300,7 @@ private:
 	// Jump flag
 	bool _jumpFlag;
 	// Jump pointer
-	uint16_t _jump;
+	Pointer _jump;
 };
 
 } // namespace BASIC

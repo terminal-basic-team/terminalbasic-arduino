@@ -60,7 +60,7 @@ namespace BASIC
 		/*
 		 * ACS ASN ATN
 		 */
-		#define M_REVERSE_TRIGONOMETRIC 1
+		#define M_REVERSE_TRIGONOMETRIC 0
 		/*
 		 * CBR (cubic root) ...
 		 */
@@ -144,7 +144,7 @@ namespace BASIC
 	/*
 	 * Set print zones width (tab spacing)
 	 */
-	#define SET_PRINTZNES  0
+	#define SET_PRINTZNES  1
 	#if SET_PRINTZNES
 		#define PRINT_ZONE_WIDTH 16
 		#define PRINT_ZONES_NUMBER 6
@@ -260,10 +260,10 @@ namespace BASIC
 	#define LIQCR_D3 2
 
 // Input select
-#define S_INPUT SERIAL_I
+#define S_INPUT SERIALL_I
 
 // Output select
-#define S_OUTPUT SERIAL_O
+#define S_OUTPUT SERIALL_O
 
 #if USE_EXTEEPROM
 	#define USE_WIRE 1

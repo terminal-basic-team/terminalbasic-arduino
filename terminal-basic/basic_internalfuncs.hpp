@@ -28,7 +28,7 @@ namespace BASIC
 class InternalFunctions : public FunctionBlock
 {
 public:
-	InternalFunctions(FunctionBlock* = NULL);
+	InternalFunctions(FunctionBlock* = nullptr);
 private:
 	static bool func_abs(Interpreter&);
 #if USE_ASC

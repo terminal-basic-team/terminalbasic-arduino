@@ -123,7 +123,7 @@ scanTable(const uint8_t *token, const uint8_t table[], uint8_t &index)
 		uint8_t c = pgm_read_byte(table);
 		uint8_t ct = token[tokPos];
 		if (c == 0)
-			return NULL;
+			return nullptr;
 		
 		if (ct == c) {
 			++tokPos, ++table;
@@ -136,7 +136,7 @@ scanTable(const uint8_t *token, const uint8_t table[], uint8_t &index)
 			if (c & uint8_t(0x80))
 				c &= ~uint8_t(0x80);
 			if (c > ct && ct != 0)
-				return NULL;
+				return nullptr;
 			else {
 				while ((pgm_read_byte(table++) & uint8_t(0x80)) ==
 				    0);

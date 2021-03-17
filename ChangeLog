@@ -1,3 +1,8 @@
+r1.1 (14.12.2017) Release, dedicated to the Russian Constitution Day
+
+  * Fix multiterminal mode
+  * Add binary form to store real constants in memory
+
 r1.1-rc1 (24.11.2017)
 
   * Fix regression in command mode

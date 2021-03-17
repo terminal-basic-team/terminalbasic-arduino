@@ -80,6 +80,7 @@
  */
 namespace BASIC
 {
+typedef uint16_t Pointer;
 // integer type
 typedef int16_t Integer;
 const Integer MaxInteger = Integer(32767);
@@ -138,144 +139,144 @@ enum class Token : uint8_t
 #endif
 	KW_DIM,        // 12
 #if USE_DIV_KW
-	KW_DIV,
+	KW_DIV,        // 13
 #endif
 #if USE_DOLOOP
-	KW_DO,         // 13
+	KW_DO,         // 14
 #endif
 #if USE_DUMP
-	COM_DUMP,      // 14
+	COM_DUMP,      // 15
 #endif
-	KW_END,        // 15
-	KW_FALSE,      // 16
-	KW_FOR,        // 17
-	KW_GOSUB,      // 18
-	KW_GOTO,       // 19
+	KW_END,        // 16
+	KW_FALSE,      // 17
+	KW_FOR,        // 18
+	KW_GOSUB,      // 19
+	KW_GOTO,       // 20
 #if CONF_SEPARATE_GO_TO
-	KW_GO,         // 20
+	KW_GO,         // 21
 #endif
 #if USE_MATRIX
-	KW_IDN,        // 21
+	KW_IDN,        // 22
 #endif
-	KW_IF,         // 22
-	KW_INPUT,      // 23
+	KW_IF,         // 23
+	KW_INPUT,      // 24
 #if USE_MATRIX
-	KW_INV,        // 24
+	KW_INV,        // 25
 #endif
-	KW_LET,        // 25
-	COM_LIST,      // 26
+	KW_LET,        // 26
+	COM_LIST,      // 27
 #if USE_SAVE_LOAD
-	COM_LOAD,      // 27
+	COM_LOAD,      // 28
 #endif
 #if USE_TEXTATTRIBUTES
-	COM_LOCATE,
+	COM_LOCATE,    // 29
 #endif
 #if USE_DOLOOP
-	KW_LOOP,       // 28
+	KW_LOOP,       // 30
 #endif
 #if USE_MATRIX
-	KW_MAT,        // 28
+	KW_MAT,        // 31
 #endif
 #if USE_INTEGER_DIV
-	KW_MOD,        // 29
+	KW_MOD,        // 32
 #endif
-	COM_NEW,       // 29
-	KW_NEXT,       // 30
-	OP_NOT,        // 31
-//	KW_ON,         // 32
-//	KW_OPTION,     // 33
-	OP_OR,         // 34
-	KW_PRINT,      // 35
+	COM_NEW,       // 33
+	KW_NEXT,       // 34
+	OP_NOT,        // 35
+	KW_ON,         // 36
+//	KW_OPTION,     // 37
+	OP_OR,         // 38
+	KW_PRINT,      // 39
 #if USE_RANDOM
-	KW_RANDOMIZE,  // 36
+	KW_RANDOMIZE,  // 40
 #endif
 #if USE_DATA
-	KW_READ,       // 37
+	KW_READ,       // 41
 #endif
-	KW_REM,        // 38
+	KW_REM,        // 42
 #if USE_DATA
-	KW_RESTORE,    // 39
+	KW_RESTORE,    // 43
 #endif
-	KW_RETURN,     // 39
-	COM_RUN,       // 40
+	KW_RETURN,     // 44
+	COM_RUN,       // 45
 #if USE_SAVE_LOAD
-	COM_SAVE,      // 41
+	COM_SAVE,      // 46
 #endif
 #if CONF_USE_SPC_PRINT_COM
-	KW_SPC,        // 42
+	KW_SPC,        // 47
 #endif
-	KW_STEP,       // 43
+	KW_STEP,       // 48
 #if USESTOPCONT
-	KW_STOP,       // 44
+	KW_STOP,       // 49
 #endif
 #if USE_TEXTATTRIBUTES
-	KW_TAB,        // 44
+	KW_TAB,        // 50
 #endif
-	KW_THEN,       // 45
-	KW_TO,         // 46
+	KW_THEN,       // 51
+	KW_TO,         // 52
 #if USE_MATRIX
-	KW_TRN,        // 47
+	KW_TRN,        // 53
 #endif
-	KW_TRUE,       // 48
+	KW_TRUE,       // 54
 #if USE_DUMP
-	KW_VARS,       // 49
+	KW_VARS,       // 55
 #endif
+	OP_XOR,        // 56
 #if USE_MATRIX
-	KW_ZER,        // 50
+	KW_ZER,        // 57
 #endif
-
 	// *
-	STAR,          // 51
+	STAR,          // 58
 	// /
-	SLASH,         // 52
+	SLASH,         // 59
 #if USE_REALS && USE_INTEGER_DIV
-	BACK_SLASH,    // 53
+	BACK_SLASH,    // 60
 #endif
 	// +
-	PLUS,          // 54
+	PLUS,          // 61
 	// -
-	MINUS,         // 55
+	MINUS,         // 62
 	// =
-	EQUALS,        // 56
+	EQUALS,        // 63
 	// :
-	COLON,         // 57
+	COLON,         // 64
 	// ;
-	SEMI,          // 58
+	SEMI,          // 65
 	// <
-	LT,
+	LT,            // 66
 	// >
-	GT,
+	GT,            // 67
 	// <=
-	LTE,
+	LTE,           // 68
 	// >=
-	GTE,
+	GTE,           // 69
 	// <>
-	NE,
+	NE,            // 70
 #if CONF_USE_ALTERNATIVE_NE
 	//  ><
-	NEA,
+	NEA,           // 71
 #endif
 	// ,
-	COMMA,
+	COMMA,         // 71
 	// ^
-	POW,
+	POW,           // 72
 	// (
-	LPAREN,
+	LPAREN,        // 73
 	// )
-	RPAREN,
+	RPAREN,        // 74
 
-	INTEGER_IDENT,
-	REAL_IDENT,
-#if USE_LONGINT
-	LONGINT_IDENT,
+	INTEGER_IDENT, // 75
+	REAL_IDENT,    // 76
+#if USE_LONGINT        // 77
+	LONGINT_IDENT, // 78
 #endif
-	STRING_IDENT,
-	BOOL_IDENT,
+	STRING_IDENT,  // 79
+	BOOL_IDENT,    // 80
 
-	C_INTEGER,
-	C_REAL,
-	C_BOOLEAN,
-	C_STRING,
+	C_INTEGER,     // 81
+	C_REAL,        // 82
+	C_BOOLEAN,     // 83
+	C_STRING,      // 84
 
 	NUM_TOKENS
 };

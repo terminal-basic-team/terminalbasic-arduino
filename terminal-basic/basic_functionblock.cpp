@@ -34,14 +34,14 @@ void
 FunctionBlock::init()
 {
 	this->_init();
-	if (_next != NULL)
+	if (_next != nullptr)
 		_next->init();
 }
 
 void
 FunctionBlock::setNext(FunctionBlock *next)
 {
-	if (_next != NULL)
+	if (_next != nullptr)
 		_next->setNext(next);
 	else
 		_next = next;
@@ -52,7 +52,7 @@ FunctionBlock::getFunction(const char *name) const
 {
 	function result;
 	if (((result = _getFunction(name)) == NULL) &&
-	    _next != NULL)
+	    _next != nullptr)
 		result = _next->getFunction(name);
 	return (result);
 }
@@ -62,7 +62,7 @@ FunctionBlock::getCommand(const char *name) const
 {
 	command result;
 	if (((result = _getCommand(name)) == NULL) &&
-	    _next != NULL)
+	    _next != nullptr)
 		result = _next->getCommand(name);
 	return (result);
 }
@@ -70,9 +70,9 @@ FunctionBlock::getCommand(const char *name) const
 FunctionBlock::function
 FunctionBlock::_getFunction(const char *name) const
 {
-	function result = NULL;
+	function result = nullptr;
 	
-	if (functionTokens != NULL) {
+	if (functionTokens != nullptr) {
 		uint8_t index;
 		if (scanTable((const uint8_t*)name, functionTokens, index)) {
 			result = reinterpret_cast<FunctionBlock::function>(
