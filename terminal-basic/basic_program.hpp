@@ -152,7 +152,7 @@ public:
 		Body body;
 	};
 
-	Program(uint16_t = PROGRAMSIZE);
+	Program(uint16_t = SINGLE_PROGSIZE);
 	/**
 	 * @brief Clear program text, but not vars and arrays
 	 */
@@ -266,7 +266,7 @@ public:
 #if USE_EXTMEM
 	char *_text;
 #else
-	char _text[PROGRAMSIZE];
+	char _text[SINGLE_PROGSIZE];
 #endif
 	const Pointer programSize;
 private:

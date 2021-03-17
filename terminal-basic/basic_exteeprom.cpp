@@ -52,7 +52,7 @@ struct EXT_PACKED ZoneHeader
 	uint16_t textEnd, varsEnd, arraysEnd, sp;
 };
 
-static constexpr const uint16_t zoneSize = PROGRAMSIZE+sizeof(ZoneHeader);
+static constexpr const uint16_t zoneSize = SINGLE_PROGSIZE+sizeof(ZoneHeader);
 
 class ZoneInfo
 {

@@ -34,7 +34,7 @@ _text(reinterpret_cast<char*> (EXTMEM_ADDRESS)),
 programSize(progsize)
 {
 	assert(_text != nullptr);
-	assert(progsize <= PROGRAMSIZE);
+	assert(progsize <= SINGLE_PROGSIZE);
 }
 
 Program::Line*

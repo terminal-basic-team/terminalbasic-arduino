@@ -34,10 +34,23 @@
 // Use multiterminal mode
 #define BASIC_MULTITERMINAL       0
 #if BASIC_MULTITERMINAL
+#define NUM_TERMINALS 1
+#ifdef HAVE_HWSERIAL1
 #define SERIAL_PORT1 SerialL1
-#define SERIAL_PORT2 SerialL2
-#define SERIAL_PORT3 SerialL3
+#undef NUM_TERMINALS
+#define NUM_TERMINALS 2
 #endif
+#ifdef HAVE_HWSERIAL2
+#define SERIAL_PORT2 SerialL2
+#undef NUM_TERMINALS
+#define NUM_TERMINALS 3
+#endif
+#ifdef HAVE_HWSERIAL3
+#define SERIAL_PORT3 SerialL3
+#undef NUM_TERMINALS
+#define NUM_TERMINALS 4
+#endif
+#endif // BASIC_MULTITERMINAL
 
 // Use external memory
 #define USE_EXTMEM                0
@@ -48,7 +61,6 @@
 
 namespace BASIC
 {
-
 // Number of bytes for program text, variables and stack
 #if USE_EXTMEM
 const uint16_t PROGRAMSIZE = EXTMEM_SIZE;
@@ -71,6 +83,12 @@ const uint16_t PROGRAMSIZE = 65535;
 #else
 const uint16_t PROGRAMSIZE = 1024;
 #endif // USE_EXTMEM
+
+#if BASIC_MULTITERMINAL
+const uint16_t SINGLE_PROGSIZE = PROGRAMSIZE / (NUM_TERMINALS+1);
+#else
+const uint16_t SINGLE_PROGSIZE = PROGRAMSIZE;
+#endif
 
 // BEGIN PRIVATE
 

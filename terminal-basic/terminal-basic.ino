@@ -117,33 +117,33 @@ static SDLStream sdlStream;
 #endif
 
 #if BASIC_MULTITERMINAL
-static BASIC::Interpreter basic(SERIAL_PORT_I, SERIAL_PORT_O, BASIC::PROGRAMSIZE / 5);
+static BASIC::Interpreter basic(SERIAL_PORT_I, SERIAL_PORT_O, BASIC::SINGLE_PROGSIZE);
 #ifdef HAVE_HWSERIAL1
-static BASIC::Interpreter basic1(SERIAL_PORT1, SERIAL_PORT1, BASIC::PROGRAMSIZE / 5);
+static BASIC::Interpreter basic1(SERIAL_PORT1, SERIAL_PORT1, BASIC::SINGLE_PROGSIZE);
 #endif
 #ifdef HAVE_HWSERIAL2
-static BASIC::Interpreter basic2(SERIAL_PORT2, SERIAL_PORT2, BASIC::PROGRAMSIZE / 5);
+static BASIC::Interpreter basic2(SERIAL_PORT2, SERIAL_PORT2, BASIC::SINGLE_PROGSIZE);
 #endif
 #ifdef HAVE_HWSERIAL3
-static BASIC::Interpreter basic3(SERIAL_PORT3, SERIAL_PORT3, BASIC::PROGRAMSIZE / 5);
+static BASIC::Interpreter basic3(SERIAL_PORT3, SERIAL_PORT3, BASIC::SINGLE_PROGSIZE);
 #endif
 #else
 #if USEUTFT
-static BASIC::Interpreter basic(SERIAL_PORT_I, utftPrint, BASIC::PROGRAMSIZE);
+static BASIC::Interpreter basic(SERIAL_PORT_I, utftPrint, BASIC::SINGLE_PROGSIZE);
 #elif (USEPS2USARTKB && USETVOUT)
-static BASIC::Interpreter basic(ps2usartStream, tvoutPrint, BASIC::PROGRAMSIZE);
+static BASIC::Interpreter basic(ps2usartStream, tvoutPrint, BASIC::SINGLE_PROGSIZE);
 #elif USEPS2USARTKB
-static BASIC::Interpreter basic(ps2usartStream, SERIAL_PORT_O, BASIC::PROGRAMSIZE);
+static BASIC::Interpreter basic(ps2usartStream, SERIAL_PORT_O, BASIC::SINGLE_PROGSIZE);
 #elif USETVOUT
 #if USE_SDL_ISTREAM
-static BASIC::Interpreter basic(sdlStream, tvoutPrint, BASIC::PROGRAMSIZE);
+static BASIC::Interpreter basic(sdlStream, tvoutPrint, BASIC::SINGLE_PROGSIZE);
 #else
-static BASIC::Interpreter basic(SERIAL_PORT_I, tvoutPrint, BASIC::PROGRAMSIZE);
+static BASIC::Interpreter basic(SERIAL_PORT_I, tvoutPrint, BASIC::SINGLE_PROGSIZE);
 #endif // USE_SDL_ISTREAM
 #elif USELIQUIDCRYSTAL
-static BASIC::Interpreter basic(SERIAL_PORT_I, lsvt100, BASIC::PROGRAMSIZE);
+static BASIC::Interpreter basic(SERIAL_PORT_I, lsvt100, BASIC::SINGLE_PROGSIZE);
 #else
-static BASIC::Interpreter basic(SERIAL_PORT_I, SERIAL_PORT_O, BASIC::PROGRAMSIZE);
+static BASIC::Interpreter basic(SERIAL_PORT_I, SERIAL_PORT_O, BASIC::SINGLE_PROGSIZE);
 #endif // USEUTFT
 #endif // BASIC_MULTITERMINAL
 

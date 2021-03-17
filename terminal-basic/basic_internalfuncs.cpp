@@ -50,6 +50,7 @@ static const uint8_t intFuncs[] PROGMEM = {
 	'R', 'N', 'D'+0x80,
 #endif
 	'S', 'G', 'N'+0x80,
+        'S', 'T', 'R', '$'+0x80,
 	'T', 'I', 'M', 'E'+0x80,
 	0
 };
@@ -76,6 +77,7 @@ const FunctionBlock::function InternalFunctions::funcs[] PROGMEM = {
 	InternalFunctions::func_rnd,
 #endif
 	InternalFunctions::func_sgn,
+	InternalFunctions::func_str,
 	InternalFunctions::func_tim
 };
 
@@ -226,6 +228,40 @@ bool
 InternalFunctions::func_sgn(Interpreter &i)
 {
 	return general_func(i, sgn);
+}
+
+class BufferPrint : public Print
+{
+public:
+	BufferPrint() : pointer(0) {}
+	
+	size_t write(uint8_t c) override
+	{
+		if (pointer < sizeof(buf)) {
+			buf[pointer++] = c;
+			return 1;
+		} else
+			return -1;
+	}
+
+	char buf[STRINGSIZE];
+	uint8_t pointer;
+};
+
+bool
+InternalFunctions::func_str(Interpreter &i)
+{
+	BufferPrint p;
+	Parser::Value v;
+	i.popValue(v);
+	size_t res = p.print(v);
+	if (res >= sizeof(p.buf))
+		res = sizeof(p.buf)-1;
+	p.buf[res] = '\0';
+	v.type = Parser::Value::STRING;
+	i.pushString(p.buf);
+	i.pushValue(v);
+	return true;
 }
 
 #if USE_RANDOM

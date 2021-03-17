@@ -61,7 +61,7 @@ FunctionBlock::command
 FunctionBlock::getCommand(const char *name) const
 {
 	command result;
-	if (((result = _getCommand(name)) == NULL) &&
+	if (((result = _getCommand(name)) == nullptr) &&
 	    _next != nullptr)
 		result = _next->getCommand(name);
 	return (result);
@@ -80,7 +80,7 @@ FunctionBlock::_getFunction(const char *name) const
 		}
 	}
 
-	return (result);
+	return result;
 }
 
 FunctionBlock::command

@@ -185,11 +185,10 @@ public:
 	// Interpreter FSM state
 	enum State : uint8_t
 	{
-		SHELL,		// Wait for user input of line or command
+		SHELL = 0,		// Wait for user input of line or command
 		PROGRAM_INPUT,	// Inputting of the program lines
 #if BASIC_MULTITERMINAL
 		COLLECT_INPUT,	//
-		EXEC_INT,	// Interactive execute
 		GET_VAR_VALUE,
 #endif // BASIC_MULTITERMINAL
 		EXECUTE,	// Runniong the program
@@ -311,7 +310,8 @@ public:
 #endif
 	void print(long, VT100::TextAttr = VT100::NO_ATTR);
 	void print(ProgMemStrings, VT100::TextAttr = VT100::NO_ATTR);
-        void write(ProgMemStrings);
+	void writePgm(ProgMemStrings);
+	void writePgm(PGM_P);
 	void print(Token);
 	void print(const char *, VT100::TextAttr = VT100::NO_ATTR);
 	// print value
@@ -444,10 +444,33 @@ public:
 
 	Program _program;
 private:
+	
 	class AttrKeeper;
 #if USE_MATRIX
+	
 	void fillMatrix(const char*, const Parser::Value&);
+	
 	void setMatrixSize(ArrayFrame&, uint16_t, uint16_t);
+	/**
+	 * @brief Get 2 dimensional array from stack
+	 * 
+	 * Returns nullptr if there is no such array or if that array is not
+	 * 2 dimensional. Raises corresponding error.
+	 * 
+	 * @param array name
+	 * @return frame pointer
+	 */
+	ArrayFrame *get2DArray(const char*);
+	/**
+	 * @brief Get 2 dimensional square array from stack
+	 * 
+	 * Returns nullptr if there is no such array or if that array is not
+	 * 2 dimensional or if it's not square. Raises corresponding error.
+	 * 
+	 * @param array name
+	 * @return frame pointer
+	 */
+	ArrayFrame *getSquareArray(const char*);
 #endif
 	// Get next input object from stack
 	bool nextInput();
@@ -491,6 +514,7 @@ private:
 #endif // USE_SAVE_LOAD
 	// Interpreter FSM state
 	State			 _state;
+	State			 _lastState;
 	// Input oject
 	Stream			&_input;
 	// Output object

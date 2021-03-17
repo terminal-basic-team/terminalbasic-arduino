@@ -21,17 +21,24 @@
 namespace BASIC
 {
 
+#if (LANG == LANG_RU)
+#include "strings_ru_koi8r.hpp"
+#elif (LANG == LANG_EN)
+#include "strings_en.hpp"
+#endif
+
 static const char strStatic[] PROGMEM = "STATIC";
 static const char strDynamic[] PROGMEM = "DYNAMIC";
-static const char strError[] PROGMEM = "ERROR";
-static const char strSemantic[] PROGMEM = "SEMANTIC";
+static const char strError[] PROGMEM = STR_ERROR;
+static const char strSemantic[] PROGMEM = STR_SEMANTIC;
+static const char strSyntax[] PROGMEM = STR_SYNTAX;
 static const char strAt[] PROGMEM = "AT";
-static const char strReady[] PROGMEM = CLI_PROMPT;
-static const char strBytes[] PROGMEM = "BYTES";
-static const char strAvailable[] PROGMEM = "AVAILABLE";
+static const char strReady[] PROGMEM = STR_CLI_PROMPT;
+static const char strBytes[] PROGMEM = STR_BYTES;
+static const char strAvailable[] PROGMEM = STR_AVAILABLE;
 static const char strucTERMINAL[] PROGMEM = "TERMINAL";
 static const char strucBASIC[] PROGMEM = "BASIC";
-static const char strVERSION[] PROGMEM = "VERSION";
+static const char strVERSION[] PROGMEM = STR_VERSION;
 static const char strTEXT[] PROGMEM = "TEXT";
 static const char strOF[] PROGMEM = "OF";
 #if USE_DUMP
@@ -68,13 +75,14 @@ static const char strVT100_WHITE[] PROGMEM = "37m";
 #endif // USE_TEXTATTRIBUTES
 
 static PGM_P const progmemStrings[uint8_t(ProgMemStrings::NUM_STRINGS)] PROGMEM = {
+	strAt,     // AT
+	strBytes, // BYTES
 	strStatic, // STATIC
 	strDynamic, // DYNAMAIC
 	strError, // ERROR
 	strSemantic, // SEMANTIC
-	strAt,     // AT
+	strSyntax, // SYNTAX
 	strReady, // READY
-	strBytes, // BYTES
 	strAvailable, // AVAILABLE
 	strucTERMINAL, // TERMINAL
 	strucBASIC, // BASIC

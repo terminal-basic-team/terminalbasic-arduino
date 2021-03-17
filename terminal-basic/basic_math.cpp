@@ -181,8 +181,7 @@ bool
 Math::func_pi(Interpreter &i)
 {
 	Parser::Value v(Real(M_PI));
-	i.pushValue(v);
-	return true;
+	return i.pushValue(v);
 }
 
 #if M_ADDITIONAL

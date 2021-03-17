@@ -87,7 +87,7 @@ namespace BASIC
 /*
  * Use >< as not-equals operator (with default <>)
  */
-#define CONF_USE_ALTERNATIVE_NE 1
+#define CONF_USE_ALTERNATIVE_NE 0
 /*
  * Support of 4-byte integer datatype
  * Functions, variables and arrays of long integer type ends with double % mark
@@ -147,7 +147,7 @@ namespace BASIC
 	#define SET_PRINTZNES  1
 	#if SET_PRINTZNES
 		#define PRINT_ZONE_WIDTH 16
-		#define PRINT_ZONES_NUMBER 6
+		#define PRINT_ZONES_NUMBER 5
 	#endif // SET_PRINTZNES
 #endif // USE_TEXTATTRIBUTES
 /*
@@ -176,6 +176,16 @@ namespace BASIC
  * SDcard module
  */
 #define USESD         0
+
+/*
+ * Localization
+ */
+#define LANG_EN 0
+#define LANG_RU 1
+#define LANG LANG_EN
+
+// Use text error strings
+#define CONF_ERROR_STRINGS 0
 
 // Arduino IO module
 #define CONF_MODULE_ARDUINOIO      1
@@ -210,9 +220,8 @@ namespace BASIC
  */
 #define USE_GFX          0
 /*
- * Prompt message
+ * Prompt on new line
  */
-#define CLI_PROMPT       "READY"
 #define CLI_PROMPT_NELINE 1
 /*
  * LF character processing
@@ -260,10 +269,10 @@ namespace BASIC
 	#define LIQCR_D3 2
 
 // Input select
-#define S_INPUT SERIALL_I
+#define S_INPUT SERIAL_I
 
 // Output select
-#define S_OUTPUT SERIALL_O
+#define S_OUTPUT SERIAL_O
 
 #if USE_EXTEEPROM
 	#define USE_WIRE 1

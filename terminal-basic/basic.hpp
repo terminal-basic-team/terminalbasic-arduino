@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -149,11 +149,14 @@ enum class Token : uint8_t
 #endif
 	KW_END,        // 16
 	KW_FALSE,      // 17
-	KW_FOR,        // 18
-	KW_GOSUB,      // 19
-	KW_GOTO,       // 20
+#if USE_DEFFN
+	KW_FN,         // 18
+#endif
+	KW_FOR,        // 19
+	KW_GOSUB,      // 20
+	KW_GOTO,       // 21
 #if CONF_SEPARATE_GO_TO
-	KW_GO,         // 21
+	KW_GO,         // 22
 #endif
 #if USE_MATRIX
 	KW_IDN,        // 22
@@ -283,13 +286,14 @@ enum class Token : uint8_t
 
 enum class ProgMemStrings : uint8_t
 {
-	S_STATIC = 0,
+	S_AT = 0,
+	S_BYTES,
+	S_STATIC,
 	S_DYNAMIC,
 	S_ERROR,
 	S_SEMANTIC,
-	S_AT,
+	S_SYNTAX,
 	S_READY,
-	BYTES,
 	AVAILABLE,
 	TERMINAL,
 	S_TERMINAL_BASIC,
