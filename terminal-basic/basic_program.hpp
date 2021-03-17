@@ -99,8 +99,6 @@ public:
 			uint8_t		textPosition;
 			// Loop variable name
 			char		varName[VARSIZE];
-			// Current value of the loop variable
-			Parser::Value	currentValue;
 			// Loop step value
 			Parser::Value	stepValue;
 			// Loop final value

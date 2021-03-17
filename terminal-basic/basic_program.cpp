@@ -189,7 +189,7 @@ Program::variableByName(const char *name)
 
 	for (auto f = variableByIndex(index); f != nullptr;
 	    f = variableByIndex(index)) {
-		int8_t res = strncmp(name, f->name, VARSIZE);
+		const int8_t res = strncmp(name, f->name, VARSIZE);
 		if (res == 0) {
 			return f;
 		} else if (res < 0)
@@ -198,24 +198,6 @@ Program::variableByName(const char *name)
 	}
 	return nullptr;
 }
-
-//Pointer
-//Program::lineIndex(const Line *s) const
-//{
-//	return ((char*) s) - _text;
-//}
-
-//Pointer
-//Program::variableIndex(VariableFrame *f) const
-//{
-//	return ((char*) f) - _text;
-//}
-
-//Pointer
-//Program::arrayIndex(ArrayFrame *f) const
-//{
-//	return ((char*) f) - _text;
-//}
 
 Pointer
 Program::objectIndex(const void *obj) const

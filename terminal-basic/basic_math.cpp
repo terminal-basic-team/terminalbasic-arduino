@@ -39,6 +39,9 @@ static const uint8_t mathTokens[] PROGMEM = {
 #if M_ADDITIONAL
 	'C', 'B', 'R'+0x80,
 #endif
+#if M_HYPERBOLIC
+        'C', 'O', 'S', 'H'+0x80,
+#endif
 #if M_TRIGONOMETRIC
 	'C', 'O', 'S'+0x80,
 	'C', 'O', 'T'+0x80,
@@ -46,6 +49,9 @@ static const uint8_t mathTokens[] PROGMEM = {
 	'E', 'X', 'P'+0x80,
 	'L', 'O', 'G'+0x80,
 	'P', 'I'+0x80,
+#if M_HYPERBOLIC
+	'S', 'I', 'N', 'H'+0x80,
+#endif
 #if M_TRIGONOMETRIC
 	'S', 'I', 'N'+0x80,
 #endif
@@ -65,6 +71,9 @@ const FunctionBlock::function Math::funcs[] PROGMEM = {
 #if M_ADDITIONAL
 	Math::func_cbr,
 #endif
+#if M_HYPERBOLIC
+        Math::func_cosh,
+#endif
 #if M_TRIGONOMETRIC
 	Math::func_cos,
 	Math::func_cot,
@@ -72,10 +81,16 @@ const FunctionBlock::function Math::funcs[] PROGMEM = {
 	Math::func_exp,
 	Math::func_log,
 	Math::func_pi,
+#if M_HYPERBOLIC
+	Math::func_sinh,        
+#endif
 #if M_TRIGONOMETRIC
 	Math::func_sin,
 #endif
 	Math::func_sqr
+#if M_HYPERBOLIC
+	,Math::func_tanh
+#endif
 #if M_TRIGONOMETRIC
 	,Math::func_tan
 #endif
@@ -149,27 +164,65 @@ Math::func_tan(Interpreter &i)
 Real
 Math::sin_r(Real v)
 {
-	return (sin(v));
+	return sin(v);
 }
 
 Real
 Math::cos_r(Real v)
 {
-	return (cos(v));
+	return cos(v);
 }
 
 Real
 Math::cot_r(Real v)
 {
-	return (Real(1) / tan(v));
+	return Real(1) / tan(v);
 }
 
 Real
 Math::tan_r(Real v)
 {
-	return (tan(v));
+	return tan(v);
 }
 #endif // M_TRIGONOMETRIC
+
+#if M_HYPERBOLIC
+bool
+Math::func_cosh(Interpreter &i)
+{
+	return general_func(i, &cosh_r);
+}
+
+bool
+Math::func_sinh(Interpreter &i)
+{
+	return general_func(i, &sinh_r);
+}
+
+bool
+Math::func_tanh(Interpreter &i)
+{
+	return general_func(i, &tanh_r);
+}
+
+Real
+Math::cosh_r(Real v)
+{
+	return cosh(v);
+}
+
+Real
+Math::sinh_r(Real v)
+{
+	return sinh(v);
+}
+
+Real
+Math::tanh_r(Real v)
+{
+	return tanh(v);
+}
+#endif // M_HYPERBOLIC
 
 bool
 Math::func_sqr(Interpreter &i)
@@ -196,45 +249,45 @@ Math::func_cbr(Interpreter &i)
 Real
 Math::acs_r(Real v)
 {
-	return (acos(v));
+	return acos(v);
 }
 
 Real
 Math::asn_r(Real v)
 {
-	return (asin(v));
+	return asin(v);
 }
 
 Real
 Math::atn_r(Real v)
 {
-	return (atan(v));
+	return atan(v);
 }
 #endif // M_REVERSE_TRIGONOMETRIC
 
 Real
 Math::exp_r(Real v)
 {
-	return (exp(v));
+	return exp(v);
 }
 
 Real
 Math::log_r(Real v)
 {
-	return (log(v));
+	return log(v);
 }
 
 Real
 Math::sqr_r(Real v)
 {
-	return (sqrt(v));
+	return sqrt(v);
 }
 
 #if M_ADDITIONAL
 Real
 Math::cbr_r(Real v)
 {
-	return (cbrt(v));
+	return cbrt(v);
 }
 #endif
 

@@ -34,6 +34,8 @@
     #define SERIAL_PORT_I Serial
 #elif S_INPUT == SERIAL1_I
     #define SERIAL_PORT_I Serial1
+#elif S_INPUT == SERIAL2_I
+    #define SERIAL_PORT_I Serial2
 #elif S_INPUT == SERIALL_I
     #define SERIAL_PORT_I SerialL
 #elif S_INPUT == SERIALL1_I
@@ -52,6 +54,8 @@
 #define SERIAL_PORT_O Serial
 #elif S_OUTPUT == SERIAL1_O
 #define SERIAL_PORT_O Serial1
+#elif S_OUTPUT == SERIAL2_O
+#define SERIAL_PORT_O Serial2
 #elif S_OUTPUT == SERIALL_O
 #define SERIAL_PORT_O SerialL
 #elif S_OUTPUT == SERIALL3_O
@@ -159,129 +163,129 @@ enum class Token : uint8_t
 	KW_GO,         // 22
 #endif
 #if USE_MATRIX
-	KW_IDN,        // 22
+	KW_IDN,        // 23
 #endif
-	KW_IF,         // 23
-	KW_INPUT,      // 24
+	KW_IF,         // 24
+	KW_INPUT,      // 25
 #if USE_MATRIX
-	KW_INV,        // 25
+	KW_INV,        // 26
 #endif
-	KW_LET,        // 26
-	COM_LIST,      // 27
+	KW_LET,        // 27
+	COM_LIST,      // 28
 #if USE_SAVE_LOAD
-	COM_LOAD,      // 28
+	COM_LOAD,      // 29
 #endif
 #if USE_TEXTATTRIBUTES
-	COM_LOCATE,    // 29
+	COM_LOCATE,    // 30
 #endif
 #if USE_DOLOOP
-	KW_LOOP,       // 30
+	KW_LOOP,       // 31
 #endif
 #if USE_MATRIX
-	KW_MAT,        // 31
+	KW_MAT,        // 32
 #endif
 #if USE_INTEGER_DIV
-	KW_MOD,        // 32
+	KW_MOD,        // 33
 #endif
-	COM_NEW,       // 33
-	KW_NEXT,       // 34
-	OP_NOT,        // 35
-	KW_ON,         // 36
-//	KW_OPTION,     // 37
-	OP_OR,         // 38
-	KW_PRINT,      // 39
+	COM_NEW,       // 34
+	KW_NEXT,       // 35
+	OP_NOT,        // 36
+	KW_ON,         // 37
+//	KW_OPTION,     // 38
+	OP_OR,         // 39
+	KW_PRINT,      // 40
 #if USE_RANDOM
-	KW_RANDOMIZE,  // 40
+	KW_RANDOMIZE,  // 41
 #endif
 #if USE_DATA
-	KW_READ,       // 41
+	KW_READ,       // 42
 #endif
-	KW_REM,        // 42
+	KW_REM,        // 43
 #if USE_DATA
-	KW_RESTORE,    // 43
+	KW_RESTORE,    // 44
 #endif
-	KW_RETURN,     // 44
-	COM_RUN,       // 45
+	KW_RETURN,     // 45
+	COM_RUN,       // 46
 #if USE_SAVE_LOAD
-	COM_SAVE,      // 46
+	COM_SAVE,      // 47
 #endif
 #if CONF_USE_SPC_PRINT_COM
-	KW_SPC,        // 47
+	KW_SPC,        // 48
 #endif
-	KW_STEP,       // 48
+	KW_STEP,       // 49
 #if USESTOPCONT
-	KW_STOP,       // 49
+	KW_STOP,       // 50
 #endif
 #if USE_TEXTATTRIBUTES
-	KW_TAB,        // 50
+	KW_TAB,        // 51
 #endif
-	KW_THEN,       // 51
-	KW_TO,         // 52
+	KW_THEN,       // 52
+	KW_TO,         // 53
 #if USE_MATRIX
-	KW_TRN,        // 53
+	KW_TRN,        // 54
 #endif
-	KW_TRUE,       // 54
+	KW_TRUE,       // 55
 #if USE_DUMP
-	KW_VARS,       // 55
+	KW_VARS,       // 56
 #endif
-	OP_XOR,        // 56
+	OP_XOR,        // 57
 #if USE_MATRIX
-	KW_ZER,        // 57
+	KW_ZER,        // 58
 #endif
 	// *
-	STAR,          // 58
+	STAR,          // 59
 	// /
-	SLASH,         // 59
+	SLASH,         // 50
 #if USE_REALS && USE_INTEGER_DIV
-	BACK_SLASH,    // 60
+	BACK_SLASH,    // 61
 #endif
 	// +
-	PLUS,          // 61
+	PLUS,          // 62
 	// -
-	MINUS,         // 62
+	MINUS,         // 63
 	// =
-	EQUALS,        // 63
+	EQUALS,        // 64
 	// :
-	COLON,         // 64
+	COLON,         // 65
 	// ;
-	SEMI,          // 65
+	SEMI,          // 66
 	// <
-	LT,            // 66
+	LT,            // 67
 	// >
-	GT,            // 67
+	GT,            // 68
 	// <=
-	LTE,           // 68
+	LTE,           // 69
 	// >=
-	GTE,           // 69
+	GTE,           // 70
 	// <>
-	NE,            // 70
+	NE,            // 71
 #if CONF_USE_ALTERNATIVE_NE
 	//  ><
-	NEA,           // 71
+	NEA,           // 72
 #endif
 	// ,
-	COMMA,         // 71
+	COMMA,         // 73
 	// ^
-	POW,           // 72
+	POW,           // 74
 	// (
-	LPAREN,        // 73
+	LPAREN,        // 75
 	// )
-	RPAREN,        // 74
+	RPAREN,        // 76
 
-	INTEGER_IDENT, // 75
-	REAL_IDENT,    // 76
-#if USE_LONGINT        // 77
-	LONGINT_IDENT, // 78
+	INTEGER_IDENT, // 77
+	REAL_IDENT,    // 78
+#if USE_LONGINT        // 79
+	LONGINT_IDENT, // 80
 #endif
-	STRING_IDENT,  // 79
-	BOOL_IDENT,    // 80
+	STRING_IDENT,  // 81
+	BOOL_IDENT,    // 82
 
-	C_INTEGER,     // 81
-	C_REAL,        // 82
-	C_BOOLEAN,     // 83
-	C_STRING,      // 84
+	C_INTEGER,     // 83
+	C_REAL,        // 84
+	C_BOOLEAN,     // 85
+	C_STRING,      // 86
 
-	NUM_TOKENS
+	NUM_TOKENS     // 87
 };
 
 enum class ProgMemStrings : uint8_t
@@ -347,6 +351,6 @@ extern PGM_P progmemString(ProgMemStrings);
  */
 uint8_t *scanTable(const uint8_t*, const uint8_t[], uint8_t&);
 
-}
+} // namespace BASIC
 
 #endif // BASIC_HPP

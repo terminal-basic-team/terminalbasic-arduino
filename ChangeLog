@@ -1,3 +1,15 @@
+r1.2-beta2 (21.06.2018)
+
+  * Add ON .. GOTO control structure
+  * FOR .. NEXT implementation update: loop body can modify control variable,
+      it's possible to GOTO from nested FOR loop body to outer loop
+  * Logical operators presedence become lower then arithmetic ones.
+  * Add INPUT with printed text feature (INPUT "Message"; VAR1, VAR2..)
+  * Add gfx_serial implementation: graphics drawing protocol over serial VT100/ANSI connection
+  * Fix bug with multioperator strings with FOR ..  TO .. STEP operator
+  * Add parameterless user defined functions DEF FNx
+  * Add hyperbolic functions to math module
+
 r1.2-beta1 (06.06.2018)
 
   * Add STR$ function

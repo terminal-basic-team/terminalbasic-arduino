@@ -20,12 +20,13 @@
 #ifndef VT100_HPP
 #define VT100_HPP
 
-#include "arduinoext.hpp"
 #include <Print.h>
 #include <stdint.h>
 
+#include "arduinoext.hpp"
+
 /**
- * @package VT100\
+ * @package VT100
  * @brief Package, implementing some vt100/ANSI terminal functions
  */
 Package(VT100)
@@ -65,11 +66,6 @@ public:
 	{
 		EXT_NOTCOPYABLE(Print)
 	public:
-		/**
-		 * @brief default constructor
-		 * @param tv TVoutEx object instance to wrap
-		 */
-		explicit Print();
 
 		virtual ~Print() = default;
 		
@@ -88,10 +84,14 @@ public:
 			SECOND_NUM // reading second number code
 		};
 		
+		Print()	;
+		
 		virtual void writeChar(uint8_t) = 0;
 		virtual uint8_t getCursorX() = 0;
 		virtual void setCursorX(uint8_t) = 0;
 		virtual void setCursor(uint8_t, uint8_t) = 0;
+		virtual void addAttribute(TextAttr) = 0;
+		virtual void resetAttributes() = 0;
 		
 	private:
 		void writeIdle(uint8_t);

@@ -41,16 +41,25 @@ class Math : public FunctionBlock
 public:
 	explicit Math();
 private:
-#if M_REVERSE_TRIGONOMETRIC
-	static bool func_acs(Interpreter&);
-	static bool func_asn(Interpreter&);
-	static bool func_atn(Interpreter&);
-#endif
 #if M_TRIGONOMETRIC
 	static bool func_cos(Interpreter&);
 	static bool func_cot(Interpreter&);
 	static bool func_sin(Interpreter&);
 	static bool func_tan(Interpreter&);
+#endif
+#if M_REVERSE_TRIGONOMETRIC
+	static bool func_acs(Interpreter&);
+	static bool func_asn(Interpreter&);
+	static bool func_atn(Interpreter&);
+#endif
+#if M_HYPERBOLIC
+	static bool func_cosh(Interpreter&);
+	static bool func_sinh(Interpreter&);
+	static bool func_tanh(Interpreter&);
+        
+	static Real cosh_r(Real);
+	static Real sinh_r(Real);
+	static Real tanh_r(Real);
 #endif
 	static bool func_exp(Interpreter&);
 	static bool func_log(Interpreter&);
@@ -80,6 +89,6 @@ private:
 	static const FunctionBlock::function funcs[] PROGMEM;;
 };
 
-}
+} // namespace BASIC
 
-#endif
+#endif // BASIC_MATH_HPP

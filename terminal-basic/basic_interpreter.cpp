@@ -103,6 +103,12 @@ Interpreter::valueFromVar(Parser::Value &v, const char *varName)
 	const auto f = getVariable(varName);
 	if (f == nullptr)
 		return;
+#if USE_DEFFN
+	if (f->type & TYPE_DEFFN) {
+		raiseError(DYNAMIC_ERROR, VAR_FUNCTION_DUPLICATE);
+		return;
+	}
+#endif // USE_DEFFN
 	switch (f->type) {
 	case Parser::Value::INTEGER:
 		v = f->get<Integer>();
@@ -708,8 +714,9 @@ Interpreter::newProgram()
 }
 
 void
-Interpreter::pushReturnAddress(uint8_t textPosition)
+Interpreter::pushReturnAddress()
 {
+	const uint8_t textPosition = _lexer.getPointer();
 	auto f = _program.push(Program::StackFrame::SUBPROGRAM_RETURN);
 	if (f != nullptr) {
 		f->body.gosubReturn.calleeIndex = _program._current.index;
@@ -735,6 +742,7 @@ Program::StackFrame*
 Interpreter::pushForLoop(const char *varName, uint8_t textPosition,
     const Parser::Value &v, const Parser::Value &vStep)
 {
+	// push new FOR .. NEXT stack frame
 	auto f = _program.push(Program::StackFrame::FOR_NEXT);
 	if (f != nullptr) {
 	    	auto &fBody = f->body.forFrame;
@@ -743,10 +751,7 @@ Interpreter::pushForLoop(const char *varName, uint8_t textPosition,
 		    textPosition;
 		fBody.finalvalue = v;
 		fBody.stepValue = vStep;
-
-		valueFromVar(fBody.currentValue, varName);
 		strcpy(fBody.varName, varName);
-		setVariable(varName, fBody.currentValue);
 	} else
 		raiseError(DYNAMIC_ERROR, STACK_FRAME_ALLOCATION);
 	
@@ -810,20 +815,65 @@ Interpreter::randomize()
 	::randomSeed(millis());
 }
 
+#if USE_DEFFN
+void
+Interpreter::execFn(const char *name)
+{
+	auto vf = _program.variableByName(name);
+	if (vf == nullptr || ((vf->type & TYPE_DEFFN) == 0)) {
+		raiseError(DYNAMIC_ERROR, NO_SUCH_ARRAY);
+		return;
+	}
+	
+	auto ff = reinterpret_cast<FunctionFrame*>(vf+1);
+	_program._current.index = ff->lineNumber;
+	_program._current.position = ff->linePosition;
+	Program::Line *s = _program.current(_program._current);
+	if (s != nullptr)
+		_lexer.init(s->text + _program._current.position);
+	else
+		raiseError(DYNAMIC_ERROR, INTERNAL_ERROR);
+}
+
+void
+Interpreter::returnFromFn()
+{
+	const auto f = _program.currentStackFrame();
+	if ((f != nullptr) && (f->_type == Program::StackFrame::SUBPROGRAM_RETURN)) {
+		_program._current.index = f->body.gosubReturn.calleeIndex;
+		_program._current.position = f->body.gosubReturn.textPosition;
+		_program.pop();
+	} else {
+		raiseError(DYNAMIC_ERROR, RETURN_WO_GOSUB);
+		return;
+	}
+	Program::Line *s = _program.current(_program._current);
+	if (s != nullptr)
+		_lexer.init(s->text + _program._current.position);
+	else
+		raiseError(DYNAMIC_ERROR, INTERNAL_ERROR);
+}
+#endif
+
 bool
 Interpreter::next(const char *varName)
 {
-	Program::StackFrame *f = _program.currentStackFrame();
-	if ((f != nullptr) && (f->_type == Program::StackFrame::FOR_NEXT) &&
-	    (strcmp(f->body.forFrame.varName, varName) == 0)) { // Correct frame
-		f->body.forFrame.currentValue += f->body.forFrame.stepValue;
-		setVariable(f->body.forFrame.varName, f->body.forFrame.currentValue);
-		if (testFor(*f))
-			return true;
-	} else // Incorrect frame
-		raiseError(DYNAMIC_ERROR, INVALID_NEXT);
-
-	return false;
+        do {
+		Program::StackFrame *f = _program.currentStackFrame();
+		if ((f != nullptr) && (f->_type == Program::StackFrame::FOR_NEXT)) { // Correct frame
+			if (strcmp(f->body.forFrame.varName, varName) == 0) {
+				Parser::Value v;
+				valueFromVar(v, varName);
+				v += f->body.forFrame.stepValue;
+				setVariable(varName, v);
+				return testFor(*f);
+			} else
+				_program.pop();
+		} else { // Incorrect frame
+			raiseError(DYNAMIC_ERROR, INVALID_NEXT);
+			return false;
+		}
+	} while (true);
 }
 
 bool
@@ -832,13 +882,14 @@ Interpreter::testFor(Program::StackFrame &f)
 	assert(f._type == Program::StackFrame::FOR_NEXT);
 	
 	auto &fBody = f.body.forFrame;
+	Parser::Value v;
+	valueFromVar(v, fBody.varName);
 	if (fBody.stepValue > Parser::Value(Integer(0))) {
-		if (fBody.currentValue >
-		    fBody.finalvalue) {
+		if (v > fBody.finalvalue) {
 			_program.pop();
 			return true;
 		}
-	} else if (fBody.currentValue < fBody.finalvalue) {
+	} else if (v < fBody.finalvalue) {
 		_program.pop();
 		return true;
 	}
@@ -1044,6 +1095,10 @@ Interpreter::doInput()
 uint8_t
 VariableFrame::size() const
 {
+#if USE_DEFFN
+	if (type & TYPE_DEFFN)
+		return sizeof(VariableFrame) + sizeof(FunctionFrame);
+#endif
 #if OPT == OPT_SPEED
 	switch (type) {
 #if USE_LONGINT
@@ -1063,7 +1118,7 @@ VariableFrame::size() const
 	default:
 		return sizeof(VariableFrame);
 	}
-#else
+#else // OPT != OPT_SPEED
 	uint8_t res = sizeof(VariableFrame);
 	
 #if USE_LONGINT
@@ -1076,14 +1131,14 @@ VariableFrame::size() const
 #if USE_REALS
 	else if (type == Parser::Value::REAL)
 		res += sizeof(Real);
-#endif
+#endif // USE_REALS
 	else if (type == Parser::Value::BOOLEAN)
 		res += sizeof(bool);
 	else if (type == Parser::Value::STRING)
 		res += STRINGSIZE;
-	
+
 	return res;
-#endif
+#endif // OPT
 }
 
 void
@@ -1199,7 +1254,7 @@ Interpreter::readInput()
 #if AUTOCAPITALIZE
 			c = toupper(c);
 			_inputBuffer[i] = c;
-#endif
+#endif // AUTOCAPITALIZE
 			// Only acept character if there is room for upcoming
 			// control one (line end or del/bs)
 			if (availableSize > 1) {
@@ -1247,6 +1302,63 @@ Interpreter::pushResult()
 {
 	return pushValue(_result);
 }
+
+#if USE_DEFFN
+void
+Interpreter::newFunction(const char *fname)
+{
+	Pointer index = _program._textEnd;
+
+	VariableFrame *f;
+	for (f = _program.variableByIndex(index); f != nullptr; index += f->size(),
+	    f = _program.variableByIndex(index)) {
+		int res = strcmp(fname, f->name);
+		if (res == 0) {
+			raiseError(DYNAMIC_ERROR,
+			    VAR_FUNCTION_DUPLICATE);
+			return;
+		} else if (res < 0)
+			break;
+	}
+
+	if (f == nullptr)
+		f = reinterpret_cast<VariableFrame*> (_program._text + index);
+
+	uint16_t dist = sizeof(VariableFrame)+sizeof(FunctionFrame);
+	Parser::Value::Type t;
+#if USE_LONGINT
+	if (endsWith(fname, "%%")) {
+		t = Parser::Value::LONG_INTEGER;
+	} else
+#endif // USE_LONGINT
+		if (endsWith(fname, '%')) {
+		t = Parser::Value::INTEGER;
+	} else if (endsWith(fname, '!')) {
+		t = Parser::Value::BOOLEAN;
+	} else if (endsWith(fname, '$')) {
+		t = Parser::Value::STRING;
+	} else {
+#if USE_REALS
+		t = Parser::Value::REAL;
+#else
+		t = Parser::Value::INTEGER;
+#endif
+	}
+	if (_program._arraysEnd >= _program._sp) {
+		raiseError(DYNAMIC_ERROR, OUTTA_MEMORY);
+		return;
+	}
+	memmove(_program._text + index + dist, _program._text + index,
+	    _program._arraysEnd - index);
+	f->type = Parser::Value::Type(uint8_t(t) | TYPE_DEFFN);
+	strncpy(f->name, fname, VARSIZE);
+	FunctionFrame *ff = reinterpret_cast<FunctionFrame*>(f->bytes);
+	ff->lineNumber = _program._current.index;
+	ff->linePosition = _program._current.position+_lexer.getPointer();
+	_program._variablesEnd += f->size();
+	_program._arraysEnd += f->size();
+}
+#endif
 
 void
 Interpreter::print(Token t)
@@ -1418,8 +1530,18 @@ Interpreter::setVariable(const char *name, const Parser::Value &v)
 	    f = _program.variableByIndex(index)) {
 		int res = strcmp(name, f->name);
 		if (res == 0) {
-			set(*f, v);
-			return f;
+#if USE_DEFFN
+			if ((f->type & TYPE_DEFFN) == 0) {
+#endif // USE_DEFFN
+				set(*f, v);
+				return f;
+#if USE_DEFFN
+			} else {
+				raiseError(DYNAMIC_ERROR,
+				    VAR_FUNCTION_DUPLICATE);
+				return nullptr;
+			}
+#endif // USE_DEFFN
 		} else if (res < 0)
 			break;
 	}

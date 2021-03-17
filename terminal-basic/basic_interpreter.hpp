@@ -64,6 +64,9 @@ struct EXT_PACKED VariableFrame
 	// Frame body
 	char bytes[];
 };
+#if USE_DEFFN
+#define TYPE_DEFFN 0x80
+#endif
 
 /**
  * Array memory frame
@@ -139,6 +142,17 @@ struct EXT_PACKED ArrayFrame
 	uint16_t dimension[];
 };
 
+#if USE_DEFFN
+/**
+ * Array memory frame
+ */
+struct EXT_PACKED FunctionFrame
+{
+	uint16_t lineNumber;
+	uint8_t linePosition;
+};
+#endif // USE_DEFFN
+
 /**
  * @brief Interpreter context object
  */
@@ -163,12 +177,19 @@ public:
 		INVALID_VALUE_TYPE = 9,
 		NO_SUCH_ARRAY = 10,
 		INTEGER_EXPRESSION_EXPECTED = 11,// Integer expression expected
+#if SAVE_LOAD_CHECKSUM
 		BAD_CHECKSUM = 12,		// Bad program checksum
+#endif
 		INVALID_TAB_VALUE = 13,
 		INVALID_ELEMENT_INDEX = 14,
+#if USE_MATRIX
 		SQUARE_MATRIX_EXPECTED = 15,
+#endif
 		DIMENSIONS_MISMATCH = 16,
 		COMMAND_FAILED = 17,
+#if USE_DEFFN
+		VAR_FUNCTION_DUPLICATE = 18,
+#endif
 		INTERNAL_ERROR = 255
 	};
 
@@ -181,8 +202,9 @@ public:
 		DYNAMIC_ERROR // runtime
 	};
 
-	
-	// Interpreter FSM state
+	/**
+	 * Interpreter FSM state
+	 */
 	enum State : uint8_t
 	{
 		SHELL = 0,		// Wait for user input of line or command
@@ -213,7 +235,6 @@ public:
 	 * @param program Program size
 	 */
 	explicit Interpreter(Stream&, Print&, Pointer);
-	
 	/**
 	 * [re]initialize interpreter object
 	 */
@@ -226,8 +247,8 @@ public:
 	// Restore data pointer
 	void restore();
 #endif
-	// Clear screen
 #if USE_TEXTATTRIBUTES
+	// Clear screen
 	void cls();
 #endif
 #if USESTOPCONT
@@ -328,9 +349,8 @@ public:
 	void newProgram();
 	/**
 	 * save current line on stack
-	 * @param text position
 	 */
-	void pushReturnAddress(uint8_t);
+	void pushReturnAddress();
 	// return from subprogram
 	void returnFromSub();
 	// save for loop
@@ -345,6 +365,10 @@ public:
 	bool popString(const char*&);
 	
 	void randomize();
+#if USE_DEFFN
+	void execFn(const char*);
+	void returnFromFn();
+#endif
 	/**
 	 * @brief iterate over loop
 	 * @param varName loop variable name
@@ -353,9 +377,8 @@ public:
 	bool next(const char*);
 	bool testFor(Program::StackFrame&);
 
-	// Internal EEPROM commands
 #if USE_SAVE_LOAD
-
+	// Internal EEPROM commands
 	struct EEpromHeader_t
 	{
 		Pointer len;
@@ -441,6 +464,14 @@ public:
 	}
 	
 	bool pushResult();
+	
+#if USE_DEFFN
+	/**
+	 * @brief Create new function frame
+	 * @param fname
+	 */
+	void newFunction(const char*);
+#endif // USE_DEFFN
 
 	Program _program;
 private:

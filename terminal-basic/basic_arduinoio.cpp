@@ -27,11 +27,11 @@ namespace BASIC
 {
 
 static const uint8_t arduinoIOFuncs[] PROGMEM = {
-	'A', 'R', 'D', '%'+0x80,
+	'A', 'R', 'E', 'A', 'D', '%'+0x80,
 #if USE_REALS
-	'A', 'R', 'D'+0x80,
+	'A', 'R', 'E', 'A', 'D'+0x80,
 #endif
-	'D', 'R', 'D'+0x80,
+	'D', 'R', 'E', 'A', 'D'+0x80,
 	0
 };
 
