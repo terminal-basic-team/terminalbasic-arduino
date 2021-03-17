@@ -1,3 +1,11 @@
+r1.1-beta3 (15.11.2017) - Release, dedicated to Proclamation of the Republic in Brasil
+
+  * Add DATA, READ, RESTORE support
+  * Add conditional setting of printing zones width
+  * Fix matrix operations in IF ... THEN statement
+  * Remove limitation on functions name length
+  * Fix string operations bug
+
 r1.1-beta2 (29.10.2017) - Release, dedicated to the World Stroke Day
 
   * Add LiquidCrystal library output support

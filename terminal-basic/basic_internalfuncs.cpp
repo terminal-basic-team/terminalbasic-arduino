@@ -192,10 +192,12 @@ InternalFunctions::func_len(Interpreter &i)
 	i.popValue(v);
 	if (v.type == Parser::Value::STRING) {
 		const char *str;
-		i.popString(str);
-		v = Integer(strnlen(str, STRINGSIZE));
-		i.pushValue(v);
-		return true;
+		if (i.popString(str)) {
+			v = Integer(strnlen(str, STRINGSIZE));
+			i.pushValue(v);
+			return true;
+		} else
+			return false;
 	} else
 		return false;
 }

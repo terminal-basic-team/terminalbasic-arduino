@@ -80,7 +80,7 @@ public:
 	 */
 	const char *id() const { return _id; }
 	/**
-	 * @brief get analised string position
+	 * @brief get current string position
 	 * @return string position index
 	 */
 	uint8_t getPointer() const { return _pointer; }
@@ -127,6 +127,6 @@ private:
 	Error	_error;
 };
 
-}
+} // namespace BASIC
 
 #endif

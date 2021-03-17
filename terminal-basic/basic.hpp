@@ -98,6 +98,9 @@ typedef Integer INT;
 typedef float Real;
 #endif
 
+// Number of characters in command/function identifier
+const uint8_t IDSIZE = 8;
+
 /**
  * @brief lexical tokens
  */
@@ -173,7 +176,7 @@ enum class Token : uint8_t
 	COM_NEW,       // 29
 	KW_NEXT,       // 30
 	OP_NOT,        // 31
-	KW_ON,         // 32
+//	KW_ON,         // 32
 //	KW_OPTION,     // 33
 	OP_OR,         // 34
 	KW_PRINT,      // 35
@@ -184,6 +187,9 @@ enum class Token : uint8_t
 	KW_READ,       // 37
 #endif
 	KW_REM,        // 38
+#if USE_DATA
+	KW_RESTORE,    // 39
+#endif
 	KW_RETURN,     // 39
 	COM_RUN,       // 40
 #if USE_SAVE_LOAD
@@ -301,6 +307,10 @@ enum class ProgMemStrings : uint8_t
 	VT100_UNDERSCORE,
 	VT100_REVERSE,
 	VT100_LINEHOME,
+#if SET_PRINTZNES
+	VT100_CLEARZONES,
+	VT100_SETZONE,
+#endif
 #if USE_COLORATTRIBUTES
 	VT100_RED,
 	VT100_GREEN,

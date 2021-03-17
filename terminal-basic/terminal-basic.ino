@@ -159,13 +159,13 @@ setup()
 	XMCRB = 0;
 #endif
 #ifdef SERIAL_PORT_I
-	SERIAL_PORT_I.begin(115200);
+	SERIAL_PORT_I.begin(SERIAL_I_BR);
 #endif
 #ifdef SERIAL_PORT_O
 #ifdef SERIAL_PORT_I
         if (&SERIAL_PORT_I != &SERIAL_PORT_O)
 #endif // SERIAL_PORT_I
-            SERIAL_PORT_O.begin(115200);
+            SERIAL_PORT_O.begin(SERIAL_O_BR);
 #endif // SERIAL_PORT_O
 #if USEPS2USARTKB
         ps2usartStream.begin();

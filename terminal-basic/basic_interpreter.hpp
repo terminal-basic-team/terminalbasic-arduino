@@ -223,6 +223,10 @@ public:
 	void step();
 	// Execute entered command (command or inputed program line)
 	void exec();
+#if USE_DATA
+	// Restore data pointer
+	void restore();
+#endif
 	// Clear screen
 #if USE_TEXTATTRIBUTES
 	void cls();
@@ -287,12 +291,16 @@ public:
 	 */
 	void assignMatrix(const char*, const char*, const char* = nullptr,
 	    MatrixOperation_t = MO_NOP);
+#endif // USE_MATRIX
+
+#if USE_DATA
+	bool read(Parser::Value&);
 #endif
 	
 	void print(Integer, VT100::TextAttr = VT100::NO_ATTR);
 #if USE_TEXTATTRIBUTES
 	/**
-	 * 
+	 * @brief control print space or tab
 	 * @param v Value of the spaces
 	 * @param flag true - TAB, false - SPC
 	 */
@@ -326,9 +334,13 @@ public:
 	void pushForLoop(const char*, uint8_t, const Parser::Value&,
 	    const Parser::Value&);
 	bool pushValue(const Parser::Value&);
+	
 	void pushInputObject(const char*);
+	
 	bool popValue(Parser::Value&);
+	
 	bool popString(const char*&);
+	
 	void randomize();
 	/**
 	 * @brief iterate over loop
@@ -492,6 +504,7 @@ private:
 	// Global RESULT() variable
 	Parser::Value		 _result;
 #if LOOP_INDENT
+	// Loop indention spaces
 	uint8_t			 _loopIndent;
 #endif
 #if BASIC_MULTITERMINAL
@@ -499,10 +512,15 @@ private:
 	uint8_t			 _termno;
 #endif
 #if USE_DELAY
+	// Milliseconds left to timeout end
 	uint32_t		_delayTimeout;
+#endif
+#if USE_DATA
+	// Data statement parser continue flag
+	bool			_dataParserContinue;
 #endif
 };
 
-}
+} // namespace BASIC
 
 #endif

@@ -52,6 +52,10 @@ static const char strVT100_BRIGHT[] PROGMEM = "1m";
 static const char strVT100_UNDERSCORE[] PROGMEM = "4m";
 static const char strVT100_REVERSE[] PROGMEM = "7m";
 static const char strVT100_LINEHOME[] PROGMEM = "80D";
+#if SET_PRINTZNES
+static const char strVT100_CLEARZONES[] PROGMEM = "3g";
+static const char strVT100_SETZONE[] PROGMEM = "\x1BH";
+#endif
 #if USE_COLORATTRIBUTES
 static const char strVT100_RED[] PROGMEM = "31m";
 static const char strVT100_GREEN[] PROGMEM = "32m";
@@ -95,6 +99,10 @@ static PGM_P const progmemStrings[uint8_t(ProgMemStrings::NUM_STRINGS)] PROGMEM 
 	strVT100_UNDERSCORE,
 	strVT100_REVERSE,
 	strVT100_LINEHOME,
+#if SET_PRINTZNES
+	strVT100_CLEARZONES,
+	strVT100_SETZONE,
+#endif
 #if USE_COLORATTRIBUTES
 	strVT100_RED,
 	strVT100_GREEN,

@@ -141,8 +141,8 @@ SDFSModule::dsave(Interpreter &i)
 	
 	i._program.reset();
 	Lexer lex;
-	for (Program::Line *s = i._program.getString(); s != nullptr;
-	    s = i._program.getString()) {
+	for (Program::Line *s = i._program.getNextLine(); s != nullptr;
+	    s = i._program.getNextLine()) {
 		f.print(s->number);
 		lex.init(s->text);
 		while (lex.getNext()) {
