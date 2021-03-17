@@ -20,6 +20,8 @@
 #ifndef ARDUINO_LOGGER_HPP
 #define ARDUINO_LOGGER_HPP
 
+#include <stdint.h>
+
 #include "arduinoext.hpp"
 #include "Stream.h"
 #include "Arduino.h"
@@ -58,41 +60,66 @@ Package(Logger) {
 	friend Logger &operator<<(Logger &logger, format_t formaat)
 	{
 		logger._format = formaat;
-		return (logger);
+		return logger;
 	}
 	
 	friend Logger &operator<<(Logger &logger, const Printable &p) {
 		logger._stream->print(p);
-		return (logger);
+		return logger.delimiter();
 	}
 
+	friend Logger &operator<<(Logger &logger, uint32_t val) {
+		logger._stream->print(val, int(_format));
+		return logger.delimiter();
+	}
+	
+	friend Logger &operator<<(Logger &logger, int32_t val) {
+		logger._stream->print(val, int(_format));
+		return logger.delimiter();
+	}
+	
+	friend Logger &operator<<(Logger &logger, uint16_t val) {
+		logger._stream->print(val, int(_format));
+		return logger.delimiter();
+	}
+	
+	friend Logger &operator<<(Logger &logger, int16_t val) {
+		logger._stream->print(val, int(_format));
+		return logger.delimiter();
+	}
+	
 	friend Logger &operator<<(Logger &logger, uint8_t val) {
 		logger._stream->print(val, int(_format));
-		return (logger);
+		return logger.delimiter();
+	}
+	
+	friend Logger &operator<<(Logger &logger, int8_t val) {
+		logger._stream->print(val, int(_format));
+		return logger.delimiter();
 	}
 
 	friend Logger &operator<<(Logger &logger, const char* first) {
 		logger._stream->print(first);
-		return (logger);
+		return logger.delimiter();
 	}
 
 	friend Logger &operator<<(Logger &logger, char* first) {
 		logger._stream->print(first);
-		return (logger);
+		return logger.delimiter();
 	}
 
 	template<typename T>
-	friend Logger &operator<<(Logger &logger, T * first)
+	friend Logger &operator<<(Logger &logger, T *first)
 	{
 		logger._stream->print(intptr_t(first), 16);
-		return (logger);
+		return logger.delimiter();
 	}
 
 	template<typename T>
 	friend Logger &operator<<(Logger &logger, T first)
 	{
 		logger._stream->print(first);
-		return (logger);
+		return logger.delimiter();
 	}
 
 	template<typename T>
@@ -105,8 +132,13 @@ Package(Logger) {
 	static void _log(T first, const Args&... args)
 	{
 		_log(first);
-		_instance._stream->print(" ");
 		_log(args...);
+	}
+	
+	Logger &delimiter()
+	{
+		_instance._stream->print(" ");
+		return *this;
 	}
 
 	static Logger _instance;

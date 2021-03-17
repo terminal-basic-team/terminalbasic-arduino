@@ -64,24 +64,21 @@ ByteArray::printTo(Print& p) const
 		while (++digits < sizeof(intptr_t)*2)
 			p.print('0');
 		
-		p.print(i, HEX), p.print(":\t");
+		p.print(i, HEX), p.print(':');
 		size_t j;
 		for (j = 0; j < 8; ++j, ++ii) {
 			if (ii >= size())
 				break;
 			uint8_t c = data()[ii];
-			if (c > 0x0F) {
-				res += p.print(char(ASCII::SPACE));
-				res += p.print(c, HEX);
-			} else {
-				res += p.print(char(ASCII::SPACE));
+			res += p.print(char(ASCII::SPACE));
+			if (c < 0x10)
 				res += p.print('0');
-				res += p.print(c, HEX);
-			}
+			res += p.print(c, HEX);
 		}
+		j*=3;
 		for (; j < 8*3; ++j)
 			res += p.print(char(ASCII::SPACE));
-		res += p.print('\t');
+		res += 2; p.print("  ");
 		for (j = 0; j < 8; ++j, ++i) {
 			if (i >= size())
 				break;

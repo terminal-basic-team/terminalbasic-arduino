@@ -285,6 +285,109 @@ Parser::fOperator()
 		_error = OPERATOR_EXPECTED;
 		return false;
 	}
+//	if (t == Token::KW_DIM) {
+//		if (_lexer.getNext())
+//			return fArrayList();
+//		return false;
+//	} else if (t == Token::KW_END) {
+//		if (_mode == EXECUTE) {
+//			_interpreter._program.reset();
+//			_interpreter.end();
+//		}
+//		_stopParse = true;
+//		_lexer.getNext();
+//	} else if (t == Token::KW_STOP) {
+//		if (_mode == EXECUTE)
+//			_interpreter.end();
+//		_stopParse = true;
+//		_lexer.getNext();
+//	} else if (t == Token::KW_FOR) {
+//		if (_lexer.getNext())
+//			return fForConds();
+//		return false;
+//	} else if (t == Token::KW_GOSUB) {
+//		Value v;
+//		if (!_lexer.getNext() || !fExpression(v)) {
+//			_error = EXPRESSION_EXPECTED;
+//			return false;
+//		}
+//		if (_mode == EXECUTE) {
+//			_interpreter.pushReturnAddress(_lexer.getPointer());
+//			_interpreter.gotoLine(v);
+//		}
+//		_stopParse = true;
+//	} else if (t == Token::KW_IF) {
+//		Value v;
+//		if (!_lexer.getNext() || !fExpression(v)) {
+//			_error = EXPRESSION_EXPECTED;
+//			return false;
+//		}
+//		bool res;
+//		if (!bool(v))
+//			_mode = SCAN;
+//		if (fIfStatement())
+//			res = true;
+//		else {
+//			_error = THEN_OR_GOTO_EXPECTED;
+//			res = false;
+//		}
+//		_mode = EXECUTE;
+//		return res;
+//	} else if (t == Token::KW_INPUT) {
+//		if (!fVarList()) {
+//			_error = VARIABLES_LIST_EXPECTED;
+//			return false;
+//		} else if (_mode == EXECUTE)
+//			_interpreter.input();
+//	} else if (t == Token::KW_LET) {
+//		char vName[VARSIZE];
+//		if (!_lexer.getNext() || !fImplicitAssignment(vName))
+//			return false;
+//	}
+//#if USE_MATRIX
+//	 else if (t == Token::KW_MAT)
+//		return _lexer.getNext() && fMatrixOperation();
+//#endif
+//	else if (t == Token::KW_NEXT) {
+//		char vName[VARSIZE];
+//		if (!_lexer.getNext() || !fVar(vName))
+//			return false;
+//		if (_mode == EXECUTE)
+//			_stopParse = !_interpreter.next(_lexer.id());
+//		if (!_stopParse)
+//			_lexer.getNext();
+//	} else if (t == Token::KW_PRINT) {
+//		if (_lexer.getNext())
+//			return fPrintList();
+//		else
+//			_interpreter.newline();
+//	}
+//#if USE_RANDOM
+//	else if (t == Token::KW_RANDOMIZE) {
+//		if (_mode == EXECUTE)
+//			_interpreter.randomize();
+//		_lexer.getNext();
+//	}
+//#endif
+//	else if (t == Token::KW_REM)
+//		while (_lexer.getNext());
+//	else if (t == Token::KW_RETURN) {
+//		if (_mode == EXECUTE) {
+//			_interpreter.returnFromSub();
+//			_stopParse = true;
+//		}
+//		_lexer.getNext();
+//	} else {
+//		if (fGotoStatement() || fCommand())
+//			return true;
+//		{
+//			char vName[VARSIZE];
+//			if (fImplicitAssignment(vName))
+//				return true;
+//		}
+//		_error = OPERATOR_EXPECTED;
+//		return false;
+//	}
 	return true;
 }
 

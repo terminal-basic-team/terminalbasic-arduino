@@ -36,6 +36,7 @@
  * KW_DET = "DET"
  * COM_DELAY = "DELAY"  // 7
  * KW_DIM = "DIM"       // 8
+ * KW_DO = "DO"
  * COM_DUMP = "DUMP"    // 9
  * KW_END = "END"       // 10
  * KW_FALSE = "FALSE"   // 11
@@ -107,7 +108,7 @@ const char sCHAIN[] PROGMEM = "CHAIN";        // 4
 #endif
 const char sCLS[] PROGMEM = "CLS";            // 5
 #if USESTOPCONT
-const char sCONT[] PROGMEM = "CONT";
+const char sCONT[] PROGMEM = "CONT";          // 6
 #endif
 #if USE_MATRIX
 const char sCON[] PROGMEM = "CON";            // 5
@@ -119,6 +120,9 @@ const char sDEF[] PROGMEM = "DEF";            // 7
 const char sDET[] PROGMEM = "DET";            // 5
 #endif
 const char sDIM[] PROGMEM = "DIM";            // 9
+#if USE_DOLOOP
+const char sDO[] PROGMEM = "DO";              // 
+#endif
 #if USE_DUMP
 const char sDUMP[] PROGMEM = "DUMP";          // 10
 #endif
@@ -140,6 +144,9 @@ const char sLET[] PROGMEM = "LET";            // 19
 const char sLIST[] PROGMEM = "LIST";          // 20
 #if USE_SAVE_LOAD
 const char sLOAD[] PROGMEM = "LOAD";          // 21
+#endif
+#if USE_DOLOOP
+const char sLOOP[] PROGMEM = "LOOP";
 #endif
 #if USE_MATRIX
 const char sMAT[] PROGMEM = "MAT";
@@ -234,6 +241,9 @@ PGM_P const Lexer::tokenStrings[uint8_t(Token::NUM_TOKENS)] PROGMEM = {
 	sDET,
 #endif
 	sDIM,       // 8
+#if USE_DOLOOP
+	sDO,
+#endif
 #if USE_DUMP
 	sDUMP,      // 9
 #endif
@@ -255,6 +265,9 @@ PGM_P const Lexer::tokenStrings[uint8_t(Token::NUM_TOKENS)] PROGMEM = {
 	sLIST,      // 19
 #if USE_SAVE_LOAD
 	sLOAD,      // 20
+#endif
+#if USE_DOLOOP
+	sLOOP,
 #endif
 #if USE_MATRIX
 	sMAT,
@@ -340,6 +353,9 @@ static const uint8_t tokenTable[] PROGMEM = {
 	'D', 'E', 'T'+0x80,
 #endif
 	'D', 'I', 'M'+0x80,                // 8
+#if USE_DOLOOP
+	'D', 'O'+0x80,
+#endif
 #if USE_DUMP
 	'D', 'U', 'M', 'P'+0x80,           // 9
 #endif
@@ -361,6 +377,9 @@ static const uint8_t tokenTable[] PROGMEM = {
 	'L', 'I', 'S', 'T'+0x80,           // 19
 #if USE_SAVE_LOAD
 	'L', 'O', 'A', 'D'+0x80,           // 20
+#endif
+#if USE_DOLOOP
+	'L', 'O', 'O', 'P'+0x80,
 #endif
 #if USE_MATRIX
 	'M', 'A', 'T'+0x80,

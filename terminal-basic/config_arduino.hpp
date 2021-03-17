@@ -16,54 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file config_arduino.hpp
+ * @brief Configuration parameters, specific for Arduino builds
+ */
+
 #ifndef CONFIG_ARDUINO_HPP
 #define CONFIG_ARDUINO_HPP
 
-#include <stdint.h>
+#include "config.hpp"
 
 /**
- * Paraeters
+ * Parameters
  */
-#define USE_REALS            0 // Real arithmetics
-#define USE_STRINGOPS        0 // Basic string operations (concatenation and comparision)
-#define USE_LONGINT          0 // Long integer support
-#define USE_DUMP             0 // DUMP command support
-#define USE_RANDOM           0 // Use RND and RANDOMIZE
-#define CLEAR_PROGRAM_MEMORY 0 // Clear program memory with 0xFF on NEW
-#define USE_MATRIX           0 // Matrix operations
-#define USE_TEXTATTRIBUTES   0 // Use vt100 text attributes
-#if USE_TEXTATTRIBUTES
-#define USE_COLORATTRIBUTES  0 // Use vt100 color attributes
-#endif
-#define USE_EXTEEPROM        0 // External EEPROM functions module
-#if USE_EXTEEPROM
-#define EXTEEPROM_SIZE    32768 // Size in bytes
-#endif
-#define USE_SAVE_LOAD        0 // SAVE, LOAD and CHAIN commands support
-#if USE_SAVE_LOAD
-#define SAVE_LOAD_CHECKSUM   0 // Compute checksums while SAVE, LOAD and CHAIN
-#endif
-#define USESTOPCONT          0
-#define AUTOCAPITALIZE       0 // Convert all input to upper register
+
 #define USE_GFX              0 // GFX module
-
-/**
- * Used modules
- */
-#define USESD                0 // SDcard module
-#define USEARDUINOIO         0 // Arduino IO module
-/*
- * Math module (requires USE_REALS)
- */
-#define USEMATH                 0
-#if USEMATH
-#define M_TRIGONOMETRIC         0 // SIN COS TAN COT
-#define M_REVERSE_TRIGONOMETRIC	0 // ACS ASN ATN
-#endif
-
-#define OPT_SPEED     1
-#define OPT_SIZE      2
-#define OPT           OPT_SIZE
 
 /*
  * Input and output for single terminal mode
@@ -115,7 +82,7 @@ namespace BASIC
 {
 
 // Max size of the program line
-const uint8_t PROGSTRINGSIZE = 65;
+const uint8_t PROGSTRINGSIZE = 73;
 
 // Number of bytes for program text, variables and stack
 #if USE_EXTMEM
@@ -135,7 +102,7 @@ const uint16_t PROGRAMSIZE = 1024;
 #endif // USE_EXTMEM
 
 // Max size of the string constants/variables
-const uint8_t STRINGSIZE = 34;
+const uint8_t STRINGSIZE = 65;
 
 // Number of characters in variable name
 const uint8_t VARSIZE = 5;

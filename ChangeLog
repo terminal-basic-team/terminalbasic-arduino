@@ -1,4 +1,10 @@
-r1.0-alpha3 (26.06.2017) - Release, dedicated to the p
+r1.0-alpha4 (26.07.2017) - Release, dedicated to the Cuba National Rebellion Day
+                           ¡Salud camaradas!
+
+  * Fix regression with print real 0
+  * Add condition compilable loop body indention
+
+r1.0-alpha3 (26.06.2017) - Release, dedicated to the Skydiver day
 
   * Single terminal mode optimisation
   * Different code size optimisations

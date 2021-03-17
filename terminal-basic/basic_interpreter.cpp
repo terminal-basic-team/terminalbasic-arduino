@@ -196,6 +196,7 @@ Interpreter::init()
 
 	print(ProgMemStrings::TERMINAL, VT100::BRIGHT);
 	print(ProgMemStrings::S_TERMINAL_BASIC, VT100::BRIGHT);
+	newline();
 	print(ProgMemStrings::S_VERSION);
 	print(VERSION, VT100::BRIGHT), newline();
 #if BASIC_MULTITERMINAL
@@ -382,16 +383,44 @@ void
 Interpreter::list(uint16_t start, uint16_t stop)
 {
 	_program.reset();
+#if LOOP_INDENT
+	_loopIndent = 0;
+#endif
 	for (Program::String *s = _program.getString(); s != NULL;
 	    s = _program.getString()) {
+		// Output onlyselected lines subrange
 		if (s->number < start)
 			continue;
 		if (stop > 0 && s->number > stop)
 			break;
 
+		// Output line number
 		print(long(s->number), VT100::C_YELLOW);
-
+		
 		Lexer lex;
+#if LOOP_INDENT
+                lex.init(s->text);
+		int8_t diff = 0;
+                while (lex.getNext()) {
+			if (lex.getToken() == Token::KW_FOR)
+				++diff;
+			else if (lex.getToken() == Token::KW_NEXT)
+				--diff;
+		}
+		if (diff < 0) {
+			if (_loopIndent > -diff)
+				_loopIndent += diff;
+			else
+				_loopIndent = 0;
+		}
+		//If enabled, do indention of the operators string
+		for (uint8_t i=0; i<_loopIndent; ++i) {
+			_output.print(char(ASCII::SPACE)),
+			_output.print(char(ASCII::SPACE));
+		}
+		if (diff > 0)
+			_loopIndent += diff;
+#endif
 		lex.init(s->text);
 		while (lex.getNext()) {
 			print(lex);
@@ -1546,7 +1575,7 @@ void
 Interpreter::print(Token t)
 {
 	char buf[10];
-	strcpy_P(buf, (PGM_P) pgm_read_word(&(Lexer::tokenStrings[
+	strcpy_P(buf, (PGM_P) pgm_read_ptr(&(Lexer::tokenStrings[
 	    uint8_t(t)])));
 	if (t < Token::STAR)
 		print(buf, VT100::TextAttr(uint8_t(VT100::BRIGHT) |

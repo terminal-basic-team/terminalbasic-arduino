@@ -96,9 +96,9 @@ Parser::Value::operator bool() const
 		return (bool(value.real));
 #endif // USE_REALS
 	case BOOLEAN:
-		return (value.boolean);
+		return value.boolean;
 	default:
-		return (false);
+		return false;
 	}
 }
 
@@ -505,6 +505,8 @@ Parser::Value::printTo(Print& p) const
 			while (n < Real(1)) {
 				n *= Real(10);
 				--decWhole;
+				if (decWhole <= -3)
+					break;
 			}
 		}
 		if (decWhole >= -3 && decWhole <= 8)
