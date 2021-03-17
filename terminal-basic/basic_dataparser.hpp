@@ -17,49 +17,30 @@
  */
 
 /**
- * @file basic_arduinoio.hpp
- * @brief Arduino io container
+ * @file	basic_dataparser.hpp
  */
 
-#ifndef BASIC_ARDUINOIO_HPP
-#define BASIC_ARDUINOIO_HPP
+#ifndef BASIC_DATAPARSER_HPP
+#define BASIC_DATAPARSER_HPP
 
-#include "basic_functionblock.hpp"
 #include "basic_interpreter.hpp"
 
 namespace BASIC
 {
 
-class ArduinoIO : public FunctionBlock
+class DataParser
 {
 public:
-	explicit ArduinoIO();
+	DataParser(Interpreter&);
+	bool searchData(const char*, Parser::Value&);
+	bool read(const char*, Parser::Value&);
+	const Lexer &lexer() const { return _lexer; }
 private:
-#if USE_REALS
-	static bool func_aread(Interpreter&);
-#endif
-	static bool func_aread_int(Interpreter&);
-	static bool func_dread(Interpreter&);
-	static bool comm_awrite(Interpreter&);
-	static bool comm_dwrite(Interpreter&);
-#if CONF_MODULE_ARDUINOIO_TONE
-	static bool comm_tone(Interpreter&);
-	static bool comm_notone(Interpreter&);
-#endif
-	
-#if USE_REALS
-	static Real aread_r(Real);
-#endif // USE_REALS
-#if USE_LONGINT
-	static LongInteger aread_i(LongInteger);
-#else
-	static Integer aread_i(Integer);
-#endif // USE_LONGINT
-	
-	static const FunctionBlock::function _funcs[] PROGMEM;
-	static const FunctionBlock::command _commands[] PROGMEM;
+	bool readValue(Parser::Value&);
+	Lexer	     _lexer;
+	Interpreter &_interpreter;
 };
 
-}
+} // namespace BASIC
 
 #endif

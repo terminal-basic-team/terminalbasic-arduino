@@ -16,13 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file basic_arduinoio.hpp
- * @brief Arduino io container
- */
-
-#ifndef BASIC_ARDUINOIO_HPP
-#define BASIC_ARDUINOIO_HPP
+#ifndef BASIC_GFX_HPP
+#define BASIC_GFX_HPP
 
 #include "basic_functionblock.hpp"
 #include "basic_interpreter.hpp"
@@ -30,34 +25,25 @@
 namespace BASIC
 {
 
-class ArduinoIO : public FunctionBlock
+class GFXModule : public FunctionBlock
 {
 public:
-	explicit ArduinoIO();
+	explicit GFXModule();
+
+	static bool command_box(Interpreter&);
+	static bool command_circle(Interpreter&);
+	static bool command_color(Interpreter&);
+	static bool command_line(Interpreter&);
+	static bool command_lineto(Interpreter&);
+	static bool command_point(Interpreter&);
+	static bool command_screen(Interpreter&);
+	
+protected:
+	
+	void _init() override;
+
 private:
-#if USE_REALS
-	static bool func_aread(Interpreter&);
-#endif
-	static bool func_aread_int(Interpreter&);
-	static bool func_dread(Interpreter&);
-	static bool comm_awrite(Interpreter&);
-	static bool comm_dwrite(Interpreter&);
-#if CONF_MODULE_ARDUINOIO_TONE
-	static bool comm_tone(Interpreter&);
-	static bool comm_notone(Interpreter&);
-#endif
-	
-#if USE_REALS
-	static Real aread_r(Real);
-#endif // USE_REALS
-#if USE_LONGINT
-	static LongInteger aread_i(LongInteger);
-#else
-	static Integer aread_i(Integer);
-#endif // USE_LONGINT
-	
-	static const FunctionBlock::function _funcs[] PROGMEM;
-	static const FunctionBlock::command _commands[] PROGMEM;
+	static const FunctionBlock::command comms[] PROGMEM;
 };
 
 }

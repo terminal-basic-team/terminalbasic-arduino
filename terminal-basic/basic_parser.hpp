@@ -48,8 +48,10 @@ public:
 		EXPRESSION_EXPECTED = 2,
 		INTEGER_CONSTANT_EXPECTED = 3,
 		THEN_OR_GOTO_EXPECTED = 4,
-		VARIABLES_LIST_EXPECTED = 5,
-		STRING_OVERFLOW = 6
+		INVALID_DATA_EXPR = 5,
+		INVALID_READ_EXPR = 6,
+		VARIABLES_LIST_EXPECTED = 7,
+		STRING_OVERFLOW = 8
 	};
 	
 	class EXT_PACKED Value;
@@ -85,10 +87,15 @@ private:
 	 */
 	enum Mode : uint8_t
 	{
-		SCAN = 0, EXECUTE
+		SCAN = 0
+		, EXECUTE
 	};
 	bool fOperators(bool&);
 	bool fOperator();
+#if USE_DATA
+	bool fDataStatement();
+	bool fReadStatement();
+#endif // USE_DATA
 	bool fImplicitAssignment(char*);
 	bool fPrintList();
 	bool fPrintItem();
@@ -101,12 +108,12 @@ private:
 	bool fCommand();
 	bool fGotoStatement();
 	bool fForConds();
-	bool fVar(char*);
+	bool fIdentifier(char*);
 	bool fVarList();
 	bool fArrayList();
 	bool fArray(uint8_t&);
 	bool fDimensions(uint8_t&);
-	bool fIdentifierExpr(const char*, Value&);
+	bool fIdentifierExpr(char*, Value&);
 #if USE_MATRIX
 	bool fMatrixOperation();
 	bool fMatrixPrint();
@@ -127,6 +134,6 @@ private:
 	InternalFunctions _internal;
 };
 
-}
+} // namespace BASIC
 
 #endif

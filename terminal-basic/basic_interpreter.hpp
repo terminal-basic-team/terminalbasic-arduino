@@ -22,6 +22,7 @@
 #include "basic.hpp"
 #include "basic_lexer.hpp"
 #include "basic_parser.hpp"
+#include "basic_program.hpp"
 #include "helper.hpp"
 #include "vt100.hpp"
 
@@ -29,15 +30,121 @@ namespace BASIC
 {
 
 /**
+ * @brief variable memory frame
+ */
+struct EXT_PACKED VariableFrame
+{
+	/**
+	 * @brief size of the initialized frame
+	 * @return size in bytes
+	 */
+	uint8_t size() const;
+
+	/**
+	 * @brief getValue from Variable frame
+	 * @param T value type
+	 * @return value
+	 */
+	template <typename T>
+	T get() const
+	{
+		union
+		{
+			const char *b;
+			const T *i;
+		} U;
+		U.b = bytes;
+		return *U.i;
+	}
+
+	// Variable name
+	char name[VARSIZE];
+	// Variable type
+	Parser::Value::Type type;
+	// Frame body
+	char bytes[];
+};
+
+/**
+ * Array memory frame
+ */
+struct EXT_PACKED ArrayFrame
+{
+	/**
+	 * @brief get frame size in bytes
+	 * @return size
+	 */
+	uint16_t size() const;
+
+	uint16_t dataSize() const;
+
+	uint16_t numElements() const;
+
+	/**
+	 * @brief get array raw data pointer
+	 * @return pointer
+	 */
+	uint8_t *data()
+	{
+		return reinterpret_cast<uint8_t*> (this+1) +
+		    sizeof(uint16_t) * numDimensions;
+	}
+
+	/**
+	 * @brief Overloaded version
+	 */
+	const uint8_t *data() const
+	{
+		return reinterpret_cast<const uint8_t*> (this+1) +
+		    sizeof(uint16_t) * numDimensions;
+	}
+
+	/**
+	 * @brief get array value by raw index
+	 * @param index shift in array data
+	 * @return value
+	 */
+	template <typename T>
+	T get(uint16_t index) const
+	{
+		const union
+		{
+			const uint8_t *b;
+			const T *i;
+		} U = { .b = this->data() };
+		return U.i[index];
+	}
+
+	bool get(uint16_t, Parser::Value&) const;
+	bool set(uint16_t, const Parser::Value&);
+
+	template <typename T>
+	void set(uint16_t index, T val)
+	{
+		union
+		{
+			uint8_t *b;
+			T *i;
+		} U = { .b = this->data() };
+		U.i[index] = val;
+	}
+
+	// Array data
+	char name[VARSIZE];
+	// Array type
+	Parser::Value::Type type;
+	// Number of dimensions
+	uint8_t numDimensions;
+	// Actual dimensions values
+	uint16_t dimension[];
+};
+
+/**
  * @brief Interpreter context object
  */
 class Interpreter
 {
 public:
-	/**
-	 * @brief BASIC program memory
-	 */
-	class EXT_PACKED Program;
 
 	/**
 	 * Dynamic (runtime error codes)
@@ -61,6 +168,7 @@ public:
 		INVALID_ELEMENT_INDEX = 14,
 		SQUARE_MATRIX_EXPECTED = 15,
 		DIMENSIONS_MISMATCH = 16,
+		COMMAND_FAILED = 17,
 		INTERNAL_ERROR = 255
 	};
 
@@ -73,121 +181,12 @@ public:
 		DYNAMIC_ERROR // runtime
 	};
 
-	/**
-	 * @brief variable memory frame
-	 */
-	struct EXT_PACKED VariableFrame
-	{
-		/**
-		 * @brief size of the initialized frame
-		 * @return size in bytes
-		 */
-		uint8_t size() const;
-
-		/**
-		 * @brief getValue from Variable frame
-		 * @param T value type
-		 * @return value
-		 */
-		template <typename T>
-		T get() const
-		{
-			union
-			{
-				const char *b;
-				const T *i;
-			} U;
-			U.b = bytes;
-			return *U.i;
-		}
-
-		// Variable name
-		char name[VARSIZE];
-		// Variable type
-		Parser::Value::Type type;
-		// Frame body
-		char bytes[];
-	};
-
-	/**
-	 * Array memory frame
-	 */
-	struct EXT_PACKED ArrayFrame
-	{
-		/**
-		 * @brief get frame size in bytes
-		 * @return size
-		 */
-		uint16_t size() const;
-		
-		uint16_t dataSize() const;
-		
-		uint16_t numElements() const;
-
-		/**
-		 * @brief get array raw data pointer
-		 * @return pointer
-		 */
-		uint8_t *data()
-		{
-			return reinterpret_cast<uint8_t*> (this+1) +
-			    sizeof(uint16_t) * numDimensions;
-		}
-
-		/**
-		 * @brief Overloaded version
-		 */
-		const uint8_t *data() const
-		{
-			return reinterpret_cast<const uint8_t*> (this+1) +
-			    sizeof(uint16_t) * numDimensions;
-		}
-
-		/**
-		 * @brief get array value by raw index
-		 * @param index shift in array data
-		 * @return value
-		 */
-		template <typename T>
-		T get(uint16_t index) const
-		{
-			const union
-			{
-				const uint8_t *b;
-				const T *i;
-			} U = { .b = this->data() };
-			return U.i[index];
-		}
-		
-		bool get(uint16_t, Parser::Value&) const;
-		bool set(uint16_t, const Parser::Value&);
-		
-		template <typename T>
-		void set(uint16_t index, T val)
-		{
-			union
-			{
-				uint8_t *b;
-				T *i;
-			} U = { .b = this->data() };
-			U.i[index] = val;
-		}
-
-		// Array data
-		char name[VARSIZE];
-		// Array type
-		Parser::Value::Type type;
-		// Number of dimensions
-		uint8_t numDimensions;
-		// Actual dimensions values
-		uint16_t dimension[];
-	};
+	
 	// Interpreter FSM state
-
 	enum State : uint8_t
 	{
 		SHELL,		// Wait for user input of line or command
-		PROGRAM_INPUT,	// INputting of the program lines
+		PROGRAM_INPUT,	// Inputting of the program lines
 #if BASIC_MULTITERMINAL
 		COLLECT_INPUT,	//
 		EXEC_INT,	// Interactive execute
@@ -195,6 +194,9 @@ public:
 #endif // BASIC_MULTITERMINAL
 		EXECUTE,	// Runniong the program
 		VAR_INPUT,	// Input of the variable value
+#if USE_DELAY
+		DELAY,          // Wait for timeout
+#endif
 		CONFIRM_INPUT	// Input of the confirmation
 	};
 #if USE_DUMP
@@ -209,9 +211,9 @@ public:
 	 * @brief constructor
 	 * @param stream Boundary output object
 	 * @param print Boundary input object
-	 * @param program Program object
+	 * @param program Program size
 	 */
-	explicit Interpreter(Stream&, Print&, Program&);
+	explicit Interpreter(Stream&, Print&, Pointer);
 	
 	/**
 	 * [re]initialize interpreter object
@@ -221,8 +223,14 @@ public:
 	void step();
 	// Execute entered command (command or inputed program line)
 	void exec();
+#if USE_DATA
+	// Restore data pointer
+	void restore();
+#endif
 	// Clear screen
+#if USE_TEXTATTRIBUTES
 	void cls();
+#endif
 #if USESTOPCONT
 	void cont();
 #endif
@@ -235,9 +243,24 @@ public:
 	// Add module on tail of the modules list
 	void addModule(FunctionBlock*);
 
+#if USE_GET
+	uint8_t lastKey();
+#endif
+	
+#if USE_DELAY
+	void delay(uint16_t);
+#endif
+	
+#if USE_TEXTATTRIBUTES
+	void locate(Integer, Integer);
+#endif
+	
 	// New print line
 	void newline();
+	
 	void print(char);
+	// Execute command by function pointer
+	void execCommand(FunctionBlock::command);
 
 #if USE_MATRIX
 	/**
@@ -268,10 +291,24 @@ public:
 	 */
 	void assignMatrix(const char*, const char*, const char* = nullptr,
 	    MatrixOperation_t = MO_NOP);
+#if USE_DATA
+	void matrixRead(const char*);
+#endif
+#endif // USE_MATRIX
+
+#if USE_DATA
+	bool read(Parser::Value&);
 #endif
 	
 	void print(Integer, VT100::TextAttr = VT100::NO_ATTR);
-	void printTab(const Parser::Value&);
+#if USE_TEXTATTRIBUTES
+	/**
+	 * @brief control print space or tab
+	 * @param v Value of the spaces
+	 * @param flag true - TAB, false - SPC
+	 */
+	void printTab(const Parser::Value&, bool);
+#endif
 	void print(long, VT100::TextAttr = VT100::NO_ATTR);
 	void print(ProgMemStrings, VT100::TextAttr = VT100::NO_ATTR);
         void write(ProgMemStrings);
@@ -297,12 +334,16 @@ public:
 	// return from subprogram
 	void returnFromSub();
 	// save for loop
-	void pushForLoop(const char*, uint8_t, const Parser::Value&,
+	Program::StackFrame *pushForLoop(const char*, uint8_t, const Parser::Value&,
 	    const Parser::Value&);
 	bool pushValue(const Parser::Value&);
+	
 	void pushInputObject(const char*);
+	
 	bool popValue(Parser::Value&);
+	
 	bool popString(const char*&);
+	
 	void randomize();
 	/**
 	 * @brief iterate over loop
@@ -310,14 +351,15 @@ public:
 	 * @return loop end flag
 	 */
 	bool next(const char*);
+	bool testFor(Program::StackFrame&);
 
 	// Internal EEPROM commands
 #if USE_SAVE_LOAD
 
 	struct EEpromHeader_t
 	{
-		uint16_t len;
-		uint16_t magic_FFFFminuslen;
+		Pointer len;
+		Pointer magic_FFFFminuslen;
 		uint16_t crc16;
 	};
 	void save();
@@ -336,13 +378,12 @@ public:
 	 * @param v value to set
 	 */
 	void set(VariableFrame&, const Parser::Value&);
-	void set(ArrayFrame&, uint16_t, const Parser::Value&);
 	/**
 	 * @brief set a new value and possibly create new variable
 	 * @param name variable name
 	 * @param v value to assign
 	 */
-	Interpreter::VariableFrame *setVariable(const char*,
+	VariableFrame *setVariable(const char*,
 	    const Parser::Value&);
 	/**
 	 * @brief setarray element a given value with indexes on the stack
@@ -401,7 +442,7 @@ public:
 	
 	bool pushResult();
 
-	Program &_program;
+	Program _program;
 private:
 	class AttrKeeper;
 #if USE_MATRIX
@@ -428,7 +469,7 @@ private:
 	 * @param num overall elements number
 	 * @return 
 	 */
-	ArrayFrame *addArray(const char*, uint8_t, uint32_t);
+	ArrayFrame *addArray(const char*, uint8_t, uint16_t);
 
 	bool arrayElementIndex(ArrayFrame*, uint16_t&);
 #if USE_SAVE_LOAD
@@ -467,14 +508,23 @@ private:
 	// Global RESULT() variable
 	Parser::Value		 _result;
 #if LOOP_INDENT
-	uint8_t			_loopIndent;
+	// Loop indention spaces
+	uint8_t			 _loopIndent;
 #endif
 #if BASIC_MULTITERMINAL
 	static uint8_t		 _termnoGen;
 	uint8_t			 _termno;
 #endif
+#if USE_DELAY
+	// Milliseconds left to timeout end
+	uint32_t		_delayTimeout;
+#endif
+#if USE_DATA
+	// Data statement parser continue flag
+	bool			_dataParserContinue;
+#endif
 };
 
-}
+} // namespace BASIC
 
 #endif

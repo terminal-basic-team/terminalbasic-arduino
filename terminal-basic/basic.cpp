@@ -26,7 +26,7 @@ static const char strDynamic[] PROGMEM = "DYNAMIC";
 static const char strError[] PROGMEM = "ERROR";
 static const char strSemantic[] PROGMEM = "SEMANTIC";
 static const char strAt[] PROGMEM = "AT";
-static const char strReady[] PROGMEM = "READY";
+static const char strReady[] PROGMEM = CLI_PROMPT;
 static const char strBytes[] PROGMEM = "BYTES";
 static const char strAvailable[] PROGMEM = "AVAILABLE";
 static const char strucTERMINAL[] PROGMEM = "TERMINAL";
@@ -34,21 +34,28 @@ static const char strucBASIC[] PROGMEM = "BASIC";
 static const char strVERSION[] PROGMEM = "VERSION";
 static const char strTEXT[] PROGMEM = "TEXT";
 static const char strOF[] PROGMEM = "OF";
+#if USE_DUMP
 static const char strVARS[] PROGMEM = "VARS";
 static const char strARRAYS[] PROGMEM = "ARRAYS";
 static const char strSTACK[] PROGMEM = "STACK";
+#endif
 #if USESD
 static const char strDIR[] PROGMEM = "DIR";
 #endif
 static const char strREALLY[] PROGMEM = "REALLY";
 static const char strEND[] PROGMEM = "END";
+#if USE_TEXTATTRIBUTES
 static const char strVT100_PROLOGUESEQ[] PROGMEM = "\x1B[";
 static const char strVT100_CLS[] PROGMEM = "2J";
 static const char strVT100_NOATTR[] PROGMEM = "0m";
-#if USE_TEXTATTRIBUTES
 static const char strVT100_BRIGHT[] PROGMEM = "1m";
 static const char strVT100_UNDERSCORE[] PROGMEM = "4m";
 static const char strVT100_REVERSE[] PROGMEM = "7m";
+static const char strVT100_LINEHOME[] PROGMEM = "80D";
+#if SET_PRINTZNES
+static const char strVT100_CLEARZONES[] PROGMEM = "3g";
+static const char strVT100_SETZONE[] PROGMEM = "\x1BH";
+#endif
 #if USE_COLORATTRIBUTES
 static const char strVT100_RED[] PROGMEM = "31m";
 static const char strVT100_GREEN[] PROGMEM = "32m";
@@ -74,21 +81,28 @@ static PGM_P const progmemStrings[uint8_t(ProgMemStrings::NUM_STRINGS)] PROGMEM 
 	strVERSION, // VERSION
 	strTEXT, // TEXT
 	strOF, // OF
+#if USE_DUMP
 	strVARS, // VARS
 	strARRAYS, // ARRAYS
 	strSTACK, // STACK
+#endif
 #if USESD
 	strDIR, // DIR
 #endif
 	strREALLY, // REALLY
 	strEND, // END
+#if USE_TEXTATTRIBUTES
 	strVT100_PROLOGUESEQ, // x1B[
 	strVT100_CLS,
 	strVT100_NOATTR,
-#if USE_TEXTATTRIBUTES
 	strVT100_BRIGHT,
 	strVT100_UNDERSCORE,
 	strVT100_REVERSE,
+	strVT100_LINEHOME,
+#if SET_PRINTZNES
+	strVT100_CLEARZONES,
+	strVT100_SETZONE,
+#endif
 #if USE_COLORATTRIBUTES
 	strVT100_RED,
 	strVT100_GREEN,
@@ -97,8 +111,8 @@ static PGM_P const progmemStrings[uint8_t(ProgMemStrings::NUM_STRINGS)] PROGMEM 
 	strVT100_MAGENTA,
 	strVT100_CYAN,
 	strVT100_WHITE
-#endif
-#endif
+#endif // USE_COLORATTRIBUTES
+#endif // USE_TEXTATTRIBUTES
 };
 
 uint8_t*
@@ -109,7 +123,7 @@ scanTable(const uint8_t *token, const uint8_t table[], uint8_t &index)
 		uint8_t c = pgm_read_byte(table);
 		uint8_t ct = token[tokPos];
 		if (c == 0)
-			return NULL;
+			return nullptr;
 		
 		if (ct == c) {
 			++tokPos, ++table;
@@ -122,7 +136,7 @@ scanTable(const uint8_t *token, const uint8_t table[], uint8_t &index)
 			if (c & uint8_t(0x80))
 				c &= ~uint8_t(0x80);
 			if (c > ct && ct != 0)
-				return NULL;
+				return nullptr;
 			else {
 				while ((pgm_read_byte(table++) & uint8_t(0x80)) ==
 				    0);
@@ -137,7 +151,7 @@ scanTable(const uint8_t *token, const uint8_t table[], uint8_t &index)
 			++tabPos, tokPos=0;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 PGM_P
@@ -146,4 +160,4 @@ progmemString(ProgMemStrings index)
 	return (PGM_P)pgm_read_ptr(&progmemStrings[uint8_t(index)]);
 }
 
-}
+} // namespace BASIC

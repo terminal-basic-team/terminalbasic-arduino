@@ -56,6 +56,9 @@ private:
 	static bool func_log(Interpreter&);
 	static bool func_sqr(Interpreter&);
 	static bool func_pi(Interpreter&);
+#if M_ADDITIONAL
+	static bool func_cbr(Interpreter&);
+#endif
 #if M_REVERSE_TRIGONOMETRIC
 	static Real acs_r(Real);
 	static Real asn_r(Real);
@@ -70,6 +73,9 @@ private:
 	static Real exp_r(Real);
 	static Real log_r(Real);
 	static Real sqr_r(Real);
+#if M_ADDITIONAL
+	static Real cbr_r(Real);
+#endif
 	
 	static const FunctionBlock::function funcs[] PROGMEM;;
 };

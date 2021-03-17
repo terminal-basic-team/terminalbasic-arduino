@@ -16,7 +16,7 @@
  * License along with Posixcpp library. If not, see
  * <http://www.gnu.org/licenses/>.
  */
- 
+
 #ifdef __AVR_ARCH__
 
 #include "seriallight.hpp"

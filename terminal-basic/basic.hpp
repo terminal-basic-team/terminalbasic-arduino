@@ -31,28 +31,40 @@
 #endif
 
 #if S_INPUT == SERIAL_I
-    #define SERIAL_PORT Serial
+    #define SERIAL_PORT_I Serial
+#elif S_INPUT == SERIAL1_I
+    #define SERIAL_PORT_I Serial1
 #elif S_INPUT == SERIALL_I
-    #define SERIAL_PORT SerialL
+    #define SERIAL_PORT_I SerialL
 #elif S_INPUT == SERIALL1_I
-    #define SERIAL_PORT SerialL1
+    #define SERIAL_PORT_I SerialL1
 #elif S_INPUT == SERIALL2_I
-    #define SERIAL_PORT SerialL2
+    #define SERIAL_PORT_I SerialL2
 #elif S_INPUT == SERIALL3_I
-    #define SERIAL_PORT SerialL3
+    #define SERIAL_PORT_I SerialL3
+#elif S_INPUT == PS2UARTKB_I
+#undef USEPS2USARTKB
+#define USEPS2USARTKB     1
+#elif S_INPUT == SDL_I
+    #define USE_SDL_ISTREAM 1
 #endif
 #if S_OUTPUT == SERIAL_O
-#define SERIAL_PORT Serial
+#define SERIAL_PORT_O Serial
+#elif S_OUTPUT == SERIAL1_O
+#define SERIAL_PORT_O Serial1
 #elif S_OUTPUT == SERIALL_O
-#define SERIAL_PORT SerialL
+#define SERIAL_PORT_O SerialL
 #elif S_OUTPUT == SERIALL3_O
-#define SERIAL_PORT SerialL3
+#define SERIAL_PORT_O SerialL3
 #elif S_OUTPUT == UTFT_O
 #undef USEUTFT
-#define USEUTFT		          1
+#define USEUTFT            1
 #elif S_OUTPUT == TVOUT_O
 #undef USETVOUT
-#define USETVOUT	          1
+#define USETVOUT           1
+#elif S_OUTPUT == LIQCR_O
+#undef USELIQUIDCRYSTAL
+#define USELIQUIDCRYSTAL   1
 #endif
 
 #ifdef true
@@ -68,19 +80,27 @@
  */
 namespace BASIC
 {
+typedef uint16_t Pointer;
 // integer type
 typedef int16_t Integer;
+const Integer MaxInteger = Integer(32767);
 #if USE_LONGINT
 // long integer type
 typedef int32_t LongInteger;
+const LongInteger MaxLongInteger = LongInteger(2147483647l);
 typedef LongInteger INT;
+#define MAXINT MaxLongInteger
 #else
 typedef Integer INT;
+#define MAXINT MaxInteger
 #endif
 // floating point type
 #if USE_REALS
 typedef float Real;
 #endif
+
+// Number of characters in command/function identifier
+const uint8_t IDSIZE = 8;
 
 /**
  * @brief lexical tokens
@@ -92,132 +112,171 @@ enum class Token : uint8_t
 #if USE_DUMP
 	KW_ARRAYS,     // 2
 #endif
-	KW_BASE,       // 3
+//	KW_BASE,       // 3
 #if USE_SAVE_LOAD
 	COM_CHAIN,     // 4
 #endif
+#if USE_TEXTATTRIBUTES
 	COM_CLS,       // 5
+#endif
 #if USESTOPCONT
 	COM_CONT,      // 6
 #endif
 #if USE_MATRIX
 	KW_CON,        // 7
 #endif
+#if USE_DATA
+	KW_DATA,       // 8
+#endif
+#if USE_DEFFN
 	KW_DEF,        // 9
-//	COM_DELAY,     // 10
+#endif
+#if USE_DELAY
+	COM_DELAY,     // 10
+#endif
 #if USE_MATRIX
 	KW_DET,        // 11
 #endif
 	KW_DIM,        // 12
+#if USE_DIV_KW
+	KW_DIV,        // 13
+#endif
+#if USE_DOLOOP
+	KW_DO,         // 14
+#endif
 #if USE_DUMP
-	COM_DUMP,      // 14
+	COM_DUMP,      // 15
 #endif
-	KW_END,        // 15
-	KW_FALSE,      // 16
-	KW_FOR,        // 17
-	KW_GOSUB,      // 18
-	KW_GOTO,       // 19
-	KW_GO,         // 20
+	KW_END,        // 16
+	KW_FALSE,      // 17
+	KW_FOR,        // 18
+	KW_GOSUB,      // 19
+	KW_GOTO,       // 20
+#if CONF_SEPARATE_GO_TO
+	KW_GO,         // 21
+#endif
 #if USE_MATRIX
-	KW_IDN,        // 21
+	KW_IDN,        // 22
 #endif
-	KW_IF,         // 22
-	KW_INPUT,      // 23
+	KW_IF,         // 23
+	KW_INPUT,      // 24
 #if USE_MATRIX
-	KW_INV,        // 24
+	KW_INV,        // 25
 #endif
-	KW_LET,        // 25
-	COM_LIST,      // 26
+	KW_LET,        // 26
+	COM_LIST,      // 27
 #if USE_SAVE_LOAD
-	COM_LOAD,      // 27
+	COM_LOAD,      // 28
+#endif
+#if USE_TEXTATTRIBUTES
+	COM_LOCATE,    // 29
+#endif
+#if USE_DOLOOP
+	KW_LOOP,       // 30
 #endif
 #if USE_MATRIX
-	KW_MAT,        // 28
+	KW_MAT,        // 31
 #endif
-	COM_NEW,       // 29
-	KW_NEXT,       // 30
-	OP_NOT,        // 31
-	KW_ON,         // 32
-	KW_OPTION,     // 33
-	OP_OR,         // 34
-	KW_PRINT,      // 35
+#if USE_INTEGER_DIV
+	KW_MOD,        // 32
+#endif
+	COM_NEW,       // 33
+	KW_NEXT,       // 34
+	OP_NOT,        // 35
+	KW_ON,         // 36
+//	KW_OPTION,     // 37
+	OP_OR,         // 38
+	KW_PRINT,      // 39
 #if USE_RANDOM
-	KW_RANDOMIZE,  // 36
+	KW_RANDOMIZE,  // 40
 #endif
-	KW_REM,        // 38
-	KW_RETURN,     // 39
-	COM_RUN,       // 40
+#if USE_DATA
+	KW_READ,       // 41
+#endif
+	KW_REM,        // 42
+#if USE_DATA
+	KW_RESTORE,    // 43
+#endif
+	KW_RETURN,     // 44
+	COM_RUN,       // 45
 #if USE_SAVE_LOAD
-	COM_SAVE,      // 41
+	COM_SAVE,      // 46
 #endif
-	KW_STEP,       // 42
+#if CONF_USE_SPC_PRINT_COM
+	KW_SPC,        // 47
+#endif
+	KW_STEP,       // 48
 #if USESTOPCONT
-	KW_STOP,       // 43
+	KW_STOP,       // 49
 #endif
-	KW_TAB,        // 44
-	KW_THEN,       // 45
-	KW_TO,         // 46
+#if USE_TEXTATTRIBUTES
+	KW_TAB,        // 50
+#endif
+	KW_THEN,       // 51
+	KW_TO,         // 52
 #if USE_MATRIX
-	KW_TRN,        // 47
+	KW_TRN,        // 53
 #endif
-	KW_TRUE,       // 48
+	KW_TRUE,       // 54
 #if USE_DUMP
-	KW_VARS,       // 49
+	KW_VARS,       // 55
 #endif
+	OP_XOR,        // 56
 #if USE_MATRIX
-	KW_ZER,        // 50
+	KW_ZER,        // 57
 #endif
-
 	// *
-	STAR,          // 51
+	STAR,          // 58
 	// /
-	SLASH,         // 52
-#if USE_REALS
-	BACK_SLASH,    // 53
+	SLASH,         // 59
+#if USE_REALS && USE_INTEGER_DIV
+	BACK_SLASH,    // 60
 #endif
 	// +
-	PLUS,          // 54
+	PLUS,          // 61
 	// -
-	MINUS,         // 55
+	MINUS,         // 62
 	// =
-	EQUALS,        // 56
+	EQUALS,        // 63
 	// :
-	COLON,         // 57
+	COLON,         // 64
 	// ;
-	SEMI,          // 58
+	SEMI,          // 65
 	// <
-	LT,
+	LT,            // 66
 	// >
-	GT,
+	GT,            // 67
 	// <=
-	LTE,
+	LTE,           // 68
 	// >=
-	GTE,
+	GTE,           // 69
 	// <>
-	NE,
+	NE,            // 70
+#if CONF_USE_ALTERNATIVE_NE
 	//  ><
-	NEA,
-	// ,
-	COMMA,
-	// ^
-	POW,
-	// (
-	LPAREN,
-	// )
-	RPAREN,
-
-	INTEGER_IDENT,
-	REAL_IDENT,
-#if USE_LONGINT
-	LONGINT_IDENT,
+	NEA,           // 71
 #endif
-	STRING_IDENT,
-	BOOL_IDENT,
+	// ,
+	COMMA,         // 71
+	// ^
+	POW,           // 72
+	// (
+	LPAREN,        // 73
+	// )
+	RPAREN,        // 74
 
-	C_INTEGER,
-	C_REAL,
-	C_BOOLEAN,
-	C_STRING,
+	INTEGER_IDENT, // 75
+	REAL_IDENT,    // 76
+#if USE_LONGINT        // 77
+	LONGINT_IDENT, // 78
+#endif
+	STRING_IDENT,  // 79
+	BOOL_IDENT,    // 80
+
+	C_INTEGER,     // 81
+	C_REAL,        // 82
+	C_BOOLEAN,     // 83
+	C_STRING,      // 84
 
 	NUM_TOKENS
 };
@@ -237,20 +296,28 @@ enum class ProgMemStrings : uint8_t
 	S_VERSION,
 	S_TEXT,
 	S_OF,
+#if USE_DUMP
 	S_VARS,
 	S_ARRAYS,
 	S_STACK,
+#endif
 #if USESD
 	S_DIR,
 #endif
 	S_REALLY,
 	S_END,
+#if USE_TEXTATTRIBUTES
         VT100_ESCSEQ,
 	VT100_CLS,
 	VT100_NOATTR,
 	VT100_BRIGHT,
 	VT100_UNDERSCORE,
 	VT100_REVERSE,
+	VT100_LINEHOME,
+#if SET_PRINTZNES
+	VT100_CLEARZONES,
+	VT100_SETZONE,
+#endif
 #if USE_COLORATTRIBUTES
 	VT100_RED,
 	VT100_GREEN,
@@ -259,7 +326,8 @@ enum class ProgMemStrings : uint8_t
 	VT100_MAGENTA,
 	VT100_CYAN,
 	VT100_WHITE,
-#endif
+#endif // USE_COLORATTRIBUTES
+#endif // USE_TEXTATTRIBUTES
 	NUM_STRINGS
 };
 

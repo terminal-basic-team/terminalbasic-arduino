@@ -36,6 +36,9 @@ static const uint8_t mathTokens[] PROGMEM = {
 	'A', 'S', 'N'+0x80,
 	'A', 'T', 'N'+0x80,
 #endif // M_REVERSE_TRIGONOMETRIC
+#if M_ADDITIONAL
+	'C', 'B', 'R'+0x80,
+#endif
 #if M_TRIGONOMETRIC
 	'C', 'O', 'S'+0x80,
 	'C', 'O', 'T'+0x80,
@@ -58,6 +61,9 @@ const FunctionBlock::function Math::funcs[] PROGMEM = {
 	Math::func_acs,
 	Math::func_asn,
 	Math::func_atn,
+#endif
+#if M_ADDITIONAL
+	Math::func_cbr,
 #endif
 #if M_TRIGONOMETRIC
 	Math::func_cos,
@@ -116,7 +122,6 @@ Math::func_log(Interpreter &i)
 }
 
 #if M_TRIGONOMETRIC
-
 bool
 Math::func_cos(Interpreter &i)
 {
@@ -164,7 +169,6 @@ Math::tan_r(Real v)
 {
 	return (tan(v));
 }
-
 #endif // M_TRIGONOMETRIC
 
 bool
@@ -181,8 +185,15 @@ Math::func_pi(Interpreter &i)
 	return true;
 }
 
-#if M_REVERSE_TRIGONOMETRIC
+#if M_ADDITIONAL
+bool
+Math::func_cbr(Interpreter &i)
+{
+	return general_func(i, &cbr_r);
+}
+#endif
 
+#if M_REVERSE_TRIGONOMETRIC
 Real
 Math::acs_r(Real v)
 {
@@ -200,7 +211,6 @@ Math::atn_r(Real v)
 {
 	return (atan(v));
 }
-
 #endif // M_REVERSE_TRIGONOMETRIC
 
 Real
@@ -220,6 +230,14 @@ Math::sqr_r(Real v)
 {
 	return (sqrt(v));
 }
+
+#if M_ADDITIONAL
+Real
+Math::cbr_r(Real v)
+{
+	return (cbrt(v));
+}
+#endif
 
 }
 

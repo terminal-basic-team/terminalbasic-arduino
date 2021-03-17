@@ -74,7 +74,7 @@
  * KW_TRUE = "TRUE"
  * KW_VARS = "VARS"
  * KW_ZER = "ZER"
- * 
+ *
  * STAR = '*'
  * SLASH = '/'
  * PLUS = '+'
@@ -96,7 +96,7 @@
 
 namespace BASIC
 {
-
+/*
 const char sNOTOKENS[] PROGMEM = "NOTOKENS";  // 0
 const char sOP_AND[] PROGMEM = "AND";         // 1
 #if USE_DUMP
@@ -113,11 +113,16 @@ const char sCONT[] PROGMEM = "CONT";          // 6
 #if USE_MATRIX
 const char sCON[] PROGMEM = "CON";            // 5
 #endif
+const char sDATA[] PROGMEM = "DATA";          // 6
 const char sDEF[] PROGMEM = "DEF";            // 7
+//const char sDELAY[] PROGMEM = "DELAY";        // 8
 #if USE_MATRIX
 const char sDET[] PROGMEM = "DET";            // 5
 #endif
 const char sDIM[] PROGMEM = "DIM";            // 9
+#if USE_DOLOOP
+const char sDO[] PROGMEM = "DO";              //
+#endif
 #if USE_DUMP
 const char sDUMP[] PROGMEM = "DUMP";          // 10
 #endif
@@ -140,6 +145,9 @@ const char sLIST[] PROGMEM = "LIST";          // 20
 #if USE_SAVE_LOAD
 const char sLOAD[] PROGMEM = "LOAD";          // 21
 #endif
+#if USE_DOLOOP
+const char sLOOP[] PROGMEM = "LOOP";
+#endif
 #if USE_MATRIX
 const char sMAT[] PROGMEM = "MAT";
 #endif
@@ -153,6 +161,7 @@ const char sPRINT[] PROGMEM = "PRINT";        // 26
 #if USE_RANDOM
 const char sRANDOMIZE[] PROGMEM = "RANDOMIZE";// 27
 #endif
+const char sREAD[] PROGMEM = "READ";          // 28
 const char sREM[] PROGMEM = "REM";            // 29
 const char sRETURN[] PROGMEM = "RETURN";      // 30
 const char sRUN[] PROGMEM = "RUN";
@@ -175,10 +184,10 @@ const char sVARS[] PROGMEM = "VARS";
 #endif
 #if USE_MATRIX
 const char sZER[] PROGMEM = "ZER";
-#endif
+#endif*/
 const char sSTAR[] PROGMEM = "*";
 const char sSLASH[] PROGMEM = "/";
-#if USE_REALS
+#if USE_REALS && USE_INTEGER_DIV
 const char sBACK_SLASH[] PROGMEM = "\\";
 #endif
 const char sPLUS[] PROGMEM = "+";
@@ -191,108 +200,18 @@ const char sGT[] PROGMEM = ">";
 const char sLTE[] PROGMEM = "<=";
 const char sGTE[] PROGMEM = ">=";
 const char sNE[] PROGMEM = "<>";
+#if CONF_USE_ALTERNATIVE_NE
 const char sNEA[] PROGMEM = "><";
+#endif
 const char sCOMMA[] PROGMEM = ",";
 const char sPOW[] PROGMEM = "^";
 const char sLPAREN[] PROGMEM = "(";
 const char sRPAREN[] PROGMEM = ")";
-/*
-const char sINTEGER_IDENT[] PROGMEM = "INTEGER_IDENT";
-const char sREAL_IDENT[] PROGMEM = "REAL_IDENT";
-const char sLONGINT_IDENT[] PROGMEM = "LONGINT_IDENT";
-const char sSTRING_IDENT[] PROGMEM = "STRING_IDENT";
-const char sBOOL_IDENT[] PROGMEM = "BOOL_IDENT";
 
-const char sINTEGER[] PROGMEM = "C_INTEGER";
-const char sREAL[] PROGMEM = "C_REAL";
-const char sBOOLEAN[] PROGMEM = "C_BOOLEAN";
-const char sSTRING[] PROGMEM = "C_STRING";*/
-
-PGM_P const Lexer::tokenStrings[uint8_t(Token::NUM_TOKENS)] PROGMEM = {
-	sNOTOKENS,  // 0
-	sOP_AND,
-#if USE_DUMP
-	sARRAYS,    // 1
-#endif
-	sBASE,      // 2
-#if USE_SAVE_LOAD
-	sCHAIN,     // 3
-#endif
-	sCLS,       // 4
-#if USESTOPCONT
-	sCONT,
-#endif
-#if USE_MATRIX
-	sCON,
-#endif
-	sDEF,       // 6
-//	sDELAY,     // 7
-#if USE_MATRIX
-	sDET,
-#endif
-	sDIM,       // 8
-#if USE_DUMP
-	sDUMP,      // 9
-#endif
-	sEND,       // 10
-	sFALSE,     // 11
-	sFOR,       // 12
-	sGOSUB,     // 13
-	sGOTO,      // 14
-	sGO,        // 15
-#if USE_MATRIX
-	sIDN,
-#endif
-	sIF,        // 16
-	sINPUT,     // 17
-#if USE_MATRIX
-	sINV,
-#endif
-	sLET,       // 18
-	sLIST,      // 19
-#if USE_SAVE_LOAD
-	sLOAD,      // 20
-#endif
-#if USE_MATRIX
-	sMAT,
-#endif
-	sNEW,       // 21
-	sNEXT,      // 22
-	sOP_NOT,
-	sON,        // 23
-	sOPTION,    // 24
-	sOP_OR,
-	sPRINT,     // 25
-#if USE_RANDOM
-	sRANDOMIZE,
-#endif
-	sREM,
-	sRETURN,
-	sRUN,
-#if USE_SAVE_LOAD
-	sSAVE,
-#endif
-	sSTEP,
-#if USESTOPCONT
-	sSTOP,
-#endif
-	sTAB,
-	sTHEN,
-	sTO,
-#if USE_MATRIX
-	sTRN,
-#endif
-	sTRUE,
-#if USE_DUMP
-	sVARS,
-#endif
-#if USE_MATRIX
-	sZER,
-#endif
-
+PGM_P const Lexer::tokenStrings[] PROGMEM = {
 	sSTAR,
 	sSLASH,
-#if USE_REALS
+#if USE_REALS && USE_INTEGER_DIV
 	sBACK_SLASH,
 #endif
 	sPLUS, sMINUS,
@@ -301,15 +220,13 @@ PGM_P const Lexer::tokenStrings[uint8_t(Token::NUM_TOKENS)] PROGMEM = {
 	sCOLON, sSEMI,
 	sLT, sGT,
 	sLTE, sGTE,
-	sNE, sNEA,
+	sNE,
+#if CONF_USE_ALTERNATIVE_NE
+	sNEA,
+#endif
 	sCOMMA,
 	sPOW,
-	sLPAREN, sRPAREN,
-
-/*	sINTEGER_IDENT, sREAL_IDENT, sLONGINT_IDENT, sSTRING_IDENT,
-	sBOOL_IDENT,
-
-	sINTEGER, sREAL, sBOOLEAN, sSTRING*/
+	sLPAREN, sRPAREN
 };
 
 static const uint8_t tokenTable[] PROGMEM = {
@@ -318,23 +235,38 @@ static const uint8_t tokenTable[] PROGMEM = {
 #if USE_DUMP
 	'A', 'R', 'R', 'A', 'Y', 'S'+0x80, // 1
 #endif
-	'B', 'A', 'S', 'E'+0x80,           // 2
+//	'B', 'A', 'S', 'E'+0x80,           // 2
 #if USE_SAVE_LOAD
 	'C', 'H', 'A', 'I', 'N'+0x80,      // 3
 #endif
+#if USE_TEXTATTRIBUTES
 	'C', 'L', 'S'+0x80,                // 4
+#endif
 #if USESTOPCONT
 	'C', 'O', 'N', 'T'+0x80,
 #endif
 #if USE_MATRIX
 	'C', 'O', 'N'+0x80,
 #endif
+#if USE_DATA
+	'D', 'A', 'T', 'A'+0x80,           // 5
+#endif
+#if USE_DEFFN
 	'D', 'E', 'F'+0x80,                // 6
-//	'D', 'E', 'L', 'A', 'Y'+0x80,      // 7
+#endif
+#if USE_DELAY
+	'D', 'E', 'L', 'A', 'Y'+0x80,      // 7
+#endif
 #if USE_MATRIX
 	'D', 'E', 'T'+0x80,
 #endif
 	'D', 'I', 'M'+0x80,                // 8
+#if USE_DIV_KW
+	'D', 'I', 'V'+0x80,
+#endif
+#if USE_DOLOOP
+	'D', 'O'+0x80,
+#endif
 #if USE_DUMP
 	'D', 'U', 'M', 'P'+0x80,           // 9
 #endif
@@ -343,7 +275,9 @@ static const uint8_t tokenTable[] PROGMEM = {
 	'F', 'O', 'R'+0x80,                // 12
 	'G', 'O', 'S', 'U', 'B'+0x80,      // 13
 	'G', 'O', 'T', 'O'+0x80,           // 14
+#if CONF_SEPARATE_GO_TO
 	'G', 'O'+0x80,                     // 15
+#endif
 #if USE_MATRIX
 	'I', 'D', 'N'+0x80,
 #endif
@@ -357,30 +291,50 @@ static const uint8_t tokenTable[] PROGMEM = {
 #if USE_SAVE_LOAD
 	'L', 'O', 'A', 'D'+0x80,           // 20
 #endif
+#if USE_TEXTATTRIBUTES
+	'L', 'O', 'C', 'A', 'T', 'E'+0x80, // 21
+#endif
+#if USE_DOLOOP
+	'L', 'O', 'O', 'P'+0x80,
+#endif
 #if USE_MATRIX
 	'M', 'A', 'T'+0x80,
+#endif
+#if USE_INTEGER_DIV
+	'M', 'O', 'D'+0x80,
 #endif
 	'N', 'E', 'W'+0x80,                // 21
 	'N', 'E', 'X', 'T'+0x80,           // 22
 	'N', 'O', 'T'+0x80,
 	'O', 'N'+0x80,                     // 23
-	'O', 'P', 'T', 'I', 'O', 'N'+0x80, // 24
+//	'O', 'P', 'T', 'I', 'O', 'N'+0x80, // 24
 	'O', 'R'+0x80,
 	'P', 'R', 'I', 'N', 'T'+0x80,      // 25
 #if USE_RANDOM
 	'R', 'A', 'N', 'D', 'O', 'M', 'I', 'Z', 'E'+0x80, //26
 #endif
+#if USE_DATA
+	'R', 'E', 'A', 'D'+0x80,           // 27
+#endif
 	'R', 'E', 'M'+0x80,
+#if USE_DATA
+	'R', 'E', 'S', 'T', 'O', 'R', 'E'+0x80,
+#endif
 	'R', 'E', 'T', 'U', 'R', 'N'+0x80,
 	'R', 'U', 'N'+0x80,
 #if USE_SAVE_LOAD
 	'S', 'A', 'V', 'E'+0x80,
 #endif
+#if CONF_USE_SPC_PRINT_COM
+	'S', 'P', 'C'+0x80,
+#endif
 	'S', 'T', 'E', 'P'+0x80,
 #if USESTOPCONT
 	'S', 'T', 'O', 'P'+0x80,
 #endif
+#if USE_TEXTATTRIBUTES
 	'T', 'A', 'B'+0x80,
+#endif
 	'T', 'H', 'E', 'N'+0x80,
 	'T', 'O'+0x80,
 #if USE_MATRIX
@@ -390,6 +344,7 @@ static const uint8_t tokenTable[] PROGMEM = {
 #if USE_DUMP
 	'V', 'A', 'R', 'S'+0x80,
 #endif
+	'X', 'O', 'R'+0x80,
 #if USE_MATRIX
 	'Z', 'E', 'R'+0x80,
 #endif
@@ -412,18 +367,27 @@ operator<<(Logger &logger, Token tok)
 #define SYM (uint8_t(_string[_pointer]))
 
 const uint8_t*
-Lexer::getTokenString(Token t) const
+Lexer::getTokenString(Token t, uint8_t *buf)
 {
-	const uint8_t *result = tokenTable;
-	
+	const uint8_t *result = tokenTable, *pointer = result;
 	uint8_t c; uint8_t index = 0;
-	while ((c = pgm_read_byte(result)) != 0) {
-		if (index == uint8_t(t))
-			return (result);
-		if (c&0x80)
-			++index;
-		c=pgm_read_byte(++result);
-	}
+
+	do {
+		c=pgm_read_byte(pointer++);
+		if (c & 0x80) {
+			if (index++ == uint8_t(t)) {
+				pointer = result;
+				result = buf;
+				while (((c = pgm_read_byte(pointer++)) & 0x80) == 0)
+					*(buf++) = c;
+				*(buf++) = c&0x7F;
+				*buf = 0;
+				return result;
+			} else
+				result = pointer;
+		}
+	} while (c != 0);
+
 	return nullptr;
 }
 
@@ -431,7 +395,7 @@ void
 Lexer::init(const char *string)
 {
 	LOG_TRACE;
-	assert(string != NULL);
+	assert(string != nullptr);
 
 	_pointer = 0, _string = string;
 }
@@ -450,6 +414,10 @@ Lexer::getNext()
 			next();
 			if (_token == Token::C_INTEGER)
 				binaryInteger();
+#if USE_REALS
+                        else if (_token == Token::C_REAL)
+				binaryReal();
+#endif
 			return true;
 		} else if (isdigit(SYM)) {
 			decimalNumber();
@@ -522,7 +490,7 @@ Lexer::getNext()
 			_token = Token::SLASH;
 			next();
 			return true;
-#if USE_REALS
+#if USE_REALS && USE_INTEGER_DIV
 		case '\\':
 			_token = Token::BACK_SLASH;
 			next();
@@ -570,6 +538,7 @@ void
 Lexer::fitst_LT()
 {
 	next();
+#if OPT == OPT_SPEED
 	switch (SYM) {
 	case '=':
 		_token = Token::LTE;
@@ -581,7 +550,16 @@ Lexer::fitst_LT()
 		_token = Token::LT;
 		return;
 	}
-	
+#else
+	if (SYM == '=')
+		_token = Token::LTE;
+	else if (SYM == '>')
+		_token = Token::NE;
+	else {
+		_token = Token::LT;
+		return;
+	}
+#endif
 	next();
 }
 
@@ -589,17 +567,32 @@ void
 Lexer::fitst_GT()
 {
 	next();
+#if OPT == OPT_SPEED
 	switch (SYM) {
 	case '=':
 		_token = Token::GTE;
 		break;
+#if CONF_USE_ALTERNATIVE_NE
 	case '<':
 		_token = Token::NEA;
 		break;
+#endif // CONF_USE_ALTERNATIVE_NE
 	default:
 		_token = Token::GT;
 		return;
 	}
+#else
+	if (SYM == '=')
+		_token = Token::GTE;
+#if CONF_USE_ALTERNATIVE_NE
+	else if (SYM == '<')
+		_token = Token::NEA;
+#endif // CONF_USE_ALTERNATIVE_NE
+	else {
+		_token = Token::GT;
+		return;
+	}
+#endif
 	next();
 }
 
@@ -614,7 +607,7 @@ Lexer::decimalNumber()
 #else
 	_value.type = Parser::Value::INTEGER;
 	Integer *val = &_value.value.integer;
-#endif
+#endif // USE_LONGINT
 #if USE_REALS
 	if (SYM == '.')
 		*val = 0;
@@ -623,24 +616,46 @@ Lexer::decimalNumber()
 		*val = SYM - '0';
 	while (SYM > 0) {
 #if USE_REALS
-		if (SYM != '.') {
-			
+		if (_value.type == Parser::Value::REAL) {
+			next();
+			if (isdigit(SYM)) {
+				_value.value.real *= Real(10);
+				_value.value.real += SYM - '0';
+				continue;
+			}
+		} else if (SYM != '.') {
+
 #endif
 			next();
 			if (isdigit(SYM)) {
-				*val *= Integer(10);
-				*val += SYM - '0';
+#if USE_REALS
+				if (*val > MAXINT/INT(10)) {
+					_value.type = Parser::Value::REAL;
+					_value.value.real = Real(*val);
+					_value.value.real *= Real(10);
+					_value.value.real += SYM - '0';
+				} else {
+#endif
+					*val *= INT(10);
+					*val += SYM - '0';
+#if USE_REALS
+				}
+#endif
 				continue;
 			}
 #if USE_REALS
 		}
 #endif
+		
+			
 		switch (SYM) {
 #if USE_REALS
 		case '.':
 		{
-			_value.type = Parser::Value::REAL;
-			_value.value.real = Real(*val);
+			if (_value.type != Parser::Value::REAL) {
+				_value.type = Parser::Value::REAL;
+				_value.value.real = Real(*val);
+			}
 			Real d = 1;
 			while (true) {
 				next();
@@ -670,7 +685,7 @@ Lexer::decimalNumber()
 			if (_value.type == Parser::Value::INTEGER
 #if USE_LONGINT
 			    || _value.type == Parser::Value::LONG_INTEGER
-#endif   
+#endif
 			    )
 				_value = Real(_value);
 			if (!numberScale()) {
@@ -700,26 +715,33 @@ Lexer::binaryInteger()
 {
 #if USE_LONGINT
 	_value.type = Parser::Value::LONG_INTEGER;
-	LongInteger *val = &_value.value.longInteger;
-	*val = LongInteger(SYM) << 24;
-	next();
-	*val |= LongInteger(SYM) << 16;
-	next();
-	*val |= LongInteger(SYM) << 8;
-	next();
-	*val |= LongInteger(SYM);
-	next();
 #else
 	_value.type = Parser::Value::INTEGER;
-	Integer *val = &_value.value.integer;
-	*val = Integer(SYM) << uint8_t(8);
-	next();
-	*val |= Integer(SYM);
-	next();
+#endif
+	char buf[sizeof(INT)];
+	for (uint8_t i=0; i<sizeof(INT); ++i) {
+		buf[i] = SYM;
+		next();
+	}
+#if USE_LONGINT
+	_value.value.longInteger = *reinterpret_cast<const LongInteger*>(buf);
+#else
+	_value.value.integer = *reinterpret_cast<const Integer*>(buf);
 #endif
 }
 
 #if USE_REALS
+void
+Lexer::binaryReal()
+{
+	_value.type = Parser::Value::REAL;
+	char buf[sizeof(Real)];
+	for (uint8_t i=0; i<sizeof(Real); ++i) {
+		buf[i] = SYM;
+		next();
+	}
+	_value.value.real = *reinterpret_cast<const Real*>(buf);
+}
 
 bool
 Lexer::numberScale()
@@ -733,7 +755,7 @@ Lexer::numberScale()
 		next();
 	} else if (SYM == '+')
 		next();
-	
+
 	if (isdigit(SYM)) {
 		scale += SYM - '0';
 		next();
@@ -755,12 +777,16 @@ Lexer::numberScale()
 		}
 	}
 }
-#endif
+#endif // USE_REALS
 
 void
 Lexer::ident()
 {
-	while (isalnum(SYM)) {
+	while (isalnum(SYM)
+#if ALLOW_UNDERSCORE_ID
+	    || (SYM == '_')
+#endif
+	    ) {
 		pushSYM();
 	}
 	if (SYM == '%') {

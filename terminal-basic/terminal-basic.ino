@@ -17,14 +17,20 @@
  */
 
 #include "basic.hpp"
+#include "basic_interpreter.hpp"
+
 #include "arduino_logger.hpp"
 #include "basic_program.hpp"
 #ifdef ARDUINO
 #include "seriallight.hpp"
 #endif
 
-#if USEARDUINOIO
+#if CONF_MODULE_ARDUINOIO
 #include "basic_arduinoio.hpp"
+#endif
+
+#if USEPS2USARTKB
+#include "ps2uartstream.hpp"
 #endif
 
 #if USESD
@@ -39,14 +45,30 @@
 #include "basic_math.hpp"
 #endif
 
+#if USELIQUIDCRYSTAL
+#include "liquidcrystalprint.hpp"
+#endif
+
 #if USETVOUT
 #include "TVoutPrint.hpp"
-#include "fonts/Font6x8.h"
+#include "utility/Font6x8.h"
+#include "utility/Font8x8.h"
+#include "utility/Font6x8_cyr_koe13.hpp"
 #endif
 
 #if USE_EXTEEPROM
 #include "basic_exteeprom.hpp"
+#endif
+#if USE_WIRE
 #include <Wire.h>
+#endif
+
+#if USE_GFX
+#include "basic_gfx.hpp"
+#endif
+
+#if USE_SDL_ISTREAM
+#include "sdlstream.hpp"
 #endif
 
 /**
@@ -60,6 +82,10 @@ static UTFTTerminal utftPrint(utft);
 static uint8_t		tvOutBuf[TVoutEx::bufferSize(TVOUT_HORIZ, TVOUT_VERT)];
 static TVoutEx		tvOut;
 static TVoutPrint	tvoutPrint;
+#elif USELIQUIDCRYSTAL
+static LiquidCrystal lCrystal(LIQCR_RS, LIQCR_E, LIQCR_D0, LIQCR_D1, LIQCR_D2, LIQCR_D3);
+static uint8_t lCrBuf[20*4];
+static LiquidCrystalVt100 lsvt100(lCrystal, 20, 4, lCrBuf);
 #endif
 
 #if USESD
@@ -70,7 +96,7 @@ static BASIC::SDFSModule sdfs;
 static BASIC::Math mathBlock;
 #endif
 
-#if USEARDUINOIO
+#if CONF_MODULE_ARDUINOIO
 static BASIC::ArduinoIO arduinoIo;
 #endif
 
@@ -78,36 +104,53 @@ static BASIC::ArduinoIO arduinoIo;
 static BASIC::ExtEEPROM extEeprom;
 #endif
 
+#if USEPS2USARTKB
+static PS2UARTKeyboardStream ps2usartStream;
+#endif
+
+#if USE_GFX
+static BASIC::GFXModule gfxModule;
+#endif
+
+#if USE_SDL_ISTREAM
+static SDLStream sdlStream;
+#endif
+
 #if BASIC_MULTITERMINAL
-static BASIC::Interpreter::Program program(BASIC::PROGRAMSIZE / 5);
-static BASIC::Interpreter basic(SERIAL_PORT, SERIAL_PORT, program);
+static BASIC::Interpreter basic(SERIAL_PORT_I, SERIAL_PORT_O, BASIC::PROGRAMSIZE / 5);
 #ifdef HAVE_HWSERIAL1
-static BASIC::Interpreter::Program program1(BASIC::PROGRAMSIZE / 5);
-static BASIC::Interpreter basic1(SERIAL_PORT1, SERIAL_PORT1, program1);
+static BASIC::Interpreter basic1(SERIAL_PORT1, SERIAL_PORT1, BASIC::PROGRAMSIZE / 5);
 #endif
 #ifdef HAVE_HWSERIAL2
-static BASIC::Interpreter::Program program2(BASIC::PROGRAMSIZE / 5);
-static BASIC::Interpreter basic2(SERIAL_PORT2, SERIAL_PORT2, program2);
+static BASIC::Interpreter basic2(SERIAL_PORT2, SERIAL_PORT2, BASIC::PROGRAMSIZE / 5);
 #endif
 #ifdef HAVE_HWSERIAL3
-static BASIC::Interpreter::Program program3(BASIC::PROGRAMSIZE / 5);
-static BASIC::Interpreter basic3(SERIAL_PORT3, SERIAL_PORT3, program3);
+static BASIC::Interpreter basic3(SERIAL_PORT3, SERIAL_PORT3, BASIC::PROGRAMSIZE / 5);
 #endif
 #else
-static BASIC::Interpreter::Program program(BASIC::PROGRAMSIZE);
 #if USEUTFT
-static BASIC::Interpreter basic(SERIAL_PORT, utftPrint, program);
+static BASIC::Interpreter basic(SERIAL_PORT_I, utftPrint, BASIC::PROGRAMSIZE);
+#elif (USEPS2USARTKB && USETVOUT)
+static BASIC::Interpreter basic(ps2usartStream, tvoutPrint, BASIC::PROGRAMSIZE);
+#elif USEPS2USARTKB
+static BASIC::Interpreter basic(ps2usartStream, SERIAL_PORT_O, BASIC::PROGRAMSIZE);
 #elif USETVOUT
-static BASIC::Interpreter basic(SERIAL_PORT, tvoutPrint, program);
+#if USE_SDL_ISTREAM
+static BASIC::Interpreter basic(sdlStream, tvoutPrint, BASIC::PROGRAMSIZE);
 #else
-static BASIC::Interpreter basic(SERIAL_PORT, SERIAL_PORT, program);
+static BASIC::Interpreter basic(SERIAL_PORT_I, tvoutPrint, BASIC::PROGRAMSIZE);
+#endif // USE_SDL_ISTREAM
+#elif USELIQUIDCRYSTAL
+static BASIC::Interpreter basic(SERIAL_PORT_I, lsvt100, BASIC::PROGRAMSIZE);
+#else
+static BASIC::Interpreter basic(SERIAL_PORT_I, SERIAL_PORT_O, BASIC::PROGRAMSIZE);
 #endif // USEUTFT
 #endif // BASIC_MULTITERMINAL
 
 void
 setup()
 {
-#if USE_EXTEEPROM
+#if USE_WIRE
 	Wire.begin();
 	Wire.setClock(400000);
 #endif
@@ -115,14 +158,32 @@ setup()
 	XMCRA |= 1ul<<7; // Switch ext mem iface on
 	XMCRB = 0;
 #endif
-	SERIAL_PORT.begin(115200);
+#ifdef SERIAL_PORT_I
+	SERIAL_PORT_I.begin(SERIAL_I_BR);
+#endif
+#ifdef SERIAL_PORT_O
+#ifdef SERIAL_PORT_I
+        if (&SERIAL_PORT_I != &SERIAL_PORT_O)
+#endif // SERIAL_PORT_I
+            SERIAL_PORT_O.begin(SERIAL_O_BR);
+#endif // SERIAL_PORT_O
+#if USEPS2USARTKB
+        ps2usartStream.begin();
+#endif
 #if USETVOUT
+	tvOut.selectFont(Font6x8_cyr);
 	tvOut.begin(PAL, TVOUT_HORIZ, TVOUT_VERT, tvOutBuf);
-        tvOut.selectFont(Font6x8);
-#endif
-#if USEUTFT
+#elif USEUTFT
 	utftPrint.begin();
+#elif USELIQUIDCRYSTAL
+        lCrystal.begin(LIQCR_HORIZ, LIQCR_VERT);
+	lCrystal.cursor();
+	lCrystal.blink();
+        lsvt100.clear();
 #endif
+#if USE_SDL_ISTREAM
+	sdlStream.init();
+#endif	
 	
 #if BASIC_MULTITERMINAL
 #ifdef HAVE_HWSERIAL1
@@ -140,8 +201,12 @@ setup()
 
 	LOG_TRACE;
 
-#if USEARDUINOIO
+#if CONF_MODULE_ARDUINOIO
 	basic.addModule(&arduinoIo);
+#endif
+	
+#if USE_GFX
+	basic.addModule(&gfxModule);
 #endif
 	
 #if USEMATH

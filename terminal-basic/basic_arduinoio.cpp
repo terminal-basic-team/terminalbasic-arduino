@@ -18,7 +18,7 @@
 
 #include "basic_arduinoio.hpp"
 
-#if USEARDUINOIO
+#if CONF_MODULE_ARDUINOIO
 
 #include "Arduino.h"
 #include <assert.h>
@@ -45,12 +45,20 @@ const FunctionBlock::function ArduinoIO::_funcs[] PROGMEM = {
 
 static const uint8_t arduinoIOCommands[] PROGMEM = {
 	'A', 'W', 'R', 'T'+0x80,
+#if CONF_MODULE_ARDUINOIO_TONE
+	'D', 'N', 'O', 'T', 'O', 'N', 'E'+0x80,
+	'D', 'T', 'O', 'N', 'E'+0x80,
+#endif
 	'D', 'W', 'R', 'T'+0x80,
 	0
 };
 
 const FunctionBlock::command  ArduinoIO::_commands[] PROGMEM = {
 	ArduinoIO::comm_awrite,
+#if CONF_MODULE_ARDUINOIO_TONE
+	ArduinoIO::comm_notone,
+	ArduinoIO::comm_tone,
+#endif
 	ArduinoIO::comm_dwrite
 };
 
@@ -66,14 +74,14 @@ ArduinoIO::ArduinoIO()
 bool
 ArduinoIO::func_aread(Interpreter &i)
 {
-	return (general_func(i, aread_r));
+	return general_func(i, aread_r);
 }
 #endif
 
 bool
 ArduinoIO::func_aread_int(Interpreter &i)
 {
-	return (general_func(i, aread_i));
+	return general_func(i, aread_i);
 }
 
 bool
@@ -83,9 +91,9 @@ ArduinoIO::func_dread(Interpreter &i)
 	if (getIntegerFromStack(i, v)) {
 		pinMode(v, INPUT);
 		i.pushValue(bool(digitalRead(v)));
-		return (true);
+		return true;
 	} else
-		return (false);
+		return false;
 }
 
 bool
@@ -108,18 +116,49 @@ bool
 ArduinoIO::comm_dwrite(Interpreter &i)
 {
 	Parser::Value v(false);
-	i.popValue(v);
-	if (v.type == Parser::Value::BOOLEAN) {
-		INT v2;
-		if (getIntegerFromStack(i, v2)) {
-			pinMode(v2, OUTPUT);
-			digitalWrite(v2, bool(v));
-			return true;
+	if (i.popValue(v)) {
+		if (v.type == Parser::Value::BOOLEAN) {
+			INT v2;
+			if (getIntegerFromStack(i, v2)) {
+				pinMode(v2, OUTPUT);
+				digitalWrite(v2, bool(v));
+				return true;
+			}
 		}
 	}
 
 	return false;
 }
+
+#if CONF_MODULE_ARDUINOIO_TONE
+bool
+ArduinoIO::comm_tone(Interpreter &i)
+{
+	INT pin, freq, dur;
+	Parser::Value on(false);
+	if (getIntegerFromStack(i, dur)) {
+		if (getIntegerFromStack(i, freq)) {
+			if (getIntegerFromStack(i, pin)) {
+				tone(pin, freq, dur);
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool
+ArduinoIO::comm_notone(Interpreter &i)
+{
+	INT pin;
+	if (getIntegerFromStack(i, pin)) {
+		noTone(pin);
+		return true;
+	}
+	return false;
+}
+
+#endif
 
 #if USE_REALS
 Real
@@ -145,4 +184,4 @@ ArduinoIO::aread_i(INT v)
 
 }
 
-#endif // USEARDUINOIO
+#endif // CONF_MODULE_ARDUINOIO

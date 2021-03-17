@@ -19,20 +19,29 @@
 #ifndef BASIC_INTERPRETER_PROGRAM_HPP
 #define BASIC_INTERPRETER_PROGRAM_HPP
 
-#include "basic_interpreter.hpp"
+#include "arduinoext.hpp"
+#include "basic.hpp"
+#include "basic_parser_value.hpp"
 
 namespace BASIC
 {
+	
+class VariableFrame;
+class ArrayFrame;
+class Interpreter;
 
-class Interpreter::Program
+/**
+ * @brief BASIC program in memory
+ */
+class Program
 {
 	friend class Interpreter;
 public:
-
+	
 	/**
 	 * @brief BASIC program string object
 	 */
-	struct EXT_PACKED String
+	struct EXT_PACKED Line
 	{
 		// string decimal number (label)
 		uint16_t number;
@@ -40,6 +49,17 @@ public:
 		uint8_t size;
 		// string body
 		char text[];
+	};
+	
+	/**
+	 * @brief BASIC program position marker
+	 */
+	struct EXT_PACKED Position
+	{
+		// line index in program memory
+		Pointer index;
+		// position in line text
+		uint8_t position;
 	};
 
 	/**
@@ -138,10 +158,10 @@ public:
 	 */
 	void clearProg();
 	/**
-	 * @brief Move program state (variables and arrays to dest)
+	 * @brief Move program state (variables and arrays) to dest
 	 * @param dest New Data start
 	 */
-	void moveData(uint16_t);
+	void moveData(Pointer);
 	/**
 	 * @brief Clear program memory
 	 */
@@ -151,61 +171,64 @@ public:
 	 * @brief newSize 0 if use existing program, text size if clear vars
 	 *   and arrays
 	 */
-	void reset(uint16_t = 0);
+	void reset(Pointer = 0);
 	/**
 	 * @brief get actual size of stored program in bytes
 	 * @return program size
 	 */
-	uint16_t size() const;
+	Pointer size() const;
 	/**
 	 * @brief get next program line
-	 * @return line object or NULL if beyond last line
+	 * @return line object or nullptr if beyond last line
 	 */
-	String *getString();
+	Line *getNextLine();
+	/**
+	 * @brief get next program line, based on provided text position
+	 * @param pos Text position object
+	 * @return line object or nullptr if beyond last line
+	 */
+	Line *getNextLine(Position&);
 	/**
 	 * @brief Get current program line to be executed
 	 * @return pointer to current program line
 	 */
-	String *current() const;
-	
-	String *first() const;
-	
-	String *last() const;
-	
-	void jump(uint16_t newVal);
+	Line *current(const Position&) const;
 	/**
-	 * @brief program string at given index
-	 * @param index
-	 * @return string pointer or NULL if not exists
+	 * @brief Get first stored program line
+	 * @return 
 	 */
-	String *stringByIndex(uint16_t) const;
+	Line *first() const;
+	
+	Line *last() const;
+	
+	void jump(Pointer);
 	/**
-	 * @brief program string of given number
+	 * @brief program line at given address
+	 * @param address
+	 * @return string pointer or nullptr if not exists
+	 */
+	Line *lineByIndex(Pointer) const;
+	/**
+	 * @brief program line of given number
 	 * @param number Program line number to get
-	 * @param index start of the search
-	 * @return string pointer or NULL if not found
+	 * @param address start of the search
+	 * @return Line pointer or NULL if not found
 	 */
-	String *lineByNumber(uint16_t, uint16_t = 0);
-	/**
-	 * @brief 
-	 * @param string pointer
-	 * @return index
-	 */
-	uint16_t stringIndex(const String*) const;
+	Line *lineByNumber(uint16_t, Pointer = 0);
 	/**
 	 * @brief get variable frame at a given index
 	 * @param index basic memory address
 	 * @return pointer
 	 */
-	VariableFrame *variableByIndex(uint16_t);
+	VariableFrame *variableByIndex(Pointer);
 	VariableFrame *variableByName(const char*);
-	uint16_t variableIndex(VariableFrame*) const;
 	
-	ArrayFrame *arrayByIndex(uint16_t);
+	ArrayFrame *arrayByIndex(Pointer);
 	ArrayFrame *arrayByName(const char*);
-	uint16_t arrayIndex(ArrayFrame*) const;
+	
+	Pointer objectIndex(const void*) const;
 
-	StackFrame *stackFrameByIndex(uint16_t index);
+	StackFrame *stackFrameByIndex(Pointer);
 	StackFrame *currentStackFrame();
 	/**
 	 * @brief create new stack frame of given type and get its pointer
@@ -236,39 +259,16 @@ public:
 	 * @brief Insert line at current position
 	 * @param num line number
 	 * @param text line text
+	 * @param len line length
 	 */
 	bool insert(uint16_t, const char*, uint8_t);
-	
-	uint16_t textEnd() const { return _textEnd; }
-	void setTextEnd(uint16_t newVal)
-	{
-		_textEnd = newVal;
-	}
-	
-	uint16_t varsEnd() const { return _variablesEnd; }
-	void setVarsEnd(uint16_t newVal)
-	{
-		_variablesEnd = newVal;
-	}
-	
-	uint16_t arraysEnd() const { return _arraysEnd; }
-	void setArraysEnd(uint16_t newVal)
-	{
-		_arraysEnd = newVal;
-	}
-	
-	uint16_t sp() const { return _sp; }
-	void setSP(uint16_t newVal)
-	{
-		_sp = newVal;
-	}
 	
 #if USE_EXTMEM
 	char *_text;
 #else
 	char _text[PROGRAMSIZE];
 #endif
-	const uint16_t programSize;
+	const Pointer programSize;
 private:
 	
 	void _reset();
@@ -282,21 +282,27 @@ private:
 	 * @return flag of success
 	 */
 	bool addLine(uint16_t, const char*, uint16_t);
+	
 	// End of program text
-	uint16_t _textEnd;
+	Pointer _textEnd;
 	// End of variables area
-	uint16_t _variablesEnd;
-	uint16_t _arraysEnd, _sp;
-	// Current line index
-	uint16_t _current;
-	// Position in current line
-	uint8_t _textPosition;
+	Pointer _variablesEnd;
+	// End of arrays area
+	Pointer _arraysEnd;
+	// Stack pointer
+	Pointer _sp;
+	// Position of main execution thread
+	Position _current;
+#if USE_DATA
+	// Position of data reader
+	Position _dataCurrent;
+#endif
 	// Jump flag
 	bool _jumpFlag;
 	// Jump pointer
-	uint16_t _jump;
+	Pointer _jump;
 };
 
-}
+} // namespace BASIC
 
 #endif

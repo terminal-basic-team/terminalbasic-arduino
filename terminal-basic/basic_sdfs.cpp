@@ -22,7 +22,7 @@
 
 #include "basic_program.hpp"
 #include <assert.h>
-
+#include <avr/pgmspace.h>
 
 namespace BASIC
 {
@@ -60,7 +60,8 @@ SDFSModule::_init()
 	if (!SDCard::SDFS.begin())
 		abort();
 	
-	_root = SDCard::SDFS.open("/", FILE_WRITE);
+	_root = SDCard::SDFS.open("/", SDCard::Mode::WRITE | SDCard::Mode::READ |
+	    SDCard::Mode::CREAT);
 	if (!_root || !_root.isDirectory())
 		abort();
 }
@@ -68,12 +69,12 @@ SDFSModule::_init()
 bool
 SDFSModule::directory(Interpreter &i)
 {
-	static const char strEND[] PROGMEM = "SD CARD CONTENTS";
+	static const char str[] PROGMEM = "SD CARD CONTENTS";
 
 	_root.rewindDirectory();
 
 	char buf[17];
-	strcpy_P(buf, (PGM_P)strEND);
+	strcpy_P(buf, (PGM_P)str);
 	i.print(buf);
 	i.newline();
 	Integer index = 0;
@@ -92,21 +93,21 @@ SDFSModule::directory(Interpreter &i)
 		i.newline();
 		ff.close();
 	}
-	return (true);
+	return true;
 }
 
 bool
 SDFSModule::scratch(Interpreter &i)
 {
 	if (!i.confirm())
-		return (true);
+		return true;
 
 	char ss[16];
 	if (getFileName(i, ss)) {
 		SDCard::SDFS.remove(ss);
-		return (true);
+		return true;
 	} else
-		return (false);
+		return false;
 }
 
 bool
@@ -131,27 +132,42 @@ bool
 SDFSModule::dsave(Interpreter &i)
 {
 	SDCard::File f;
-	{
-		char ss[16];
-		if (getFileName(i, ss))
-			SDCard::SDFS.remove(ss);
-		f = SDCard::SDFS.open(ss, FILE_WRITE);
-	}
+	
+	{ // Stack section 1
+	char ss[16];
+	if (getFileName(i, ss))
+		SDCard::SDFS.remove(ss);
+	f = SDCard::SDFS.open(ss, SDCard::Mode::WRITE |
+	    SDCard::Mode::READ | SDCard::Mode::CREAT);
+	} // Stack section 1
 	if (!f)
-		return (false);
+		return false;
+	
 	i._program.reset();
+	{ // Stack section 2
 	Lexer lex;
-	for (Interpreter::Program::String *s = i._program.getString(); s != NULL;
-	    s = i._program.getString()) {
+	for (Program::Line *s = i._program.getNextLine(); s != nullptr;
+	    s = i._program.getNextLine()) {
 		f.print(s->number);
 		lex.init(s->text);
 		while (lex.getNext()) {
 			f.write(' ');
 			Token t = lex.getToken();
-			if (t <= Token::RPAREN) {
+			if (t < Token::STAR) {
 				char buf[16];
-				strcpy_P(buf, (PGM_P)pgm_read_word(
-					&(Lexer::tokenStrings[uint8_t(t)])));
+				const uint8_t *res = Lexer::getTokenString(t,
+				    reinterpret_cast<uint8_t*>(buf));
+				if (res != nullptr)
+					f.print(buf);
+				else {
+					f.close();
+					return false;
+				}
+			} else if (t <= Token::RPAREN) {
+				char buf[16];
+				strcpy_P(buf, (PGM_P)pgm_read_ptr(
+				    &(Lexer::tokenStrings[uint8_t(t)-
+				    uint8_t(Token::STAR)])));
 				f.print(buf);
 				if (t == Token::KW_REM) {
 					f.write(' ');
@@ -170,8 +186,9 @@ SDFSModule::dsave(Interpreter &i)
 		}
 		f.print('\n');
 	}
+	} // Stack section 2
 	f.close();
-	return (true);
+	return true;
 }
 
 bool
@@ -182,14 +199,16 @@ SDFSModule::_loadText(SDCard::File &f, Interpreter &i)
 		f.setTimeout(10);
 		size_t res = f.readBytesUntil('\n', buf, PROGSTRINGSIZE-1);
 		if (res > 0) {
+                	if (buf[res-1] == '\r')
+                        	buf[res-1] = 0;
 			Lexer lex;
 			lex.init(buf);
 			if (!lex.getNext() || lex.getToken() !=
 			    Token::C_INTEGER)
-				return (false);
+				return false;
 			if (!i._program.addLine(Integer(lex.getValue()),
 			    buf+lex.getPointer()))
-				return (false);
+				return false;
 		} else
 			break;
 	}
@@ -220,34 +239,38 @@ bool
 SDFSModule::header(Interpreter &i)
 {
 	if (!i.confirm())
-		return (true);
+		return true;
 
 	char ss[16];
 	_root.rewindDirectory();
-	for (SDCard::File ff = _root.openNextFile(FILE_WRITE); ff;
-	    ff = _root.openNextFile(FILE_WRITE)) {
+	for (SDCard::File ff = _root.openNextFile(SDCard::Mode::WRITE |
+	    SDCard::Mode::READ | SDCard::Mode::CREAT); ff;
+	    ff = _root.openNextFile(SDCard::Mode::WRITE |
+	    SDCard::Mode::READ | SDCard::Mode::CREAT)) {
 		ss[0] = '/'; strcpy(ss+1, ff.name());
 		ff.close();
 		if (!SDCard::SDFS.remove(ss))
-			return (false);
+			return false;
 	}
-	return (true);
+	return true;
 }
 
 bool
 SDFSModule::getFileName(Interpreter &i, char ss[])
 {
+	static const char strBAS[] PROGMEM = ".BAS";
+	
 	const char *s;
 	if (!i.popString(s))
-		return (false);
+		return false;
 	ss[0] = '/';
-	uint8_t len = strlen(s);
+	const uint8_t len = strlen(s);
 	strcpy(ss + 1, s);
-	strcpy(ss + len + 1, ".BAS");
+	strcpy_P(ss + len + 1, (PGM_P)strBAS);
 
-	return (SDCard::SDFS.exists(ss));
+	return SDCard::SDFS.exists(ss);
 }
 
-}
+} // namespace BASIC
 
 #endif // USESD

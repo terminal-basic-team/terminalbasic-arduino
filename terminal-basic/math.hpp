@@ -20,10 +20,10 @@
 #ifndef MATH_HPP
 #define MATH_HPP
 
-#include "Arduino.h"
+#include <Arduino.h>
+#include <math.h>
 #include <limits.h>
 #include <stdlib.h>
-#include <math.h>
 #include <float.h>
 #include <inttypes.h>
 
@@ -33,6 +33,14 @@
 
 #ifdef round
 #undef round
+#endif
+
+#ifndef M_PI
+#define M_PI		3.14159265358979323846
+#endif
+
+#ifndef M_PI_2
+#define M_PI_2		1.57079632679489661923
 #endif
 
 #ifndef M_PI_2l
@@ -108,56 +116,56 @@ template <>
 inline float math<float>
 ::abs(float arg)
 {
-	return (::fabsf(arg));
+	return ::fabsf(arg);
 }
 
 template <>
 inline double math<double>
 ::abs(double arg)
 {
-	return (::fabs(arg));
+	return ::fabs(arg);
 }
 
 template <>
 inline float math<float>
 ::floor(float arg)
 {
-	return (::floorf(arg));
+	return ::floorf(arg);
 }
 
 template <>
 inline double math<double>
 ::floor(double arg)
 {
-	return (::floor(arg));
+	return ::floor(arg);
 }
 
 template <>
 inline float math<float>
 ::round(float arg)
 {
-	return (::round(arg));
+	return ::round(arg);
 }
 
 template <>
 inline double math<double>
 ::round(double arg)
 {
-	return (::round(arg));
+	return ::round(arg);
 }
 
 template <>
 inline constexpr float math<float>
 ::pi()
 {
-	return (M_PIf);
+	return M_PIf;
 }
 
 template <>
 inline constexpr double math<double>
 ::pi()
 {
-	return (M_PId);
+	return M_PId;
 }
 
 template <>
@@ -165,9 +173,9 @@ inline constexpr long double math<long double>
 ::pi()
 {
 #ifdef M_PIl
-	return (M_PIl);
+	return M_PIl;
 #else
-	return (M_PId);
+	return M_PId;
 #endif
 }
 
@@ -175,14 +183,14 @@ template <>
 inline constexpr float math<float>
 ::pi_2()
 {
-	return (M_PI_2f);
+	return M_PI_2f;
 }
 
 template <>
 inline constexpr double math<double>
 ::pi_2()
 {
-	return (M_PI_2d);
+	return M_PI_2d;
 }
 
 template <>
@@ -190,9 +198,9 @@ inline constexpr long double math<long double>
 ::pi_2()
 {
 #ifdef M_PI_2l
-	return (M_PI_2l);
+	return M_PI_2l;
 #else
-	return (M_PI_2d);
+	return M_PI_2d;
 #endif
 }
 
@@ -200,84 +208,84 @@ template <>
 inline constexpr float math<float>
 ::pi3_2()
 {
-	return (M_PI3_2f);
+	return M_PI3_2f;
 }
 
 template <>
 inline constexpr double math<double>
 ::pi3_2()
 {
-	return (M_PI3_2d);
+	return M_PI3_2d;
 }
 
 template <>
 inline constexpr long double math<long double>
 ::pi3_2()
 {
-	return (M_PI3_2l);
+	return M_PI3_2l;
 }
 
 template <>
 inline constexpr float math<float>
 ::minimum()
 {
-	return (FLT_MIN);
+	return FLT_MIN;
 }
 
 template <>
 inline constexpr double math<double>
 ::minimum()
 {
-	return (DBL_MIN);
+	return DBL_MIN;
 }
 
 template <>
 inline constexpr long double math<long double>
 ::minimum()
 {
-	return (LDBL_MIN);
+	return LDBL_MIN;
 }
 
 template <>
 inline constexpr float math<float>
 ::maximum()
 {
-	return (FLT_MAX);
+	return FLT_MAX;
 }
 
 template <>
 inline constexpr double math<double>
 ::maximum()
 {
-	return (DBL_MAX);
+	return DBL_MAX;
 }
 
 template <>
 inline constexpr long double math<long double>
 ::maximum()
 {
-	return (LDBL_MAX);
+	return LDBL_MAX;
 }
 
 template <>
 inline constexpr float math<float>
 ::epsilon()
 {
-	return (FLT_EPSILON);
+	return FLT_EPSILON;
 }
 
 template <>
 inline constexpr double math<double>
 ::epsilon()
 {
-	return (DBL_EPSILON);
+	return DBL_EPSILON;
 }
 
 template <>
 inline constexpr long double math<long double>
 ::epsilon()
 {
-	return (LDBL_EPSILON);
+	return LDBL_EPSILON;
 }
 
 /**
@@ -304,15 +312,15 @@ almost_equal(T x, T y, unsigned ulp)
 {
 	if (x != y) {
 		if (x == T(0))
-			return (almost_zero(y, ulp));
+			return almost_zero(y, ulp);
 		else if (y == T(0))
-			return (almost_zero(x, ulp));
+			return almost_zero(x, ulp);
 		else
 			// the machine epsilon has to be scaled to the magnitude of the values used
 			// and multiplied by the desired precision in ULPs (units in the last place)
-			return (fabs(x - y) <= math<T>::epsilon() * max(abs(x), abs(y)) * ulp);
+			return fabs(x - y) <= math<T>::epsilon() * max(abs(x), abs(y)) * ulp;
 	} else
-		return (true);
+		return true;
 }
 
 inline bool
@@ -332,7 +340,7 @@ equals_zero(double f)
 inline bool
 equals_zero(long double f)
 {
-	return (equals_zero(double(f)));
+	return equals_zero(double(f));
 }
 
 enum class CartesianCoordinates2D_t : uint8_t
