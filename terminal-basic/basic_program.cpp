@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -131,7 +131,7 @@ Program::StackFrame::size(Type t)
 	case VALUE:
 		return sizeof (Type) + sizeof (Parser::Value);
 	case INPUT_OBJECT:
-		return sizeof (Type) + sizeof (InputBody);
+		return sizeof (Type) + sizeof (VariableBody);
 	default:
 		return 0;
 	}
@@ -149,7 +149,7 @@ Program::StackFrame::size(Type t)
 	else if (t == VALUE)
 		return (sizeof (Type) + sizeof (Parser::Value));
 	else if (t == INPUT_OBJECT)
-		return (sizeof (Type) + sizeof (InputBody));
+		return (sizeof (Type) + sizeof (VariableBody));
 	else
 		return 0;
 #endif
@@ -317,7 +317,8 @@ Program::addLine(uint16_t num, const char *line)
 
 	Lexer _lexer;
 	_lexer.init(line);
-	uint8_t position = 0, lexerPosition = _lexer.getPointer();
+	uint8_t position = 0;
+	uint8_t lexerPosition = _lexer.getPointer();
 
 	while (_lexer.getNext()) {
 		if (position >= (PROGSTRINGSIZE-1))
@@ -357,6 +358,7 @@ Program::addLine(uint16_t num, const char *line)
 		}
 #endif // USE_REALS
 		else { // Other tokens
+			tempBuffer[position++] = ' ';
 			while (line[lexerPosition] == ' ' ||
 			    line[lexerPosition] == '\t')
 				++lexerPosition;

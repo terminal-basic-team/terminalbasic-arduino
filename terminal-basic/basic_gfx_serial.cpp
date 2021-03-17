@@ -27,6 +27,12 @@ namespace BASIC
 
 void GFXModule::_init() {}
 
+static void
+write16(Interpreter &i, int16_t v)
+{
+    i.print(char(v>>8)); i.print(char(v&0xFF));
+}
+
 bool
 GFXModule::command_box(Interpreter &i)
 {
@@ -36,7 +42,12 @@ GFXModule::command_box(Interpreter &i)
 		if (getIntegerFromStack(i, w)) {
 			if (getIntegerFromStack(i, y)) {
 				if (getIntegerFromStack(i, x)) {
-					
+					i.print(char(ASCII::DLE));
+					i.print(char(GFXTERM::Command::BOX));
+					write16(i, x);
+					write16(i, y);
+					write16(i, w);
+					write16(i, h);
 					return true;
 				}
 			}
@@ -53,7 +64,11 @@ GFXModule::command_circle(Interpreter &i)
 	if (getIntegerFromStack(i, r)) {
 		if (getIntegerFromStack(i, y)) {
 			if (getIntegerFromStack(i, x)) {
-				
+				i.print(char(ASCII::DLE));
+				i.print(char(GFXTERM::Command::CIRCLE));
+				write16(i, x);
+				write16(i, y);
+				write16(i, r);
 				return true;
 			}
 		}
@@ -88,7 +103,12 @@ GFXModule::command_line(Interpreter &i)
 		if (getIntegerFromStack(i, x2)) {
 			if (getIntegerFromStack(i, y1)) {
 				if (getIntegerFromStack(i, x1)) {
-					
+					i.print(char(ASCII::DLE));
+					i.print(char(GFXTERM::Command::LINE));
+					write16(i, x1);
+					write16(i, y1);
+					write16(i, x2);
+					write16(i, y2);
 					return true;
 				}
 			}
@@ -100,11 +120,14 @@ GFXModule::command_line(Interpreter &i)
 bool
 GFXModule::command_lineto(Interpreter &i)
 {
-	INT x1,y1;
+	INT x,y;
 	
-	if (getIntegerFromStack(i, y1)) {
-		if (getIntegerFromStack(i, x1)) {
-			
+	if (getIntegerFromStack(i, y)) {
+		if (getIntegerFromStack(i, x)) {
+			i.print(char(ASCII::DLE));
+			i.print(char(GFXTERM::Command::LINETO));
+			write16(i, x);
+			write16(i, y);
 			return true;
 		}
 	}
@@ -119,7 +142,10 @@ GFXModule::command_point(Interpreter &i)
 	
 	if (getIntegerFromStack(i, y)) {
 		if (getIntegerFromStack(i, x)) {
-			
+			i.print(char(ASCII::DLE));
+			i.print(char(GFXTERM::Command::POINT));
+			write16(i, x);
+			write16(i, y);
 			return true;
 		}
 	}

@@ -31,12 +31,34 @@ public:
 	
 	enum class Command : uint8_t
 	{
+		NONE = 0x00,
 		// Sert terminal video mode
 		// param m - uint8_t mode number
 		MODE = 0x20,
 		// Set text cursor visible
 		// param bool (uint8_t) visible
-		CURSOR = 0x21
+		CURSOR = 0x21,
+		// Set color
+		// param uint8_t ink, uint8_t paper
+		COLOR = 0x22,
+		// Set active font
+		// param uint8_t font index
+		FONT = 0x23,
+		// Draw circle
+		// param int16_t cx, cy, r
+		CIRCLE = 0x24,
+		// Draw box (rectangle)
+		// param int16_t x,y, w,h
+		BOX = 0x25,
+		// Draw line
+		// param int16_t x1,y1, x2,y2
+		LINE = 0x26,
+		// Draw line from current position
+		// param int16_t x,y
+		LINETO = 0x26,
+		// Draw point
+		// param int16_t x,y
+		POINT = 0x27
 	};
 };
 

@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 
 namespace BASIC
 {
-	
+
 class VariableFrame;
 class ArrayFrame;
 class Interpreter;
@@ -120,7 +120,7 @@ public:
 		/**
 		 * @brief Input object frame body
 		 */
-		struct EXT_PACKED InputBody
+		struct EXT_PACKED VariableBody
 		{
 			enum Type : uint8_t
 			{
@@ -143,7 +143,7 @@ public:
 			uint8_t		arrayDimensions;
 			uint16_t	arrayDimension;
 			ForBody		forFrame;
-			InputBody	inputObject;
+			VariableBody	inputObject;
 			char		string[STRINGSIZE];
 			Parser::Value	value;
 		};
@@ -303,4 +303,4 @@ private:
 
 } // namespace BASIC
 
-#endif
+#endif // BASIC_INTERPRETER_PROGRAM_HPP

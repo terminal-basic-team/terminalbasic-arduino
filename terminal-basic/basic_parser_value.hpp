@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -104,18 +104,18 @@ public:
 	static size_t size(Type);
 	
 	Type type;
+	
 	Body value;
+	
 private:
 	/**
 	 * @brief match value type with the power type
-	 * @param 
 	 */
 	void powerMatchValue(const Value&);
-// Printable interface
+	// Printable interface
 	size_t printTo(Print& p) const override;
-
 };
 
-}
+} // namespace BASIC
 
-#endif
+#endif // BASIC_PARSER_VALUE_HPP

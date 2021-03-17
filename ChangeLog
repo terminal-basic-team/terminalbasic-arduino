@@ -1,3 +1,13 @@
+r1.2-beta3 (13.09.2018) Release, dedicated to my birthday
+
+  * Add BEEP command
+  * Add configurable real numbers precision
+  * Add LEFT$ function
+  * RND function has optional parameter
+  * Fix bug with concatenation of sequential identifiers
+  * Fix bug with unnecessary output
+  * Fix bug with INPUT command in multioperator lines
+
 r1.2-beta2 (21.06.2018)
 
   * Add ON .. GOTO control structure

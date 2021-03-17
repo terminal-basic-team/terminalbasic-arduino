@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,9 @@
 namespace BASIC
 {
 
+/**
+ * @brief Module, containing Arduino digital and abalog I/O functions
+ */
 class ArduinoIO : public FunctionBlock
 {
 public:
@@ -37,7 +40,7 @@ public:
 private:
 #if USE_REALS
 	static bool func_aread(Interpreter&);
-#endif
+#endif // USE_REALS
 	static bool func_aread_int(Interpreter&);
 	static bool func_dread(Interpreter&);
 	static bool comm_awrite(Interpreter&);
@@ -45,16 +48,16 @@ private:
 #if CONF_MODULE_ARDUINOIO_TONE
 	static bool comm_tone(Interpreter&);
 	static bool comm_notone(Interpreter&);
-#endif
+#if CONF_BEEP
+	static bool comm_beep(Interpreter&);
+#endif // CONF_BEEP
+#endif // CONF_MODULE_ARDUINOIO_TONE
 	
 #if USE_REALS
 	static Real aread_r(Real);
 #endif // USE_REALS
-#if USE_LONGINT
-	static LongInteger aread_i(LongInteger);
-#else
-	static Integer aread_i(Integer);
-#endif // USE_LONGINT
+
+	static INT aread_i(INT);
 	
 	static const FunctionBlock::function _funcs[] PROGMEM;
 	static const FunctionBlock::command _commands[] PROGMEM;
@@ -62,4 +65,4 @@ private:
 
 }
 
-#endif
+#endif // BASIC_ARDUINOIO_HPP

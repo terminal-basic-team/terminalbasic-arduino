@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -676,7 +676,6 @@ Parser::fImplicitAssignment(char *varName)
 			} else
 				_error = EXPRESSION_EXPECTED;
 		}
-
 	}
 	return false;
 }
@@ -1500,6 +1499,7 @@ Parser::fVarList()
 {
 	Token t;
 	char varName[IDSIZE];
+	
 	do {
 		if (!fIdentifier(varName))
 			return false;
@@ -1510,7 +1510,8 @@ Parser::fVarList()
 		if (!_lexer.getNext())
 			return true;
 		t = _lexer.getToken();
-		_lexer.getNext();
+		if (t == Token::COMMA)
+		    _lexer.getNext();
 	} while (t == Token::COMMA);
 	return true;
 }

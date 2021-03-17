@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2017-2018 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -293,7 +293,6 @@ Interpreter::step()
 		c = char(ASCII::NUL);
 		if (_input.available() > 0) {
 			c = _input.read();
-			_output.println(c, 16);
 #if USE_GET
 			_inputBuffer[0] = c;
 #endif // USE_GET
@@ -790,7 +789,7 @@ Interpreter::popValue(Parser::Value &v)
 		_program.pop();
 		return true;
 	} else {
-		raiseError(DYNAMIC_ERROR, OUTTA_MEMORY);
+//		raiseError(DYNAMIC_ERROR, OUTTA_MEMORY);
 		return false;
 	}
 }
@@ -1870,7 +1869,7 @@ ArrayFrame::numElements() const
 	
 	// Every dimension is from 0 to dimension[i], thats why 
 	// it is increased by 1
-	for (uint8_t i = 0; i < numDimensions; ++i)
+	for (uint8_t i=0u; i<numDimensions; ++i)
 		mul *= dimension[i] + 1;
 	
 	return mul;
