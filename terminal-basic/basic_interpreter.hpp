@@ -187,12 +187,14 @@ public:
 	enum State : uint8_t
 	{
 		SHELL,		// Wait for user input of line or command
-		PROGRAM_INPUT,	// 
+		PROGRAM_INPUT,	// INputting of the program lines
+#if BASIC_MULTITERMINAL
 		COLLECT_INPUT,	//
 		EXEC_INT,	// Interactive execute
+		GET_VAR_VALUE,
+#endif // BASIC_MULTITERMINAL
 		EXECUTE,	// Runniong the program
 		VAR_INPUT,	// Input of the variable value
-		GET_VAR_VALUE,
 		CONFIRM_INPUT	// Input of the confirmation
 	};
 #if USE_DUMP
@@ -221,6 +223,9 @@ public:
 	void exec();
 	// Clear screen
 	void cls();
+#if USESTOPCONT
+	void cont();
+#endif
 	// Output program memory
 	void list(uint16_t = 1, uint16_t = 0);
 #if USE_DUMP

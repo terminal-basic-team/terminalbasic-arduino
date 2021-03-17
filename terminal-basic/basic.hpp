@@ -22,8 +22,6 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-#include "helper.hpp"
-
 #ifdef ARDUINO
 #include "config_arduino.hpp"
 #elif defined __linux__
@@ -64,7 +62,6 @@
  */
 namespace BASIC
 {
-
 // integer type
 typedef int16_t Integer;
 #if USE_LONGINT
@@ -94,6 +91,9 @@ enum class Token : uint8_t
 	COM_CHAIN,     // 3
 #endif
 	COM_CLS,       // 4
+#if USESTOPCONT
+	COM_CONT,
+#endif
 #if USE_MATRIX
 	KW_CON,
 #endif
@@ -147,7 +147,9 @@ enum class Token : uint8_t
 	COM_SAVE,
 #endif
 	KW_STEP,
+#if USESTOPCONT
 	KW_STOP,
+#endif
 	KW_TAB,
 	KW_THEN,
 	KW_TO,
@@ -234,7 +236,9 @@ enum class ProgMemStrings : uint8_t
 	S_VARS,
 	S_ARRAYS,
 	S_STACK,
+#if USESD
 	S_DIR,
+#endif
 	S_REALLY,
 	S_END,
         VT100_ESCSEQ,

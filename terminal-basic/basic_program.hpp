@@ -270,6 +270,9 @@ public:
 #endif
 	const uint16_t programSize;
 private:
+	
+	void _reset();
+	
 	void pushBottom(StackFrame*);
 	/**
 	 * @brief Add tokenized program line

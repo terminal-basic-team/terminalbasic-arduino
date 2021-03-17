@@ -93,7 +93,7 @@ Interpreter::Program::lineByNumber(uint16_t number, uint16_t index)
 
 	if (index <= _textEnd) {
 		_current = index;
-		for (String *cur = getString(); cur != NULL;
+		for (String *cur = getString(); cur != nullptr;
 		    cur = getString()) {
 			if (cur->number == number) {
 				result = cur;
@@ -150,9 +150,7 @@ void
 Interpreter::Program::clearProg()
 {
 	_jumpFlag = false;
-	_textPosition = 0;
-	_sp = programSize;
-	_current = 0;
+	_reset();
 }
 
 void
@@ -290,7 +288,7 @@ Interpreter::Program::arrayByName(const char *name)
 	for (ArrayFrame *f = arrayByIndex(index); index < _arraysEnd;
 	    index += f->size(),
 	    f = arrayByIndex(index)) {
-		int8_t res = strcmp(name, f->name);
+		const int8_t res = strcmp(name, f->name);
 		if (res == 0) {
 			return f;
 		} else if (res < 0)
@@ -335,7 +333,7 @@ Interpreter::Program::addLine(uint16_t num, const char *line)
 				while (line[lexerPosition] == ' ' ||
 				    line[lexerPosition] == '\t')
 					++lexerPosition;
-				uint8_t remaining = strlen(line) - lexerPosition;
+				const uint8_t remaining = strlen(line) - lexerPosition;
 				memcpy(tempBuffer + position, line + lexerPosition,
 				    remaining);
 				position += remaining;
@@ -346,7 +344,7 @@ Interpreter::Program::addLine(uint16_t num, const char *line)
 #if USE_LONGINT
 			if ((position + 4) >= PROGSTRINGSIZE-1)
 				return false;
-			LongInteger v = LongInteger(_lexer.getValue());
+			const LongInteger v = LongInteger(_lexer.getValue());
 			tempBuffer[position++] = v >> 24;
 			tempBuffer[position++] = (v >> 16) & 0xFF;
 			tempBuffer[position++] = (v >> 8) & 0xFF;
@@ -354,7 +352,7 @@ Interpreter::Program::addLine(uint16_t num, const char *line)
 #else
 			if ((position + 2) >= PROGSTRINGSIZE-1)
 				return false;
-			Integer v = Integer(_lexer.getValue());
+			const Integer v = Integer(_lexer.getValue());
 			tempBuffer[position++] = (v >> 8) & 0xFF;
 			tempBuffer[position++] = v & 0xFF;
 #endif
@@ -453,8 +451,7 @@ Interpreter::Program::insert(uint16_t num, const char *text, uint8_t len)
 void
 Interpreter::Program::reset(uint16_t size)
 {
-	_current = 0, _textPosition = 0;
-	_sp = programSize;
+	_reset();
 	if (size > 0)
 		_textEnd = _variablesEnd = _arraysEnd = size;
 }
@@ -463,6 +460,13 @@ uint16_t
 Interpreter::Program::size() const
 {
 	return _textEnd;
+}
+
+void
+Interpreter::Program::_reset()
+{
+	_current = _textPosition = 0;
+	_sp = programSize;
 }
 
 }

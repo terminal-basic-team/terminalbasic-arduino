@@ -79,9 +79,9 @@ InternalFunctions::func_abs(Interpreter &i)
 		if (v < Parser::Value(Integer(0)))
 			v.switchSign();
 		i.pushValue(v);
-		return (true);
+		return true;
 	} else
-		return (false);
+		return false;
 }
 
 bool

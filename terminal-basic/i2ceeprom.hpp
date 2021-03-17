@@ -70,7 +70,7 @@ public:
 		const uint8_t res = Wire.endTransmission();
 		if (res != 0)
 			return false;
-		Wire.requestFrom(_address, 1);
+		Wire.requestFrom(_address, uint8_t(1));
 		uint8_t repeat = 3;
 		while (!Wire.available()) {
 			delay(1);
@@ -113,9 +113,9 @@ public:
 	
 	template<typename T>
 	bool
-	read(uint16_t address, const T &object)
+	read(uint16_t address, T &object)
 	{
-		uint8_t *buf = reinterpret_cast<const uint8_t*>(&object);
+		uint8_t *buf = reinterpret_cast<uint8_t*>(&object);
 		
 		for (uint16_t i=0, position=0; i<sizeof(object); ++i, ++position) {
 			if (position == 0) {
@@ -123,10 +123,8 @@ public:
 				Wire.write(address >> 8); // MSB
 				Wire.write(address & uint16_t(0xFF)); // LSB
 				const uint8_t res = Wire.endTransmission();
-				if (res != 0) {
-					Serial.println("Can't write address");
+				if (res != 0)
 					return false;
-				}
 				Wire.flush();
 				Wire.requestFrom(_address, sizeof(object));
 			}

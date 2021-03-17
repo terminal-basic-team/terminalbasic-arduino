@@ -20,6 +20,7 @@
 #include <assert.h>
 
 #include <stdbool.h>
+#include <ctype.h>
 
 #include "basic.hpp"
 
@@ -207,6 +208,7 @@ Interpreter::init()
 	_state = SHELL;
 }
 
+#if BASIC_MULTITERMINAL
 void
 Interpreter::step()
 {
@@ -274,6 +276,64 @@ Interpreter::step()
 		break;
 	}
 }
+#else
+void
+Interpreter::step()
+{
+	LOG_TRACE;
+
+	char c;
+
+	switch (_state) {
+		// waiting for user input command or program line
+	case SHELL:
+	{
+		print(ProgMemStrings::S_READY, VT100::BRIGHT);
+		newline();
+	}
+		// fall through
+		// waiting for user input next program line
+	case PROGRAM_INPUT:
+		//_state = COLLECT_INPUT;
+		_inputPosition = 0;
+		memset(_inputBuffer, 0xFF, PROGSTRINGSIZE);
+		while (!readInput());
+		exec();
+		break;
+	case VAR_INPUT:
+		while (nextInput()) {
+			_output.print('?');
+			_inputPosition = 0;
+			memset(_inputBuffer, 0xFF, PROGSTRINGSIZE);
+			while (!readInput());
+			doInput();
+		}
+		_state = EXECUTE;
+		break;
+	case EXECUTE: {
+		c = char(ASCII::NUL);
+#if defined(ARDUINO) || BASIC_MULTITERMINAL
+		if (_input.available() > 0)
+			c = _input.read();
+#endif
+		Program::String *s = _program.current();
+		if (s != nullptr && c != char(ASCII::EOT)) {
+			bool res;
+			if (!_parser.parse(s->text + _program._textPosition, res))
+				_program.getString();
+			else
+				_program._textPosition += _lexer.getPointer();
+			if (!res)
+				raiseError(STATIC_ERROR);
+		} else
+			_state = SHELL;
+	}
+	// Fall through
+	default:
+		break;
+	}
+}
+#endif // BASIC_MULTITERMINAL
 
 void
 Interpreter::exec()
@@ -297,14 +357,20 @@ Interpreter::exec()
 	} else {
 		bool res;
 		if (!_parser.parse(_inputBuffer+_inputPosition, res))
-			if (_state == EXEC_INT)
+			if (_state == PROGRAM_INPUT)
 				_state = SHELL;
 		if (!res)
 			raiseError(STATIC_ERROR);
 		_inputPosition += _lexer.getPointer();
 	}
 }
-
+#if USESTOPCONT
+void
+Interpreter::cont()
+{
+	_state = EXECUTE;
+}
+#endif
 void
 Interpreter::cls()
 {
@@ -465,14 +531,14 @@ Interpreter::print(Lexer &l)
 		case Token::C_REAL:
 		case Token::C_BOOLEAN:
 			print(l.getValue(), VT100::C_CYAN);
-			_output.write(' ');
+			_output.print(char(ASCII::SPACE));
 			break;
 		case Token::C_STRING:
 		{
 			AttrKeeper a(*this, VT100::C_MAGENTA);
-			_output.write(uint8_t(ASCII::QUMARK));
+			_output.print(char(ASCII::QUMARK));
 			_output.print(l.id());
-			_output.write(uint8_t(ASCII::QUMARK));
+			_output.print(char(ASCII::QUMARK));
 		}
 			break;
 		case Token::REAL_IDENT:
@@ -492,13 +558,13 @@ Interpreter::print(Lexer &l)
 			print(l.getValue(), VT100::C_CYAN);
 		else if (t == Token::C_STRING) {
 			AttrKeeper a(*this, VT100::C_MAGENTA);
-			_output.write(uint8_t(ASCII::QUMARK));
+			_output.print(char(ASCII::QUMARK));
 			_output.print(l.id());
-			_output.write(uint8_t(ASCII::QUMARK));
+			_output.print(char(ASCII::QUMARK));
 		} else if (t >= Token::INTEGER_IDENT && t <= Token::BOOL_IDENT)
 			print(l.id(), VT100::C_BLUE);
 		else
-			_output.print('?');
+			_output.print(char(ASCII::QMARK));
 #endif
 	}
 }
@@ -1031,9 +1097,9 @@ Interpreter::readInput()
 		case char(ASCII::DEL):
 			if (_inputPosition > 0) {
 				--_inputPosition;
-				_output.write(char(ASCII::BS));
-				_output.write(char(ASCII::SPACE));
-				_output.write(char(ASCII::BS));
+				_output.print(char(ASCII::BS));
+				_output.print(char(ASCII::SPACE));
+				_output.print(char(ASCII::BS));
 			}
 			break;
 		case char(ASCII::CR):
@@ -1042,11 +1108,14 @@ Interpreter::readInput()
 			_inputPosition = 0;
 			return true;
 		default:
+#if AUTOCAPITALIZE
+			c = toupper(c);
+#endif
 			// Only acept character if there is room for upcoming
 			// control one (line end or del/bs)
 			if (availableSize > 1) {
 				++_inputPosition;
-				_output.write(c);
+				_output.print(c);
 			}
 		}
 	}
@@ -1058,7 +1127,7 @@ Interpreter::print(const char *text, VT100::TextAttr attr)
 {
 	AttrKeeper _a(*this, attr);
 
-	_output.print(text), _output.print(' ');
+	_output.print(text), _output.print(char(ASCII::SPACE));
 }
 
 void
@@ -1066,7 +1135,7 @@ Interpreter::print(ProgMemStrings index, VT100::TextAttr attr)
 {
 	AttrKeeper _a(*this, attr);
 
-	write(index), _output.print(' ');
+	write(index), _output.print(char(ASCII::SPACE));
 }
 
 void
@@ -1148,7 +1217,7 @@ Interpreter::printMatrix(const char *name)
 				Parser::Value v;
 				if (array->get(row*(array->dimension[1]+1)+column,
 				    v))
-					this->print(v), _output.write(' ');
+					this->print(v), _output.print(char(ASCII::SPACE));
 				else
 					raiseError(DYNAMIC_ERROR,
 					    INVALID_ELEMENT_INDEX);
@@ -1476,7 +1545,7 @@ Interpreter::pushResult()
 void
 Interpreter::print(Token t)
 {
-	char buf[16];
+	char buf[10];
 	strcpy_P(buf, (PGM_P) pgm_read_word(&(Lexer::tokenStrings[
 	    uint8_t(t)])));
 	if (t < Token::STAR)
@@ -1491,7 +1560,7 @@ Interpreter::print(Integer i, VT100::TextAttr attr)
 {
 	AttrKeeper _a(*this, attr);
 
-	_output.print(i), _output.print(' ');
+	_output.print(i), _output.print(char(ASCII::SPACE));
 }
 
 void
@@ -1529,7 +1598,7 @@ Interpreter::print(long i, VT100::TextAttr attr)
 {
 	AttrKeeper _a(*this, attr);
 
-	_output.print(i), _output.print(' ');
+	_output.print(i), _output.print(char(ASCII::SPACE));
 }
 
 void
@@ -1692,7 +1761,7 @@ Interpreter::getVariable(const char *name)
 		Parser::Value v(Integer(0));
 		f = setVariable(name, v);
 	}
-	return (f);
+	return f;
 }
 
 void
@@ -1734,11 +1803,11 @@ Interpreter::confirm()
 	bool result = false;
 	do {
 		print(ProgMemStrings::S_REALLY);
-		print('?');
+		_output.print(char(ASCII::QMARK));
 		newline();
 		while (_input.available() <= 0);
 		char c = _input.read();
-		_output.write(c);
+		_output.print(c);
 		while (_input.available() <= 0);
 		if (_input.read() != int(ASCII::CR)) {
 			newline();
@@ -1811,7 +1880,7 @@ Interpreter::ArrayFrame::size() const
 	uint16_t mul = dataSize();
 	result += mul;
 
-	return (result);
+	return result;
 }
 
 uint16_t

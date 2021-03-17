@@ -101,7 +101,7 @@ ArduinoIO::comm_awrite(Interpreter &i)
 		}
 	}
 
-	return (false);
+	return false;
 }
 
 bool

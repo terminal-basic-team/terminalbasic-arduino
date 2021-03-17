@@ -86,15 +86,15 @@ FunctionBlock::_getFunction(const char *name) const
 FunctionBlock::command
 FunctionBlock::_getCommand(const char *name) const
 {
-	if (commandTokens == NULL)
-		return (NULL);
+	if (commandTokens == nullptr)
+		return nullptr;
 	
 	uint8_t index;
 	if (scanTable((const uint8_t*)name, commandTokens, index))
 		return (reinterpret_cast<FunctionBlock::command>(
 		    pgm_read_ptr(&commands[index])));
 
-	return (NULL);
+	return nullptr;
 }
 
 #if USE_REALS
@@ -116,25 +116,20 @@ FunctionBlock::general_func(Interpreter &i, _funcReal f)
 }
 #endif
 
-#if USE_LONGINT
-#define _Integer LongInteger
-#else
-#define _Integer Integer
-#endif // USE_LONGINT
 bool
 FunctionBlock::general_func(Interpreter &i, _funcInteger f)
 {
-	_Integer v;
+	INT v;
 	if (getIntegerFromStack(i, v)) {
 		v = (*f)(v);
 		i.pushValue(v);
-		return (true);
+		return true;
 	} else
-		return (false);
+		return false;
 }
 
 bool
-FunctionBlock::getIntegerFromStack(Interpreter &i, _Integer &num)
+FunctionBlock::getIntegerFromStack(Interpreter &i, INT &num)
 {
 	Parser::Value v(Integer(0));
 	if (i.popValue(v) && (
@@ -146,7 +141,7 @@ FunctionBlock::getIntegerFromStack(Interpreter &i, _Integer &num)
 	 || v.type == Parser::Value::REAL
 #endif
 	)) {
-		num  = _Integer(v);
+		num  = INT(v);
 		return true;
 	} else
 		return false;

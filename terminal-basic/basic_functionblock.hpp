@@ -49,11 +49,8 @@ protected:
 #if USE_REALS
 	typedef Real (*_funcReal)(Real);
 #endif // USE_REALS
-#if USE_LONGINT
-	typedef LongInteger (*_funcInteger)(LongInteger);
-#else
-	typedef Integer (*_funcInteger)(Integer);
-#endif // USE_LONGINT
+	typedef INT (*_funcInteger)(INT);
+
 	explicit FunctionBlock(FunctionBlock* =NULL);
 	
 	virtual void _init() {}
@@ -88,13 +85,8 @@ protected:
 	 */
 	static bool general_func(Interpreter&, _funcInteger);
 	
-#if USE_LONGINT
-	#define _Integer LongInteger
-#else
-	#define _Integer Integer
-#endif // USE_LONGINT
-	static bool getIntegerFromStack(Interpreter&, _Integer&);
-#undef _Integer
+	static bool getIntegerFromStack(Interpreter&, INT&);
+	
 	const uint8_t *commandTokens;
 	const FunctionBlock::command *commands;
 	const uint8_t *functionTokens;

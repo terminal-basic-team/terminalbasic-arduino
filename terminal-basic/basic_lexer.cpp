@@ -106,6 +106,9 @@ const char sBASE[] PROGMEM = "BASE";          // 3
 const char sCHAIN[] PROGMEM = "CHAIN";        // 4
 #endif
 const char sCLS[] PROGMEM = "CLS";            // 5
+#if USESTOPCONT
+const char sCONT[] PROGMEM = "CONT";
+#endif
 #if USE_MATRIX
 const char sCON[] PROGMEM = "CON";            // 5
 #endif
@@ -159,7 +162,9 @@ const char sRUN[] PROGMEM = "RUN";
 const char sSAVE[] PROGMEM = "SAVE";
 #endif
 const char sSTEP[] PROGMEM = "STEP";
+#if USESTOPCONT
 const char sSTOP[] PROGMEM = "STOP";
+#endif
 const char sTAB[] PROGMEM = "TAB";
 const char sTHEN[] PROGMEM = "THEN";
 const char sTO[] PROGMEM = "TO";
@@ -216,6 +221,9 @@ PGM_P const Lexer::tokenStrings[uint8_t(Token::NUM_TOKENS)] PROGMEM = {
 	sCHAIN,     // 3
 #endif
 	sCLS,       // 4
+#if USESTOPCONT
+	sCONT,
+#endif
 #if USE_MATRIX
 	sCON,
 #endif
@@ -269,7 +277,9 @@ PGM_P const Lexer::tokenStrings[uint8_t(Token::NUM_TOKENS)] PROGMEM = {
 	sSAVE,
 #endif
 	sSTEP,
+#if USESTOPCONT
 	sSTOP,
+#endif
 	sTAB,
 	sTHEN,
 	sTO,
@@ -317,6 +327,9 @@ static const uint8_t tokenTable[] PROGMEM = {
 	'C', 'H', 'A', 'I', 'N'+0x80,      // 3
 #endif
 	'C', 'L', 'S'+0x80,                // 4
+#if USESTOPCONT
+	'C', 'O', 'N', 'T'+0x80,
+#endif
 #if USE_MATRIX
 	'C', 'O', 'N'+0x80,
 #endif
@@ -370,7 +383,9 @@ static const uint8_t tokenTable[] PROGMEM = {
 	'S', 'A', 'V', 'E'+0x80,
 #endif
 	'S', 'T', 'E', 'P'+0x80,
+#if USESTOPCONT
 	'S', 'T', 'O', 'P'+0x80,
+#endif
 	'T', 'A', 'B'+0x80,
 	'T', 'H', 'E', 'N'+0x80,
 	'T', 'O'+0x80,
@@ -393,7 +408,7 @@ Logger&
 operator<<(Logger &logger, Token tok)
 {
 	char buf[12];
-	strcpy_P(buf, (PGM_P) pgm_read_word(&(Lexer::tokenStrings[tok])));
+	strcpy_P(buf, (PGM_P) pgm_read_word(&(Lexer::tokenStrings[uint8_t(tok)])));
 
 	logger.log(buf);
 	return (logger);
@@ -415,7 +430,7 @@ Lexer::getTokenString(Token t) const
 			++index;
 		c=pgm_read_byte(++result);
 	}
-	return NULL;
+	return nullptr;
 }
 
 void

@@ -23,7 +23,7 @@
 #include <Arduino.h>
 #include <Stream.h>
 
-#include <HardwareSerial.h>
+#include "HardwareSerial.h"
 
 #define SERIAL_8N1 0x06
 

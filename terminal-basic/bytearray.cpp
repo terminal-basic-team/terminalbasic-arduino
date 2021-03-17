@@ -20,6 +20,7 @@
 #include "bytearray.hpp"
 
 #include "Print.h"
+#include "ascii.hpp"
 #include <stdlib.h>
 
 ByteArray::ByteArray() :
@@ -56,37 +57,32 @@ ByteArray::printTo(Print& p) const
 		// Leading zeros of the absolute address
 		size_t addr = i + uintptr_t(data());
 		uint8_t digits;
-		/*for (digits = 0; addr > 15; addr >>= 4, ++digits);
-		while (++digits < sizeof(intptr_t)*2)
-			p.print('0');
 		
-		p.print(i + intptr_t(data()), HEX), p.print('(');
-		*/
 		// Leading zeros of the relative address
 		addr = i;
 		for (digits = 0; addr > 15; addr >>= 4, ++digits);
 		while (++digits < sizeof(intptr_t)*2)
 			p.print('0');
 		
-		p.print(i, HEX)/*, p.print(')')*/, p.print(":\t");
+		p.print(i, HEX), p.print(":\t");
 		size_t j;
 		for (j = 0; j < 8; ++j, ++ii) {
 			if (ii >= size())
 				break;
 			uint8_t c = data()[ii];
 			if (c > 0x0F) {
-				res += p.print(' ');
-				res += p.print(c, 16);
+				res += p.print(char(ASCII::SPACE));
+				res += p.print(c, HEX);
 			} else {
-				res += p.print(' ');
+				res += p.print(char(ASCII::SPACE));
 				res += p.print('0');
-				res += p.print(c, 16);
+				res += p.print(c, HEX);
 			}
 		}
-		for (; j < 8; ++j)
-			res += p.print("   ");
+		for (; j < 8*3; ++j)
+			res += p.print(char(ASCII::SPACE));
 		res += p.print('\t');
-		for (size_t j = 0; j < 8; ++j, ++i) {
+		for (j = 0; j < 8; ++j, ++i) {
 			if (i >= size())
 				break;
 			const char c = ((const char*) data())[i];
@@ -97,5 +93,5 @@ ByteArray::printTo(Print& p) const
 		}
 		res += p.println();
 	}
-	return (res);
+	return res;
 }

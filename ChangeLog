@@ -1,3 +1,10 @@
+r1.0-alpha3 (26.06.2017) - Release, dedicated to the p
+
+  * Single terminal mode optimisation
+  * Different code size optimisations
+  * STOP/CONT works and are condition compilable
+  * Fix bug with TAB() expression under a false IF THEN branch
+
 r1.0-alpha2 (12.06.2017) - Release, dedicated to the Russia day
 
   * Synchronized with tvoutex library
