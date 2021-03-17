@@ -1,4 +1,17 @@
-r1.1-alpha1 (28.08.2017) - Release, dedicated to the
+r1.1-alpha2 (03.10.2017) - Release, dedicated to The International Day of Non-Violence
+
+  * Netbeans project updated for usage of Arduino IDE 1.8.4
+  * Add LOCATE command
+  * GO TO (instead GOTO) is condition compilable
+  * Fix loop body indention with the presence of REM lines
+  * Fix TAB and SPC print commands
+  * Fix comparision of boolean values
+  * Alternative equals symbol ("><") and "_" in identifiers are condition compilable
+  * Fix loading programs with CR symbol at the line end
+  * Fix long integers logical operations
+  * Some FLASH and SRAM optimisations
+
+r1.1-alpha1 (28.08.2017) - Release, dedicated to the Great March on Washington
 
   * Add support of Atmega1284-based single chip computers by Dan
     https://hackaday.io/project/2428-single-chip-avr-basic-computer-v03

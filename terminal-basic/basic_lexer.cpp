@@ -74,7 +74,7 @@
  * KW_TRUE = "TRUE"
  * KW_VARS = "VARS"
  * KW_ZER = "ZER"
- * 
+ *
  * STAR = '*'
  * SLASH = '/'
  * PLUS = '+'
@@ -121,7 +121,7 @@ const char sDET[] PROGMEM = "DET";            // 5
 #endif
 const char sDIM[] PROGMEM = "DIM";            // 9
 #if USE_DOLOOP
-const char sDO[] PROGMEM = "DO";              // 
+const char sDO[] PROGMEM = "DO";              //
 #endif
 #if USE_DUMP
 const char sDUMP[] PROGMEM = "DUMP";          // 10
@@ -200,12 +200,14 @@ const char sGT[] PROGMEM = ">";
 const char sLTE[] PROGMEM = "<=";
 const char sGTE[] PROGMEM = ">=";
 const char sNE[] PROGMEM = "<>";
+#if CONF_USE_ALTERNATIVE_NE
 const char sNEA[] PROGMEM = "><";
+#endif
 const char sCOMMA[] PROGMEM = ",";
 const char sPOW[] PROGMEM = "^";
 const char sLPAREN[] PROGMEM = "(";
 const char sRPAREN[] PROGMEM = ")";
-	
+
 PGM_P const Lexer::tokenStrings[] PROGMEM = {
 /*	nullptr,	// 0
 	nullptr,	// 1
@@ -310,7 +312,10 @@ PGM_P const Lexer::tokenStrings[] PROGMEM = {
 	sCOLON, sSEMI,
 	sLT, sGT,
 	sLTE, sGTE,
-	sNE, sNEA,
+	sNE,
+#if CONF_USE_ALTERNATIVE_NE
+	sNEA,
+#endif
 	sCOMMA,
 	sPOW,
 	sLPAREN, sRPAREN
@@ -357,7 +362,9 @@ static const uint8_t tokenTable[] PROGMEM = {
 	'F', 'O', 'R'+0x80,                // 12
 	'G', 'O', 'S', 'U', 'B'+0x80,      // 13
 	'G', 'O', 'T', 'O'+0x80,           // 14
+#if CONF_SEPARATE_GO_TO
 	'G', 'O'+0x80,                     // 15
+#endif
 #if USE_MATRIX
 	'I', 'D', 'N'+0x80,
 #endif
@@ -370,6 +377,9 @@ static const uint8_t tokenTable[] PROGMEM = {
 	'L', 'I', 'S', 'T'+0x80,           // 19
 #if USE_SAVE_LOAD
 	'L', 'O', 'A', 'D'+0x80,           // 20
+#endif
+#if USE_TEXTATTRIBUTES
+	'L', 'O', 'C', 'A', 'T', 'E'+0x80, // 21
 #endif
 #if USE_DOLOOP
 	'L', 'O', 'O', 'P'+0x80,
@@ -396,11 +406,16 @@ static const uint8_t tokenTable[] PROGMEM = {
 #if USE_SAVE_LOAD
 	'S', 'A', 'V', 'E'+0x80,
 #endif
+#if CONF_USE_SPC_PRINT_COM
+	'S', 'P', 'C'+0x80,
+#endif
 	'S', 'T', 'E', 'P'+0x80,
 #if USESTOPCONT
 	'S', 'T', 'O', 'P'+0x80,
 #endif
+#if USE_TEXTATTRIBUTES
 	'T', 'A', 'B'+0x80,
+#endif
 	'T', 'H', 'E', 'N'+0x80,
 	'T', 'O'+0x80,
 #if USE_MATRIX
@@ -436,7 +451,7 @@ Lexer::getTokenString(Token t, uint8_t *buf)
 {
 	const uint8_t *result = tokenTable, *pointer = result;
 	uint8_t c; uint8_t index = 0;
-	
+
 	do {
 		c=pgm_read_byte(pointer++);
 		if (c & 0x80) {
@@ -599,6 +614,7 @@ void
 Lexer::fitst_LT()
 {
 	next();
+#if OPT == OPT_SPEED
 	switch (SYM) {
 	case '=':
 		_token = Token::LTE;
@@ -610,7 +626,16 @@ Lexer::fitst_LT()
 		_token = Token::LT;
 		return;
 	}
-	
+#else
+	if (SYM == '=')
+		_token = Token::LTE;
+	else if (SYM == '>')
+		_token = Token::NE;
+	else {
+		_token = Token::LT;
+		return;
+	}
+#endif
 	next();
 }
 
@@ -618,17 +643,32 @@ void
 Lexer::fitst_GT()
 {
 	next();
+#if OPT == OPT_SPEED
 	switch (SYM) {
 	case '=':
 		_token = Token::GTE;
 		break;
+#if CONF_USE_ALTERNATIVE_NE
 	case '<':
 		_token = Token::NEA;
 		break;
+#endif // CONF_USE_ALTERNATIVE_NE
 	default:
 		_token = Token::GT;
 		return;
 	}
+#else
+	if (SYM == '=')
+		_token = Token::GTE;
+#if CONF_USE_ALTERNATIVE_NE
+	else if (SYM == '<')
+		_token = Token::NEA;
+#endif // CONF_USE_ALTERNATIVE_NE
+	else {
+		_token = Token::GT;
+		return;
+	}
+#endif
 	next();
 }
 
@@ -643,7 +683,7 @@ Lexer::decimalNumber()
 #else
 	_value.type = Parser::Value::INTEGER;
 	Integer *val = &_value.value.integer;
-#endif
+#endif // USE_LONGINT
 #if USE_REALS
 	if (SYM == '.')
 		*val = 0;
@@ -653,7 +693,7 @@ Lexer::decimalNumber()
 	while (SYM > 0) {
 #if USE_REALS
 		if (SYM != '.') {
-			
+
 #endif
 			next();
 			if (isdigit(SYM)) {
@@ -699,7 +739,7 @@ Lexer::decimalNumber()
 			if (_value.type == Parser::Value::INTEGER
 #if USE_LONGINT
 			    || _value.type == Parser::Value::LONG_INTEGER
-#endif   
+#endif
 			    )
 				_value = Real(_value);
 			if (!numberScale()) {
@@ -762,7 +802,7 @@ Lexer::numberScale()
 		next();
 	} else if (SYM == '+')
 		next();
-	
+
 	if (isdigit(SYM)) {
 		scale += SYM - '0';
 		next();

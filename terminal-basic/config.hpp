@@ -46,7 +46,7 @@ namespace BASIC
  * When enabled, all variables and arrays, which names are not ending with "$ ! %"
  * are treated as reals. Mathematical functions support depend on this option
  */
-#define USE_REALS               1
+#define USE_REALS           1
 
 #if USE_REALS
 /*
@@ -62,17 +62,17 @@ namespace BASIC
 /*
  * ACS ASN ATN
  */
-#define M_REVERSE_TRIGONOMETRIC	1
+#define M_REVERSE_TRIGONOMETRIC	0
 /*
  * CBR (cubic root) ...
  */
-#define M_ADDITIONAL            1
+#define M_ADDITIONAL            0
 #endif // USEMATH
 
 #endif // USE_REALS
 
 // Use string functions and operations
-#define USE_STRINGOPS        1
+#define USE_STRINGOPS      1
 	
 #if USE_STRINGOPS
 // GET$ function, returns string from last pressed key symbol
@@ -85,6 +85,14 @@ namespace BASIC
 #define USE_LEN            1
 #endif
 
+/**
+ * Allow GO TO OPERATOR in addition to GOTO
+ */
+#define CONF_SEPARATE_GO_TO     1
+/*
+ * Use >< as not-equals operator (with default <>)
+ */
+#define CONF_USE_ALTERNATIVE_NE 0
 /*
  * Support of 4-byte integer datatype
  * Functions, variables and arrays of long integer type ends with double % mark
@@ -94,7 +102,7 @@ namespace BASIC
  * DUMP command support
  * This command can be used to see BASIC memory image, variables and arrays list
  */
-#define USE_DUMP             1
+#define USE_DUMP             0
 /*
  * Clear program memory on NEW command
  */
@@ -110,14 +118,22 @@ namespace BASIC
 /**
  * Support of DATA/READ statements
  */
-#define USE_DATA             1
+#define USE_DATA             0
 /*
  * Use vt100 text attributes
  */
 #define USE_TEXTATTRIBUTES   1
 #if USE_TEXTATTRIBUTES
-#define USE_COLORATTRIBUTES  1 // Use vt100 color attributes
-#endif
+/*
+ * Use vt100 color attributes
+ */
+#define USE_COLORATTRIBUTES  1
+/*
+ * Support of SPC(N) print command
+ */
+#define CONF_USE_SPC_PRINT_COM  1
+#endif // USE_TEXTATTRIBUTES
+
 #define USE_SAVE_LOAD        1 // SAVE, LOAD and CHAIN commands support
 #if USE_SAVE_LOAD
 #define SAVE_LOAD_CHECKSUM   1 // Compute checksums while SAVE, LOAD and CHAIN
@@ -132,7 +148,7 @@ namespace BASIC
 #define OPT_SIZE      2
 #define OPT           OPT_SIZE
 
-#define USESD            0 // SDcard module
+#define USESD         0 // SDcard module
 
 #define CONF_MODULE_ARDUINOIO      1 // Arduino IO module
 #if CONF_MODULE_ARDUINOIO
@@ -147,7 +163,7 @@ namespace BASIC
 #define EXTEEPROM_SIZE   32768
 #endif // USE_EXTEEPROM
 
-#define USE_DOLOOP       1
+#define USE_DOLOOP       0
 /*
  * Indention of the loop bodies
  */
@@ -158,7 +174,7 @@ namespace BASIC
 /*
  * GFX module
  */
-#define USE_GFX          1
+#define USE_GFX          0
     
     
 /*
@@ -197,6 +213,6 @@ const uint8_t STRINGSIZE = 65;
 // Number of characters in variable name
 const uint8_t VARSIZE = 5;
 
-}
+} // namespace BASIC
 
 #endif // CONFIG_HPP

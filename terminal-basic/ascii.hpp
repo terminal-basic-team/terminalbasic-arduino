@@ -51,6 +51,7 @@ enum class ASCII : uint8_t
 	QMARK = '?',
 	DOT = '.',
 	COLON = ':',
+	SEMICOLON = ';',
 	QUMARK = '\"',
 	LPAREN = '(',
 	RPAREN = ')',

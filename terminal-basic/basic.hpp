@@ -77,6 +77,7 @@ namespace BASIC
 {
 // integer type
 typedef int16_t Integer;
+const Integer MaxInteger = 1 << (sizeof(Integer)*8-1);
 #if USE_LONGINT
 // long integer type
 typedef int32_t LongInteger;
@@ -134,7 +135,9 @@ enum class Token : uint8_t
 	KW_FOR,        // 17
 	KW_GOSUB,      // 18
 	KW_GOTO,       // 19
+#if CONF_SEPARATE_GO_TO
 	KW_GO,         // 20
+#endif
 #if USE_MATRIX
 	KW_IDN,        // 21
 #endif
@@ -147,6 +150,9 @@ enum class Token : uint8_t
 	COM_LIST,      // 26
 #if USE_SAVE_LOAD
 	COM_LOAD,      // 27
+#endif
+#if USE_TEXTATTRIBUTES
+	COM_LOCATE,
 #endif
 #if USE_DOLOOP
 	KW_LOOP,       // 28
@@ -173,11 +179,16 @@ enum class Token : uint8_t
 #if USE_SAVE_LOAD
 	COM_SAVE,      // 41
 #endif
-	KW_STEP,       // 42
-#if USESTOPCONT
-	KW_STOP,       // 43
+#if CONF_USE_SPC_PRINT_COM
+	KW_SPC,        // 42
 #endif
+	KW_STEP,       // 43
+#if USESTOPCONT
+	KW_STOP,       // 44
+#endif
+#if USE_TEXTATTRIBUTES
 	KW_TAB,        // 44
+#endif
 	KW_THEN,       // 45
 	KW_TO,         // 46
 #if USE_MATRIX
@@ -218,8 +229,10 @@ enum class Token : uint8_t
 	GTE,
 	// <>
 	NE,
+#if CONF_USE_ALTERNATIVE_NE
 	//  ><
 	NEA,
+#endif
 	// ,
 	COMMA,
 	// ^
@@ -260,9 +273,11 @@ enum class ProgMemStrings : uint8_t
 	S_VERSION,
 	S_TEXT,
 	S_OF,
+#if USE_DUMP
 	S_VARS,
 	S_ARRAYS,
 	S_STACK,
+#endif
 #if USESD
 	S_DIR,
 #endif
@@ -275,6 +290,7 @@ enum class ProgMemStrings : uint8_t
 	VT100_BRIGHT,
 	VT100_UNDERSCORE,
 	VT100_REVERSE,
+	VT100_LINEHOME,
 #if USE_COLORATTRIBUTES
 	VT100_RED,
 	VT100_GREEN,

@@ -235,7 +235,7 @@ InternalFunctions::func_rnd(Interpreter &i)
 	Parser::Value v(Integer(random()));
 #endif
 	i.pushValue(v);
-	return (true);
+	return true;
 }
 #endif // USE_RANDOM
 

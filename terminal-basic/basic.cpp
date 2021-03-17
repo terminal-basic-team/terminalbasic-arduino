@@ -34,9 +34,11 @@ static const char strucBASIC[] PROGMEM = "BASIC";
 static const char strVERSION[] PROGMEM = "VERSION";
 static const char strTEXT[] PROGMEM = "TEXT";
 static const char strOF[] PROGMEM = "OF";
+#if USE_DUMP
 static const char strVARS[] PROGMEM = "VARS";
 static const char strARRAYS[] PROGMEM = "ARRAYS";
 static const char strSTACK[] PROGMEM = "STACK";
+#endif
 #if USESD
 static const char strDIR[] PROGMEM = "DIR";
 #endif
@@ -49,6 +51,7 @@ static const char strVT100_NOATTR[] PROGMEM = "0m";
 static const char strVT100_BRIGHT[] PROGMEM = "1m";
 static const char strVT100_UNDERSCORE[] PROGMEM = "4m";
 static const char strVT100_REVERSE[] PROGMEM = "7m";
+static const char strVT100_LINEHOME[] PROGMEM = "80D";
 #if USE_COLORATTRIBUTES
 static const char strVT100_RED[] PROGMEM = "31m";
 static const char strVT100_GREEN[] PROGMEM = "32m";
@@ -74,9 +77,11 @@ static PGM_P const progmemStrings[uint8_t(ProgMemStrings::NUM_STRINGS)] PROGMEM 
 	strVERSION, // VERSION
 	strTEXT, // TEXT
 	strOF, // OF
+#if USE_DUMP
 	strVARS, // VARS
 	strARRAYS, // ARRAYS
 	strSTACK, // STACK
+#endif
 #if USESD
 	strDIR, // DIR
 #endif
@@ -89,6 +94,7 @@ static PGM_P const progmemStrings[uint8_t(ProgMemStrings::NUM_STRINGS)] PROGMEM 
 	strVT100_BRIGHT,
 	strVT100_UNDERSCORE,
 	strVT100_REVERSE,
+	strVT100_LINEHOME,
 #if USE_COLORATTRIBUTES
 	strVT100_RED,
 	strVT100_GREEN,

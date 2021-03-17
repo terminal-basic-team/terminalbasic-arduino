@@ -25,6 +25,7 @@
 #define CONFIG_ARDUINO_HPP
 
 #include "config.hpp"
+#include "seriallight.hpp"
 
 /**
  * Parameters
@@ -34,11 +35,11 @@
 #define S_INPUT SERIALL_I
 
 // Output select
-#define S_OUTPUT UTFT_O
+#define S_OUTPUT TVOUT_O
 
-#define USEUTFT		          0
-#define USETVOUT	          0
-#define USEPS2USARTKB             0
+#define USEUTFT            0
+#define USETVOUT	       0
+#define USEPS2USARTKB      0
 
 // Use multiterminal mode
 #define BASIC_MULTITERMINAL       0
@@ -64,7 +65,11 @@ const uint16_t PROGRAMSIZE = EXTMEM_SIZE;
 #elif defined (__AVR_ATmega1284__) || defined (__AVR_ATmega1284P__)
 const uint16_t PROGRAMSIZE = 8192;
 #elif defined (__AVR_ATmega2560__)
-const uint16_t PROGRAMSIZE = 4096;
+#if (S_OUTPUT != TVOUT_O) && (USE_EXTMEM == 0)
+const uint16_t PROGRAMSIZE = 6144;
+#else
+const uint16_t PROGRAMSIZE = 1024;
+#endif
 #elif defined (__AVR_ATmega128__) || defined (__AVR_ATmega128A__)
 const uint16_t PROGRAMSIZE = 3072;
 #elif defined (__AVR_ATmega328__) || defined (__AVR_ATmega328P__)

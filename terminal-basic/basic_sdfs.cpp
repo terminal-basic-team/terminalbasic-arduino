@@ -182,14 +182,16 @@ SDFSModule::_loadText(SDCard::File &f, Interpreter &i)
 		f.setTimeout(10);
 		size_t res = f.readBytesUntil('\n', buf, PROGSTRINGSIZE-1);
 		if (res > 0) {
+                	if (buf[res-1] == '\r')
+                        	buf[res-1] = 0;
 			Lexer lex;
 			lex.init(buf);
 			if (!lex.getNext() || lex.getToken() !=
 			    Token::C_INTEGER)
-				return (false);
+				return false;
 			if (!i._program.addLine(Integer(lex.getValue()),
 			    buf+lex.getPointer()))
-				return (false);
+				return false;
 		} else
 			break;
 	}

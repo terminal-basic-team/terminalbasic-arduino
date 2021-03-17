@@ -146,6 +146,7 @@ Parser::Value::operator Integer() const
 Parser::Value &
 Parser::Value::operator-()
 {
+#if OPT == OPT_SPEED
 	switch (type) {
 #if USE_LONGINT
 	case LONG_INTEGER:
@@ -167,6 +168,20 @@ Parser::Value::operator-()
 		// undefined
 		break;
 	}
+#else
+	if (type == INTEGER)
+		value.integer = -value.integer;
+#if USE_LONGINT
+	else if (type == LONG_INTEGER)
+		value.longInteger = -value.longInteger;
+#endif // USE_LONGINT
+#if USE_REALS
+	else if (type == REAL)
+		value.real = -value.real;
+#endif // USE_REALS
+	else if (type == BOOLEAN)
+		value.boolean = !value.boolean;
+#endif
 	return *this;
 }
 
@@ -195,8 +210,10 @@ Parser::Value::operator==(const Value &rhs) const
 #endif
 	case INTEGER:
 		return this->value.integer == Integer(rhs);
+	case BOOLEAN:
+		return this->value.boolean == bool(rhs);
 	default:
-		break;
+        	return false;
 	}
 }
 
@@ -220,7 +237,7 @@ Parser::Value::operator>(const Value &rhs) const
 	case INTEGER:
 		return this->value.integer > Integer(rhs);
 	default:
-		break;
+        	return false;
 	}
 }
 
@@ -255,7 +272,8 @@ Parser::Value::operator+=(const Value &rhs)
 #endif
 	case INTEGER: this->value.integer += Integer(rhs);
 		break;
-	default: break;
+	default:
+		break;
 	}
 
 	return *this;
@@ -280,7 +298,8 @@ Parser::Value::operator-=(const Value &rhs)
 #endif
 	case INTEGER: this->value.integer -= Integer(rhs);
 		break;
-	default: break;
+	default:
+		break;
 	}
 
 	return *this;
@@ -305,7 +324,8 @@ Parser::Value::operator*=(const Value &rhs)
 #endif
 	case INTEGER: this->value.integer *= Integer(rhs);
 		break;
-	default: break;
+	default:
+		break;
 	}
 
 	return *this;
@@ -436,7 +456,7 @@ Parser::Value::size(Type t)
 #endif
 	case BOOLEAN:
 		return sizeof(bool);
-	case STRING:
+	default:
 		return 0;
 	}
 }
@@ -451,9 +471,15 @@ Parser::Value::operator|=(const Value &v)
 	case BOOLEAN:
 		this->value.boolean |= bool(v);
 		break;
+#if USE_LONGINT
+	case LONG_INTEGER:
+		this->value.longInteger |= LongInteger(v);
+		break;
+#endif
 	default:
 		break;
 	}
+
 	return *this;
 }
 
@@ -467,6 +493,11 @@ Parser::Value::operator&=(const Value &v)
 	case BOOLEAN:
 		this->value.boolean &= bool(v);
 		break;
+#if USE_LONGINT
+	case LONG_INTEGER:
+		this->value.longInteger &= LongInteger(v);
+		break;
+#endif
 	default:
 		break;
 	}

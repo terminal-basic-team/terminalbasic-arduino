@@ -247,6 +247,10 @@ public:
 	void delay(uint16_t);
 #endif
 	
+#if USE_TEXTATTRIBUTES
+	void locate(Integer, Integer);
+#endif
+	
 	// New print line
 	void newline();
 	
@@ -286,7 +290,14 @@ public:
 #endif
 	
 	void print(Integer, VT100::TextAttr = VT100::NO_ATTR);
-	void printTab(const Parser::Value&);
+#if USE_TEXTATTRIBUTES
+	/**
+	 * 
+	 * @param v Value of the spaces
+	 * @param flag true - TAB, false - SPC
+	 */
+	void printTab(const Parser::Value&, bool);
+#endif
 	void print(long, VT100::TextAttr = VT100::NO_ATTR);
 	void print(ProgMemStrings, VT100::TextAttr = VT100::NO_ATTR);
         void write(ProgMemStrings);

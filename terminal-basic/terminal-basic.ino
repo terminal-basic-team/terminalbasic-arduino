@@ -17,6 +17,8 @@
  */
 
 #include "basic.hpp"
+#include "basic_interpreter.hpp"
+
 #include "arduino_logger.hpp"
 #include "basic_program.hpp"
 #ifdef ARDUINO

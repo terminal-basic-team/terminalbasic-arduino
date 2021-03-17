@@ -28,7 +28,9 @@ namespace BASIC
 class EXT_PACKED Parser::Value : public Printable
 {
 public:
-
+	/**
+	 * @brief types of the value
+	 */
 	enum Type : uint8_t
 	{
 		INTEGER,
@@ -38,7 +40,8 @@ public:
 #if USE_REALS
 		REAL,
 #endif
-		BOOLEAN, STRING
+		BOOLEAN,
+		STRING
 	};
 
 	struct EXT_PACKED String

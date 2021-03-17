@@ -139,7 +139,7 @@ bool
 Interpreter::valueFromArray(Parser::Value &v, const char *name)
 {
 	ArrayFrame *f = _program.arrayByName(name);
-	if (f == NULL) {
+	if (f == nullptr) {
 		raiseError(DYNAMIC_ERROR, NO_SUCH_ARRAY);
 		return false;
 	}
@@ -150,25 +150,7 @@ Interpreter::valueFromArray(Parser::Value &v, const char *name)
 		return false;
 	}
 
-	v.type = f->type;
-	switch (f->type) {
-	case Parser::Value::BOOLEAN:
-		v.value.boolean = f->get<bool>(index);
-		break;
-	case Parser::Value::INTEGER:
-		v.value.integer = f->get<Integer>(index);
-		break;
-#if USE_LONGINT
-	case Parser::Value::LONG_INTEGER:
-		v.value.longInteger = f->get<LongInteger>(index);
-		break;
-#endif
-#if USE_REALS
-	case Parser::Value::REAL:
-		v.value.real = f->get<Real>(index);
-		break;
-#endif
-	default:
+	if (!f->get(index, v)) {
 		raiseError(DYNAMIC_ERROR, INVALID_VALUE_TYPE);
 		return false;
 	}
@@ -398,7 +380,7 @@ Interpreter::list(uint16_t start, uint16_t stop)
 #if LINE_NUM_INDENT
 	uint8_t order = 0;
 	_program.reset();
-	for (Program::String *s = _program.getString(); s != NULL;
+	for (Program::String *s = _program.getString(); s != nullptr;
 	    s = _program.getString()) {
 		// Output onlyselected lines subrange
 		if (s->number < start)
@@ -453,7 +435,9 @@ Interpreter::list(uint16_t start, uint16_t stop)
                 lex.init(s->text);
 		int8_t diff = 0;
                 while (lex.getNext()) {
-			if (lex.getToken() == Token::KW_FOR)
+			if (lex.getToken() == Token::KW_REM)
+				break;
+			else if (lex.getToken() == Token::KW_FOR)
 				++diff;
 			else if (lex.getToken() == Token::KW_NEXT)
 				--diff;
@@ -605,6 +589,16 @@ Interpreter::delay(uint16_t ms)
 }
 #endif
 
+#if USE_TEXTATTRIBUTES
+void
+Interpreter::locate(Integer x, Integer y)
+{
+	write(ProgMemStrings::VT100_ESCSEQ), _output.print(x),
+	    _output.print(char(ASCII::SEMICOLON)), _output.print(y),
+	    _output.print('f');
+}
+#endif
+
 void
 Interpreter::newline()
 {
@@ -667,6 +661,7 @@ Interpreter::print(Lexer &l)
 			_output.print(char(ASCII::QUMARK));
 			_output.print(l.id());
 			_output.print(char(ASCII::QUMARK));
+                        _output.print(char(ASCII::SPACE));
 		} else if (t >= Token::INTEGER_IDENT && t <= Token::BOOL_IDENT)
 			print(l.id(), VT100::C_BLUE);
 		else
@@ -782,7 +777,7 @@ bool
 Interpreter::popValue(Parser::Value &v)
 {
 	Program::StackFrame *f = _program.currentStackFrame();
-	if ((f != NULL) && (f->_type == Program::StackFrame::VALUE)) {
+	if ((f != nullptr) && (f->_type == Program::StackFrame::VALUE)) {
 		v = f->body.value;
 		_program.pop();
 		return true;
@@ -1635,8 +1630,9 @@ Interpreter::printEsc(ProgMemStrings index)
 }
 #endif
 
+#if USE_TEXTATTRIBUTES
 void
-Interpreter::printTab(const Parser::Value &v)
+Interpreter::printTab(const Parser::Value &v, bool flag)
 {
 	Integer tabs;
 #if USE_REALS
@@ -1646,16 +1642,16 @@ Interpreter::printTab(const Parser::Value &v)
 #endif
 		tabs = Integer(v);
 	if (tabs > 0) {
-#if USE_TEXTATTRIBUTES
-		write(ProgMemStrings::VT100_ESCSEQ), _output.print(tabs - 1),
-		    _output.print('C');
-#else
-		while (tabs-- > 0)
-			_output.print(char(ASCII::SPACE));
-#endif
+		write(ProgMemStrings::VT100_ESCSEQ);
+		if (flag) {
+			write(ProgMemStrings::VT100_LINEHOME);
+			write(ProgMemStrings::VT100_ESCSEQ);
+		}
+		_output.print(tabs), _output.print('C');
 	} else
 		raiseError(DYNAMIC_ERROR, INVALID_TAB_VALUE, false);
 }
+#endif
 
 void
 Interpreter::print(long i, VT100::TextAttr attr)
