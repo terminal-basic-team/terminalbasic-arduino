@@ -54,7 +54,9 @@ negativeLedBlink(size_t num = 1)
 #define negativeLedBlink(a...)
 #define PGM_P const char*
 #define PROGMEM
+#define pgm_read_byte(a) (*a)
 #define pgm_read_word(a) (*a)
+#define pgm_read_ptr(a) (*a)
 #define strcpy_P(a,b) strcpy(a,b)
 #define strcmp_P(a,b) strcmp(a,b)
 #endif

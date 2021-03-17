@@ -22,21 +22,39 @@
 #include <inttypes.h>
 
 /**
- * @brief ASCII control characters
+ * @brief ASCII characters
  */
 enum class ASCII : uint8_t
 {
 	NUL = 0x00,
 	SOH = 0x01,
-        EOT = 0x03,
+	STX = 0x02,
+	ETX = 0x03,
+	EOT = 0x04,
 	ENQ = 0x05,
+	ACK = 0x06,
 	BEL = 0x07,
-        BS  = 0x08,
-	HT  = 0x09,
-	LF  = 0x0A,
-	CR  = 0x0D,
+	BS = 0x08,
+	HT = 0x09,
+	LF = 0x0A,
+	VT = 0x0B,
+	FF = 0x0C,
+	CR = 0x0D,
+	SO = 0x0E,
+	SI = 0x0F,
+	NAK = 0x15,
+	SYN = 0x16,
 	CAN = 0x18,
 	ESC = 0x1B,
+	SPACE = ' ',
+	QMARK = '?',
+	DOT = '.',
+	COLON = ':',
+	QUMARK = '\"',
+	LPAREN = '(',
+	RPAREN = ')',
+	COMMA = ',',
+	TILDE = 0x7E,
 	DEL = 0x7F
 };
 

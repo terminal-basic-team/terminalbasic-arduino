@@ -1,0 +1,126 @@
+Terminal-BASIC is a lightweight BASIC-like language interpreter for
+microcontroller-based systems.  It was inspired by the TinyBASIC port
+for popular 8-bit AVR uc boards.
+
+Arduino mega 2560-like boards are primary target for this project.
+However the source code is not an arduino-ide sketch, but the set
+of Netbeans C/C++ IDE projects. Moreover projects depend on the
+arduino-ide and uses its toolchain.
+
+1. Build from sources
+
+Full source code is available at https://bitbucket.org/starling13/ucbasic/
+and https://sourceforge.net/p/terminal-basic/
+
+The script ./make_sketch.sh makes an archive with arduino-ide sketch
+from source tree. It depends on the arduinoext library, which is being
+hosted at https://bitbucket.org/starling13/libarduinoext/
+(it should be placed at the same directory, where terminal-basic
+directory is placed i.e.
+   .../REPO/-|
+             |-terminal-basic from https://bitbucket.org/starling13/ucbasic/
+             |-libarduinoext from https://bitbucket.org/starling13/libarduinoext/ )
+
+Use netbeans 8.2 IDE to work with sources. Building for PC (using
+linux Arduino API emulation library) depends
+on posixcpp library from https://bitbucket.org/starling13/posixcpp/
+installed.
+
+2. Terminal-BASIC language
+
+Primary goal for project is a support of ANSI/ECMA Minimal BASIC
+standards.
+
+A set of sources for test programs can be downloaded from
+https://cloud.mail.ru/public/45SG/gGc2kFpBk
+
+The language, which ucBASIC will support one day is:
+
+Lexems:
+ * COM_CLS = "CLS"
+ * COM_DATA = "DATA"
+ * COM_DUMP = "DUMP"
+ * COM_LIST = "LIST"
+ * COM_LOAD = "LOAD"
+ * COM_NEW = "NEW"
+ * COM_RUN = "RUN"
+ * COM_SAVE = "SAVE"
+ * 
+ * KW_DIM = "DIM"
+ * KW_END = "END"
+ * KW_FOR = "FOR"
+ * KW_GOSUB = "GOSUB"
+ * KW_GOTO = "GOTO"
+ * KW_IF = "IF"
+ * KW_INPUT = "INPUT"
+ * KW_LET = "LET"
+ * KW_NEXT = "NEXT"
+ * KW_PRINT = "PRINT"
+ * KW_RETURN = "RETURN"
+ * 
+ * KW_ARRAYS = "ARRAYS"
+ * KW_THEN = "THEN"
+ * KW_TO = "TO"
+ * KW_STEP = "STEP"
+ * KW_VARS = "VARS"
+ * 
+ * OP_AND = "AND"
+ * OP_OR = "OR"
+ * OP_NOT = "NOT"
+ * 
+ * COLON = ':'
+ * SEMI = ';'
+ * LT = '<'
+ * LTE = "<="
+ * GT = '>'
+ * GTE = ">="
+ * EQUALS = '='
+ * NE = "<>"
+ * NEA = "><"
+ * MINUS = '-'
+ * PLUS = '+'
+ * STAR = '*'
+ * SLASH = '/'
+ * POW = '^'
+ * IDENT = [A-Z][A-Z0-9]*
+ * C_INTEGER = [0-9]+
+ * C_REAL = [0-9]+[.][0-9]*
+ 
+Grammar:
+ * TEXT = OPERATORS | C_INTEGER OPERATORS
+ * OPERATORS = OPERATOR | OPERATOR COLON OPERATORS
+ * OPERATOR = COMMAND |
+ *      KW_END |
+ *	KW_RETURN |
+ *	KW_INPUT VAR_LIST |
+ *	KW_PRINT PRINT_LIST |
+ *	KW_IF EXPRESSION IF_STATEMENT |
+ *	KW_FOR FOR_CONDS |
+ *	KW_NEXT IDENT |
+ *	ASSIGNMENT |TURN |
+ *	GOTO_STATEMENT |
+ *	KW_GOSUB INTEGER |
+ *	KW_DIM ARRAYS_LIST
+ * COMMAND = COM_DUMP | COM_DUMP KW_VARS | COM_DUMP KW_ARRAYS
+ *	COM_LIST | COM_NEW | COM_RUN | COM_SAVE | COM_LOAD
+ * ASSIGNMENT = KW_LET IMPLICIT_ASSIGNMENT | IMPLICIT_ASSIGNMENT
+ * IMPLICIT_ASSIGNMENT = VAR EQUALS EXPRESSION | VAR ARRAY EQUALS EXPRESSION
+ * EXPRESSION = SIMPLE_EXPRESSION | SIMPLE_EXPRESSION REL SIMPLE_EXPRESSION
+ * REL = LT | LTE | EQUALS | GT | GTE | NE | NEA
+ * SIMPLE_EXPRESSION = TERM | TERM ADD TERM
+ * ADD = PLUS MINUS KW_OR
+ * TERM = FACTOR | FACTOR MUL FACTOR
+ * MUL = STAR | SLASH | DIV | MOD | KW_AND
+ * FACTOR = FINAL | FINAL POW FINAL
+ * FINAL = C_INTEGER | C_REAL | C_STRING | VAR | VAR ARRAY |
+ *	LPAREN EXPRESSION RPAREN | MINUS FINAL
+ * VAR = REAL_IDENT | INTEGER_IDENT | STRING_IDENT
+ * VAR_LIST = VAR | VAR VAR_LIST
+ * PRINT_LIST = EXPRESSION | EXPRESSION COMMA PRINT_LIST
+ * IF_STATEMENT = GOTO_STATEMEMNT | KW_THEN OPERATORS
+ * GOTO_STATEMENT = KW_GOTO C_INTEGER
+ * FOR_CONDS = IMPLICIT_ASSIGNMENT KW_TO EXPRESSION |
+ *	IMPLICIT_ASSIGNMENT KW_TO EXPRESSION KW_STEP EXPRESSION
+ * ARRAYS_LIST = VAR ARRAY | VAR ARRAY ARRAYS_LIST
+ * ARRAY = LPAREN DIMENSIONS RPAREN
+ * DIMENSIONS = C_INTEGER | C_INTEGER COMMA DIMENSIONS

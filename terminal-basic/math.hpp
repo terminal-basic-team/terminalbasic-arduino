@@ -19,6 +19,7 @@
 #ifndef MATH_HPP
 #define MATH_HPP
 
+#include "Arduino.h"
 #include <limits.h>
 #include <stdlib.h>
 #include <math.h>

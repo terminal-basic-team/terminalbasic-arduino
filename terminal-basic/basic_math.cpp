@@ -16,87 +16,65 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "basic.hpp"
+
+#if USEMATH
 #include "basic_math.hpp"
 #include <math.h>
 #include <string.h>
 
+#include "ascii.hpp"
+#include "helper.hpp"
+
 namespace BASIC
 {
 
-static const char sABS[] PROGMEM = "ABS";
-static const char sACS[] PROGMEM = "ACS";
-static const char sATN[] PROGMEM = "ATN";
-static const char sCOS[] PROGMEM = "COS";
-static const char sCOT[] PROGMEM = "COT";
-static const char sEXP[] PROGMEM = "EXP";
-static const char sLOG[] PROGMEM = "LOG";
-static const char sPI[] PROGMEM = "PI";
-static const char sSIN[] PROGMEM = "SIN";
-static const char sSQR[] PROGMEM = "SQR";
-static const char sTAN[] PROGMEM = "TAN";
+static const uint8_t mathTokens[] PROGMEM = {
+	'A', 'C', 'S'+0x80,
+	'A', 'S', 'N'+0x80,
+	'A', 'T', 'N'+0x80,
+	'C', 'O', 'S'+0x80,
+	'C', 'O', 'T'+0x80,
+	'E', 'X', 'P'+0x80,
+	'L', 'O', 'G'+0x80,
+	'P', 'I'+0x80,
+	'S', 'I', 'N'+0x80,
+	'S', 'Q', 'R'+0x80,
+	'T', 'A', 'N'+0x80,
+	0
+};
 
-PGM_P const Math::funcStrings[NUM_FUNC] PROGMEM = {
-	sABS, sACS, sATN, sCOS, sCOT, sEXP, sLOG, sPI, sSIN, sSQR, sTAN
+const FunctionBlock::function Math::funcs[] PROGMEM = {
+	Math::func_acs,
+	Math::func_asn,
+	Math::func_atn,
+	Math::func_cos,
+	Math::func_cot,
+	Math::func_exp,
+	Math::func_log,
+	Math::func_pi,
+	Math::func_sin,
+	Math::func_sqr,
+	Math::func_tan
 };
 
 Math::Math(FunctionBlock *next) :
 FunctionBlock(next)
 {
-}
-
-FunctionBlock::function
-Math::_getFunction(const char *name) const
-{
-	if (strcmp_P(name, (PGM_P)pgm_read_word(&(funcStrings[F_ABS]))) == 0)
-		return func_abs;
-	else if (strcmp_P(name, (PGM_P)pgm_read_word(&(funcStrings[F_ACS]))) == 0)
-		return func_acs;
-	else if (strcmp_P(name, (PGM_P)pgm_read_word(&(funcStrings[F_ATN]))) == 0)
-		return func_atn;
-	else if (strcmp_P(name, (PGM_P)pgm_read_word(&(funcStrings[F_COS]))) == 0)
-		return func_cos;
-	else if (strcmp_P(name, (PGM_P)pgm_read_word(&(funcStrings[F_COT]))) == 0)
-		return func_cot;
-	else if (strcmp_P(name, (PGM_P)pgm_read_word(&(funcStrings[F_EXP]))) == 0)
-		return func_exp;
-	else if (strcmp_P(name, (PGM_P)pgm_read_word(&(funcStrings[F_LOG]))) == 0)
-		return func_log;
-	else if (strcmp_P(name, (PGM_P)pgm_read_word(&(funcStrings[F_SIN]))) == 0)
-		return func_sin;
-	else if (strcmp_P(name, (PGM_P)pgm_read_word(&(funcStrings[F_SQR]))) == 0)
-		return func_sqr;
-	else if (strcmp_P(name, (PGM_P)pgm_read_word(&(funcStrings[F_PI]))) == 0)
-		return func_pi;
-	else if (strcmp_P(name, (PGM_P)pgm_read_word(&(funcStrings[F_TAN]))) == 0)
-		return func_tan;
-	else
-		return NULL;
-}
-
-bool
-Math::func_abs(Interpreter &i)
-{
-	Parser::Value v(Integer(0));
-	i.popValue(v);
-#if USE_LONGINT
-	if (v.type == Parser::Value::INTEGER ||
-	    v.type == Parser::Value::LONG_INTEGER ||
-	    v.type == Parser::Value::REAL) {
-#else
-	if (v.type == Parser::Value::INTEGER || v.type == Parser::Value::REAL) {
-#endif
-		if (v < Parser::Value(Integer(0)))
-			v.switchSign();
-		i.pushValue(v);
-		return true;
-	} else
-		return false;
+	functions = funcs;
+	functionTokens = mathTokens;
 }
 
 bool
 Math::func_acs(Interpreter &i)
 {
 	return general_func(i, &acs_r);
+}
+
+bool
+Math::func_asn(Interpreter &i)
+{
+	return general_func(i, &asn_r);
 }
 
 bool
@@ -158,55 +136,63 @@ Math::func_tan(Interpreter &i)
 Real
 Math::acs_r(Real v)
 {
-	return acos(v);
+	return (acos(v));
+}
+
+Real
+Math::asn_r(Real v)
+{
+	return (asin(v));
 }
 
 Real
 Math::sin_r(Real v)
 {
-	return sin(v);
+	return (sin(v));
 }
 
 Real
 Math::cos_r(Real v)
 {
-	return cos(v);
+	return (cos(v));
 }
 
 Real
 Math::cot_r(Real v)
 {
-	return Real(1) / tan(v);
+	return (Real(1) / tan(v));
 }
 
 Real
 Math::exp_r(Real v)
 {
-	return exp(v);
+	return (exp(v));
 }
 
 Real
 Math::log_r(Real v)
 {
-	return log(v);
+	return (log(v));
 }
 
 Real
 Math::sqr_r(Real v)
 {
-	return sqrt(v);
+	return (sqrt(v));
 }
 
 Real
 Math::atn_r(Real v)
 {
-	return atan(v);
+	return (atan(v));
 }
 
 Real
 Math::tan_r(Real v)
 {
-	return tan(v);
+	return (tan(v));
 }
 
 }
+
+#endif

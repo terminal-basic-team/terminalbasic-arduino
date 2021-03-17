@@ -29,13 +29,13 @@
 namespace BASIC
 {
 
-class CPS_PACKED Lexer;
-class CPS_PACKED Interpreter;
+class Lexer;
+class Interpreter;
 
 /**
  * @brief Syntactic analyzer class
  */
-class CPS_PACKED Parser
+class Parser
 {
 public:
 	/**
@@ -58,7 +58,7 @@ public:
 	 * @param interpreter Interpreter context object reference
 	 * @param module Pointer to the first module in chain
 	 */
-	Parser(Lexer&, Interpreter&, FunctionBlock* = NULL);
+	Parser(Lexer&, Interpreter&);
 	/**
 	 * @brief Parse a text string
 	 * @param str string to parse
@@ -72,6 +72,8 @@ public:
 	ErrorCodes getError() const { return _error; }
 	
 	void init();
+	
+	void addModule(FunctionBlock*);
 private:
 	/**
 	 * Parser mode: syntax check or execute commands of the interpreter
@@ -85,6 +87,7 @@ private:
 	bool fOperator();
 	bool fImplicitAssignment(char*);
 	bool fPrintList();
+	bool fPrintItem();
 	bool fExpression(Value&);
 	bool fSimpleExpression(Value&);
 	bool fTerm(Value&);

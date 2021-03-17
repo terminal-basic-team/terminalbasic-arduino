@@ -20,169 +20,87 @@
 
 #if USESD
 
-#include "basic_interpreter_program.hpp"
+#include "basic_program.hpp"
 #include <assert.h>
+
 
 namespace BASIC
 {
 
 File SDFSModule::_root;
 
+static const uint8_t sdfsCommands[] PROGMEM = {
+	'C', 'H', 'A', 'I', 'N'+0x80,
+	'D', 'I', 'R', 'E', 'C', 'T', 'O', 'R', 'Y'+0x80,
+	'D', 'L', 'O', 'A', 'D'+0x80,
+	'D', 'S', 'A', 'V', 'E'+0x80,
+	'H', 'E', 'A', 'D', 'E', 'R'+0x80,
+	'S', 'C', 'R', 'A', 'T', 'C', 'H'+0x80,
+	0
+};
+
+const FunctionBlock::function  SDFSModule::_commands[] PROGMEM = {
+	SDFSModule::chain,
+	SDFSModule::directory,
+	SDFSModule::dload,
+	SDFSModule::dsave,
+	SDFSModule::header,
+	SDFSModule::scratch
+};
+
+SDFSModule::SDFSModule()
+{
+	commands = _commands;
+	commandTokens = sdfsCommands;
+}
+
 void
 SDFSModule::_init()
 {
-	if (!SD.begin(SS)) {
+	if (!SD.begin())
 		abort();
-	}
+	
 	_root = SD.open("/", FILE_WRITE);
-	if (!_root || !_root.isDirectory()) {
+	if (!_root || !_root.isDirectory())
 		abort();
-	}
-}
-
-FunctionBlock::command
-SDFSModule::_getCommand(const char *name) const
-{
-	assert(name != NULL);
-	uint8_t position = 0;
-	char c = name[position];
-	if (c != 0) {
-		switch (c) {
-		case 'D':
-			++position, c = name[position];
-			switch (c) {
-			case 'I':
-				++position;
-				if (name[position] == 'R') {
-					++position;
-					if (name[position] == 'E') {
-						++position;
-						if (name[position] == 'C') {
-							++position;
-							if (name[position] == 'T') {
-								++position;
-								if (name[position] == 'O') {
-									++position;
-									if (name[position] == 'R') {
-										++position;
-										if (name[position] == 'Y') {
-											++position;
-											if (name[position] == 0)
-												return directory;
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-				break;
-			case 'L':
-				++position;
-				if (name[position] == 'O') {
-					++position;
-					if (name[position] == 'A') {
-						++position;
-						if (name[position] == 'D') {
-							++position;
-							if (name[position] == 0)
-								return dload;
-						}
-					}
-				}
-				break;
-			case 'S':
-				++position;
-				if (name[position] == 'A') {
-					++position;
-					if (name[position] == 'V') {
-						++position;
-						if (name[position] == 'E') {
-							++position;
-							if (name[position] == 0)
-								return dsave;
-						}
-					}
-				}
-				break;
-			};
-			break;
-		case 'H':
-			++position;
-			if (name[position] == 'E') {
-				++position;
-				if (name[position] == 'A') {
-					++position;
-					if (name[position] == 'D') {
-						++position;
-						if (name[position] == 'E') {
-							++position;
-							if (name[position] == 'R') {
-								++position;
-								if (name[position] == 0)
-									return header;
-							}
-						}
-					}
-				}
-			}
-			break;
-		case 'S':
-			++position;
-			if (name[position] == 'C') {
-				++position;
-				if (name[position] == 'R') {
-					++position;
-					if (name[position] == 'A') {
-						++position;
-						if (name[position] == 'T') {
-							++position;
-							if (name[position] == 'C') {
-								++position;
-								if (name[position] == 'H') {
-									++position;
-									if (name[position] == 0)
-										return scratch;
-								}
-							}
-						}
-					}
-				}
-			}
-			break;
-		};
-	}
-	return NULL;
 }
 
 bool
 SDFSModule::directory(Interpreter &i)
-{	
+{
+	static const char strEND[] PROGMEM = "SD CARD CONTENTS";
+
 	_root.rewindDirectory();
-	i.print("SD CARD CONTENTS");
+
+	char buf[17];
+	strcpy_P(buf, (PGM_P)strEND);
+	i.print(buf);
 	i.newline();
 	Integer index = 0;
 	for (File ff = _root.openNextFile(); ff; ff = _root.openNextFile()) {
-		i.print(index++);
+		i.print(++index);
 		i.print('\t');
 		i.print(ff.name());
-		i.print('\t');
+		uint8_t len = min((uint8_t(13)-strlen(ff.name())),
+		    uint8_t(13));
+		while (len-- > 0)
+			i.print(' ');
 		if (ff.isDirectory())
-			i.print(Interpreter::S_DIR);
+			i.print(ProgMemStrings::S_DIR);
 		else
 			i.print(Integer(ff.size()));
 		i.newline();
 		ff.close();
 	}
-	return true;
+	return (true);
 }
 
 bool
 SDFSModule::scratch(Interpreter &i)
 {
 	if (!i.confirm())
-		return true;
-	
+		return (true);
+
 	char ss[16];
 	if (getFileName(i, ss)) {
 		SD.remove(ss);
@@ -192,17 +110,56 @@ SDFSModule::scratch(Interpreter &i)
 }
 
 bool
+SDFSModule::chain(Interpreter &i)
+{
+	return (true);
+}
+
+bool
 SDFSModule::dsave(Interpreter &i)
 {
-	char ss[16];
-	if (getFileName(i, ss))
-		SD.remove(ss);
-	File f = SD.open(ss, FILE_WRITE);
+	File f;
+	{
+		char ss[16];
+		if (getFileName(i, ss))
+			SD.remove(ss);
+		f = SD.open(ss, FILE_WRITE);
+	}
 	if (!f)
-		return false;
-	f.write(i._program._text, i._program.size());
+		return (false);
+	i._program.reset();
+	Lexer lex;
+	for (Interpreter::Program::String *s = i._program.getString(); s != NULL;
+	    s = i._program.getString()) {
+		f.print(s->number);
+		lex.init(s->text);
+		while (lex.getNext()) {
+			f.write(' ');
+			Token t = lex.getToken();
+			if (t <= Token::RPAREN) {
+				char buf[16];
+				strcpy_P(buf, (PGM_P)pgm_read_word(
+					&(Lexer::tokenStrings[uint8_t(t)])));
+				f.print(buf);
+				if (t == Token::KW_REM) {
+					f.write(' ');
+					f.print(s->text+lex.getPointer());
+					break;
+				}
+			} else if (t <= Token::BOOL_IDENT) {
+				f.print(lex.id());
+			} else if (t <= Token::C_BOOLEAN) {
+				f.print(lex.getValue());
+			} else if (t == Token::C_STRING) {
+				f.write('"');
+				f.print(lex.id());
+				f.write('"');
+			}
+		}
+		f.print('\n');
+	}
 	f.close();
-	return true;
+	return (true);
 }
 
 bool
@@ -210,21 +167,38 @@ SDFSModule::dload(Interpreter &i)
 {
 	char ss[16];
 	if (!getFileName(i, ss))
-		return false;
+		return (false);
 	File f = SD.open(ss);
 	if (!f)
-		return false;
-	f.readBytes(i._program._text, f.size());
-	i._program.reset(f.size());
+		return (false);
+	
+	i._program.newProg();
+	while (true) {
+		char buf[PROGSTRINGSIZE] = {0, };
+		size_t res = f.readBytesUntil('\n', buf, PROGSTRINGSIZE-1);
+		if (res > 0) {
+			Lexer lex;
+			lex.init(buf);
+			if (!lex.getNext() || lex.getToken() !=
+			    Token::C_INTEGER)
+				return (false);
+			if (!i._program.addLine(Integer(lex.getValue()),
+			    buf+lex.getPointer()))
+				return (false);
+		} else
+			break;
+	}
+	
 	f.close();
-	return true;
+	i._program.reset();
+	return (true);
 }
 
 bool
 SDFSModule::header(Interpreter &i)
 {
 	if (!i.confirm())
-		return true;
+		return (true);
 
 	char ss[16];
 	_root.rewindDirectory();
@@ -233,9 +207,9 @@ SDFSModule::header(Interpreter &i)
 		ss[0] = '/'; strcpy(ss+1, ff.name());
 		ff.close();
 		if (!SD.remove(ss))
-			return false;
+			return (false);
 	}
-	return true;
+	return (true);
 }
 
 bool
@@ -243,7 +217,7 @@ SDFSModule::getFileName(Interpreter &i, char ss[])
 {
 	const char *s;
 	if (!i.popString(s))
-		return false;
+		return (false);
 	ss[0] = '/';
 	uint8_t len = strlen(s);
 	strcpy(ss + 1, s);

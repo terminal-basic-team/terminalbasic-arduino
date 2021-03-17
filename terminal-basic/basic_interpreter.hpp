@@ -30,7 +30,7 @@ namespace BASIC
 /**
  * @brief Interpreter context object
  */
-class CPS_PACKED Interpreter
+class Interpreter
 {
 public:
 	/**
@@ -47,7 +47,9 @@ public:
 #if USE_LONGINT
 		VF_LONG_INTEGER,
 #endif
+#if USE_REALS
 		VF_REAL,
+#endif
 		VF_BOOLEAN,
 		VF_STRING
 	};
@@ -70,6 +72,7 @@ public:
 		NO_SUCH_ARRAY,
 		INTEGER_EXPRESSION_EXPECTED, // Integer expression expected
 		BAD_CHECKSUM,		// Bad program checksum
+		INVALID_TAB_VALUE,
 		INTERNAL_ERROR = 255
 	};
 	
@@ -216,19 +219,13 @@ public:
 		CB_WHITE = 0xF0,
 	};
 	
-	enum ProgMemStrings : uint8_t
-	{
-		S_STATIC = 0, S_DYNAMIC, S_ERROR, S_SEMANTIC, READY, BYTES,
-		AVAILABLE, TERMINAL, ucBASIC, S_VERSION, S_TEXT, S_OF, S_VARS,
-		S_ARRAYS, S_STACK, S_DIR, S_REALLY, NUM_STRINGS
-	};
 	/**
 	 * @brief constructor
 	 * @param stream Boundary object for I/O
 	 * @param program Program object
 	 * @param firstModule First module in chain
 	 */
-	explicit Interpreter(Stream&, Print&, Program&, FunctionBlock* = NULL);
+	explicit Interpreter(Stream&, Print&, Program&);
 	
 	/**
 	 * [re]initialize interpreter object
@@ -239,7 +236,7 @@ public:
 	// Execute entered command (command or inputed program line)
 	void exec();
 	// Tokenize inputed program string
-	void tokenize();
+	//void tokenize();
 	// Clear screen
 	void cls();
 	// Output program memory
@@ -247,10 +244,15 @@ public:
 	// Dump program memory
 	void dump(DumpMode);
 	
+	void addModule(FunctionBlock*);
+	
 	void newline();
 	void print(char);
+#if USE_REALS
 	void print(Real);
+#endif
 	void print(Integer, TextAttr=NO_ATTR);
+	void printTab(Integer);
 	void print(long, TextAttr=NO_ATTR);
 	void print(ProgMemStrings, TextAttr=NO_ATTR);
 	void print(Token);
@@ -397,8 +399,6 @@ private:
 	uint8_t			 _inputPosition;
 	// Input variable name string;
 	char			 _inputVarName[VARSIZE];
-	// Static text strings
-	static PGM_P const	 _progmemStrings[];
 	static uint8_t		 _termnoGen;
 	uint8_t			 _termno;
 };

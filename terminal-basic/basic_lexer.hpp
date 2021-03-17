@@ -39,7 +39,7 @@ operator<<(Logger &logger, Token tok);
  * @brief Lexical analyzer class
  * @param 
  */
-class CPS_PACKED Lexer
+class Lexer
 {
 public:
 	/**
@@ -107,7 +107,9 @@ private:
 	void decimalNumber();
 	// Parse Binary number
 	void binaryInteger();
+#if USE_REALS
 	bool numberScale();
+#endif
 	void ident();
 	void stringConst();
 	

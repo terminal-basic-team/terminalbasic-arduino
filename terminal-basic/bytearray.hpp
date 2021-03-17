@@ -28,7 +28,7 @@ class ByteArray : public Printable
 public:
 	ByteArray(const uint8_t*, size_t);
 	ByteArray(const char *c, size_t s) :
-	ByteArray(reinterpret_cast<const uint8_t*>(c), s) {}
+	  ByteArray(reinterpret_cast<const uint8_t*>(c), s) {}
 
 	size_t printTo(Print& p) const override;
 

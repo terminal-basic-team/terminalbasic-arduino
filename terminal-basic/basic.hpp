@@ -22,10 +22,18 @@
 #include <stdio.h>
 #include <inttypes.h>
 
+#include "helper.hpp"
+
 #ifdef ARDUINO
 #include "config_arduino.hpp"
 #elif defined __linux__
 #include "config_linux.hpp"
+#endif
+
+#if USEMATH
+#if !USE_REALS
+#error Math module requires real arithmetics support
+#endif
 #endif
 
 /**
@@ -41,7 +49,9 @@ typedef int16_t Integer;
 typedef int32_t LongInteger;
 #endif
 // floating point type
+#if USE_REALS
 typedef float Real;
+#endif
 
 /**
  * @brief lexical tokens
@@ -49,16 +59,17 @@ typedef float Real;
 enum class Token : uint8_t
 {
 	NOTOKENS = 0,
-	
+
 	// Commands
 	COM_CLS,
+	COM_DELAY,
 	COM_DUMP,
 	COM_LIST,
 	COM_LOAD,
 	COM_NEW,
 	COM_RUN,
 	COM_SAVE,
-	
+
 	// Statements
 	KW_DATA,
 	KW_DIM,
@@ -79,15 +90,16 @@ enum class Token : uint8_t
 	// other keywords
 	KW_ARRAYS,
 	KW_FALSE,
+	KW_STEP,
+	KW_TAB,
 	KW_THEN,
 	KW_TO,
 	KW_TRUE,
-	KW_STEP,
 	KW_VARS,
-	
+
 	OP_AND,
-	OP_OR,
 	OP_NOT,
+	OP_OR,
 
 	// *
 	STAR,
@@ -123,21 +135,56 @@ enum class Token : uint8_t
 	LPAREN,
 	// )
 	RPAREN,
-	
+
 	REAL_IDENT,
 	INTEGER_IDENT,
 	LONGINT_IDENT,
 	STRING_IDENT,
 	BOOL_IDENT,
-	
+
 	C_INTEGER,
 	C_REAL,
-	C_STRING,
 	C_BOOLEAN,
-	    
+	C_STRING,
+
 	NUM_TOKENS
 };
 
+enum class ProgMemStrings : uint8_t
+{
+	S_STATIC = 0,
+	S_DYNAMIC,
+	S_ERROR,
+	S_SEMANTIC,
+	READY,
+	BYTES,
+	AVAILABLE,
+	TERMINAL,
+	S_TERMINAL_BASIC,
+	S_VERSION,
+	S_TEXT,
+	S_OF,
+	S_VARS,
+	S_ARRAYS,
+	S_STACK,
+	S_DIR,
+	S_REALLY,
+	S_END,
+	NUM_STRINGS
+};
+
+// Static text strings
+extern PGM_P progmemString(ProgMemStrings);
+
+/**
+ * @brief Scan token table
+ * @param token
+ * @param table
+ * @param index
+ * @return find flag
+ */
+bool scanTable(const uint8_t*, const uint8_t[], uint8_t&);
+
 }
 
-#endif
+#endif // BASIC_HPP

@@ -35,19 +35,19 @@ ByteArray::printTo(Print& p) const
 		// Leading zeros of the absolute address
 		size_t addr = i + uintptr_t(data());
 		uint8_t digits;
-		for (digits = 0; addr > 15; addr >>= 4, ++digits);
+		/*for (digits = 0; addr > 15; addr >>= 4, ++digits);
 		while (++digits < sizeof(intptr_t)*2)
 			p.print('0');
 		
 		p.print(i + intptr_t(data()), HEX), p.print('(');
-		
+		*/
 		// Leading zeros of the relative address
 		addr = i;
 		for (digits = 0; addr > 15; addr >>= 4, ++digits);
 		while (++digits < sizeof(intptr_t)*2)
 			p.print('0');
 		
-		p.print(i, HEX), p.print(')'), p.print(":\t");
+		p.print(i, HEX)/*, p.print(')')*/, p.print(":\t");
 		size_t j;
 		for (j = 0; j < 8; ++j, ++ii) {
 			if (ii >= size())

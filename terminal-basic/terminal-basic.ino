@@ -18,9 +18,10 @@
 
 #include "basic.hpp"
 #include "arduino_logger.hpp"
-#include "basic_interpreter_program.hpp"
-#include "basic_math.hpp"
+#include "basic_program.hpp"
 #include "basic_arduinoio.hpp"
+
+#include "seriallight.hpp"
 
 #if USESD
 #include "basic_sdfs.hpp"
@@ -28,41 +29,60 @@
 
 #if USEUTFT
 #include "utft_stream.hpp"
+#endif
+
+#if USEMATH
+#include "basic_math.hpp"
+#endif
+
+/**
+ * Instantiating modules
+ */
+
+#if USEUTFT
 static UTFT	utft(CTE32HR, 38, 39, 40, 41);
 static UTFTTerminal utftPrint(utft);
 #endif
 
 #if USESD
 static BASIC::SDFSModule sdfs;
-static BASIC::Math mathBlock(&sdfs);
-#else
+#endif
+
+#if USEMATH
 static BASIC::Math mathBlock;
 #endif
-static BASIC::ArduinoIO arduinoIo(&mathBlock);
+
+#if USEARDUINOIO
+static BASIC::ArduinoIO arduinoIo;
+#endif
 
 #if BASIC_MULTITERMINAL
 static BASIC::Interpreter::Program program(BASIC::PROGRAMSIZE / 5);
-static BASIC::Interpreter basic(Serial, Serial, program, &arduinoIo);
+static BASIC::Interpreter basic(Serial, Serial, program);
 #if HAVE_HWSERIAL1
 static BASIC::Interpreter::Program program1(BASIC::PROGRAMSIZE / 5);
-static BASIC::Interpreter basic1(Serial1, Serial1, program1, &arduinoIo);
+static BASIC::Interpreter basic1(Serial1, Serial1, program1);
 #endif
 #if HAVE_HWSERIAL2
 static BASIC::Interpreter::Program program2(BASIC::PROGRAMSIZE / 5);
-static BASIC::Interpreter basic2(Serial2, Serial2, program2, &arduinoIo);
+static BASIC::Interpreter basic2(Serial2, Serial2, program2);
 #endif
 #if HAVE_HWSERIAL3
 static BASIC::Interpreter::Program program3(BASIC::PROGRAMSIZE / 5);
-static BASIC::Interpreter basic3(Serial3, Serial3, program3, &arduinoIo);
+static BASIC::Interpreter basic3(Serial3, Serial3, program3);
 #endif
 #else
 static BASIC::Interpreter::Program program(BASIC::PROGRAMSIZE);
 #if USEUTFT
-static BASIC::Interpreter basic(Serial, utftPrint, program, &arduinoIo);
+static BASIC::Interpreter basic(Serial, utftPrint, program);
 #else
-static BASIC::Interpreter basic(Serial, Serial, program, &arduinoIo);
+#ifdef ARDUINO
+static BASIC::Interpreter basic(SerialL, SerialL, program);
+#else
+static BASIC::Interpreter basic(Serial, Serial, program);
 #endif
-#endif
+#endif // USEUTFT
+#endif // BASIC_MULTITERMINAL
 
 void
 setup()
@@ -71,11 +91,15 @@ setup()
 	XMCRA |= 1ul<<7; // Switch ext mem iface on
 	XMCRB = 0;
 #endif
-	Serial.begin(57600);
+#ifdef ARDUINO
+	SerialL.begin(115200);
+#else
+	Serial.begin(115200);
+#endif // ARDUINO
 #if USEUTFT
 	utftPrint.begin();
 #endif
-	
+
 #if BASIC_MULTITERMINAL
 #if HAVE_HWSERIAL1
 	Serial1.begin(57600);
@@ -91,7 +115,18 @@ setup()
 	LOG_INIT(Serial);
 
 	LOG_TRACE;
+
+#if USEARDUINOIO
+	basic.addModule(&arduinoIo);
+#endif
 	
+#if USEMATH
+	basic.addModule(&mathBlock);
+#endif
+	
+#if USESD
+	basic.addModule(&sdfs);
+#endif
 	basic.init();
 #if BASIC_MULTITERMINAL
 #if HAVE_HWSERIAL1

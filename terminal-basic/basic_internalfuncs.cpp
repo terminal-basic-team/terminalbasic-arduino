@@ -25,47 +25,55 @@
 namespace BASIC
 {
 
+static const uint8_t intFuncs[] PROGMEM = {
+	'A', 'B', 'S'+0x80,
+	'R', 'N', 'D'+0x80,
+	'T', 'I', 'M', 'E'+0x80,
+	0
+};
+
+const FunctionBlock::function InternalFunctions::funcs[] PROGMEM = {
+	InternalFunctions::func_abs,
+	InternalFunctions::func_rnd,
+	InternalFunctions::func_tim
+};
+
 InternalFunctions::InternalFunctions(FunctionBlock *first) :
 FunctionBlock(first)
 {
+	functions = funcs;
+	functionTokens = intFuncs;
 }
 
-FunctionBlock::function
-InternalFunctions::_getFunction(const char *name) const
+bool
+InternalFunctions::func_abs(Interpreter &i)
 {
-	assert(name != NULL);
-	uint8_t position = 0;
-	char c = name[position];
-	if (c != 0) {
-		switch (c) {
-		case 'R':
-			++position;
-			if (name[position] == 'N') {
-				++position;
-				if (name[position] == 'D')
-					return (func_rnd);
-			}
-			break;
-		case 'T':
-			++position;
-			if (name[position] == 'I') {
-				++position;
-				if (name[position] == 'M') {
-					++position;
-					if (name[position] == 'E')
-						return (func_tim);
-				}
-			}
-			break;
-		}
-	}
-	return (NULL);
+	Parser::Value v(Integer(0));
+	i.popValue(v);
+	if (v.type == Parser::Value::INTEGER
+#if USE_LONGINT
+	 || v.type == Parser::Value::LONG_INTEGER
+#endif
+#if USE_REALS
+	 || v.type == Parser::Value::REAL
+#endif
+	    ) {
+		if (v < Parser::Value(Integer(0)))
+			v.switchSign();
+		i.pushValue(v);
+		return (true);
+	} else
+		return (false);
 }
 
 bool
 InternalFunctions::func_rnd(Interpreter &i)
 {
+#if USE_REALS
 	Parser::Value v(Real(random()) / Real(RANDOM_MAX));
+#else
+	Parser::Value v(Integer(random()));
+#endif
 	i.pushValue(v);
 	return (true);
 }
@@ -73,7 +81,11 @@ InternalFunctions::func_rnd(Interpreter &i)
 bool
 InternalFunctions::func_tim(Interpreter &i)
 {
-	Real time = millis();
+#if USE_REALS
+	Real time = Real(millis()) / Real(1000);
+#else
+	Integer time = millis() / 1000;
+#endif
 	Parser::Value v(time);
 	i.pushValue(v);
 	return (true);

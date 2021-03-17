@@ -24,7 +24,6 @@
 
 #if USESD
 
-#include <SPI.h>
 #include <SD.h>
 
 namespace BASIC
@@ -35,11 +34,12 @@ namespace BASIC
 class SDFSModule : public FunctionBlock
 {
 	// Function block interface
+public:
+	SDFSModule();
 protected:
 	void _init() override;
-
-	FunctionBlock::command _getCommand(const char*) const override;
 private:
+	static bool chain(Interpreter&);
 	static bool dsave(Interpreter&);
 	static bool directory(Interpreter&);
 	static bool scratch(Interpreter&);
@@ -47,6 +47,7 @@ private:
 	static bool header(Interpreter&);
 	static bool getFileName(Interpreter&, char[]);
 	static File	_root;
+	static const FunctionBlock::function _commands[] PROGMEM;
 };
 
 }

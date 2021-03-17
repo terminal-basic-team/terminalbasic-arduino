@@ -26,18 +26,19 @@
 
 /*
  * COM_CLS = "CLS"
+ * COM_DELAY = "DELAY"
  * COM_DUMP = "DUMP"
  * COM_LIST = "LIST"
  * COM_LOAD = "LOAD"
  * COM_NEW = "NEW"
  * COM_RUN = "RUN"
  * COM_SAVE = "SAVE"
- * COM_TIME = "TIME"
  * 
  * KW_DATA = "DATA"
  * KW_DIM = "DIM"
  * KW_END = "END"
  * KW_FOR = "FOR"
+ * KW_FOR = "GO"
  * KW_GOSUB = "GOSUB"
  * KW_GOTO = "GOTO"
  * KW_IF = "IF"
@@ -45,20 +46,27 @@
  * KW_LET = "LET"
  * KW_NEXT = "NEXT"
  * KW_PRINT = "PRINT"
- * KW_RETURN = "RETURN"
  * KW_RANDOMIZE = "RANDOMIZE"
+ * KW_REM = "REM"
+ * KW_RETURN = "RETURN"
  * KW_STOP = "STOP"
  * 
  * KW_ARRAYS = "ARRAYS"
+ * KW_FALSE = "FALSE"
+ * KW_STEP = "STEP"
+ * KW_TAB = "TAB"
  * KW_THEN = "THEN"
  * KW_TO = "TO"
- * KW_STEP = "STEP"
+ * KW_TRUE = "TRUE"
  * KW_VARS = "VARS"
  * 
  * OP_AND = "AND"
- * OP_OR = "OR"
  * OP_NOT = "NOT"
- * 
+ * OP_OR = "OR"
+ *
+ * STAR = '*'
+ * SLASH = '/'
+ * PLUS = '+'
  * COLON = ':'
  * SEMI = ';'
  * LT = '<'
@@ -69,9 +77,6 @@
  * NE = "<>"
  * NEA = "><"
  * MINUS = '-'
- * PLUS = '+'
- * STAR = '*'
- * SLASH = '/'
  * POW = '^'
  * IDENT = [A-Z][A-Z0-9]*
  * C_INTEGER = [0-9]+
@@ -84,6 +89,7 @@ namespace BASIC
 const char sNOTOKENS[] PROGMEM = "NOTOKENS";
 
 const char sCLS[] PROGMEM = "CLS";
+const char sDELAY[] PROGMEM = "DELAY";
 const char sDUMP[] PROGMEM = "DUMP";
 const char sLIST[] PROGMEM = "LIST";
 const char sLOAD[] PROGMEM = "LOAD";
@@ -110,15 +116,16 @@ const char sSTOP[] PROGMEM = "STOP";
 
 const char sARRAYS[] PROGMEM = "ARRAYS";
 const char sFALSE[] PROGMEM = "FALSE";
+const char sSTEP[] PROGMEM = "STEP";
+const char sTAB[] PROGMEM = "TAB";
 const char sTHEN[] PROGMEM = "THEN";
 const char sTO[] PROGMEM = "TO";
 const char sTRUE[] PROGMEM = "TRUE";
-const char sSTEP[] PROGMEM = "STEP";
 const char sVARS[] PROGMEM = "VARS";
 
 const char sOP_AND[] PROGMEM = "AND";
-const char sOP_OR[] PROGMEM = "OR";
 const char sOP_NOT[] PROGMEM = "NOT";
+const char sOP_OR[] PROGMEM = "OR";
 
 const char sSTAR[] PROGMEM = "*";
 const char sSLASH[] PROGMEM = "/";
@@ -146,39 +153,40 @@ const char sBOOL_IDENT[] PROGMEM = "BOOL_IDENT";
 
 const char sINTEGER[] PROGMEM = "C_INTEGER";
 const char sREAL[] PROGMEM = "C_REAL";
-const char sSTRING[] PROGMEM = "C_STRING";
 const char sBOOLEAN[] PROGMEM = "C_BOOLEAN";
+const char sSTRING[] PROGMEM = "C_STRING";
 
 PGM_P const Lexer::tokenStrings[uint8_t(Token::NUM_TOKENS)] PROGMEM = {
 	sNOTOKENS,
-	
-	sCLS,	sDUMP,	sLIST,	sLOAD,	sNEW,	sRUN,	sSAVE,
-	
-	sDATA,	sDIM,	sEND,	sFOR,	sGO,	sGOSUB,	sGOTO,	sIF,	sINPUT,
-	sLET,	sNEXT,	sPRINT,	sRANDOMIZE,	sREM,	sRETURN,sSTOP,
-	
-	sARRAYS,sFALSE,	sTHEN,	sTO,	sTRUE,	sSTEP,	sVARS,
-	
-	sOP_AND,sOP_OR,	sOP_NOT,
-	
-	sSTAR,	sSLASH,	sPLUS,	sMINUS,
-	
+
+	sCLS, sDELAY, sDUMP, sLIST, sLOAD, sNEW, sRUN, sSAVE,
+
+	sDATA, sDIM, sEND, sFOR, sGO, sGOSUB, sGOTO, sIF, sINPUT,
+	sLET, sNEXT, sPRINT, sRANDOMIZE, sREM, sRETURN, sSTOP,
+
+	sARRAYS, sFALSE, sSTEP, sTAB, sTHEN, sTO, sTRUE, sVARS,
+
+	sOP_AND, sOP_NOT, sOP_OR,
+
+	sSTAR, sSLASH, sPLUS, sMINUS,
+
 	sEQUALS,
-	sCOLON,	sSEMI,
+	sCOLON, sSEMI,
 	sLT, sGT,
 	sLTE, sGTE,
 	sNE, sNEA,
 	sCOMMA,
 	sPOW,
 	sLPAREN, sRPAREN,
-	
-	sREAL_IDENT,	sINTEGER_IDENT,	sLONGINT_IDENT,	sSTRING_IDENT,
+
+	sREAL_IDENT, sINTEGER_IDENT, sLONGINT_IDENT, sSTRING_IDENT,
 	sBOOL_IDENT,
-	
-	sINTEGER,	sREAL,	sSTRING, sBOOLEAN
+
+	sINTEGER, sREAL, sBOOLEAN, sSTRING
 };
 
 #if ARDUINO_LOG
+
 Logger&
 operator<<(Logger &logger, Token tok)
 {
@@ -225,7 +233,7 @@ Lexer::getNext()
 			case 'D':
 				_id[_valuePointer++] = SYM;
 				first_D();
-				return true;				
+				return true;
 			case 'E':
 				_id[_valuePointer++] = SYM;
 				first_E();
@@ -848,6 +856,15 @@ Lexer::first_T()
 {
 	next();
 	switch (SYM) {
+	case 'A':
+		pushSYM();
+		switch (SYM) {
+		case 'B':
+			next();
+			_token = Token::KW_TAB;
+			return;
+		}
+		break;
 	case 'H':
 		pushSYM();
 		switch (SYM) {
@@ -964,6 +981,7 @@ Lexer::decimalNumber()
 			continue;
 		}
 		switch (SYM) {
+#if USE_REALS
 		case '.':
 		{
 			_value.type = Parser::Value::REAL;
@@ -973,7 +991,7 @@ Lexer::decimalNumber()
 				next();
 				if (isdigit(SYM)) {
 					d /= 10.f;
-					_value.value.real += Real(SYM-'0') *d;
+					_value.value.real += Real(SYM - '0') * d;
 					continue;
 				} else if (SYM == 0) {
 					_token = Token::C_REAL;
@@ -990,30 +1008,32 @@ Lexer::decimalNumber()
 				}
 			}
 		}
-		break;
+			break;
 		case 'E':
 		{
 			if (_value.type == Parser::Value::INTEGER
 #if USE_LONGINT
-			 || _value.type == Parser::Value::LONG_INTEGER
-#endif			
-			)
+			    || _value.type == Parser::Value::LONG_INTEGER
+#endif   
+			    )
 				_value = Real(_value);
 			if (!numberScale()) {
 				_token = Token::NOTOKENS;
 				return;
 			}
 		}
+#endif
 		default:
 			if (_value.type == Parser::Value::INTEGER
 #if USE_LONGINT
-			 || _value.type == Parser::Value::LONG_INTEGER
+			    || _value.type == Parser::Value::LONG_INTEGER
 #endif
 			    )
 				_token = Token::C_INTEGER;
-
+#if USE_REALS
 			else
 				_token = Token::C_REAL;
+#endif
 			return;
 		}
 	}
@@ -1031,24 +1051,26 @@ Lexer::binaryInteger()
 	next();
 	*val |= LongInteger(SYM) << 8;
 	next();
-	*val |= SYM;
+	*val |= LongInteger(SYM);
 	next();
 #else
 	_value.type = Parser::Value::INTEGER;
 	Integer *val = &_value.value.integer;
-	*val |= Integer(SYM) << uint8_t(8);
+	*val = Integer(SYM) << uint8_t(8);
 	next();
-	*val |= SYM;
+	*val |= Integer(SYM);
 	next();
 #endif
 }
+
+#if USE_REALS
 
 bool
 Lexer::numberScale()
 {
 	Integer scale(0);
 	bool sign = true;
-	
+
 	next();
 	if (SYM == '-') {
 		sign = false;
@@ -1059,7 +1081,7 @@ Lexer::numberScale()
 		next();
 	} else
 		return false;
-	
+
 	while (true) {
 		if (isdigit(SYM)) {
 			scale *= Integer(10);
@@ -1075,6 +1097,7 @@ Lexer::numberScale()
 		}
 	}
 }
+#endif
 
 void
 Lexer::ident()

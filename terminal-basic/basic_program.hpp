@@ -24,7 +24,7 @@
 namespace BASIC
 {
 
-class CPS_PACKED Interpreter::Program
+class Interpreter::Program
 {
 	friend class Interpreter;
 public:
@@ -114,6 +114,8 @@ public:
 		};
 
 		static uint8_t size(Type);
+		
+		uint8_t size() const { return (size(this->_type)); }
 
 		Type _type;
 
@@ -137,11 +139,16 @@ public:
 	void newProg();
 	/**
 	 * @brief reset program 
+	 * @brief newSize 0 if use existing program, text size if clear vars
+	 *   and arrays
 	 */
 	void reset(size_t=0);
 	
 	size_t size() const;
-
+	/**
+	 * @brief get next program line
+	 * @return line object or NULL if beyond last line
+	 */
 	String *getString();
 
 	String *current() const;
@@ -197,6 +204,7 @@ public:
 	 * @brief reverse order of last same type elements
 	 */
 	void reverseLast(StackFrame::Type);
+	bool addLine(uint16_t, const char*);
 	/**
 	 * @brief Add new Program line
 	 * @param number decimal line number

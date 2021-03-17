@@ -20,11 +20,12 @@
 #define BASIC_PARSER_VALUE_HPP
 
 #include "basic_parser.hpp"
+#include <Printable.h>
 
 namespace BASIC
 {
 
-class CPS_PACKED Parser::Value
+class CPS_PACKED Parser::Value : public Printable
 {
 public:
 
@@ -32,9 +33,12 @@ public:
 	{
 		INTEGER,
 #if USE_LONGINT
-		    LONG_INTEGER,
+		LONG_INTEGER,
 #endif
-		REAL, BOOLEAN, STRING
+#if USE_REALS
+		REAL,
+#endif
+		BOOLEAN, STRING
 	};
 
 	struct CPS_PACKED String
@@ -49,7 +53,9 @@ public:
 		LongInteger longInteger;
 #endif
 		Integer integer;
+#if USE_REALS
 		Real real;
+#endif
 		bool boolean;
 	};
 
@@ -58,10 +64,14 @@ public:
 	Value(LongInteger);
 #endif
 	Value(Integer);
-	Value(float);
+#if USE_REALS
+	Value(Real);
+#endif
 	Value(bool);
 
+#if USE_REALS
 	explicit operator Real() const;
+#endif
 	explicit operator bool() const;
 	explicit operator Integer() const;
 #if USE_LONGINT
@@ -81,10 +91,20 @@ public:
 	Value &operator/=(const Value&);
 	Value &operator^=(const Value&);
 	void switchSign();
-
+	
 	Type type;
 	Body value;
+private:
+	/**
+	 * @brief match value type with the power type
+	 * @param 
+	 */
+	void powerMatchValue(const Value&);
+// Printable interface
+	size_t printTo(Print& p) const override;
+
 };
+
 }
 
 #endif
