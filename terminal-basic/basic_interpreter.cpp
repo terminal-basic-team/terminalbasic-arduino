@@ -1,6 +1,6 @@
 /*
  * ucBASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016  Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -365,7 +365,7 @@ Interpreter::tokenize()
 void
 Interpreter::cls()
 {
-	_output.print("\x1B[2J"), _input.print("\x1B[H");
+	_output.print("\x1B[2J"), _output.print("\x1B[H");
 }
 
 void
@@ -401,15 +401,15 @@ Interpreter::dump(DumpMode mode)
 	case MEMORY:
 	{
 		ByteArray ba((uint8_t*) _program._text, _program.programSize);
-		_input.println(ba);
-		print(Token::KW_END), print(S_OF), print(S_TEXT), _input.print('\t');
-		_input.println(unsigned(_program._textEnd), HEX);
-		print(Token::KW_END), print(S_OF), print(S_VARS), _input.print('\t');
-		_input.println(unsigned(_program._variablesEnd), HEX);
-		print(Token::KW_END), print(S_OF), print(S_ARRAYS), _input.print('\t');
-		_input.println(unsigned(_program._arraysEnd), HEX);
-		print(S_STACK), _input.print('\t');
-		_input.println(unsigned(_program._sp), HEX);
+		_output.println(ba);
+		print(Token::KW_END), print(S_OF), print(S_TEXT), _output.print('\t');
+		_output.println(unsigned(_program._textEnd), HEX);
+		print(Token::KW_END), print(S_OF), print(S_VARS), _output.print('\t');
+		_output.println(unsigned(_program._variablesEnd), HEX);
+		print(Token::KW_END), print(S_OF), print(S_ARRAYS), _output.print('\t');
+		_output.println(unsigned(_program._arraysEnd), HEX);
+		print(S_STACK), _output.print('\t');
+		_output.println(unsigned(_program._sp), HEX);
 	}
 		break;
 	case VARS:
@@ -419,12 +419,12 @@ Interpreter::dump(DumpMode mode)
 		    (f != NULL) && (_program.variableIndex(f) <
 		    _program._variablesEnd); f = _program.variableByIndex(
 		    _program.variableIndex(f) + f->size())) {
-			_input.print(f->name);
-			_input.print(":\t");
+			_output.print(f->name);
+			_output.print(":\t");
 			Parser::Value v;
 			valueFromVar(v, f->name);
 			print(v);
-			_input.println();
+			_output.println();
 		}
 	}
 		break;
@@ -434,16 +434,16 @@ Interpreter::dump(DumpMode mode)
 		for (ArrayFrame *f = _program.arrayByIndex(index);
 		    _program.arrayIndex(f) < _program._arraysEnd;
 		    f = _program.arrayByIndex(_program.arrayIndex(f) + f->size())) {
-			_input.print(f->name);
-			_input.print('(');
-			_input.print(f->dimension[0]);
+			_output.print(f->name);
+			_output.print('(');
+			_output.print(f->dimension[0]);
 			for (uint8_t i = 1; i < f->numDimensions; ++i) {
-				_input.print(',');
-				_input.print(f->dimension[i]);
+				_output.print(',');
+				_output.print(f->dimension[i]);
 			}
-			_input.print(')');
-			_input.print(":\t");
-			_input.println();
+			_output.print(')');
+			_output.print(":\t");
+			_output.println();
 		}
 	}
 	}
@@ -538,7 +538,11 @@ Interpreter::print(Lexer &l)
 		break;
 		case Token::REAL_IDENT:
 		case Token::INTEGER_IDENT:
+#if USE_LONGINT
+		case Token::LONGINT_IDENT:
+#endif
 		case Token::BOOL_IDENT:
+		case Token::STRING_IDENT:
 			print(l.id(), C_BLUE);
 			break;
 		default:
@@ -795,6 +799,11 @@ Interpreter::doInput()
 				v = l.getValue();
 				break;
 			case Token::C_STRING:
+			case Token::REAL_IDENT:
+			case Token::INTEGER_IDENT:
+			case Token::LONGINT_IDENT:
+			case Token::STRING_IDENT:
+			case Token::BOOL_IDENT:
 			{
 				v = l.getValue();
 				pushString(l.id());
@@ -802,6 +811,7 @@ Interpreter::doInput()
 				break;
 			default:
 				raiseError(DYNAMIC_ERROR, INVALID_VALUE_TYPE);
+				return;
 			}
 		}
 		if (neg)

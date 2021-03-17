@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016  Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,20 +32,26 @@ namespace BASIC
 #define BASIC_MULTITERMINAL 0
 // Use long integer
 #define USE_LONGINT 1
+// Use external memory
+#define USE_EXTMEM 0
+#define EXTMEM_ADDRESS 0x8000
+#define EXTMEM_SIZE 32768
 // Tokenize keywords in program text
 const bool TOKENIZE = true;
 // Max size of the program line
 const uint8_t PROGSTRINGSIZE = 72;
 
 // Number of bytes for program text, variables and stack
-#if defined (__AVR_ATmega1284__) || defined (__AVR_ATmega1284P__)
+#if USE_EXTMEM
+const size_t PROGRAMSIZE = EXTMEM_SIZE;
+#elif defined (__AVR_ATmega1284__) || defined (__AVR_ATmega1284P__)
 const size_t PROGRAMSIZE = 14848;
 #elif defined (__AVR_ATmega2560__)
 const size_t PROGRAMSIZE = 6144;
 #elif defined (__AVR_ATmega128__) || defined (__AVR_ATmega128A__)
 const size_t PROGRAMSIZE = 3072;
 #elif defined (__AVR_ATmega328__) || defined (__AVR_ATmega328P__)
-const size_t PROGRAMSIZE = 1024;	
+const size_t PROGRAMSIZE = 1024;
 #endif
 
 // Max size of the string constants/variables

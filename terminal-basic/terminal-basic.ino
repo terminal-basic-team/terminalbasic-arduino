@@ -1,6 +1,6 @@
 /*
  * ucBASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016  Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,6 +67,10 @@ static BASIC::Interpreter basic(Serial, Serial, program, &arduinoIo);
 void
 setup()
 {
+#if USE_EXTMEM
+	XMCRA |= 1ul<<7; // Switch ext mem iface on
+	XMCRB = 0;
+#endif
 	Serial.begin(57600);
 #if USEUTFT
 	utftPrint.begin();
