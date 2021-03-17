@@ -41,6 +41,7 @@
 
 #if USETVOUT
 #include "TVoutPrint.hpp"
+#include "fonts/Font6x8.h"
 #endif
 
 #if USE_EXTEEPROM
@@ -56,7 +57,9 @@
 static UTFT	utft(CTE32HR, 38, 39, 40, 41);
 static UTFTTerminal utftPrint(utft);
 #elif USETVOUT
-static TVoutPrint tvoutPrint;
+static uint8_t		tvOutBuf[TVoutEx::bufferSize(TVOUT_HORIZ, TVOUT_VERT)];
+static TVoutEx		tvOut;
+static TVoutPrint	tvoutPrint;
 #endif
 
 #if USESD
@@ -114,7 +117,8 @@ setup()
 #endif
 	SERIAL_PORT.begin(115200);
 #if USETVOUT
-	tvoutPrint.begin(PAL);
+	tvOut.begin(PAL, TVOUT_HORIZ, TVOUT_VERT, tvOutBuf);
+        tvOut.selectFont(Font6x8);
 #endif
 #if USEUTFT
 	utftPrint.begin();

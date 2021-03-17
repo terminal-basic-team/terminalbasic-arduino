@@ -1,4 +1,12 @@
-r1.0-alpha1 (01.06.2017) - Release, dedicated to INternational day of protection of children
+r1.0-alpha2 (12.06.2017) - Release, dedicated to the Russia day
+
+  * Synchronized with tvoutex library
+  * Fix the i2c eeprom operations
+  * Fix output of the reals, less then 1.0 in absolute value
+  * Fix generation of the arduino sketch
+  * Fix build with Arduino IDE
+
+r1.0-alpha1 (01.06.2017) - Release, dedicated to International day of protection of children
 
    * Darthmouth BASIC-style matrix operations
    * I2C eeprom module with functions ESAVE, ELOAD, ECHAIN

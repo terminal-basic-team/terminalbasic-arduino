@@ -30,6 +30,27 @@
 #include "config_linux.hpp"
 #endif
 
+#if S_INPUT == SERIAL_I
+#define SERIAL_PORT Serial
+#elif S_INPUT == SERIALL_I
+#define SERIAL_PORT SerialL
+#elif S_INPUT == SERIALL3_I
+#define SERIAL_PORT SerialL3
+#endif
+#if S_OUTPUT == SERIAL_O
+#define SERIAL_PORT Serial
+#elif S_OUTPUT == SERIALL_O
+#define SERIAL_PORT SerialL
+#elif S_OUTPUT == SERIALL3_O
+#define SERIAL_PORT SerialL3
+#elif S_OUTPUT == UTFT_O
+#undef USEUTFT
+#define USEUTFT		          1
+#elif S_OUTPUT == TVOUT_O
+#undef USETVOUT
+#define USETVOUT	          1
+#endif
+
 #ifdef true
 #undef true
 #endif

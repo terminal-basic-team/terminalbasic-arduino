@@ -492,13 +492,14 @@ Parser::Value::printTo(Print& p) const
 	{
 		char buf[15];
 #ifdef __AVR_ARCH__
-		uint8_t decWhole = 1;
+		int8_t decWhole = 1;
 		Real n = math<Real>::abs(value.real);
+                
 		while (n >= Real(10)) {
 			n /= Real(10);
 			++decWhole;
 		}
-		if (decWhole < 4)
+		if (math<Real>::abs(value.real) >= Real(0.1) && decWhole < 4)
 			::dtostrf(value.real, 10, 8 - decWhole, buf);
 		else
 			::dtostre(value.real, buf, 7, DTOSTR_ALWAYS_SIGN);

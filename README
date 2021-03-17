@@ -11,10 +11,13 @@ arduino-ide and uses its toolchain.
 
 Full source code is available at https://bitbucket.org/starling13/ucbasic/
 and https://sourceforge.net/p/terminal-basic/ repositories.
-It depends on the libarduino, libarduinoext and libarduinoemulator libraries,
-which are being hosted at 
+It depends on the libarduino, libarduinoext, libutft, libsdcard, tvoutex  and
+libarduinoemulator libraries, which are being hosted at
     https://bitbucket.org/starling13/libarduino/
     https://bitbucket.org/starling13/libarduinoext/
+    https://bitbucket.org/starling13/libutft/
+    https://bitbucket.org/starling13/libsdcard/
+    https://bitbucket.org/starling13/tvoutex/
     https://bitbucket.org/starling13/libarduinoemulator/
 respectively (libs should be placed at the same directory, where terminal-basic
 directory is placed i.e.
@@ -22,6 +25,9 @@ directory is placed i.e.
              |-terminal-basic from https://bitbucket.org/starling13/ucbasic/
              |-libarduino from https://bitbucket.org/starling13/libarduino/
              |-libarduinoext from https://bitbucket.org/starling13/libarduinoext/
+             |-libutft from https://bitbucket.org/starling13/libutft/
+             |-libsdcard from https://bitbucket.org/starling13/libsdcard/
+             |-tvoutex from https://bitbucket.org/starling13/tvoutex/
              |-libarduinoemulator from https://bitbucket.org/starling13/libarduinoemulator/ )
 
 The script ./make_sketch.sh makes an archive with arduino-ide sketch from source tree.

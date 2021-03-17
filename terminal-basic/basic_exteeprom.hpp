@@ -16,27 +16,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "basic_gfx.hpp"
+/**
+ * @file basic_exteeprom.hpp
+ * @brief I2C/SPI external eeprom functions and commands
+ */
 
-#if USE_GFX
+#ifndef BASIC_EXTEEPROM_HPP
+#define BASIC_EXTEEPROM_HPP
 
-#include "TVoutEx.h"
+#include "basic_functionblock.hpp"
 
 namespace BASIC
 {
 
-GFXModule::GFXModule()
+class ExtEEPROM : public FunctionBlock
 {
+public:
+	explicit ExtEEPROM();
+private:
+	static bool com_echain(Interpreter&);
+	static bool com_eload(Interpreter&);
+	static bool com_esave(Interpreter&);
+	
+	static const FunctionBlock::command _commands[] PROGMEM;
+// FunctionBlock interface
+public:
+	void _init() override;
+};
+
 }
 
-void
-GFXModule::command_circle(Interpreter &i)
-{
-	uint8_t x,y,r;
-	Color_t c;
-	TVoutEx::instance()->drawCircle(x,y,r,c);
-}
-
-}
-
-#endif // USE_GFX
+#endif
