@@ -19,9 +19,12 @@
 #include "basic.hpp"
 #include "arduino_logger.hpp"
 #include "basic_program.hpp"
-#include "basic_arduinoio.hpp"
 #ifdef ARDUINO
 #include "seriallight.hpp"
+#endif
+
+#if USEARDUINOIO
+#include "basic_arduinoio.hpp"
 #endif
 
 #if USESD
@@ -106,7 +109,7 @@ setup()
 #endif
 	SERIAL_PORT.begin(115200);
 #if USETVOUT
-	tvoutPrint.begin();
+	tvoutPrint.begin(PAL, TVOUT_HORIZ, TVOUT_VERT);
 #endif
 #if USEUTFT
 	utftPrint.begin();

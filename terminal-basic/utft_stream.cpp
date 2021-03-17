@@ -29,8 +29,6 @@
 #include "bytearray.hpp"
 #include "arduino_logger.hpp"
 
-#include "seriallight.hpp"
-
 extern uint8_t SmallFont[];
 extern uint8_t BigFont[];
 
@@ -260,7 +258,7 @@ UTFTTerminal::insertChar(uint8_t c)
 		memset(_data[H-1], 0, sizeof (Cell)*W);
 		redraw();
 		uint32_t stop = millis();
-		SerialL.print("Redraw "); SerialL.println(stop-start, DEC);
+		//SerialL.print("Redraw "); SerialL.println(stop-start, DEC);
 	}
 }
 

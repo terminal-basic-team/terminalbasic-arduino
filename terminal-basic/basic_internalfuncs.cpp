@@ -29,7 +29,9 @@ namespace BASIC
 static const uint8_t intFuncs[] PROGMEM = {
 	'A', 'B', 'S'+0x80,
 	'C', 'H', 'R', '$'+0x80,
+#if USE_REALS
 	'I', 'N', 'T'+0x80,
+#endif
 #if USE_RANDOM
 	'R', 'N', 'D'+0x80,
 #endif
@@ -41,7 +43,9 @@ static const uint8_t intFuncs[] PROGMEM = {
 const FunctionBlock::function InternalFunctions::funcs[] PROGMEM = {
 	InternalFunctions::func_abs,
 	InternalFunctions::func_chr,
+#if USE_REALS
 	InternalFunctions::func_int,
+#endif
 #if USE_RANDOM
 	InternalFunctions::func_rnd,
 #endif
@@ -82,7 +86,7 @@ InternalFunctions::func_chr(Interpreter &i)
 {
 	Parser::Value v;
 	i.popValue(v);
-	char buf[2] = "0";
+	char buf[2] = {0,};
 	buf[0] = Integer(v);
 	v.type = Parser::Value::STRING;
 	i.pushString(buf);
@@ -90,6 +94,7 @@ InternalFunctions::func_chr(Interpreter &i)
 	return true;
 }
 
+#if USE_REALS
 bool
 InternalFunctions::func_int(Interpreter &i)
 {
@@ -99,23 +104,20 @@ InternalFunctions::func_int(Interpreter &i)
 #if USE_LONGINT
 	 || v.type == Parser::Value::LONG_INTEGER
 #endif
-#if USE_REALS
 	 || v.type == Parser::Value::REAL
-#endif
 	    ) {
-#if USE_REALS
 		v = math<Real>::floor(Real(v));
 #if USE_LONGINT
 		v = LongInteger(v);
 #else
 		v = Integer(v);
 #endif
-#endif // USE_REALS
 		i.pushValue(v);
 		return (true);
 	} else
 		return (false);
 }
+#endif // USE_REALS
 
 #if USE_REALS
 #define TYP Real
@@ -160,13 +162,14 @@ bool
 InternalFunctions::func_tim(Interpreter &i)
 {
 #if USE_REALS
-	Real time = Real(millis()) / Real(1000);
+#define TYP Real
+#elif USE_LONGINT
+#define TYP LongInteger
 #else
-	Integer time = millis() / 1000;
+#define TYP Integer
 #endif
-	Parser::Value v(time);
-	i.pushValue(v);
-	return (true);
+	i.pushValue(TYP(millis()) / TYP(1000));
+	return true;
 }
 
 }

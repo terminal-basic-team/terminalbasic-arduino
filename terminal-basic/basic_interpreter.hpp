@@ -139,8 +139,8 @@ public:
 		 */
 		uint8_t *data()
 		{
-			return (reinterpret_cast<uint8_t*> (this+1) +
-			    sizeof (size_t) * numDimensions);
+			return reinterpret_cast<uint8_t*> (this+1) +
+			    sizeof(uint16_t) * numDimensions;
 		}
 
 		/**
@@ -148,8 +148,8 @@ public:
 		 */
 		const uint8_t *data() const
 		{
-			return (reinterpret_cast<const uint8_t*> (this+1) +
-			    sizeof (size_t) * numDimensions);
+			return reinterpret_cast<const uint8_t*> (this+1) +
+			    sizeof(uint16_t) * numDimensions;
 		}
 
 		/**
@@ -158,7 +158,7 @@ public:
 		 * @return value
 		 */
 		template <typename T>
-		T get(size_t index) const
+		T get(uint16_t index) const
 		{
 			union
 			{
@@ -295,7 +295,7 @@ public:
 	 * @param v value to set
 	 */
 	void set(VariableFrame&, const Parser::Value&);
-	void set(ArrayFrame&, size_t, const Parser::Value&);
+	void set(ArrayFrame&, uint16_t, const Parser::Value&);
 	/**
 	 * @brief set a new value and possibly create new variable
 	 * @param name variable name
@@ -381,7 +381,7 @@ private:
 	 */
 	ArrayFrame *addArray(const char*, uint8_t, uint32_t);
 
-	bool arrayElementIndex(ArrayFrame*, size_t&);
+	bool arrayElementIndex(ArrayFrame*, uint16_t&);
 #if USE_SAVE_LOAD
 	/**
 	 * @brief Check program text
@@ -415,8 +415,10 @@ private:
 	uint8_t			 _inputPosition;
 	// Input variable name string;
 	char			 _inputVarName[VARSIZE];
+#if BASIC_MULTITERMINAL
 	static uint8_t		 _termnoGen;
 	uint8_t			 _termno;
+#endif
 };
 
 }

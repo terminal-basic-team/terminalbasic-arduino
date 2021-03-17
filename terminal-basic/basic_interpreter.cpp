@@ -86,8 +86,6 @@ private:
 	VT100::TextAttr _a;
 };
 
-uint8_t Interpreter::_termnoGen = 0;
-
 void
 Interpreter::valueFromVar(Parser::Value &v, const char *varName)
 {
@@ -136,7 +134,7 @@ Interpreter::valueFromArray(Parser::Value &v, const char *name)
 		return false;
 	}
 
-	size_t index;
+	uint16_t index;
 	if (!arrayElementIndex(f, index)) {
 		raiseError(DYNAMIC_ERROR, INVALID_VALUE_TYPE);
 		return false;
@@ -170,9 +168,16 @@ Interpreter::valueFromArray(Parser::Value &v, const char *name)
 	return true;
 }
 
+#if BASIC_MULTITERMINAL
+uint8_t Interpreter::_termnoGen = 0;
+#endif
+
 Interpreter::Interpreter(Stream &stream, Print &output, Program &program) :
 _program(program), _state(SHELL), _input(stream), _output(output),
-_parser(_lexer, *this), _termno(++_termnoGen)
+_parser(_lexer, *this)
+#if BASIC_MULTITERMINAL
+,_termno(++_termnoGen)
+#endif
 {
 	_input.setTimeout(10000L);
 }
@@ -344,7 +349,7 @@ Interpreter::dump(DumpMode mode)
 		break;
 	case VARS:
 	{
-		size_t index = _program._textEnd;
+		uint16_t index = _program._textEnd;
 		for (VariableFrame *f = _program.variableByIndex(index);
 		    (f != NULL) && (_program.variableIndex(f) <
 		    _program._variablesEnd); f = _program.variableByIndex(
@@ -360,7 +365,7 @@ Interpreter::dump(DumpMode mode)
 		break;
 	case ARRAYS:
 	{
-		size_t index = _program._variablesEnd;
+		uint16_t index = _program._variablesEnd;
 		for (ArrayFrame *f = _program.arrayByIndex(index);
 		    _program.arrayIndex(f) < _program._arraysEnd;
 		    f = _program.arrayByIndex(_program.arrayIndex(f) + f->size())) {
@@ -439,6 +444,7 @@ Interpreter::print(Lexer &l)
 		case Token::C_REAL:
 		case Token::C_BOOLEAN:
 			print(l.getValue(), VT100::C_CYAN);
+			_output.write(' ');
 			break;
 		case Token::C_STRING:
 		{
@@ -633,13 +639,13 @@ Interpreter::save()
 	};
 #if SAVE_LOAD_CHECKSUM
 	// Compute program checksum
-	for (size_t p = 0; p < _program._textEnd; ++p)
+	for (uint16_t p = 0; p < _program._textEnd; ++p)
 		h.crc16 = _crc16_update(h.crc16, _program._text[p]);
 #endif
 	{
 		EEPROMClass e;
 		// Write program to EEPROM
-		for (size_t p = 0; p < _program._textEnd; ++p) {
+		for (uint16_t p = 0; p < _program._textEnd; ++p) {
 			e.update(p + sizeof (EEpromHeader_t), _program._text[p]);
 			_output.print('.');
 		}
@@ -911,7 +917,7 @@ Interpreter::set(VariableFrame &f, const Parser::Value &v)
 }
 
 void
-Interpreter::set(ArrayFrame &f, size_t index, const Parser::Value &v)
+Interpreter::set(ArrayFrame &f, uint16_t index, const Parser::Value &v)
 {
 	switch (f.type) {
 	case VF_BOOLEAN:
@@ -1120,10 +1126,10 @@ Interpreter::raiseError(ErrorType type, ErrorCodes errorCode, bool fatal)
 }
 
 bool
-Interpreter::arrayElementIndex(ArrayFrame *f, size_t &index)
+Interpreter::arrayElementIndex(ArrayFrame *f, uint16_t &index)
 {
 	index = 0;
-	size_t dim = f->numDimensions, mul = 1;
+	uint8_t dim = f->numDimensions, mul = 1;
 	while (dim-- > 0) {
 		Program::StackFrame *sf = _program.currentStackFrame();
 		if (sf == NULL ||
@@ -1135,13 +1141,13 @@ Interpreter::arrayElementIndex(ArrayFrame *f, size_t &index)
 		mul *= f->dimension[dim] + 1;
 		_program.pop();
 	};
-	return (true);
+	return true;
 }
 
 Interpreter::VariableFrame *
 Interpreter::setVariable(const char *name, const Parser::Value &v)
 {
-	size_t index = _program._textEnd;
+	uint16_t index = _program._textEnd;
 
 	VariableFrame *f;
 	for (f = _program.variableByIndex(index); f != NULL; index += f->size(),
@@ -1149,7 +1155,7 @@ Interpreter::setVariable(const char *name, const Parser::Value &v)
 		int res = strcmp(name, f->name);
 		if (res == 0) {
 			set(*f, v);
-			return (f);
+			return f;
 		} else if (res < 0)
 			break;
 	}
@@ -1157,30 +1163,30 @@ Interpreter::setVariable(const char *name, const Parser::Value &v)
 	if (f == NULL)
 		f = reinterpret_cast<VariableFrame*> (_program._text + index);
 
-	size_t dist = sizeof (VariableFrame);
+	uint16_t dist = sizeof(VariableFrame);
 	Type t;
 #if USE_LONGINT
 	if (endsWith(name, "%%")) {
 		t = VF_LONG_INTEGER;
-		dist += sizeof (LongInteger);
+		dist += sizeof(LongInteger);
 	} else
 #endif
 		if (endsWith(name, '%')) {
 		t = VF_INTEGER;
-		dist += sizeof (Integer);
+		dist += sizeof(Integer);
 	} else if (endsWith(name, '!')) {
 		t = VF_BOOLEAN;
-		dist += sizeof (bool);
+		dist += sizeof(bool);
 	} else if (endsWith(name, '$')) {
 		t = VF_STRING;
 		dist += STRINGSIZE;
 	} else {
 #if USE_REALS
 		t = VF_REAL;
-		dist += sizeof (Real);
+		dist += sizeof(Real);
 #else
 		t = VF_INTEGER;
-		dist += sizeof (Integer);
+		dist += sizeof(Integer);
 #endif
 	}
 	if (_program._arraysEnd >= _program._sp) {
@@ -1195,7 +1201,7 @@ Interpreter::setVariable(const char *name, const Parser::Value &v)
 	_program._arraysEnd += f->size();
 	set(*f, v);
 
-	return (f);
+	return f;
 }
 
 void
@@ -1207,7 +1213,7 @@ Interpreter::setArrayElement(const char *name, const Parser::Value &v)
 		return;
 	}
 
-	size_t index;
+	uint16_t index;
 	if (!arrayElementIndex(f, index)) {
 		raiseError(DYNAMIC_ERROR, INVALID_VALUE_TYPE);
 		return;
@@ -1223,8 +1229,8 @@ Interpreter::newArray(const char *name)
 	if (f != NULL && f->_type == Program::StackFrame::ARRAY_DIMENSIONS) {
 		uint8_t dimensions = f->body.arrayDimensions;
 		_program.pop();
-		size_t size = 1;
-		size_t sp = _program._sp; // go on stack frames, containong dimesions
+		uint16_t size = 1;
+		uint16_t sp = _program._sp; // go on stack frames, containong dimesions
 		for (uint8_t dim = 0; dim < dimensions; ++dim) {
 			f = _program.stackFrameByIndex(sp);
 			if (f != NULL && f->_type ==
@@ -1445,7 +1451,7 @@ Interpreter::addArray(const char *name, uint8_t dim,
 #endif
 	}
 
-	const uint16_t dist = sizeof (ArrayFrame) + sizeof (size_t) * dim + num;
+	const uint16_t dist = sizeof (ArrayFrame) + sizeof (uint16_t) * dim + num;
 	if (_program._arraysEnd + dist >= _program._sp) {
 		raiseError(DYNAMIC_ERROR, OUTTA_MEMORY);
 		return (NULL);
@@ -1458,7 +1464,7 @@ Interpreter::addArray(const char *name, uint8_t dim,
 	memset(f->data(), 0, num);
 	_program._arraysEnd += dist;
 
-	return (f);
+	return f;
 }
 
 }

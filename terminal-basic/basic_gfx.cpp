@@ -16,43 +16,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BASIC_INTERNALFUNCS_HPP
-#define BASIC_INTERNALFUNCS_HPP
+#include "basic_gfx.hpp"
 
-#include "basic_functionblock.hpp"
-#include "helper.hpp"
+#if USE_GFX
+
+#include "TVoutEx.h"
 
 namespace BASIC
 {
 
-class InternalFunctions : public FunctionBlock
+GFXModule::GFXModule()
 {
-public:
-	InternalFunctions(FunctionBlock* = NULL);
-private:
-	static bool func_abs(Interpreter&);
-	static bool func_chr(Interpreter&);
-#if USE_REALS
-	static bool func_int(Interpreter&);
-#endif
-#if USE_RANDOM
-	static bool func_rnd(Interpreter&);
-#endif
-	static bool func_sgn(Interpreter&);
-	static bool func_tim(Interpreter&);
-#if USE_REALS
-#define ___TYP Real
-#elif USE_LONGINT
-#define ___TYP LongInteger
-#else
-#define ___TYP Integer
-#endif // USE_LONGINT
-	static ___TYP sgn(___TYP);
-#undef ___TYP
-	
-	static const FunctionBlock::function funcs[] PROGMEM;
-};
+}
+
+void
+GFXModule::command_circle(Interpreter &i)
+{
+	uint8_t x,y,r;
+	Color_t c;
+	TVoutEx::instance()->draw_circle(x,y,r,c);
+}
 
 }
 
-#endif
+#endif // USE_GFX

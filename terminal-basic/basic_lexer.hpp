@@ -83,7 +83,7 @@ public:
 	 * @brief get analised string position
 	 * @return string position index
 	 */
-	size_t getPointer() const { return _pointer; }
+	uint8_t getPointer() const { return _pointer; }
 	/**
 	 * @brief token strings array
 	 */

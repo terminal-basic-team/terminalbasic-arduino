@@ -411,6 +411,7 @@ Parser::fExpression(Value &v)
 	while (true) {
 		const Token t = _lexer.getToken();
 		Value v2;
+#if OPT == OPT_SPEED
 		switch (t) {
 		case Token::LT:
 			if (_lexer.getNext() && fSimpleExpression(v2)) {
@@ -449,6 +450,7 @@ Parser::fExpression(Value &v)
 			} else
 				return false;
 		case Token::NE:
+		case Token::NEA:
 			if (_lexer.getNext() && fSimpleExpression(v2)) {
 				v = !(v == v2);
 				continue;
@@ -457,6 +459,34 @@ Parser::fExpression(Value &v)
 		default:
 			return true;
 		}
+#else
+		if (t == Token::LT || t == Token::LTE || t == Token::GT ||
+		    t == Token::GTE || t == Token::EQUALS || t == Token::NE ||
+		    t == Token::NEA) {
+			if (!_lexer.getNext() || !fSimpleExpression(v2))
+				return false;
+			
+			if (t == Token::LT)
+				v = v < v2;
+			else if (t == Token::LTE)
+				v = (v < v2) || (v == v2);
+			else if (t == Token::GT)
+				v = v > v2;
+			else if (t ==Token::GTE)
+				v = (v > v2) || (v == v2);
+			else if (t == Token::EQUALS) {
+#if USE_STRINGOPS
+				if (v.type == Value::STRING &&
+				    v2.type == Value::STRING)
+					v = _interpreter.strCmp();
+				else
+#endif // USE_STRINGOPS
+					v = v == v2;
+			} else if (t == Token::NE || t == Token::NEA)
+				v = !(v == v2);
+		} else
+			return true;
+#endif
 		v.type = Value::BOOLEAN;
 	}
 }
@@ -478,6 +508,7 @@ Parser::fSimpleExpression(Value &v)
 		Token t = _lexer.getToken();
 		LOG(t);
 		Value v2;
+#if OPT == OPT_SPEED
 		switch (t) {
 		case Token::PLUS:
 			if (_lexer.getNext() && fTerm(v2)) {
@@ -506,6 +537,25 @@ Parser::fSimpleExpression(Value &v)
 		default:
 			return true;
 		}
+#else
+		if (t == Token::PLUS || t == Token::MINUS || t == Token::OP_OR) {
+			if (!_lexer.getNext() || !fTerm(v2))
+				return false;
+			if (t == Token::PLUS) {
+#if USE_STRINGOPS
+				if (v.type == Value::STRING &&
+				    v2.type == Value::STRING)
+					_interpreter.strConcat();
+				else
+#endif
+					v += v2;
+			} else if (t == Token::MINUS)
+				v -= v2;
+			else if (t == Token::OP_OR)
+				v |= v2;
+		} else
+			return true;
+#endif
 	}
 }
 
@@ -521,6 +571,7 @@ Parser::fTerm(Value &v)
 		Token t = _lexer.getToken();
 		LOG(t);
 		Value v2;
+#if OPT == OPT_SPEED
 		switch (t) {
 		case Token::STAR:
 			if (_lexer.getNext() && fFactor(v2)) {
@@ -543,6 +594,20 @@ Parser::fTerm(Value &v)
 		default:
 			return true;
 		}
+#else
+		if (t == Token::STAR || t == Token::SLASH || t == Token::OP_AND) {
+			if (!_lexer.getNext() || !fFactor(v2))
+				return false;
+			
+			if (t == Token::STAR)
+				v *= v2;
+			else if (t == Token::SLASH)
+				v /= v2;
+			else if (t == Token::OP_AND)
+				v &= v2;
+		} else
+			return true;
+#endif
 	}
 }
 
@@ -578,7 +643,9 @@ Parser::fFinal(Value &v)
 
 	const Token t = _lexer.getToken();
 	LOG(t);
+
 	while (true) {
+#if OPT == OPT_SPEED
 		switch (t) {
 		case Token::MINUS:
 			if (!_lexer.getNext() || !fFinal(v))
@@ -637,7 +704,64 @@ Parser::fFinal(Value &v)
 		}
 			return false;
 		}
+#else
+		if (t == Token::MINUS) {
+			if (!_lexer.getNext() || !fFinal(v))
+				return false;
+			if (_mode == EXECUTE)
+				v.switchSign();
+			return true;
+		} else if (t == Token::OP_NOT) {
+			if (!_lexer.getNext() || !fFinal(v))
+				return false;
+			if (_mode == EXECUTE)
+				v.notOp();
+			return true;
+		} else if (t == Token::C_INTEGER || t == Token::C_REAL) {
+			if (_mode == EXECUTE)
+				v = _lexer.getValue();
+			_lexer.getNext();
+			return true;
+		} else if (t == Token::C_STRING) {
+			if (_lexer.getError() == Lexer::STRING_OVERFLOW) {
+				_error = STRING_OVERFLOW;
+				_lexer.getNext();
+				return false;
+			}
+			if (_mode == EXECUTE) {
+				_interpreter.pushString(_lexer.id());
+				v.type = Value::Type::STRING;
+			}
+			_lexer.getNext();
+			return true;
+		} else if (t == Token::LPAREN) {
+			if (!_lexer.getNext() || !fExpression(v))
+				return false;
+			if (_lexer.getToken() != Token::RPAREN)
+				return false;
+			else {
+				_lexer.getNext();
+				return true;
+			}
+		} else if (t == Token::KW_TRUE) {
+			if (_mode == EXECUTE)
+				v = true;
+			_lexer.getNext();
+			return true;
+		} else if (t == Token::KW_FALSE) {
+			if (_mode == EXECUTE)
+				v = false;
+			_lexer.getNext();
+			return true;
+		} else {
+			char varName[VARSIZE];
+			if (fVar(varName))
+				return fIdentifierExpr(varName, v);
+			return false;
+		}
+#endif
 	}
+
 }
 
 bool

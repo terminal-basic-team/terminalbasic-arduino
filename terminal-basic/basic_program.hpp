@@ -74,7 +74,7 @@ public:
 		struct CPS_PACKED ForBody
 		{
 			// Program counter on loop begin
-			size_t		calleeIndex;
+			uint16_t	calleeIndex;
 			// Loop begin position in the program string
 			uint8_t		textPosition;
 			// Loop variable name
@@ -94,7 +94,7 @@ public:
 		struct CPS_PACKED GosubReturn
 		{
 			// Program counter of the colee string
-			size_t	calleeIndex;
+			uint16_t calleeIndex;
 			// Position in the program string
 			uint8_t	textPosition;
 		};
@@ -132,7 +132,7 @@ public:
 		Body body;
 	};
 
-	Program(size_t=PROGRAMSIZE);
+	Program(uint16_t = PROGRAMSIZE);
 	/**
 	 * @brief Clear program text, but not vars and arrays
 	 */
@@ -151,12 +151,12 @@ public:
 	 * @brief newSize 0 if use existing program, text size if clear vars
 	 *   and arrays
 	 */
-	void reset(size_t=0);
+	void reset(uint16_t = 0);
 	/**
 	 * @brief get actual size of stored program in bytes
 	 * @return program size
 	 */
-	size_t size() const;
+	uint16_t size() const;
 	/**
 	 * @brief get next program line
 	 * @return line object or NULL if beyond last line
@@ -172,13 +172,13 @@ public:
 	
 	String *last() const;
 	
-	void jump(size_t newVal);
+	void jump(uint16_t newVal);
 	/**
 	 * @brief program string at given index
 	 * @param index
 	 * @return string pointer or NULL if not exists
 	 */
-	String *stringByIndex(size_t) const;
+	String *stringByIndex(uint16_t) const;
 	/**
 	 * @brief program string of given number
 	 * @param number Program line number to get
@@ -191,21 +191,21 @@ public:
 	 * @param string pointer
 	 * @return index
 	 */
-	size_t stringIndex(const String*) const;
+	uint16_t stringIndex(const String*) const;
 	/**
 	 * @brief get variable frame at a given index
 	 * @param index basic memory address
 	 * @return pointer
 	 */
-	VariableFrame *variableByIndex(size_t);
+	VariableFrame *variableByIndex(uint16_t);
 	VariableFrame *variableByName(const char*);
-	size_t variableIndex(VariableFrame*) const;
+	uint16_t variableIndex(VariableFrame*) const;
 	
-	ArrayFrame *arrayByIndex(size_t);
+	ArrayFrame *arrayByIndex(uint16_t);
 	ArrayFrame *arrayByName(const char*);
-	size_t arrayIndex(ArrayFrame*) const;
+	uint16_t arrayIndex(ArrayFrame*) const;
 
-	StackFrame *stackFrameByIndex(size_t index);
+	StackFrame *stackFrameByIndex(uint16_t index);
 	StackFrame *currentStackFrame();
 	
 	/**
@@ -234,7 +234,7 @@ public:
 	 * @param num line number
 	 * @param text line text
 	 */
-	bool insert(uint16_t, const char*, size_t);
+	bool insert(uint16_t, const char*, uint8_t);
 #if USE_EXTMEM
 	char *_text;
 #else

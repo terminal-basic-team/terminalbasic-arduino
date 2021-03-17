@@ -133,7 +133,7 @@ scanTable(const uint8_t *token, const uint8_t table[], uint8_t &index)
 			++tabPos, tokPos=0;
 		}
 	}
-	return (NULL);
+	return NULL;
 }
 
 PGM_P progmemString(ProgMemStrings index)

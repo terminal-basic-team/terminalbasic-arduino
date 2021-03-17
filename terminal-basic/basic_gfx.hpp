@@ -16,41 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BASIC_INTERNALFUNCS_HPP
-#define BASIC_INTERNALFUNCS_HPP
+#ifndef BASIC_GFX_HPP
+#define BASIC_GFX_HPP
 
 #include "basic_functionblock.hpp"
-#include "helper.hpp"
+#include "basic_interpreter.hpp"
 
 namespace BASIC
 {
 
-class InternalFunctions : public FunctionBlock
+class GFXModule : public FunctionBlock
 {
 public:
-	InternalFunctions(FunctionBlock* = NULL);
-private:
-	static bool func_abs(Interpreter&);
-	static bool func_chr(Interpreter&);
-#if USE_REALS
-	static bool func_int(Interpreter&);
-#endif
-#if USE_RANDOM
-	static bool func_rnd(Interpreter&);
-#endif
-	static bool func_sgn(Interpreter&);
-	static bool func_tim(Interpreter&);
-#if USE_REALS
-#define ___TYP Real
-#elif USE_LONGINT
-#define ___TYP LongInteger
-#else
-#define ___TYP Integer
-#endif // USE_LONGINT
-	static ___TYP sgn(___TYP);
-#undef ___TYP
+	explicit GFXModule();
 	
-	static const FunctionBlock::function funcs[] PROGMEM;
+	void command_circle(Interpreter&);
 };
 
 }

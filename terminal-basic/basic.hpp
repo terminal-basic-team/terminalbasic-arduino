@@ -41,6 +41,9 @@ typedef int16_t Integer;
 #if USE_LONGINT
 // long integer type
 typedef int32_t LongInteger;
+typedef LongInteger INT;
+#else
+typedef Integer INT;
 #endif
 // floating point type
 #if USE_REALS

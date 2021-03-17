@@ -24,7 +24,7 @@
 namespace BASIC
 {
 
-Interpreter::Program::Program(size_t progsize) :
+Interpreter::Program::Program(uint16_t progsize) :
 #if USE_EXTMEM
 _text(reinterpret_cast<char*> (EXTMEM_ADDRESS)),
 #endif
@@ -71,14 +71,14 @@ Interpreter::Program::last() const
 }
 
 void
-Interpreter::Program::jump(size_t newVal)
+Interpreter::Program::jump(uint16_t newVal)
 {
 	_jump = newVal;
 	_jumpFlag = true;
 }
 
 Interpreter::Program::String*
-Interpreter::Program::stringByIndex(size_t index) const
+Interpreter::Program::stringByIndex(uint16_t index) const
 {
 	return (const_cast<String*> (reinterpret_cast<const String*> (
 	    _text + index)));
@@ -113,7 +113,7 @@ Interpreter::Program::StackFrame::size(Type t)
 	case STRING:
 		return (sizeof (Type) + STRINGSIZE);
 	case ARRAY_DIMENSION:
-		return (sizeof (Type) + sizeof (size_t));
+		return (sizeof (Type) + sizeof (uint16_t));
 	case ARRAY_DIMENSIONS:
 		return (sizeof (Type) + sizeof (uint8_t));
 	case VALUE:
@@ -154,10 +154,10 @@ Interpreter::Program::newProg()
 #endif
 }
 
-Interpreter::VariableFrame*
+Interpreter::VariableFrame *
 Interpreter::Program::variableByName(const char *name)
 {
-	size_t index = _textEnd;
+	uint16_t index = _textEnd;
 
 	for (VariableFrame *f = variableByIndex(index); f != NULL;
 	    f = variableByIndex(index)) {
@@ -168,22 +168,22 @@ Interpreter::Program::variableByName(const char *name)
 			break;
 		index += f->size();
 	}
-	return (NULL);
+	return NULL;
 }
 
-size_t
+uint16_t
 Interpreter::Program::stringIndex(const String *s) const
 {
 	return (((char*) s) - _text);
 }
 
-size_t
+uint16_t
 Interpreter::Program::variableIndex(VariableFrame *f) const
 {
 	return (((char*) f) - _text);
 }
 
-size_t
+uint16_t
 Interpreter::Program::arrayIndex(ArrayFrame *f) const
 {
 	return (((char*) f) - _text);
@@ -244,7 +244,7 @@ Interpreter::Program::pushBottom(StackFrame *f)
 }
 
 Interpreter::Program::StackFrame*
-Interpreter::Program::stackFrameByIndex(size_t index)
+Interpreter::Program::stackFrameByIndex(uint16_t index)
 {
 	if ((index > 0) && (index < programSize))
 		return (reinterpret_cast<StackFrame*> (_text + index));
@@ -264,7 +264,7 @@ Interpreter::Program::currentStackFrame()
 Interpreter::ArrayFrame*
 Interpreter::Program::arrayByName(const char *name)
 {
-	size_t index = _variablesEnd;
+	uint16_t index = _variablesEnd;
 
 	for (ArrayFrame *f = arrayByIndex(index); index < _arraysEnd;
 	    index += f->size(),
@@ -279,34 +279,32 @@ Interpreter::Program::arrayByName(const char *name)
 }
 
 Interpreter::VariableFrame*
-Interpreter::Program::variableByIndex(size_t index)
+Interpreter::Program::variableByIndex(uint16_t index)
 {
 	if (index < _variablesEnd)
 		return (reinterpret_cast<VariableFrame*> (_text + index));
 	else
-		return (NULL);
+		return NULL;
 }
 
 Interpreter::ArrayFrame*
-Interpreter::Program::arrayByIndex(size_t index)
+Interpreter::Program::arrayByIndex(uint16_t index)
 {
-	return (reinterpret_cast<ArrayFrame*> (_text + index));
+	return reinterpret_cast<ArrayFrame*> (_text + index);
 }
 
 bool
 Interpreter::Program::addLine(uint16_t num, const char *line)
 {
-	size_t size;
+	uint16_t size;
 	char tempBuffer[PROGSTRINGSIZE];
 
 	Lexer _lexer;
 	_lexer.init(line);
-	size_t position = 0,
-	    lexerPosition = _lexer.getPointer();
+	uint8_t position = 0, lexerPosition = _lexer.getPointer();
 
 	while (_lexer.getNext()) {
 		uint8_t t = uint8_t(0x80) + uint8_t(_lexer.getToken());
-		;
 		if (_lexer.getToken() < Token::STAR) { // One byte tokens
 			tempBuffer[position++] = t;
 			lexerPosition = _lexer.getPointer();
@@ -404,10 +402,10 @@ Interpreter::Program::addLine(uint16_t num, const char *text, uint16_t len)
 }
 
 bool
-Interpreter::Program::insert(uint16_t num, const char *text, size_t len)
+Interpreter::Program::insert(uint16_t num, const char *text, uint8_t len)
 {
 	assert(len < PROGSTRINGSIZE);
-	const size_t strLen = sizeof (String) + len;
+	const uint8_t strLen = sizeof (String) + len;
 
 	if (_arraysEnd + strLen >= _sp)
 		return (false);
@@ -424,7 +422,7 @@ Interpreter::Program::insert(uint16_t num, const char *text, size_t len)
 }
 
 void
-Interpreter::Program::reset(size_t size)
+Interpreter::Program::reset(uint16_t size)
 {
 	_current = 0;
 	_sp = programSize;
@@ -432,7 +430,7 @@ Interpreter::Program::reset(size_t size)
 		_textEnd = _variablesEnd = _arraysEnd = size;
 }
 
-size_t
+uint16_t
 Interpreter::Program::size() const
 {
 	return (_textEnd);

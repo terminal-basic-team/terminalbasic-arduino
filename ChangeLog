@@ -1,3 +1,12 @@
+r0.8.2 (9.05.2017) - Release, dedicated to Victory Day.
+
+   * Fix buffer overflow in real numbers output.
+   * Real numbers output in the for of fixed or floating point.
+     in order to use the shortest form.
+   * Fix parsing of real numbers, now understands exponentioal form.
+   * Optimisations and more configuration options  allow reducing
+     code size.
+
 r0.8.1 (28.04.2017) - Release, dedicated to my wedding anniversary
                       :).
 

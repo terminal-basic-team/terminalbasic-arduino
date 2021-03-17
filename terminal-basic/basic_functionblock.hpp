@@ -48,7 +48,7 @@ public:
 protected:
 #if USE_REALS
 	typedef Real (*_funcReal)(Real);
-#endif
+#endif // USE_REALS
 #if USE_LONGINT
 	typedef LongInteger (*_funcInteger)(LongInteger);
 #else
@@ -79,7 +79,7 @@ protected:
 	 * @return ok status
 	 */
 	static bool general_func(Interpreter&, _funcReal);
-#endif
+#endif // USE_REALS
 	/**
 	 * @brief general function wrapper with 1 Real argument
 	 * @param interpreter Interpreter object
@@ -87,6 +87,14 @@ protected:
 	 * @return ok status
 	 */
 	static bool general_func(Interpreter&, _funcInteger);
+	
+#if USE_LONGINT
+	#define _Integer LongInteger
+#else
+	#define _Integer Integer
+#endif // USE_LONGINT
+	static bool getIntegerFromStack(Interpreter&, _Integer&);
+#undef _Integer
 	const uint8_t *commandTokens;
 	const FunctionBlock::command *commands;
 	const uint8_t *functionTokens;

@@ -116,8 +116,25 @@ FunctionBlock::general_func(Interpreter &i, _funcReal f)
 }
 #endif
 
+#if USE_LONGINT
+#define _Integer LongInteger
+#else
+#define _Integer Integer
+#endif // USE_LONGINT
 bool
 FunctionBlock::general_func(Interpreter &i, _funcInteger f)
+{
+	_Integer v;
+	if (getIntegerFromStack(i, v)) {
+		v = (*f)(v);
+		i.pushValue(v);
+		return (true);
+	} else
+		return (false);
+}
+
+bool
+FunctionBlock::getIntegerFromStack(Interpreter &i, _Integer &num)
 {
 	Parser::Value v(Integer(0));
 	i.popValue(v);
@@ -129,15 +146,12 @@ FunctionBlock::general_func(Interpreter &i, _funcInteger f)
 	 || v.type == Parser::Value::REAL
 #endif
 	) {
-#if USE_LONGINT
-		v = (*f)(LongInteger(v));
-#else
-		v = (*f)(Integer(v));
-#endif
-		i.pushValue(v);
-		return (true);
+		num  = _Integer(v);
+		return true;
 	} else
-		return (false);
+		return false;
 }
+
+#undef _Integer
 
 }

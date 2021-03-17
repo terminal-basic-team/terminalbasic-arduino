@@ -17,8 +17,10 @@
  */
 
 #include "basic_arduinoio.hpp"
-#include "Arduino.h"
 
+#if USEARDUINOIO
+
+#include "Arduino.h"
 #include <assert.h>
 
 namespace BASIC
@@ -77,17 +79,10 @@ ArduinoIO::func_aread_int(Interpreter &i)
 bool
 ArduinoIO::func_dread(Interpreter &i)
 {
-	Parser::Value v(Integer(0));
-	i.popValue(v);
-#if USE_LONGINT
-	if (v.type == Parser::Value::INTEGER ||
-	    v.type == Parser::Value::LONG_INTEGER) {
-#else
-	if (v.type == Parser::Value::INTEGER) {
-#endif
-		pinMode(Integer(v), INPUT);
-		v = bool(digitalRead(Integer(v)));
-		i.pushValue(v);
+	INT v;
+	if (getIntegerFromStack(i, v)) {
+		pinMode(v, INPUT);
+		i.pushValue(bool(digitalRead(v)));
 		return (true);
 	} else
 		return (false);
@@ -96,25 +91,13 @@ ArduinoIO::func_dread(Interpreter &i)
 bool
 ArduinoIO::comm_awrite(Interpreter &i)
 {
-	Parser::Value v(Integer(0));
-	i.popValue(v);
-#if USE_LONGINT
-	if (v.type == Parser::Value::INTEGER ||
-	    v.type == Parser::Value::LONG_INTEGER) {
-#else
-	if (v.type == Parser::Value::INTEGER) {
-#endif
-		Parser::Value v2(Integer(0));
-		i.popValue(v2);
-#if USE_LONGINT
-		if (v2.type == Parser::Value::INTEGER ||
-		    v2.type == Parser::Value::LONG_INTEGER) {
-#else
-		if (v2.type == Parser::Value::INTEGER) {
-#endif
-			pinMode(Integer(v2), OUTPUT);
-			analogWrite(Integer(v2), Integer(v));
-			return (true);
+	INT v;
+	if (getIntegerFromStack(i, v)) {
+		INT v2;
+		if (getIntegerFromStack(i, v2)) {
+			pinMode(v2, OUTPUT);
+			analogWrite(v2, v);
+			return true;
 		}
 	}
 
@@ -124,24 +107,18 @@ ArduinoIO::comm_awrite(Interpreter &i)
 bool
 ArduinoIO::comm_dwrite(Interpreter &i)
 {
-	Parser::Value v(Integer(0));
+	Parser::Value v(false);
 	i.popValue(v);
 	if (v.type == Parser::Value::BOOLEAN) {
-		Parser::Value v2(Integer(0));
-		i.popValue(v2);
-#if USE_LONGINT
-		if (v2.type == Parser::Value::INTEGER ||
-		    v2.type == Parser::Value::LONG_INTEGER) {
-#else
-		if (v2.type == Parser::Value::INTEGER) {
-#endif
-			pinMode(Integer(v2), OUTPUT);
-			digitalWrite(Integer(v2), bool(v));
-			return (true);
+		INT v2;
+		if (getIntegerFromStack(i, v2)) {
+			pinMode(v2, OUTPUT);
+			digitalWrite(v2, bool(v));
+			return true;
 		}
 	}
 
-	return (false);
+	return false;
 }
 
 #if USE_REALS
@@ -167,3 +144,5 @@ ArduinoIO::aread_i(INT v)
 #undef INT
 
 }
+
+#endif // USEARDUINOIO

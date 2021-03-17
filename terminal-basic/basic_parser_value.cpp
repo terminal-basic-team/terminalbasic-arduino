@@ -468,19 +468,22 @@ Parser::Value::printTo(Print& p) const
 #if USE_REALS
 	case REAL:
 	{
-		char buf[14];
+		char buf[15];
 #ifdef ARDUINO
 		uint8_t decWhole = 1;
-		Real n = value.real;
+		Real n = math<Real>::abs(value.real);
 		while (n >= Real(10)) {
 			n /= Real(10);
 			++decWhole;
 		}
-		::dtostrf(value.real, 10, 8 - decWhole, buf);
+		if (decWhole < 4)
+			::dtostrf(value.real, 10, 8 - decWhole, buf);
+		else
+			::dtostre(value.real, buf, 7, DTOSTR_ALWAYS_SIGN);
 #else
 		::sprintf(buf, "% .8G", value.real);
 #endif // ARDUINO
-		return value.real > Real(0) ? p.print(buf) + 1 : p.print(buf);
+		return p.print(buf);
 	}
 		break;
 #endif

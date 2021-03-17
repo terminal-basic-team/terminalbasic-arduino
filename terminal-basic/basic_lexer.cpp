@@ -513,6 +513,7 @@ Lexer::fitst_LT()
 		_token = Token::LT;
 		return;
 	}
+	
 	next();
 }
 
@@ -582,7 +583,7 @@ Lexer::decimalNumber()
 				} else if (SYM == 0) {
 					_token = Token::C_REAL;
 					return;
-				} else if (SYM == 'E') {
+				} else if (SYM == 'E' || SYM == 'e') {
 					if (!numberScale())
 						_token = Token::NOTOKENS;
 					else
@@ -596,6 +597,7 @@ Lexer::decimalNumber()
 		}
 			break;
 		case 'E':
+		case 'e':
 		{
 			if (_value.type == Parser::Value::INTEGER
 #if USE_LONGINT
@@ -661,7 +663,9 @@ Lexer::numberScale()
 	if (SYM == '-') {
 		sign = false;
 		next();
-	}
+	} else if (SYM == '+')
+		next();
+	
 	if (isdigit(SYM)) {
 		scale += SYM - '0';
 		next();
