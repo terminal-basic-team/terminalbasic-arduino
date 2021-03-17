@@ -48,8 +48,10 @@ public:
 		EXPRESSION_EXPECTED = 2,
 		INTEGER_CONSTANT_EXPECTED = 3,
 		THEN_OR_GOTO_EXPECTED = 4,
-		VARIABLES_LIST_EXPECTED = 5,
-		STRING_OVERFLOW = 6
+		INVALID_DATA_EXPR = 5,
+		INVALID_READ_EXPR = 6,
+		VARIABLES_LIST_EXPECTED = 7,
+		STRING_OVERFLOW = 8
 	};
 	
 	class EXT_PACKED Value;
@@ -85,10 +87,12 @@ private:
 	 */
 	enum Mode : uint8_t
 	{
-		SCAN = 0, EXECUTE
+		SCAN = 0, EXECUTE, READ
 	};
 	bool fOperators(bool&);
 	bool fOperator();
+	bool fDataStatement();
+	bool fReadStatement();
 	bool fImplicitAssignment(char*);
 	bool fPrintList();
 	bool fPrintItem();

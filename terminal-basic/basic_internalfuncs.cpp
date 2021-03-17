@@ -29,9 +29,20 @@ namespace BASIC
 
 static const uint8_t intFuncs[] PROGMEM = {
 	'A', 'B', 'S'+0x80,
+#if USE_ASC
+	'A', 'S', 'C'+0x80,
+#endif
+#if USE_CHR
 	'C', 'H', 'R', '$'+0x80,
+#endif
+#if USE_GET
+	'G', 'E', 'T', '$'+0x80,
+#endif
 #if USE_REALS
 	'I', 'N', 'T'+0x80,
+#endif
+#if USE_LEN
+	'L', 'E', 'N'+0x80,
 #endif
 	'R', 'E', 'S'+0x80,
 #if USE_RANDOM
@@ -44,9 +55,20 @@ static const uint8_t intFuncs[] PROGMEM = {
 
 const FunctionBlock::function InternalFunctions::funcs[] PROGMEM = {
 	InternalFunctions::func_abs,
+#if USE_ASC
+	InternalFunctions::func_asc,
+#endif
+#if USE_CHR
 	InternalFunctions::func_chr,
+#endif
+#if USE_GET
+	InternalFunctions::func_get,
+#endif
 #if USE_REALS
 	InternalFunctions::func_int,
+#endif
+#if USE_LEN
+	InternalFunctions::func_len,
 #endif
 	InternalFunctions::func_result,
 #if USE_RANDOM
@@ -84,6 +106,24 @@ InternalFunctions::func_abs(Interpreter &i)
 		return false;
 }
 
+#if USE_ASC
+bool
+InternalFunctions::func_asc(Interpreter &i)
+{
+	Parser::Value v;
+	i.popValue(v);
+	if (v.type == Parser::Value::STRING) {
+		const char *str;
+		i.popString(str);
+		v = Integer(str[0]);
+		i.pushValue(v);
+		return true;
+	} else
+		return false;
+}
+#endif
+
+#if USE_CHR
 bool
 InternalFunctions::func_chr(Interpreter &i)
 {
@@ -96,6 +136,21 @@ InternalFunctions::func_chr(Interpreter &i)
 	i.pushValue(v);
 	return true;
 }
+#endif
+
+#if USE_GET
+bool
+InternalFunctions::func_get(Interpreter &i)
+{
+	Parser::Value v;
+	char buf[2] = {0,};
+	buf[0] = i.lastKey();
+	v.type = Parser::Value::STRING;
+	i.pushString(buf);
+	i.pushValue(v);
+	return true;
+}
+#endif // USE_GET
 
 bool
 InternalFunctions::func_result(Interpreter &i)
@@ -127,6 +182,23 @@ InternalFunctions::func_int(Interpreter &i)
 		return (false);
 }
 #endif // USE_REALS
+
+#if USE_LEN
+bool
+InternalFunctions::func_len(Interpreter &i)
+{
+	Parser::Value v;
+	i.popValue(v);
+	if (v.type == Parser::Value::STRING) {
+		const char *str;
+		i.popString(str);
+		v = Integer(strnlen(str, STRINGSIZE));
+		i.pushValue(v);
+		return true;
+	} else
+		return false;
+}
+#endif
 
 #if USE_REALS
 #define TYP Real

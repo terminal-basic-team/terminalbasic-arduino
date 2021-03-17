@@ -32,6 +32,8 @@
 
 #if S_INPUT == SERIAL_I
     #define SERIAL_PORT Serial
+#elif S_INPUT == SERIAL1_I
+    #define SERIAL_PORT Serial1
 #elif S_INPUT == SERIALL_I
     #define SERIAL_PORT SerialL
 #elif S_INPUT == SERIALL1_I
@@ -40,9 +42,14 @@
     #define SERIAL_PORT SerialL2
 #elif S_INPUT == SERIALL3_I
     #define SERIAL_PORT SerialL3
+#elif S_INPUT == PS2UARTKB_I
+#undef USEPS2USARTKB
+#define USEPS2USARTKB     1
 #endif
 #if S_OUTPUT == SERIAL_O
 #define SERIAL_PORT Serial
+#elif S_OUTPUT == SERIAL1_O
+#define SERIAL_PORT Serial1
 #elif S_OUTPUT == SERIALL_O
 #define SERIAL_PORT SerialL
 #elif S_OUTPUT == SERIALL3_O
@@ -96,19 +103,29 @@ enum class Token : uint8_t
 #if USE_SAVE_LOAD
 	COM_CHAIN,     // 4
 #endif
+#if USE_TEXTATTRIBUTES
 	COM_CLS,       // 5
+#endif
 #if USESTOPCONT
 	COM_CONT,      // 6
 #endif
 #if USE_MATRIX
 	KW_CON,        // 7
 #endif
+#if USE_DATA
+	KW_DATA,       // 8
+#endif
 	KW_DEF,        // 9
-//	COM_DELAY,     // 10
+#if USE_DELAY
+	COM_DELAY,     // 10
+#endif
 #if USE_MATRIX
 	KW_DET,        // 11
 #endif
 	KW_DIM,        // 12
+#if USE_DOLOOP
+	KW_DO,         // 13
+#endif
 #if USE_DUMP
 	COM_DUMP,      // 14
 #endif
@@ -131,6 +148,9 @@ enum class Token : uint8_t
 #if USE_SAVE_LOAD
 	COM_LOAD,      // 27
 #endif
+#if USE_DOLOOP
+	KW_LOOP,       // 28
+#endif
 #if USE_MATRIX
 	KW_MAT,        // 28
 #endif
@@ -143,6 +163,9 @@ enum class Token : uint8_t
 	KW_PRINT,      // 35
 #if USE_RANDOM
 	KW_RANDOMIZE,  // 36
+#endif
+#if USE_DATA
+	KW_READ,       // 37
 #endif
 	KW_REM,        // 38
 	KW_RETURN,     // 39
@@ -245,6 +268,7 @@ enum class ProgMemStrings : uint8_t
 #endif
 	S_REALLY,
 	S_END,
+#if USE_TEXTATTRIBUTES
         VT100_ESCSEQ,
 	VT100_CLS,
 	VT100_NOATTR,
@@ -259,7 +283,8 @@ enum class ProgMemStrings : uint8_t
 	VT100_MAGENTA,
 	VT100_CYAN,
 	VT100_WHITE,
-#endif
+#endif // USE_COLORATTRIBUTES
+#endif // USE_TEXTATTRIBUTES
 	NUM_STRINGS
 };
 

@@ -19,12 +19,18 @@
 #ifndef BASIC_INTERPRETER_PROGRAM_HPP
 #define BASIC_INTERPRETER_PROGRAM_HPP
 
-#include "basic_interpreter.hpp"
+#include "arduinoext.hpp"
+#include "basic.hpp"
+#include "basic_parser_value.hpp"
 
 namespace BASIC
 {
+	
+class VariableFrame;
+class ArrayFrame;
+class Interpreter;
 
-class Interpreter::Program
+class Program
 {
 	friend class Interpreter;
 public:

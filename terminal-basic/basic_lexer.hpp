@@ -37,11 +37,13 @@ operator<<(Logger &logger, Token tok);
 
 /**
  * @brief Lexical analyzer class
- * @param 
  */
 class Lexer
 {
 public:
+	/**
+	 * @brief lexical analyses stage errors
+	 */
 	enum Error : uint8_t
 	{
 		NO_ERROR = 0,
@@ -49,7 +51,7 @@ public:
 	};
 	/**
 	 * @brief initialize lexer session
-	 * @param str string to extract tokens from
+	 * @param str null-terminating string to extract tokens from
 	 */
 	void init(const char*);
 	/**
@@ -61,14 +63,12 @@ public:
 	 * @brief get last extracted token
 	 * @return last token
 	 */
-	Token getToken() const
-	{
-		return _token;
-	}
-	Error getError() const
-	{
-		return _error;
-	}
+	Token getToken() const { return _token; }
+	/**
+	 * @brief get last lexer error
+	 * @return error code
+	 */
+	Error getError() const { return _error; }
 	/**
 	 * @brief get current value (numberm boolean...)
 	 * @return value, extracted from string
@@ -87,9 +87,14 @@ public:
 	/**
 	 * @brief token strings array
 	 */
-	static PGM_P const tokenStrings[uint8_t(Token::NUM_TOKENS)];
-	
-	const uint8_t *getTokenString(Token) const;
+	static PGM_P const tokenStrings[];
+	/**
+	 * @brief Get null-terminated token string representation
+	 * @param token Token code
+	 * @param buf String buffer to copy to
+	 * @return buffer pointer or nullptr if error
+	 */
+	static const uint8_t *getTokenString(Token, uint8_t*);
 private:
 
 	void pushSYM();

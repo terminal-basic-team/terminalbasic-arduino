@@ -54,5 +54,15 @@ protected: \
   ClassName() = default; \
   EXT_NOTCOPYABLE(ClassName)
 
-#endif //EXT_HPP
+#ifdef swap
+#undef swap
+#endif
+template <typename T>
+void swap(T &r, T &l)
+{
+	T buf = r;
+	r = l;
+	l = buf;
+}
 
+#endif //EXT_HPP

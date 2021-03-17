@@ -71,13 +71,13 @@ Parser::Value::operator Real() const
 		return (Real(value.longInteger));
 #endif // USE_LONGINT
 	case INTEGER:
-		return (Real(value.integer));
+		return Real(value.integer);
 	case REAL:
-		return (value.real);
+		return value.real;
 	case BOOLEAN:
-		return (Real(value.boolean));
+		return Real(value.boolean);
 	default:
-		return (Real(NAN));
+		return Real(NAN);
 	}
 }
 #endif // USE_REALS
@@ -90,10 +90,10 @@ Parser::Value::operator bool() const
 		return (bool(value.longInteger));
 #endif // USE_LONGINT
 	case INTEGER:
-		return (bool(value.integer));
+		return bool(value.integer);
 #if USE_REALS
 	case REAL:
-		return (bool(value.real));
+		return bool(value.real);
 #endif // USE_REALS
 	case BOOLEAN:
 		return value.boolean;
@@ -227,13 +227,13 @@ Parser::Value::operator>(const Value &rhs) const
 bool
 operator>=(const Parser::Value &l, const Parser::Value &r)
 {
-	return (l.operator>(r) || l.operator==(r));
+	return l.operator>(r) || l.operator==(r);
 }
 
 bool
 operator<=(const Parser::Value &l, const Parser::Value &r)
 {
-	return (l.operator<(r) || l.operator==(r));
+	return l.operator<(r) || l.operator==(r);
 }
 
 Parser::Value &
@@ -480,14 +480,15 @@ Parser::Value::printTo(Print& p) const
 	case BOOLEAN:
 	{
 		char buf[6]; // Size, sufficient to store both 'TRUE' and 'FALSE
-		Token t;
+		const uint8_t *res;
 		if (value.boolean)
-			t = Token::KW_TRUE;
+			res = Lexer::getTokenString(Token::KW_TRUE, (uint8_t*)buf);
 		else
-			t = Token::KW_FALSE;
-		strcpy_P(buf, (PGM_P)pgm_read_word(&(Lexer::
-		    tokenStrings[uint8_t(t)])));
-		return p.print(buf);
+			res = Lexer::getTokenString(Token::KW_FALSE, (uint8_t*)buf);
+		if (res != nullptr)
+			return p.print(buf);
+		else
+			return 0;
 	}
 		break;
 #if USE_REALS

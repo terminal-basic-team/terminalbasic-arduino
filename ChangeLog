@@ -1,3 +1,21 @@
+r1.1-alpha1 (28.08.2017) - Release, dedicated to the
+
+  * Add support of Atmega1284-based single chip computers by Dan
+    https://hackaday.io/project/2428-single-chip-avr-basic-computer-v03
+  * Add GFX module with drawing functions and commands, currently
+    supports output using TVoutEx and UTFT libraries on Arduino and
+    TVoutEx SDL2 emulation on Linux
+  * Add DELAY function with obvious semantics (in multiterminal mode is unblocking)
+  * Add ASC (char code), LEN (string length) and GET$ (user input) functions
+  * Add CBR (qubic root) math function
+  * Add optional alignment of the line numbers in LIST command
+  * Boolean arrays (name ends with ! symbol) are bit-packed, providing
+    significant memory saving
+  * Errors in functions and commands treated as Dynamic vs Static semantic
+    errors
+  * Some bug fixes and code cleanup
+  * As usual, some hard-to-find bugs were added
+
 r1.0-beta1 (20.08.2017) - Release, dedicated to the Russian Day of Air Fleet and
                           the Belarussian Day of Air Forces
 
@@ -90,29 +108,29 @@ r0.6.3 (28.02.2017) Fix Atmega2560 with external memory build
 			FIx input/output boundary objects usage
 			Fix listing of variables ids
 			Fix string variables input
-			
+
 r0.6.2 (24.02.2017)	Fix program string size when saving to internal memory
 			Fix multivalue input
 			Fix input of real numbers
-			
+
 r0.6.1 (21.02.2017)	Fix in the optional long integer support;
 			Atmega128a build fix.
-			
+
 r0.6 (20.02.2017)	AWRITE command in ARduinoIO module;
 			Tokenization of integer constants;
 			Bug fixes;
-			
+
 r0.5 (27.01.2017)	4-byte integer optional datatype with %% variable name suffix;
 			RANDOMIZE command was added;
 			RND() function was added;
 			Optional keyword tokenization;
 			Script for make arduino ide sketch from netbeans-oriented sources.
-			
+
 r0.4 (26.12.2016)	LIST command outputs syntax-highlighted program text;
 			Boolean datatype with TRUE and FALSE constants and ! variable name suffix;
 			ArduinoIO module was  updated;
 			SDCard program save/load module;
-			
+
 r0.3 (07.12.2016)	Interpreter rewrited as FSM with short-time step() method. This allows to implement
 			time-sharing system with multiple terminals;
 			ArduinoIO module was added;
@@ -124,7 +142,7 @@ r0.3 (07.12.2016)	Interpreter rewrited as FSM with short-time step() method. Thi
 			Break (Ctrl-C) command;
 			vt100 color/highlighted output supported;
 			Bug fixes.
-			
+
 r0.2 (29.11.2016)	REM operator;
 			Multioperator lines with operators separated by semicolons;
      Input both positive and negative numbers;

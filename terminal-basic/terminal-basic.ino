@@ -23,8 +23,12 @@
 #include "seriallight.hpp"
 #endif
 
-#if USEARDUINOIO
+#if CONF_MODULE_ARDUINOIO
 #include "basic_arduinoio.hpp"
+#endif
+
+#if USEPS2USARTKB
+#include "ps2uartstream.hpp"
 #endif
 
 #if USESD
@@ -41,12 +45,18 @@
 
 #if USETVOUT
 #include "TVoutPrint.hpp"
-#include "fonts/Font6x8.h"
+#include "utility/Font6x8.h"
+#include "utility/Font8x8.h"
+#include "utility/Font6x8_cyr_koe13.hpp"
 #endif
 
 #if USE_EXTEEPROM
 #include "basic_exteeprom.hpp"
 #include <Wire.h>
+#endif
+
+#if USE_GFX
+#include "basic_gfx.hpp"
 #endif
 
 /**
@@ -70,7 +80,7 @@ static BASIC::SDFSModule sdfs;
 static BASIC::Math mathBlock;
 #endif
 
-#if USEARDUINOIO
+#if CONF_MODULE_ARDUINOIO
 static BASIC::ArduinoIO arduinoIo;
 #endif
 
@@ -78,29 +88,36 @@ static BASIC::ArduinoIO arduinoIo;
 static BASIC::ExtEEPROM extEeprom;
 #endif
 
+#if USEPS2USARTKB
+static PS2UARTKeyboardStream ps2usartStream;
+#endif
+
+#if USE_GFX
+static BASIC::GFXModule gfxModule;
+#endif
+
 #if BASIC_MULTITERMINAL
-static BASIC::Interpreter::Program program(BASIC::PROGRAMSIZE / 5);
-static BASIC::Interpreter basic(SERIAL_PORT, SERIAL_PORT, program);
+static BASIC::Interpreter basic(SERIAL_PORT, SERIAL_PORT, BASIC::PROGRAMSIZE / 5);
 #ifdef HAVE_HWSERIAL1
-static BASIC::Interpreter::Program program1(BASIC::PROGRAMSIZE / 5);
-static BASIC::Interpreter basic1(SERIAL_PORT1, SERIAL_PORT1, program1);
+static BASIC::Interpreter basic1(SERIAL_PORT1, SERIAL_PORT1, BASIC::PROGRAMSIZE / 5);
 #endif
 #ifdef HAVE_HWSERIAL2
-static BASIC::Interpreter::Program program2(BASIC::PROGRAMSIZE / 5);
-static BASIC::Interpreter basic2(SERIAL_PORT2, SERIAL_PORT2, program2);
+static BASIC::Interpreter basic2(SERIAL_PORT2, SERIAL_PORT2, BASIC::PROGRAMSIZE / 5);
 #endif
 #ifdef HAVE_HWSERIAL3
-static BASIC::Interpreter::Program program3(BASIC::PROGRAMSIZE / 5);
-static BASIC::Interpreter basic3(SERIAL_PORT3, SERIAL_PORT3, program3);
+static BASIC::Interpreter basic3(SERIAL_PORT3, SERIAL_PORT3, BASIC::PROGRAMSIZE / 5);
 #endif
 #else
-static BASIC::Interpreter::Program program(BASIC::PROGRAMSIZE);
 #if USEUTFT
-static BASIC::Interpreter basic(SERIAL_PORT, utftPrint, program);
+static BASIC::Interpreter basic(SERIAL_PORT, utftPrint, BASIC::PROGRAMSIZE);
+#elif (USEPS2USARTKB && USETVOUT)
+static BASIC::Interpreter basic(ps2usartStream, tvoutPrint, BASIC::PROGRAMSIZE);
+#elif USEPS2USARTKB
+static BASIC::Interpreter basic(ps2usartStream, SERIAL_PORT, BASIC::PROGRAMSIZE);
 #elif USETVOUT
-static BASIC::Interpreter basic(SERIAL_PORT, tvoutPrint, program);
+static BASIC::Interpreter basic(SERIAL_PORT, tvoutPrint, BASIC::PROGRAMSIZE);
 #else
-static BASIC::Interpreter basic(SERIAL_PORT, SERIAL_PORT, program);
+static BASIC::Interpreter basic(SERIAL_PORT, SERIAL_PORT, BASIC::PROGRAMSIZE);
 #endif // USEUTFT
 #endif // BASIC_MULTITERMINAL
 
@@ -115,10 +132,15 @@ setup()
 	XMCRA |= 1ul<<7; // Switch ext mem iface on
 	XMCRB = 0;
 #endif
+#ifdef SERIAL_PORT
 	SERIAL_PORT.begin(115200);
+#endif
 #if USETVOUT
 	tvOut.begin(PAL, TVOUT_HORIZ, TVOUT_VERT, tvOutBuf);
-        tvOut.selectFont(Font6x8);
+        tvOut.selectFont(Font6x8_cyr);
+#endif
+#if USEPS2USARTKB
+        ps2usartStream.begin();
 #endif
 #if USEUTFT
 	utftPrint.begin();
@@ -140,8 +162,12 @@ setup()
 
 	LOG_TRACE;
 
-#if USEARDUINOIO
+#if CONF_MODULE_ARDUINOIO
 	basic.addModule(&arduinoIo);
+#endif
+	
+#if USE_GFX
+	basic.addModule(&gfxModule);
 #endif
 	
 #if USEMATH

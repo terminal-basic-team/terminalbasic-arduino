@@ -17,14 +17,17 @@
  */
 
 #include "basic_program.hpp"
+
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "basic_interpreter.hpp"
+
 namespace BASIC
 {
 
-Interpreter::Program::Program(uint16_t progsize) :
+Program::Program(uint16_t progsize) :
 #if USE_EXTMEM
 _text(reinterpret_cast<char*> (EXTMEM_ADDRESS)),
 #endif
@@ -34,8 +37,8 @@ programSize(progsize)
 	assert(progsize <= PROGRAMSIZE);
 }
 
-Interpreter::Program::String*
-Interpreter::Program::getString()
+Program::String*
+Program::getString()
 {
 	if (_jumpFlag) {
 		_current = _jump;
@@ -51,8 +54,8 @@ Interpreter::Program::getString()
 	return result;
 }
 
-Interpreter::Program::String*
-Interpreter::Program::current() const
+Program::String*
+Program::current() const
 {
 	if (_current < _textEnd)
 		return stringByIndex(_current);
@@ -60,34 +63,34 @@ Interpreter::Program::current() const
 		return nullptr;
 }
 
-Interpreter::Program::String*
-Interpreter::Program::first() const
+Program::String*
+Program::first() const
 {
 	return stringByIndex(0);
 }
 
-Interpreter::Program::String*
-Interpreter::Program::last() const
+Program::String*
+Program::last() const
 {
 	return stringByIndex(_textEnd);
 }
 
 void
-Interpreter::Program::jump(uint16_t newVal)
+Program::jump(uint16_t newVal)
 {
 	_jump = newVal;
 	_jumpFlag = true;
 }
 
-Interpreter::Program::String*
-Interpreter::Program::stringByIndex(uint16_t index) const
+Program::String*
+Program::stringByIndex(uint16_t index) const
 {
 	return const_cast<String*> (reinterpret_cast<const String*> (
 	    _text + index));
 }
 
-Interpreter::Program::String*
-Interpreter::Program::lineByNumber(uint16_t number, uint16_t index)
+Program::String*
+Program::lineByNumber(uint16_t number, uint16_t index)
 {
 	Program::String *result = NULL;
 
@@ -105,7 +108,7 @@ Interpreter::Program::lineByNumber(uint16_t number, uint16_t index)
 }
 
 uint8_t
-Interpreter::Program::StackFrame::size(Type t)
+Program::StackFrame::size(Type t)
 {
 #if OPT == OPT_SPEED
 	switch (t) {
@@ -147,14 +150,14 @@ Interpreter::Program::StackFrame::size(Type t)
 }
 
 void
-Interpreter::Program::clearProg()
+Program::clearProg()
 {
 	_jumpFlag = false;
 	_reset();
 }
 
 void
-Interpreter::Program::moveData(uint16_t dest)
+Program::moveData(uint16_t dest)
 {
 	int32_t diff = _textEnd-dest;
 	memmove(_text+dest, _text+_textEnd, _arraysEnd-_textEnd);
@@ -164,7 +167,7 @@ Interpreter::Program::moveData(uint16_t dest)
 }
 
 void
-Interpreter::Program::newProg()
+Program::newProg()
 {
 	clearProg();
 	_textEnd = _variablesEnd = _arraysEnd = _jump = 0;
@@ -173,8 +176,8 @@ Interpreter::Program::newProg()
 #endif
 }
 
-Interpreter::VariableFrame *
-Interpreter::Program::variableByName(const char *name)
+VariableFrame *
+Program::variableByName(const char *name)
 {
 	uint16_t index = _textEnd;
 
@@ -187,31 +190,31 @@ Interpreter::Program::variableByName(const char *name)
 			break;
 		index += f->size();
 	}
-	return NULL;
+	return nullptr;
 }
 
 uint16_t
-Interpreter::Program::stringIndex(const String *s) const
+Program::stringIndex(const String *s) const
 {
 	return ((char*) s) - _text;
 }
 
 uint16_t
-Interpreter::Program::variableIndex(VariableFrame *f) const
+Program::variableIndex(VariableFrame *f) const
 {
 	return ((char*) f) - _text;
 }
 
 uint16_t
-Interpreter::Program::arrayIndex(ArrayFrame *f) const
+Program::arrayIndex(ArrayFrame *f) const
 {
 	return ((char*) f) - _text;
 }
 
-Interpreter::Program::StackFrame*
-Interpreter::Program::push(StackFrame::Type t)
+Program::StackFrame*
+Program::push(StackFrame::Type t)
 {
-	uint8_t s = StackFrame::size(t);
+	const uint8_t s = StackFrame::size(t);
 	if ((_sp - s) < _arraysEnd)
 		return nullptr;
 
@@ -223,18 +226,18 @@ Interpreter::Program::push(StackFrame::Type t)
 }
 
 void
-Interpreter::Program::pop()
+Program::pop()
 {
-	StackFrame *f = stackFrameByIndex(_sp);
+	const StackFrame *f = stackFrameByIndex(_sp);
 	if (f != nullptr)
 		_sp += StackFrame::size(f->_type);
 }
 
 void
-Interpreter::Program::reverseLast(StackFrame::Type type)
+Program::reverseLast(StackFrame::Type type)
 {
 	StackFrame *f = this->currentStackFrame();
-	if (f != NULL && f->_type == type) {
+	if (f != nullptr && f->_type == type) {
 		char buf[sizeof (StackFrame)];
 		StackFrame *fr = reinterpret_cast<StackFrame*> (buf);
 		memcpy(fr, f, StackFrame::size(f->_type));
@@ -245,7 +248,7 @@ Interpreter::Program::reverseLast(StackFrame::Type type)
 }
 
 void
-Interpreter::Program::pushBottom(StackFrame *f)
+Program::pushBottom(StackFrame *f)
 {
 	StackFrame *newFrame = this->currentStackFrame();
 	if ((newFrame == NULL) || (newFrame->_type != f->_type)) {
@@ -262,8 +265,8 @@ Interpreter::Program::pushBottom(StackFrame *f)
 	}
 }
 
-Interpreter::Program::StackFrame*
-Interpreter::Program::stackFrameByIndex(uint16_t index)
+Program::StackFrame*
+Program::stackFrameByIndex(uint16_t index)
 {
 	if ((index > 0) && (index < programSize))
 		return reinterpret_cast<StackFrame*> (_text + index);
@@ -271,8 +274,8 @@ Interpreter::Program::stackFrameByIndex(uint16_t index)
 		return nullptr;
 }
 
-Interpreter::Program::StackFrame*
-Interpreter::Program::currentStackFrame()
+Program::StackFrame*
+Program::currentStackFrame()
 {
 	if (_sp < programSize)
 		return stackFrameByIndex(_sp);
@@ -280,8 +283,8 @@ Interpreter::Program::currentStackFrame()
 		return nullptr;
 }
 
-Interpreter::ArrayFrame*
-Interpreter::Program::arrayByName(const char *name)
+ArrayFrame*
+Program::arrayByName(const char *name)
 {
 	uint16_t index = _variablesEnd;
 
@@ -297,8 +300,8 @@ Interpreter::Program::arrayByName(const char *name)
 	return nullptr;
 }
 
-Interpreter::VariableFrame*
-Interpreter::Program::variableByIndex(uint16_t index)
+VariableFrame*
+Program::variableByIndex(uint16_t index)
 {
 	if (index < _variablesEnd)
 		return reinterpret_cast<VariableFrame*> (_text + index);
@@ -306,14 +309,14 @@ Interpreter::Program::variableByIndex(uint16_t index)
 		return nullptr;
 }
 
-Interpreter::ArrayFrame*
-Interpreter::Program::arrayByIndex(uint16_t index)
+ArrayFrame*
+Program::arrayByIndex(uint16_t index)
 {
 	return reinterpret_cast<ArrayFrame*> (_text + index);
 }
 
 bool
-Interpreter::Program::addLine(uint16_t num, const char *line)
+Program::addLine(uint16_t num, const char *line)
 {
 	uint16_t size;
 	char tempBuffer[PROGSTRINGSIZE];
@@ -377,7 +380,7 @@ Interpreter::Program::addLine(uint16_t num, const char *line)
 }
 
 void
-Interpreter::Program::removeLine(uint16_t num)
+Program::removeLine(uint16_t num)
 {
 	const String *line = this->lineByNumber(num, 0);
 	if (line != nullptr) {
@@ -393,7 +396,7 @@ Interpreter::Program::removeLine(uint16_t num)
 }
 
 bool
-Interpreter::Program::addLine(uint16_t num, const char *text, uint16_t len)
+Program::addLine(uint16_t num, const char *text, uint16_t len)
 {
 	reset();
 
@@ -429,7 +432,7 @@ Interpreter::Program::addLine(uint16_t num, const char *text, uint16_t len)
 }
 
 bool
-Interpreter::Program::insert(uint16_t num, const char *text, uint8_t len)
+Program::insert(uint16_t num, const char *text, uint8_t len)
 {
 	assert(len <= PROGSTRINGSIZE);
 	const uint8_t strLen = sizeof (String) + len;
@@ -449,7 +452,7 @@ Interpreter::Program::insert(uint16_t num, const char *text, uint8_t len)
 }
 
 void
-Interpreter::Program::reset(uint16_t size)
+Program::reset(uint16_t size)
 {
 	_reset();
 	if (size > 0)
@@ -457,13 +460,13 @@ Interpreter::Program::reset(uint16_t size)
 }
 
 uint16_t
-Interpreter::Program::size() const
+Program::size() const
 {
 	return _textEnd;
 }
 
 void
-Interpreter::Program::_reset()
+Program::_reset()
 {
 	_current = _textPosition = 0;
 	_sp = programSize;

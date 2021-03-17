@@ -30,36 +30,15 @@
  * Parameters
  */
 
-/*
- * Input and output for single terminal mode
- */
-
-// Input variants
-#define SERIAL_I   0 // Serial input
-#define SERIALL_I  1 // SerialL input
-#define SERIALL1_I 2 // SerialL1 input
-#define SERIALL2_I 3 // SerialL2 input
-#define SERIALL3_I 4 // SerialL3 input
-
-// Output variants
-#define SERIAL_O   0 // SerialL output
-#define SERIALL_O  1 // SerialL output
-#define SERIALL1_O 2 // SerialL1 output
-#define SERIALL2_O 3 // SerialL2 output
-#define SERIALL3_O 4 // SerialL3 output
-#define UTFT_O     5 // UTFT output
-#define TVOUT_O    6 // TVout output
-	#define TVOUT_HORIZ 240
-	#define TVOUT_VERT 192
-
-// Input select 
+// Input select
 #define S_INPUT SERIALL_I
 
 // Output select
-#define S_OUTPUT SERIALL_O
+#define S_OUTPUT UTFT_O
 
 #define USEUTFT		          0
 #define USETVOUT	          0
+#define USEPS2USARTKB             0
 
 // Use multiterminal mode
 #define BASIC_MULTITERMINAL       0
@@ -79,16 +58,13 @@
 namespace BASIC
 {
 
-// Max size of the program line
-const uint8_t PROGSTRINGSIZE = 73;
-
 // Number of bytes for program text, variables and stack
 #if USE_EXTMEM
 const uint16_t PROGRAMSIZE = EXTMEM_SIZE;
 #elif defined (__AVR_ATmega1284__) || defined (__AVR_ATmega1284P__)
-const uint16_t PROGRAMSIZE = 14848;
+const uint16_t PROGRAMSIZE = 8192;
 #elif defined (__AVR_ATmega2560__)
-const uint16_t PROGRAMSIZE = 6144;
+const uint16_t PROGRAMSIZE = 4096;
 #elif defined (__AVR_ATmega128__) || defined (__AVR_ATmega128A__)
 const uint16_t PROGRAMSIZE = 3072;
 #elif defined (__AVR_ATmega328__) || defined (__AVR_ATmega328P__)
@@ -98,12 +74,6 @@ const uint16_t PROGRAMSIZE = 384;
 #else
 const uint16_t PROGRAMSIZE = 1024;
 #endif // USE_EXTMEM
-
-// Max size of the string constants/variables
-const uint8_t STRINGSIZE = 65;
-
-// Number of characters in variable name
-const uint8_t VARSIZE = 5;
 
 }
 

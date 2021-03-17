@@ -42,10 +42,10 @@ static const char strDIR[] PROGMEM = "DIR";
 #endif
 static const char strREALLY[] PROGMEM = "REALLY";
 static const char strEND[] PROGMEM = "END";
+#if USE_TEXTATTRIBUTES
 static const char strVT100_PROLOGUESEQ[] PROGMEM = "\x1B[";
 static const char strVT100_CLS[] PROGMEM = "2J";
 static const char strVT100_NOATTR[] PROGMEM = "0m";
-#if USE_TEXTATTRIBUTES
 static const char strVT100_BRIGHT[] PROGMEM = "1m";
 static const char strVT100_UNDERSCORE[] PROGMEM = "4m";
 static const char strVT100_REVERSE[] PROGMEM = "7m";
@@ -82,10 +82,10 @@ static PGM_P const progmemStrings[uint8_t(ProgMemStrings::NUM_STRINGS)] PROGMEM 
 #endif
 	strREALLY, // REALLY
 	strEND, // END
+#if USE_TEXTATTRIBUTES
 	strVT100_PROLOGUESEQ, // x1B[
 	strVT100_CLS,
 	strVT100_NOATTR,
-#if USE_TEXTATTRIBUTES
 	strVT100_BRIGHT,
 	strVT100_UNDERSCORE,
 	strVT100_REVERSE,
@@ -97,8 +97,8 @@ static PGM_P const progmemStrings[uint8_t(ProgMemStrings::NUM_STRINGS)] PROGMEM 
 	strVT100_MAGENTA,
 	strVT100_CYAN,
 	strVT100_WHITE
-#endif
-#endif
+#endif // USE_COLORATTRIBUTES
+#endif // USE_TEXTATTRIBUTES
 };
 
 uint8_t*
