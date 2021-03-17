@@ -17,49 +17,28 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ASCII_HPP
-#define ASCII_HPP
+#ifndef LIQUIDCRYSTALPRINT_HPP
+#define LIQUIDCRYSTALPRINT_HPP
 
-#include <inttypes.h>
+#include "vt100.hpp"
+#include "LiquidCrystal.h"
 
-/**
- * @brief ASCII characters
- */
-enum class ASCII : uint8_t
+class LiquidCrystalVt100 : public VT100::Print
 {
-	NUL = 0x00,
-	SOH = 0x01,
-	STX = 0x02,
-	ETX = 0x03,
-	EOT = 0x04,
-	ENQ = 0x05,
-	ACK = 0x06,
-	BEL = 0x07,
-	BS = 0x08,
-	HT = 0x09,
-	LF = 0x0A,
-	VT = 0x0B,
-	FF = 0x0C,
-	CR = 0x0D,
-	SO = 0x0E,
-	SI = 0x0F,
-	NAK = 0x15,
-	SYN = 0x16,
-	CAN = 0x18,
-	ESC = 0x1B,
-	SPACE = ' ',
-	QMARK = '?',
-	DOT = '.',
-	COLON = ':',
-	SEMICOLON = ';',
-	QUMARK = '\"',
-	LPAREN = '(',
-	RPAREN = ')',
-	COMMA = ',',
-	GT = '>',
-	LT = '<',
-	TILDE = 0x7E,
-	DEL = 0x7F
+	EXT_NOTCOPYABLE(LiquidCrystalVt100)
+public:
+	LiquidCrystalVt100(LiquidCrystal&, uint8_t, uint8_t, uint8_t*);
+	void clear() override;
+protected:
+	uint8_t getCursorX() override;
+	void setCursor(uint8_t, uint8_t) override;
+	void setCursorX(uint8_t) override;
+	void writeChar(uint8_t) override;
+private:
+	void scroll();
+	LiquidCrystal &_crystal;
+	uint8_t _x,_y, _w, _h;
+	uint8_t *_buffer;
 };
 
 #endif

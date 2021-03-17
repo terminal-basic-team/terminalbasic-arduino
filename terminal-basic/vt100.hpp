@@ -21,8 +21,14 @@
 #define VT100_HPP
 
 #include "arduinoext.hpp"
+#include <Print.h>
+#include <stdint.h>
 
-class VT100
+/**
+ * @package VT100\
+ * @brief Package, implementing some vt100/ANSI terminal functions
+ */
+Package(VT100)
 {
 	EXT_PACKAGE(VT100);
 public:
@@ -50,6 +56,56 @@ public:
 		CB_MAGENTA = 0xD0,
 		CB_CYAN = 0xE0,
 		CB_WHITE = 0xF0,
+	};
+
+	/**
+	 * @brief Print print wrapper with vt100 capabilities
+	 */
+	class Print : public ::Print
+	{
+		EXT_NOTCOPYABLE(Print)
+	public:
+		/**
+		 * @brief default constructor
+		 * @param tv TVoutEx object instance to wrap
+		 */
+		explicit Print();
+
+		virtual ~Print() = default;
+		
+		virtual void clear() = 0;
+
+	protected:
+		/**
+		 * @brief escape codes parsing automata state set
+		 */
+		enum State_t : uint8_t
+		{
+			IDLE,      // Initial state without escape sequances
+			ESCAPE,    // escape-char was read
+			LBRACKET,  // left bracket char was read
+			FIRST_NUM, // reading first number code
+			SECOND_NUM // reading second number code
+		};
+		
+		virtual void writeChar(uint8_t) = 0;
+		virtual uint8_t getCursorX() = 0;
+		virtual void setCursorX(uint8_t) = 0;
+		virtual void setCursor(uint8_t, uint8_t) = 0;
+
+		State_t _state;
+		uint16_t _value, _value2;
+		// Print zone width
+		uint8_t _pZoneWidth;
+	// Print interface
+	public:
+		size_t write(uint8_t) override;
+	private:
+		void writeIdle(uint8_t);
+		void writeESC(uint8_t);
+		void writeLbracket(uint8_t);
+		void writeFirstNum(uint8_t);
+		void writeSecondNum(uint8_t);
 	};
 };
 

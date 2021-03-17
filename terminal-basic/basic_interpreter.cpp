@@ -176,7 +176,9 @@ Interpreter::init()
 {
 	_parser.init();
 	_program.newProg();
-
+#if USE_TEXTATTRIBUTES
+        cls();
+#endif
 	print(ProgMemStrings::TERMINAL, VT100::BRIGHT);
 	print(ProgMemStrings::S_TERMINAL_BASIC, VT100::BRIGHT);
 	newline();
@@ -205,7 +207,9 @@ Interpreter::step()
 	case SHELL:
 	{
 		print(ProgMemStrings::S_READY, VT100::BRIGHT);
+#if CLI_PROMPT_NELINE
 		newline();
+#endif
 	}
 		// fall through
 		// waiting for user input next program line
@@ -243,7 +247,7 @@ Interpreter::step()
 		if (_input.available() > 0)
 			c = _input.read();
 #endif
-		Program::String *s = _program.current();
+		Program::Line *s = _program.current();
 		if (s != nullptr && c != char(ASCII::EOT)) {
 			bool res;
 			if (!_parser.parse(s->text + _program._textPosition, res))
@@ -273,7 +277,9 @@ Interpreter::step()
 	case SHELL:
 	{
 		print(ProgMemStrings::S_READY, VT100::BRIGHT);
+#if CLI_PROMPT_NELINE
 		newline();
+#endif
 	}
 		// fall through
 		// waiting for user input next program line
@@ -308,7 +314,7 @@ Interpreter::step()
 			_inputBuffer[0] = c;
 #endif // USE_GET
 		}
-		Program::String *s = _program.current();
+		Program::Line *s = _program.current();
 		if (s != nullptr && c != char(ASCII::EOT)) {
 			bool res;
 			if (!_parser.parse(s->text + _program._textPosition, res))
@@ -380,7 +386,7 @@ Interpreter::list(uint16_t start, uint16_t stop)
 #if LINE_NUM_INDENT
 	uint8_t order = 0;
 	_program.reset();
-	for (Program::String *s = _program.getString(); s != nullptr;
+	for (Program::Line *s = _program.getString(); s != nullptr;
 	    s = _program.getString()) {
 		// Output onlyselected lines subrange
 		if (s->number < start)
@@ -403,7 +409,7 @@ Interpreter::list(uint16_t start, uint16_t stop)
 #if LOOP_INDENT
 	_loopIndent = 0;
 #endif
-	for (Program::String *s = _program.getString(); s != NULL;
+	for (Program::Line *s = _program.getString(); s != NULL;
 	    s = _program.getString()) {
 		// Output onlyselected lines subrange
 		if (s->number < start)
@@ -691,7 +697,7 @@ Interpreter::gotoLine(const Parser::Value &l)
 		raiseError(DYNAMIC_ERROR, INTEGER_EXPRESSION_EXPECTED);
 		return;
 	}
-	Program::String *s = _program.lineByNumber(Integer(l));
+	Program::Line *s = _program.lineByNumber(Integer(l));
 	if (s != NULL)
 		_program.jump(_program.stringIndex(s));
 	else
@@ -934,7 +940,7 @@ Interpreter::checkText(uint16_t &len)
 		return false;
 	}
 #if SAVE_LOAD_CHECKSUM
-	uint16_t crc = eepromProgramChecksum(h.len);
+	const uint16_t crc = eepromProgramChecksum(h.len);
 	if (h.crc16 != crc) {
 		raiseError(DYNAMIC_ERROR, BAD_CHECKSUM);
 		return false;
@@ -1641,11 +1647,12 @@ Interpreter::printTab(const Parser::Value &v, bool flag)
 	else
 #endif
 		tabs = Integer(v);
-	if (tabs > 0) {
+	if (tabs > 0) {	
 		write(ProgMemStrings::VT100_ESCSEQ);
 		if (flag) {
 			write(ProgMemStrings::VT100_LINEHOME);
 			write(ProgMemStrings::VT100_ESCSEQ);
+                        --tabs;
 		}
 		_output.print(tabs), _output.print('C');
 	} else

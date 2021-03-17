@@ -298,7 +298,7 @@ template <typename REAL>
 inline bool math<REAL>::
 almost_zero(REAL d, unsigned ulp)
 {
-	return abs(d) <= minimum() * ulp;
+	return abs(d) <= minimum() * REAL(ulp);
 }
 
 /**

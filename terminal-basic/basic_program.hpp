@@ -30,6 +30,9 @@ class VariableFrame;
 class ArrayFrame;
 class Interpreter;
 
+/**
+ * @brief BASIC program in memory
+ */
 class Program
 {
 	friend class Interpreter;
@@ -38,7 +41,7 @@ public:
 	/**
 	 * @brief BASIC program string object
 	 */
-	struct EXT_PACKED String
+	struct EXT_PACKED Line
 	{
 		// string decimal number (label)
 		uint16_t number;
@@ -165,39 +168,42 @@ public:
 	uint16_t size() const;
 	/**
 	 * @brief get next program line
-	 * @return line object or NULL if beyond last line
+	 * @return line object or nullptr if beyond last line
 	 */
-	String *getString();
+	Line *getString();
 	/**
 	 * @brief Get current program line to be executed
 	 * @return pointer to current program line
 	 */
-	String *current() const;
+	Line *current() const;
+	/**
+	 * @brief Get first stored program line
+	 * @return 
+	 */
+	Line *first() const;
 	
-	String *first() const;
-	
-	String *last() const;
+	Line *last() const;
 	
 	void jump(uint16_t newVal);
 	/**
-	 * @brief program string at given index
+	 * @brief program line at given index
 	 * @param index
-	 * @return string pointer or NULL if not exists
+	 * @return string pointer or nullptr if not exists
 	 */
-	String *stringByIndex(uint16_t) const;
+	Line *lineByIndex(uint16_t) const;
 	/**
-	 * @brief program string of given number
+	 * @brief program line of given number
 	 * @param number Program line number to get
 	 * @param index start of the search
 	 * @return string pointer or NULL if not found
 	 */
-	String *lineByNumber(uint16_t, uint16_t = 0);
+	Line *lineByNumber(uint16_t, uint16_t = 0);
 	/**
 	 * @brief 
 	 * @param string pointer
 	 * @return index
 	 */
-	uint16_t stringIndex(const String*) const;
+	uint16_t stringIndex(const Line*) const;
 	/**
 	 * @brief get variable frame at a given index
 	 * @param index basic memory address

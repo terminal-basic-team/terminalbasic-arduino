@@ -26,7 +26,7 @@ static const char strDynamic[] PROGMEM = "DYNAMIC";
 static const char strError[] PROGMEM = "ERROR";
 static const char strSemantic[] PROGMEM = "SEMANTIC";
 static const char strAt[] PROGMEM = "AT";
-static const char strReady[] PROGMEM = "READY";
+static const char strReady[] PROGMEM = CLI_PROMPT;
 static const char strBytes[] PROGMEM = "BYTES";
 static const char strAvailable[] PROGMEM = "AVAILABLE";
 static const char strucTERMINAL[] PROGMEM = "TERMINAL";
@@ -152,4 +152,4 @@ progmemString(ProgMemStrings index)
 	return (PGM_P)pgm_read_ptr(&progmemStrings[uint8_t(index)]);
 }
 
-}
+} // namespace BASIC

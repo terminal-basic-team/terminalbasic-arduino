@@ -694,24 +694,46 @@ Lexer::decimalNumber()
 		*val = SYM - '0';
 	while (SYM > 0) {
 #if USE_REALS
-		if (SYM != '.') {
+		if (_value.type == Parser::Value::REAL) {
+			next();
+			if (isdigit(SYM)) {
+				_value.value.real *= Real(10);
+				_value.value.real += SYM - '0';
+				continue;
+			}
+		} else if (SYM != '.') {
 
 #endif
 			next();
 			if (isdigit(SYM)) {
-				*val *= Integer(10);
-				*val += SYM - '0';
+#if USE_REALS
+				if (*val > MAXINT/INT(10)) {
+					_value.type = Parser::Value::REAL;
+					_value.value.real = Real(*val);
+					_value.value.real *= Real(10);
+					_value.value.real += SYM - '0';
+				} else {
+#endif
+					*val *= INT(10);
+					*val += SYM - '0';
+#if USE_REALS
+				}
+#endif
 				continue;
 			}
 #if USE_REALS
 		}
 #endif
+		
+			
 		switch (SYM) {
 #if USE_REALS
 		case '.':
 		{
-			_value.type = Parser::Value::REAL;
-			_value.value.real = Real(*val);
+			if (_value.type != Parser::Value::REAL) {
+				_value.type = Parser::Value::REAL;
+				_value.value.real = Real(*val);
+			}
 			Real d = 1;
 			while (true) {
 				next();

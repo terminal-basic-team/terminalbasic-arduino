@@ -32,7 +32,7 @@ namespace BASIC
 /*
  * Allow '_' symbol in identifiers
  */
-#define ALLOW_UNDERSCORE_ID 1
+#define ALLOW_UNDERSCORE_ID 0
 	
 /*
  * DELAY command, suspends execution for N ms
@@ -46,7 +46,7 @@ namespace BASIC
  * When enabled, all variables and arrays, which names are not ending with "$ ! %"
  * are treated as reals. Mathematical functions support depend on this option
  */
-#define USE_REALS           1
+#define USE_REALS               1
 
 #if USE_REALS
 /*
@@ -62,18 +62,18 @@ namespace BASIC
 /*
  * ACS ASN ATN
  */
-#define M_REVERSE_TRIGONOMETRIC 0
+#define M_REVERSE_TRIGONOMETRIC 1
 /*
  * CBR (cubic root) ...
  */
-#define M_ADDITIONAL            0
+#define M_ADDITIONAL            1
 #endif // USEMATH
 
 #endif // USE_REALS
 
 // Use string functions and operations
 #define USE_STRINGOPS      1
-
+	
 #if USE_STRINGOPS
 // GET$ function, returns string from last pressed key symbol
 #define USE_GET            1
@@ -84,11 +84,10 @@ namespace BASIC
 // LEN function, returns length of the string
 #define USE_LEN            1
 #endif
-
 /**
  * Allow GO TO OPERATOR in addition to GOTO
  */
-#define CONF_SEPARATE_GO_TO     1
+#define CONF_SEPARATE_GO_TO     0
 /*
  * Use >< as not-equals operator (with default <>)
  */
@@ -137,14 +136,13 @@ namespace BASIC
  */
 #define CONF_USE_SPC_PRINT_COM  1
 #endif // USE_TEXTATTRIBUTES
-
 /*
  * SAVE, LOAD and CHAIN commands support
  */
 #define USE_SAVE_LOAD        1
 #if USE_SAVE_LOAD
 // Compute checksums while SAVE, LOAD and CHAIN
-#define SAVE_LOAD_CHECKSUM   1
+#define SAVE_LOAD_CHECKSUM   0
 #endif // USE_SAVE_LOAD
 /*
  * STOP and CONTINUE commands support
@@ -197,6 +195,11 @@ namespace BASIC
  * GFX module
  */
 #define USE_GFX          0
+/*
+ * Prompt message
+ */
+#define CLI_PROMPT       "READY"
+#define CLI_PROMPT_NELINE 1
 
 /*
  * Input and output for single terminal mode
@@ -223,11 +226,32 @@ namespace BASIC
 #define TVOUT_O    8 // TVoutEx library output
 	#define TVOUT_HORIZ 240
 	#define TVOUT_VERT 192
+#define LIQCR_O    9 // LiquidCrystal library output
+	#define LIQCR_HORIZ 20
+	#define LIQCR_VERT 4
+	#define LIQCR_RS 12
+	#define LIQCR_E 11
+	#define LIQCR_D0 5
+	#define LIQCR_D1 4
+	#define LIQCR_D2 3
+	#define LIQCR_D3 2
+
+// Input select
+#define S_INPUT SERIALL_I
+
+// Output select
+#define S_OUTPUT SERIALL_O
+
+#if USE_EXTEEPROM
+#define USE_WIRE 1
+#else
+#define USE_WIRE 0
+#endif
 
 /*
  * Max size of the program line
  */
-const uint8_t PROGSTRINGSIZE = 73;
+const uint8_t PROGSTRINGSIZE = 75;
 
 // Max size of the string constants/variables
 const uint8_t STRINGSIZE = 73;

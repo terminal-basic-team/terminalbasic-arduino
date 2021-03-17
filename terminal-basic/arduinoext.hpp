@@ -37,13 +37,12 @@ private:                                  \
 // Not instantiable class
 #define EXT_STATIC(ClassName)        \
 private:                             \
-  ClassName() = delete;
+  ClassName() = delete;              \
+  EXT_NOTCOPYABLE(ClassName)
 
 // Class-package (Ada nostalgie)
 #define Package(ClassName) class ClassName final
-#define EXT_PACKAGE(ClassName) \
-  EXT_STATIC(ClassName) \
-  EXT_NOTCOPYABLE(ClassName)
+#define EXT_PACKAGE(ClassName) EXT_STATIC(ClassName) \
 
 // Interface class (Wanna be java)
 #define Interface(ClassName) class ClassName

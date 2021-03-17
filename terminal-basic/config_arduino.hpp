@@ -31,16 +31,6 @@
  * Parameters
  */
 
-// Input select
-#define S_INPUT SERIALL_I
-
-// Output select
-#define S_OUTPUT SERIALL_O
-
-#define USEUTFT            0
-#define USETVOUT           0
-#define USEPS2USARTKB      0
-
 // Use multiterminal mode
 #define BASIC_MULTITERMINAL       0
 #if BASIC_MULTITERMINAL
@@ -79,6 +69,15 @@ const uint16_t PROGRAMSIZE = 384;
 #else
 const uint16_t PROGRAMSIZE = 1024;
 #endif // USE_EXTMEM
+
+// BEGIN PRIVATE
+
+#define USEUTFT            0
+#define USETVOUT           0
+#define USEPS2USARTKB      0
+#define USELIQUIDCRYSTAL   0
+
+// END PRIVATE
 
 }
 

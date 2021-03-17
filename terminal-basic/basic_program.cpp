@@ -33,11 +33,11 @@ _text(reinterpret_cast<char*> (EXTMEM_ADDRESS)),
 #endif
 programSize(progsize)
 {
-	assert(_text != NULL);
+	assert(_text != nullptr);
 	assert(progsize <= PROGRAMSIZE);
 }
 
-Program::String*
+Program::Line*
 Program::getString()
 {
 	if (_jumpFlag) {
@@ -46,7 +46,7 @@ Program::getString()
 		return current();
 	}
 	
-	Program::String *result = current();
+	Program::Line *result = current();
 	if (result != nullptr) {
 		_current += result->size;
 		_textPosition = 0;
@@ -54,25 +54,25 @@ Program::getString()
 	return result;
 }
 
-Program::String*
+Program::Line*
 Program::current() const
 {
 	if (_current < _textEnd)
-		return stringByIndex(_current);
+		return lineByIndex(_current);
 	else
 		return nullptr;
 }
 
-Program::String*
+Program::Line*
 Program::first() const
 {
-	return stringByIndex(0);
+	return lineByIndex(0);
 }
 
-Program::String*
+Program::Line*
 Program::last() const
 {
-	return stringByIndex(_textEnd);
+	return lineByIndex(_textEnd);
 }
 
 void
@@ -82,21 +82,21 @@ Program::jump(uint16_t newVal)
 	_jumpFlag = true;
 }
 
-Program::String*
-Program::stringByIndex(uint16_t index) const
+Program::Line*
+Program::lineByIndex(uint16_t index) const
 {
-	return const_cast<String*> (reinterpret_cast<const String*> (
+	return const_cast<Line*> (reinterpret_cast<const Line*> (
 	    _text + index));
 }
 
-Program::String*
+Program::Line*
 Program::lineByNumber(uint16_t number, uint16_t index)
 {
-	Program::String *result = nullptr;
+	Program::Line *result = nullptr;
 
 	if (index <= _textEnd) {
 		_current = index;
-		for (String *cur = getString(); cur != nullptr;
+		for (Line *cur = getString(); cur != nullptr;
 		    cur = getString()) {
 			if (cur->number == number) {
 				result = cur;
@@ -194,7 +194,7 @@ Program::variableByName(const char *name)
 }
 
 uint16_t
-Program::stringIndex(const String *s) const
+Program::stringIndex(const Line *s) const
 {
 	return ((char*) s) - _text;
 }
@@ -382,7 +382,7 @@ Program::addLine(uint16_t num, const char *line)
 void
 Program::removeLine(uint16_t num)
 {
-	const String *line = this->lineByNumber(num, 0);
+	const Line *line = this->lineByNumber(num, 0);
 	if (line != nullptr) {
 		const uint16_t index = stringIndex(line);
 		assert(index < _textEnd);
@@ -403,9 +403,9 @@ Program::addLine(uint16_t num, const char *text, uint16_t len)
 	if (_textEnd == 0) // First string insertion
 		return insert(num, text, len);
 
-	const uint16_t strLen = sizeof(String) + len;
+	const uint16_t strLen = sizeof(Line) + len;
 	// Iterate over
-	String *cur;
+	Line *cur;
 	for (cur = current(); _current < _textEnd; cur = current()) {
 		if (num < cur->number) {
 			break;
@@ -435,7 +435,7 @@ bool
 Program::insert(uint16_t num, const char *text, uint8_t len)
 {
 	assert(len <= PROGSTRINGSIZE);
-	const uint8_t strLen = sizeof(String) + len;
+	const uint8_t strLen = sizeof(Line) + len;
 
 	if (_arraysEnd + strLen >= _sp)
 		return false;
@@ -443,7 +443,7 @@ Program::insert(uint16_t num, const char *text, uint8_t len)
 	memmove(_text + _current + strLen, _text + _current,
 	    _arraysEnd - _current);
 
-	String *cur = stringByIndex(_current);
+	Line *cur = lineByIndex(_current);
 	cur->number = num;
 	cur->size = strLen;
 	memcpy(cur->text, text, len);
@@ -472,4 +472,4 @@ Program::_reset()
 	_sp = programSize;
 }
 
-}
+} // namespace BASIC

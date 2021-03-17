@@ -40,7 +40,7 @@ private:
 	
 	static const FunctionBlock::command _commands[] PROGMEM;
 // FunctionBlock interface
-public:
+protected:
 	void _init() override;
 };
 

@@ -196,13 +196,15 @@ Parser::Value::operator==(const Value &rhs) const
 {
 #if USE_REALS
 	if (rhs.type == REAL)
-		return math<Real>::almost_equal(Real(*this), Real(rhs), 2);
+		return Real(*this) == rhs.value.real;
+		//return math<Real>::almost_equal(Real(*this), Real(rhs), 1);
 	else
 #endif
 	switch (this->type) {
 #if USE_REALS
 	case REAL:
-		return math<Real>::almost_equal(this->value.real, Real(rhs), 2);
+		return this->value.real == Real(rhs);
+		//eturn math<Real>::almost_equal(this->value.real, Real(rhs), 2);
 #endif
 #if USE_LONGINT
 	case LONG_INTEGER:
@@ -253,7 +255,7 @@ operator<=(const Parser::Value &l, const Parser::Value &r)
 	return l.operator<(r) || l.operator==(r);
 }
 
-Parser::Value &
+Parser::Value&
 Parser::Value::operator+=(const Value &rhs)
 {
 #if USE_REALS
@@ -279,7 +281,7 @@ Parser::Value::operator+=(const Value &rhs)
 	return *this;
 }
 
-Parser::Value &
+Parser::Value&
 Parser::Value::operator-=(const Value &rhs)
 {
 #if USE_REALS
@@ -305,7 +307,7 @@ Parser::Value::operator-=(const Value &rhs)
 	return *this;
 }
 
-Parser::Value &
+Parser::Value&
 Parser::Value::operator*=(const Value &rhs)
 {
 #if USE_REALS
@@ -332,7 +334,7 @@ Parser::Value::operator*=(const Value &rhs)
 }
 
 // '/' operation always return REAL if real numbers support used
-Parser::Value &
+Parser::Value&
 Parser::Value::operator/=(const Value &rhs)
 {
 #if USE_REALS
@@ -365,7 +367,7 @@ Parser::Value::powerMatchValue(const Value &rhs)
 #endif
 }
 
-Parser::Value &
+Parser::Value&
 Parser::Value::operator^=(const Value &rhs)
 {
 	powerMatchValue(rhs);
@@ -569,4 +571,4 @@ Parser::Value::printTo(Print& p) const
 	}
 }
 
-}
+} // namespace BASIC

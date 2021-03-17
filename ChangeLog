@@ -1,3 +1,9 @@
+r1.1-beta2 (29.10.2017) - Release, dedicated to the World Stroke Day
+
+  * Add LiquidCrystal library output support
+  * Fix comparision of real numbers
+  * Fix TAB() indention
+
 r1.1-beta1 (17.10.2017) - Release, dedicated to the International Day for the Eradication of Poverty
 
   * Fix bug in saving the program to SD card

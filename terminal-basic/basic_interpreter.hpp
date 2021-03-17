@@ -186,7 +186,7 @@ public:
 	enum State : uint8_t
 	{
 		SHELL,		// Wait for user input of line or command
-		PROGRAM_INPUT,	// INputting of the program lines
+		PROGRAM_INPUT,	// Inputting of the program lines
 #if BASIC_MULTITERMINAL
 		COLLECT_INPUT,	//
 		EXEC_INT,	// Interactive execute
