@@ -112,7 +112,7 @@ public:
 	/**
 	 * Array memory frame
 	 */
-	struct ArrayFrame
+	struct EXT_PACKED ArrayFrame
 	{
 		/**
 		 * @brief get frame size in bytes

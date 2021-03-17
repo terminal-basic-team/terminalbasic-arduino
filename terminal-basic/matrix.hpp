@@ -52,20 +52,20 @@ std::cout << std::endl;
  * @brief Row-major matrix operations generic package
  */
 template <typename T>
-Package(Matrix)
+Package(Matricies)
 {
 
-	EXT_PACKAGE(Matrix)
+	EXT_PACKAGE(Matricies)
 		public:
 #define elm(d,m,n) (d[m*N+n])
-		/**
-		 * @brief In-place transposiion of the matrix
-		 * 
-		 * @param data
-		 * @param M
-		 * @param N
-		 */
-		static void transpose(T *data, size_t M, size_t N)
+	/**
+	 * @brief In-place transposiion of the matrix
+	 * 
+	 * @param data
+	 * @param M
+	 * @param N
+	 */
+	static void transpose(T *data, size_t M, size_t N)
 	{
 		if (M == N) { // square matrix
 			for (size_t n = 0; n < (N - 1); ++n) {
@@ -110,8 +110,8 @@ Package(Matrix)
 	 * @param buf result of size N*M2
 	 * @return flag of success
 	 */
-	static bool mul(T *data, size_t N, size_t M, T *data2,
-			size_t N2, size_t M2, T * buf)
+	static bool mul(T *data, size_t N, size_t M, T *data2, size_t N2,
+	    size_t M2, T * buf)
 	{
 #define A(d, n, i, j) d[i*n+j]
 		if (M != N2)

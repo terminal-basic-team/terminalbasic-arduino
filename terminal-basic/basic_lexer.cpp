@@ -113,16 +113,11 @@ const char sCONT[] PROGMEM = "CONT";          // 6
 #if USE_MATRIX
 const char sCON[] PROGMEM = "CON";            // 5
 #endif
-const char sDATA[] PROGMEM = "DATA";          // 6
 const char sDEF[] PROGMEM = "DEF";            // 7
-//const char sDELAY[] PROGMEM = "DELAY";        // 8
 #if USE_MATRIX
 const char sDET[] PROGMEM = "DET";            // 5
 #endif
 const char sDIM[] PROGMEM = "DIM";            // 9
-#if USE_DOLOOP
-const char sDO[] PROGMEM = "DO";              // 
-#endif
 #if USE_DUMP
 const char sDUMP[] PROGMEM = "DUMP";          // 10
 #endif
@@ -145,9 +140,6 @@ const char sLIST[] PROGMEM = "LIST";          // 20
 #if USE_SAVE_LOAD
 const char sLOAD[] PROGMEM = "LOAD";          // 21
 #endif
-#if USE_DOLOOP
-const char sLOOP[] PROGMEM = "LOOP";
-#endif
 #if USE_MATRIX
 const char sMAT[] PROGMEM = "MAT";
 #endif
@@ -161,7 +153,6 @@ const char sPRINT[] PROGMEM = "PRINT";        // 26
 #if USE_RANDOM
 const char sRANDOMIZE[] PROGMEM = "RANDOMIZE";// 27
 #endif
-const char sREAD[] PROGMEM = "READ";          // 28
 const char sREM[] PROGMEM = "REM";            // 29
 const char sRETURN[] PROGMEM = "RETURN";      // 30
 const char sRUN[] PROGMEM = "RUN";
@@ -234,16 +225,12 @@ PGM_P const Lexer::tokenStrings[uint8_t(Token::NUM_TOKENS)] PROGMEM = {
 #if USE_MATRIX
 	sCON,
 #endif
-	sDATA,      // 5
 	sDEF,       // 6
 //	sDELAY,     // 7
 #if USE_MATRIX
 	sDET,
 #endif
 	sDIM,       // 8
-#if USE_DOLOOP
-	sDO,
-#endif
 #if USE_DUMP
 	sDUMP,      // 9
 #endif
@@ -266,9 +253,6 @@ PGM_P const Lexer::tokenStrings[uint8_t(Token::NUM_TOKENS)] PROGMEM = {
 #if USE_SAVE_LOAD
 	sLOAD,      // 20
 #endif
-#if USE_DOLOOP
-	sLOOP,
-#endif
 #if USE_MATRIX
 	sMAT,
 #endif
@@ -282,7 +266,6 @@ PGM_P const Lexer::tokenStrings[uint8_t(Token::NUM_TOKENS)] PROGMEM = {
 #if USE_RANDOM
 	sRANDOMIZE,
 #endif
-	sREAD,
 	sREM,
 	sRETURN,
 	sRUN,
@@ -346,16 +329,12 @@ static const uint8_t tokenTable[] PROGMEM = {
 #if USE_MATRIX
 	'C', 'O', 'N'+0x80,
 #endif
-	'D', 'A', 'T', 'A'+0x80,           // 5
 	'D', 'E', 'F'+0x80,                // 6
 //	'D', 'E', 'L', 'A', 'Y'+0x80,      // 7
 #if USE_MATRIX
 	'D', 'E', 'T'+0x80,
 #endif
 	'D', 'I', 'M'+0x80,                // 8
-#if USE_DOLOOP
-	'D', 'O'+0x80,
-#endif
 #if USE_DUMP
 	'D', 'U', 'M', 'P'+0x80,           // 9
 #endif
@@ -378,9 +357,6 @@ static const uint8_t tokenTable[] PROGMEM = {
 #if USE_SAVE_LOAD
 	'L', 'O', 'A', 'D'+0x80,           // 20
 #endif
-#if USE_DOLOOP
-	'L', 'O', 'O', 'P'+0x80,
-#endif
 #if USE_MATRIX
 	'M', 'A', 'T'+0x80,
 #endif
@@ -394,7 +370,6 @@ static const uint8_t tokenTable[] PROGMEM = {
 #if USE_RANDOM
 	'R', 'A', 'N', 'D', 'O', 'M', 'I', 'Z', 'E'+0x80, //26
 #endif
-	'R', 'E', 'A', 'D'+0x80,           // 27
 	'R', 'E', 'M'+0x80,
 	'R', 'E', 'T', 'U', 'R', 'N'+0x80,
 	'R', 'U', 'N'+0x80,

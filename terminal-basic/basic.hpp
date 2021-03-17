@@ -31,11 +31,15 @@
 #endif
 
 #if S_INPUT == SERIAL_I
-#define SERIAL_PORT Serial
+    #define SERIAL_PORT Serial
 #elif S_INPUT == SERIALL_I
-#define SERIAL_PORT SerialL
+    #define SERIAL_PORT SerialL
+#elif S_INPUT == SERIALL1_I
+    #define SERIAL_PORT SerialL1
+#elif S_INPUT == SERIALL2_I
+    #define SERIAL_PORT SerialL2
 #elif S_INPUT == SERIALL3_I
-#define SERIAL_PORT SerialL3
+    #define SERIAL_PORT SerialL3
 #endif
 #if S_OUTPUT == SERIAL_O
 #define SERIAL_PORT Serial
@@ -83,7 +87,7 @@ typedef float Real;
  */
 enum class Token : uint8_t
 {
-	NOTOKENS = 0,
+	NOTOKENS = 0,  // 0
 	OP_AND,        // 1
 #if USE_DUMP
 	KW_ARRAYS,     // 2
@@ -99,16 +103,12 @@ enum class Token : uint8_t
 #if USE_MATRIX
 	KW_CON,        // 7
 #endif
-	KW_DATA,       // 8
 	KW_DEF,        // 9
 //	COM_DELAY,     // 10
 #if USE_MATRIX
 	KW_DET,        // 11
 #endif
 	KW_DIM,        // 12
-#if USE_DOLOOP
-	KW_DO,         // 13
-#endif
 #if USE_DUMP
 	COM_DUMP,      // 14
 #endif
@@ -131,9 +131,6 @@ enum class Token : uint8_t
 #if USE_SAVE_LOAD
 	COM_LOAD,      // 27
 #endif
-#if USE_DOLOOP
-	KW_LOOP,       // 28
-#endif
 #if USE_MATRIX
 	KW_MAT,        // 28
 #endif
@@ -147,7 +144,6 @@ enum class Token : uint8_t
 #if USE_RANDOM
 	KW_RANDOMIZE,  // 36
 #endif
-	KW_READ,       // 37
 	KW_REM,        // 38
 	KW_RETURN,     // 39
 	COM_RUN,       // 40

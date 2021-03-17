@@ -30,8 +30,6 @@
  * Parameters
  */
 
-#define USE_GFX              0 // GFX module
-
 /*
  * Input and output for single terminal mode
  */

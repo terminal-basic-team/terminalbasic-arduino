@@ -258,7 +258,7 @@ Parser::Value::operator+=(const Value &rhs)
 	default: break;
 	}
 
-	return (*this);
+	return *this;
 }
 
 Parser::Value &
@@ -283,7 +283,7 @@ Parser::Value::operator-=(const Value &rhs)
 	default: break;
 	}
 
-	return (*this);
+	return *this;
 }
 
 Parser::Value &
@@ -308,7 +308,7 @@ Parser::Value::operator*=(const Value &rhs)
 	default: break;
 	}
 
-	return (*this);
+	return *this;
 }
 
 // '/' operation always return REAL if real numbers support used
@@ -325,7 +325,7 @@ Parser::Value::operator/=(const Value &rhs)
 	value.integer = Integer(*this) / Integer(rhs);
 	type = Value::INTEGER;
 #endif
-	return (*this);
+	return *this;
 }
 
 void
@@ -373,6 +373,8 @@ Parser::Value::operator^=(const Value &rhs)
 		value.real = pow(value.real, Real(rhs));
 		break;
 #endif
+	default:
+		break;
 	}
 	return *this;
 }
@@ -452,7 +454,7 @@ Parser::Value::operator|=(const Value &v)
 	default:
 		break;
 	}
-	return (*this);
+	return *this;
 }
 
 Parser::Value &
@@ -468,7 +470,7 @@ Parser::Value::operator&=(const Value &v)
 	default:
 		break;
 	}
-	return (*this);
+	return *this;
 }
 
 size_t

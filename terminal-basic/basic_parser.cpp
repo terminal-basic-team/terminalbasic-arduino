@@ -766,6 +766,8 @@ Parser::fFinal(Value &v)
 	while (true) {
 #if OPT == OPT_SPEED
 		switch (t) {
+		case Token::PLUS:
+			return _lexer.getNext() && fFinal(v);
 		case Token::MINUS:
 			if (!_lexer.getNext() || !fFinal(v))
 				return false;
@@ -815,7 +817,9 @@ Parser::fFinal(Value &v)
 			return false;
 		}
 #else
-		if (t == Token::MINUS) {
+		if (t == Token::PLUS) { // Unary plus, ignored
+			return _lexer.getNext() && fFinal(v);
+		} else if (t == Token::MINUS) { // Unary minus, switch sign
 			if (!_lexer.getNext() || !fFinal(v))
 				return false;
 			if (_mode == EXECUTE)
@@ -1288,6 +1292,7 @@ Parser::fMatrixExpression(const char *buf)
 		_interpreter.assignMatrix(buf, first);
 		return true;
 	}
+	return false;
 }
 
 #endif // USE_MATRIX

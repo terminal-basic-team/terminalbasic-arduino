@@ -82,11 +82,11 @@ ByteArray::printTo(Print& p) const
 		for (j = 0; j < 8; ++j, ++i) {
 			if (i >= size())
 				break;
-			const char c = ((const char*) data())[i];
+			const signed char c = ((const signed char*)data())[i];
 			if (c < ' ')
 				res += p.print('.');
 			else
-				res += p.print(c);
+				res += p.print((char)c);
 		}
 		res += p.println();
 	}

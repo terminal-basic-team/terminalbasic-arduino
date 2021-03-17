@@ -226,7 +226,7 @@ void
 Interpreter::Program::pop()
 {
 	StackFrame *f = stackFrameByIndex(_sp);
-	if (f != NULL)
+	if (f != nullptr)
 		_sp += StackFrame::size(f->_type);
 }
 
