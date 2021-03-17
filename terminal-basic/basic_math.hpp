@@ -27,13 +27,19 @@
 #include "basic_functionblock.hpp"
 #include "basic_interpreter.hpp"
 
+#if USEMATH
+#if !USE_REALS
+#error Math module requires real arithmetics support
+#endif
+#endif // USEMATH
+
 namespace BASIC
 {
 
 class Math : public FunctionBlock
 {
 public:
-	explicit Math(FunctionBlock* =NULL);
+	explicit Math();
 private:
 #if M_REVERSE_TRIGONOMETRIC
 	static bool func_acs(Interpreter&);

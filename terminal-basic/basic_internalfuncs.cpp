@@ -19,6 +19,7 @@
 #include "basic_internalfuncs.hpp"
 #include "basic_interpreter.hpp"
 #include "Arduino.h"
+#include "math.hpp"
 
 #include <assert.h>
 
@@ -27,14 +28,24 @@ namespace BASIC
 
 static const uint8_t intFuncs[] PROGMEM = {
 	'A', 'B', 'S'+0x80,
+	'C', 'H', 'R', '$'+0x80,
+	'I', 'N', 'T'+0x80,
+#if USE_RANDOM
 	'R', 'N', 'D'+0x80,
+#endif
+	'S', 'G', 'N'+0x80,
 	'T', 'I', 'M', 'E'+0x80,
 	0
 };
 
 const FunctionBlock::function InternalFunctions::funcs[] PROGMEM = {
 	InternalFunctions::func_abs,
+	InternalFunctions::func_chr,
+	InternalFunctions::func_int,
+#if USE_RANDOM
 	InternalFunctions::func_rnd,
+#endif
+	InternalFunctions::func_sgn,
 	InternalFunctions::func_tim
 };
 
@@ -67,6 +78,72 @@ InternalFunctions::func_abs(Interpreter &i)
 }
 
 bool
+InternalFunctions::func_chr(Interpreter &i)
+{
+	Parser::Value v;
+	i.popValue(v);
+	char buf[2] = "0";
+	buf[0] = Integer(v);
+	v.type = Parser::Value::STRING;
+	i.pushString(buf);
+	i.pushValue(v);
+	return true;
+}
+
+bool
+InternalFunctions::func_int(Interpreter &i)
+{
+	Parser::Value v(Integer(0));
+	i.popValue(v);
+	if (v.type == Parser::Value::INTEGER
+#if USE_LONGINT
+	 || v.type == Parser::Value::LONG_INTEGER
+#endif
+#if USE_REALS
+	 || v.type == Parser::Value::REAL
+#endif
+	    ) {
+#if USE_REALS
+		v = math<Real>::floor(Real(v));
+#if USE_LONGINT
+		v = LongInteger(v);
+#else
+		v = Integer(v);
+#endif
+#endif // USE_REALS
+		i.pushValue(v);
+		return (true);
+	} else
+		return (false);
+}
+
+#if USE_REALS
+#define TYP Real
+#elif USE_LONGINT
+#define TYP LongInteger
+#else
+#define TYP Integer
+#endif // USE_LONGINT
+TYP
+InternalFunctions::sgn(TYP v)
+{
+	if (v > TYP(0))
+		return TYP(1);
+	else if (v == TYP(0))
+		return TYP(0);
+	else
+		return TYP(-1);
+}
+#undef TYP
+
+bool
+InternalFunctions::func_sgn(Interpreter &i)
+{
+	return general_func(i, sgn);
+}
+
+#if USE_RANDOM
+bool
 InternalFunctions::func_rnd(Interpreter &i)
 {
 #if USE_REALS
@@ -77,6 +154,7 @@ InternalFunctions::func_rnd(Interpreter &i)
 	i.pushValue(v);
 	return (true);
 }
+#endif // USE_RANDOM
 
 bool
 InternalFunctions::func_tim(Interpreter &i)

@@ -24,6 +24,9 @@
 #include "wiring_private.h"
 
 SerialLight SerialL(&UBRR0H, &UBRR0L, &UCSR0A, &UCSR0B, &UCSR0C, &UDR0);
+#ifdef HAVE_HWSERIAL3
+SerialLight SerialL3(&UBRR3H, &UBRR3L, &UCSR3A, &UCSR3B, &UCSR3C, &UDR3);
+#endif
 
 SerialLight::SerialLight(
    volatile uint8_t *ubrrh, volatile uint8_t *ubrrl,

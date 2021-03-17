@@ -1,5 +1,5 @@
 /*
- * ucBASIC is a lightweight BASIC-like language interpreter
+ * Terminal-BASIC is a lightweight BASIC-like language interpreter
  * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -33,11 +33,6 @@
 #include "bytearray.hpp"
 #include "version.h"
 #include "ascii.hpp"
-#ifdef ARDUINO
-#include "config_arduino.hpp"
-#else
-#include "config_linux.hpp"
-#endif
 
 namespace BASIC
 {
@@ -49,38 +44,44 @@ public:
 	explicit AttrKeeper(Interpreter &i, VT100::TextAttr a) :
 	_i(i), _a(a)
 	{
+#if USE_TEXTATTRIBUTES
 		if (_a == VT100::NO_ATTR)
 			return;
 		if ((uint8_t(a) & uint8_t(VT100::BRIGHT)) != uint8_t(VT100::NO_ATTR))
-			_i._output.print("\x1B[1m");
+			_i.printEsc(ProgMemStrings::VT100_BRIGHT);
 		if ((uint8_t(a) & uint8_t(VT100::UNDERSCORE)) != uint8_t(VT100::NO_ATTR))
-			_i._output.print("\x1B[4m");
+			_i.printEsc(ProgMemStrings::VT100_UNDERSCORE);
 		if ((uint8_t(a) & uint8_t(VT100::REVERSE)) != uint8_t(VT100::NO_ATTR))
-			_i._output.print("\x1B[7m");
+			_i.printEsc(ProgMemStrings::VT100_REVERSE);
+#if USE_COLORATTRIBUTES
 		if ((uint8_t(a) & 0xF0) == VT100::C_YELLOW)
-			_i._output.print("\x1B[33m");
+			_i.printEsc(ProgMemStrings::VT100_YELLOW);
 		else if ((uint8_t(a) & 0xF0) == VT100::C_GREEN)
-			_i._output.print("\x1B[32m");
+			_i.printEsc(ProgMemStrings::VT100_GREEN);
 		else if ((uint8_t(a) & 0xF0) == VT100::C_RED)
-			_i._output.print("\x1B[31m");
+			_i.printEsc(ProgMemStrings::VT100_RED);
 		else if ((uint8_t(a) & 0xF0) == VT100::C_BLUE)
-			_i._output.print("\x1B[34m");
+			_i.printEsc(ProgMemStrings::VT100_BLUE);
 		else if ((uint8_t(a) & 0xF0) == VT100::C_MAGENTA)
-			_i._output.print("\x1B[35m");
+			_i.printEsc(ProgMemStrings::VT100_MAGENTA);
 		else if ((uint8_t(a) & 0xF0) == VT100::C_CYAN)
-			_i._output.print("\x1B[36m");
+			_i.printEsc(ProgMemStrings::VT100_CYAN);
 		else if ((uint8_t(a) & 0xF0) == VT100::C_WHITE)
-			_i._output.print("\x1B[37m");
+			_i.printEsc(ProgMemStrings::VT100_WHITE);
+#endif
+#endif // USE_TEXTATTRIBUTES
 	}
 
 	~AttrKeeper()
 	{
+#if USE_TEXTATTRIBUTES
 		if (_a == VT100::NO_ATTR)
 			return;
-		_i._output.print("\x1B[0m");
+		_i.printEsc(ProgMemStrings::VT100_NOATTR);
+#endif
 	}
 private:
-	
+
 	Interpreter &_i;
 	VT100::TextAttr _a;
 };
@@ -188,7 +189,7 @@ Interpreter::init()
 	print(VERSION, VT100::BRIGHT), newline();
 #if BASIC_MULTITERMINAL
 	print(ProgMemStrings::TERMINAL, NO_ATTR), print(Integer(_termno), BRIGHT),
-	_output.print(':'), _output.print(' ');
+	    _output.print(':'), _output.print(' ');
 #endif
 	print(long(_program.programSize - _program._arraysEnd), VT100::BRIGHT);
 	print(ProgMemStrings::BYTES), print(ProgMemStrings::AVAILABLE), newline();
@@ -199,7 +200,7 @@ void
 Interpreter::step()
 {
 	LOG_TRACE;
-	
+
 	char c;
 
 	switch (_state) {
@@ -236,7 +237,7 @@ Interpreter::step()
 			_state = VAR_INPUT;
 		}
 		break;
-	case EXECUTE: 
+	case EXECUTE:
 		c = char(ASCII::NUL);
 #ifdef ARDUINO
 		if (_input.available() > 0)
@@ -260,12 +261,18 @@ Interpreter::exec()
 	_lexer.init(_inputBuffer);
 	if (_lexer.getNext() && (_lexer.getToken() == Token::C_INTEGER)) {
 		Integer pLine = Integer(_lexer.getValue());
-		if (!_program.addLine(pLine, _inputBuffer+_lexer.getPointer())) {
-			raiseError(DYNAMIC_ERROR, OUTTA_MEMORY);
-			_state = SHELL;
-			return;
-		} else
+		uint8_t position = _lexer.getPointer();
+		_lexer.getNext();
+		if (_lexer.getToken() != Token::NOTOKENS) {
+			if (!_program.addLine(pLine, _inputBuffer + position)) {
+				raiseError(DYNAMIC_ERROR, OUTTA_MEMORY);
+				_state = SHELL;
+			} else
+				_state = PROGRAM_INPUT;
+		} else {
+			_program.removeLine(pLine);
 			_state = PROGRAM_INPUT;
+		}
 	} else {
 		_state = SHELL;
 		if (!_parser.parse(_inputBuffer))
@@ -276,7 +283,8 @@ Interpreter::exec()
 void
 Interpreter::cls()
 {
-	_output.print("\x1B[2J"), _output.print("\x1B[H");
+	printEsc(ProgMemStrings::VT100_CLS),
+	printEsc("H");
 }
 
 void
@@ -312,6 +320,7 @@ Interpreter::addModule(FunctionBlock *module)
 }
 
 #if USE_DUMP
+
 void
 Interpreter::dump(DumpMode mode)
 {
@@ -379,27 +388,14 @@ Interpreter::print(const Parser::Value &v, VT100::TextAttr attr)
 
 	switch (v.type) {
 	case Parser::Value::BOOLEAN:
-		if (v.value.boolean)
-			print(Token::KW_TRUE);
-		else
-			print(Token::KW_FALSE);
-		break;
 #if USE_REALS
 	case Parser::Value::REAL:
-		this->print(v.value.real);
-		break;
 #endif
 #if USE_LONGINT
 	case Parser::Value::LONG_INTEGER:
-		if (v >= LongInteger(0))
-			_output.write(' ');
-		_output.print(v.value.longInteger);
-		break;
 #endif
 	case Parser::Value::INTEGER:
-		if (v >= Integer(0))
-			_output.write(' ');
-		_output.print(v.value.integer);
+		_output.print(v);
 		break;
 	case Parser::Value::STRING:
 	{
@@ -431,26 +427,6 @@ Interpreter::print(char v)
 	_output.print(v);
 }
 
-#if USE_REALS
-void
-Interpreter::print(Real number)
-{
-	char buf[17];
-#ifdef ARDUINO
-	uint8_t decWhole = 1;
-	Real n = number;
-	while (n > 1) {
-		n /= 10;
-		++decWhole;
-	}
-	::dtostrf(number, 9, 8-decWhole, buf);
-#else
-	::sprintf(buf, "% .7G", number);
-#endif
-	print(buf);
-}
-#endif // USE_REALS
-
 void
 Interpreter::print(Lexer &l)
 {
@@ -467,11 +443,11 @@ Interpreter::print(Lexer &l)
 		case Token::C_STRING:
 		{
 			AttrKeeper a(*this, VT100::C_MAGENTA);
-			_output.write("\"");
+			_output.write(uint8_t(ASCII::QUMARK));
 			_output.print(l.id());
-			_output.write("\" ");
+			_output.write(uint8_t(ASCII::QUMARK));
 		}
-		break;
+			break;
 		case Token::REAL_IDENT:
 		case Token::INTEGER_IDENT:
 #if USE_LONGINT
@@ -497,16 +473,15 @@ Interpreter::run()
 void
 Interpreter::gotoLine(const Parser::Value &l)
 {
+	if (l.type != Parser::Value::INTEGER
 #if USE_LONGINT
-	if (l.type != Parser::Value::INTEGER &&
-	    l.type != Parser::Value::LONG_INTEGER) {
-#else
-	if (l.type != Parser::Value::INTEGER) {
+	&& l.type != Parser::Value::LONG_INTEGER
 #endif
+	) {
 		raiseError(DYNAMIC_ERROR, INTEGER_EXPRESSION_EXPECTED);
 		return;
 	}
-	Program::String *s = _program.stringByNumber(Integer(l));
+	Program::String *s = _program.lineByNumber(Integer(l));
 	if (s != NULL)
 		_program.jump(_program.stringIndex(s));
 	else
@@ -524,10 +499,12 @@ Interpreter::pushReturnAddress(uint8_t textPosition)
 {
 	Program::StackFrame *f = _program.push(Program::StackFrame::
 	    SUBPROGRAM_RETURN);
-	if (f == NULL)
+	if (f != NULL) {
+		f->body.gosubReturn.calleeIndex = _program._current;
+		f->body.gosubReturn.textPosition = _program._textPosition +
+		    textPosition;
+	} else
 		raiseError(DYNAMIC_ERROR, STACK_FRAME_ALLOCATION);
-	f->body.gosubReturn.calleeIndex = _program._current;
-	f->body.gosubReturn.textPosition = _program._textPosition + textPosition;
 }
 
 void
@@ -547,16 +524,18 @@ Interpreter::pushForLoop(const char *varName, uint8_t textPosition,
     const Parser::Value &v, const Parser::Value &vStep)
 {
 	Program::StackFrame *f = _program.push(Program::StackFrame::FOR_NEXT);
-	if (f == NULL)
-		raiseError(DYNAMIC_ERROR, STACK_FRAME_ALLOCATION);
-	f->body.forFrame.calleeIndex = _program._current;
-	f->body.forFrame.textPosition = _program._textPosition + textPosition;
-	f->body.forFrame.finalvalue = v;
-	f->body.forFrame.stepValue = vStep;
+	if (f != NULL) {
+		f->body.forFrame.calleeIndex = _program._current;
+		f->body.forFrame.textPosition = _program._textPosition +
+		    textPosition;
+		f->body.forFrame.finalvalue = v;
+		f->body.forFrame.stepValue = vStep;
 
-	valueFromVar(f->body.forFrame.currentValue, varName);
-	strcpy(f->body.forFrame.varName, varName);
-	setVariable(varName, f->body.forFrame.currentValue);
+		valueFromVar(f->body.forFrame.currentValue, varName);
+		strcpy(f->body.forFrame.varName, varName);
+		setVariable(varName, f->body.forFrame.currentValue);
+	} else
+		raiseError(DYNAMIC_ERROR, STACK_FRAME_ALLOCATION);
 }
 
 void
@@ -564,9 +543,10 @@ Interpreter::pushValue(const Parser::Value &v)
 {
 	Program::StackFrame *f = _program.push(Program::StackFrame::
 	    VALUE);
-	if (f == NULL)
+	if (f != NULL)
+		f->body.value = v;
+	else
 		raiseError(DYNAMIC_ERROR, STACK_FRAME_ALLOCATION);
-	f->body.value = v;
 }
 
 void
@@ -574,9 +554,10 @@ Interpreter::pushInputObject(const char *varName)
 {
 	Program::StackFrame *f = _program.push(Program::StackFrame::
 	    INPUT_OBJECT);
-	if (f == NULL)
+	if (f != NULL)
+		strcpy(f->body.inputObject.name, varName);
+	else
 		raiseError(DYNAMIC_ERROR, STACK_FRAME_ALLOCATION);
-	strcpy(f->body.inputObject.name, varName);
 }
 
 bool
@@ -646,7 +627,7 @@ Interpreter::save()
 	EEpromHeader_t h = {
 		// Program text buffer length
 		.len = _program._textEnd,
-		.magic_FFFFminuslen = uint16_t(0xFFFFu)-_program._textEnd,
+		.magic_FFFFminuslen = uint16_t(0xFFFFu) - _program._textEnd,
 		// Checksum
 		.crc16 = 0
 	};
@@ -664,10 +645,10 @@ Interpreter::save()
 		}
 	}
 	newline();
-#if SAVE_LOAD_CHECKSUM	
+#if SAVE_LOAD_CHECKSUM
 	// Compute checksum
 	uint16_t crc = eepromProgramChecksum(h.len);
-	
+
 	if (crc == h.crc16) {
 #endif
 		EEPROMClass e;
@@ -696,7 +677,7 @@ Interpreter::chain()
 	uint16_t len;
 	if (!checkText(len))
 		return;
-	
+
 	_program.clearProg();
 	_program.moveData(len);
 	// Load programm memory without progress
@@ -706,13 +687,14 @@ Interpreter::chain()
 }
 
 #if SAVE_LOAD_CHECKSUM
+
 uint16_t
 Interpreter::eepromProgramChecksum(uint16_t len)
 {
 	EEPROMClass e;
 	// Compute checksum
 	uint16_t crc = 0, p;
-	for (p = sizeof (EEpromHeader_t); p < len+sizeof (EEpromHeader_t);
+	for (p = sizeof (EEpromHeader_t); p < len + sizeof (EEpromHeader_t);
 	    ++p) {
 		uint8_t b = e.read(p);
 		crc = _crc16_update(crc, b);
@@ -721,20 +703,20 @@ Interpreter::eepromProgramChecksum(uint16_t len)
 	newline();
 	return crc;
 }
-#endif
+#endif // SAVE_LOAD_CHECKSUM
 
 bool
 Interpreter::checkText(uint16_t &len)
 {
 	EEpromHeader_t h;
-	
+
 	{
 		EEPROMClass e;
 		e.get(0, h);
 	}
-	
+
 	if ((h.len > PROGRAMSIZE) ||
-	    (h.magic_FFFFminuslen != uint16_t(0xFFFF)-h.len)) {
+	    (h.magic_FFFFminuslen != uint16_t(0xFFFF) - h.len)) {
 		raiseError(DYNAMIC_ERROR, INTERNAL_ERROR);
 		return false;
 	}
@@ -773,7 +755,7 @@ Interpreter::input()
 bool
 Interpreter::nextInput()
 {
-	Program::StackFrame *f = _program.currentStackFrame();
+	const Program::StackFrame *f = _program.currentStackFrame();
 	if (f != NULL && f->_type == Program::StackFrame::INPUT_OBJECT) {
 		_program.pop();
 		strcpy(_inputVarName, f->body.inputObject.name);
@@ -805,7 +787,9 @@ Interpreter::doInput()
 			case Token::C_STRING:
 			case Token::REAL_IDENT:
 			case Token::INTEGER_IDENT:
+#if USE_LONGINT
 			case Token::LONGINT_IDENT:
+#endif
 			case Token::STRING_IDENT:
 			case Token::BOOL_IDENT:
 			{
@@ -914,7 +898,7 @@ Interpreter::set(VariableFrame &f, const Parser::Value &v)
 	{
 		Program::StackFrame *fr = _program.currentStackFrame();
 		if (fr == NULL || fr->_type != Program::StackFrame::STRING) {
-			raiseError(DYNAMIC_ERROR, STRING_FRAME_SEARCH);
+			f.bytes[0] = 0;
 			return;
 		}
 		strcpy(f.bytes, fr->body.string);
@@ -1039,12 +1023,18 @@ Interpreter::print(const char *text, VT100::TextAttr attr)
 void
 Interpreter::print(ProgMemStrings index, VT100::TextAttr attr)
 {
+	AttrKeeper _a(*this, attr);
+
+	write(index), _output.print(' ');
+}
+
+void
+Interpreter::write(ProgMemStrings index)
+{
 	char buf[16];
 	strcpy_P(buf, progmemString(index));
 
-	AttrKeeper _a(*this, attr);
-
-	_output.print(buf), _output.print(' ');
+	_output.print(buf);
 }
 
 void
@@ -1055,7 +1045,7 @@ Interpreter::print(Token t)
 	    uint8_t(t)])));
 	if (t < Token::STAR)
 		print(buf, VT100::TextAttr(uint8_t(VT100::BRIGHT) |
-		    uint8_t(VT100::C_GREEN)));
+	    uint8_t(VT100::C_GREEN)));
 	else
 		print(buf);
 }
@@ -1069,12 +1059,33 @@ Interpreter::print(Integer i, VT100::TextAttr attr)
 }
 
 void
-Interpreter::printTab(Integer tabs)
+Interpreter::printEsc(const char *str)
 {
-	if (tabs < 1)
-		raiseError(DYNAMIC_ERROR, INVALID_TAB_VALUE);
+	write(ProgMemStrings::VT100_ESCSEQ), _output.print(str);
+}
+
+void
+Interpreter::printEsc(ProgMemStrings index)
+{
+	write(ProgMemStrings::VT100_ESCSEQ);
+	write(index);
+}
+
+void
+Interpreter::printTab(const Parser::Value &v)
+{
+	Integer tabs;
+#if USE_REALS
+	if (v.type == Parser::Value::REAL)
+		tabs = math<Real>::round(v.value.real);
 	else
-		_output.print("\x1B["), _output.print(tabs-1), _output.print('C');
+#endif
+		tabs = Integer(v);
+	if (tabs > 0)
+		write(ProgMemStrings::VT100_ESCSEQ), _output.print(tabs - 1),
+		    _output.print('C');
+	else
+		raiseError(DYNAMIC_ERROR, INVALID_TAB_VALUE, false);
 }
 
 void
@@ -1086,9 +1097,10 @@ Interpreter::print(long i, VT100::TextAttr attr)
 }
 
 void
-Interpreter::raiseError(ErrorType type, ErrorCodes errorCode)
-{	
-	if (_program.current())
+Interpreter::raiseError(ErrorType type, ErrorCodes errorCode, bool fatal)
+{
+	// Output Program line number if running program
+	if ((_state == EXECUTE) && (_program.current() != NULL))
 		print(long(_program.current()->number), VT100::C_YELLOW);
 	_output.print(':');
 	if (type == DYNAMIC_ERROR)
@@ -1103,7 +1115,8 @@ Interpreter::raiseError(ErrorType type, ErrorCodes errorCode)
 		print(Integer(_parser.getError()));
 	newline();
 	
-	_state = SHELL;
+	if (fatal)
+		_state = SHELL;
 }
 
 bool
@@ -1125,7 +1138,7 @@ Interpreter::arrayElementIndex(ArrayFrame *f, size_t &index)
 	return (true);
 }
 
-Interpreter::VariableFrame*
+Interpreter::VariableFrame *
 Interpreter::setVariable(const char *name, const Parser::Value &v)
 {
 	size_t index = _program._textEnd;
@@ -1137,9 +1150,8 @@ Interpreter::setVariable(const char *name, const Parser::Value &v)
 		if (res == 0) {
 			set(*f, v);
 			return (f);
-		} else if (res < 0) {
+		} else if (res < 0)
 			break;
-		}
 	}
 
 	if (f == NULL)
@@ -1153,7 +1165,7 @@ Interpreter::setVariable(const char *name, const Parser::Value &v)
 		dist += sizeof (LongInteger);
 	} else
 #endif
-	if (endsWith(name, '%')) {
+		if (endsWith(name, '%')) {
 		t = VF_INTEGER;
 		dist += sizeof (Integer);
 	} else if (endsWith(name, '!')) {
@@ -1236,7 +1248,7 @@ Interpreter::newArray(const char *name)
 	}
 }
 
-const Interpreter::VariableFrame*
+const Interpreter::VariableFrame *
 Interpreter::getVariable(const char *name)
 {
 	const VariableFrame *f = _program.variableByName(name);
@@ -1258,8 +1270,8 @@ Interpreter::pushString(const char *str)
 	strcpy(f->body.string, str);
 }
 
-size_t
-Interpreter::pushDimension(size_t dim)
+uint16_t
+Interpreter::pushDimension(uint16_t dim)
 {
 	Program::StackFrame *f =
 	    _program.push(Program::StackFrame::ARRAY_DIMENSION);
@@ -1310,10 +1322,11 @@ Interpreter::confirm()
 	return (result);
 }
 
+#if USE_STRINGOPS
 void
-Interpreter::strConcat(Parser::Value &v1, Parser::Value &v2)
+Interpreter::strConcat()
 {
-	Program::StackFrame *f = _program.currentStackFrame();
+	const Program::StackFrame *f = _program.currentStackFrame();
 	if (f != NULL && f->_type == Program::StackFrame::STRING) {
 		_program.pop();
 		Program::StackFrame *ff = _program.currentStackFrame();
@@ -1330,19 +1343,37 @@ Interpreter::strConcat(Parser::Value &v1, Parser::Value &v2)
 	raiseError(DYNAMIC_ERROR, STRING_FRAME_SEARCH);
 }
 
+bool
+Interpreter::strCmp()
+{
+	const Program::StackFrame *f = _program.currentStackFrame();
+	if (f != NULL && f->_type == Program::StackFrame::STRING) {
+		_program.pop();
+		Program::StackFrame *ff = _program.currentStackFrame();
+		if (ff != NULL || ff->_type == Program::StackFrame::STRING) {
+			_program.pop();
+			return strncmp(ff->body.string, f->body.string,
+			    STRINGSIZE) == 0;
+		}
+	}
+	raiseError(DYNAMIC_ERROR, STRING_FRAME_SEARCH);
+	return false;
+}
+#endif // USE_STRINGOPS
+
 void
 Interpreter::end()
 {
 	_state = SHELL;
 }
 
-size_t
+uint16_t
 Interpreter::ArrayFrame::size() const
 {
-	size_t result = sizeof (Interpreter::ArrayFrame) +
-	    numDimensions * sizeof (size_t);
+	uint16_t result = sizeof (Interpreter::ArrayFrame) +
+	    numDimensions * sizeof (uint16_t);
 
-	size_t mul = 1;
+	uint16_t mul = 1;
 
 	for (uint8_t i = 0; i < numDimensions; ++i)
 		mul *= dimension[i] + 1;
@@ -1372,11 +1403,11 @@ Interpreter::ArrayFrame::size() const
 	return (result);
 }
 
-Interpreter::ArrayFrame*
+Interpreter::ArrayFrame *
 Interpreter::addArray(const char *name, uint8_t dim,
     uint32_t num)
 {
-	size_t index = _program._variablesEnd;
+	uint16_t index = _program._variablesEnd;
 	ArrayFrame *f;
 	for (f = _program.arrayByIndex(index); index < _program._arraysEnd;
 	    index += f->size(), f = _program.arrayByIndex(index)) {
@@ -1398,24 +1429,23 @@ Interpreter::addArray(const char *name, uint8_t dim,
 		num *= sizeof (LongInteger);
 	} else
 #endif
-	if (endsWith(name, '%')) {
+		if (endsWith(name, '%')) {
 		t = VF_INTEGER;
 		num *= sizeof (Integer);
 	} else if (endsWith(name, '!')) {
 		t = VF_BOOLEAN;
 		num *= sizeof (bool);
-	}
-	else { // real
+	} else { // real
 #if USE_REALS
 		t = VF_REAL;
 		num *= sizeof (Real);
-#else		// Integer
+#else  // Integer
 		t = VF_INTEGER;
 		num *= sizeof (Integer);
 #endif
 	}
-	
-	size_t dist = sizeof (ArrayFrame) + sizeof (size_t) * dim + num;
+
+	const uint16_t dist = sizeof (ArrayFrame) + sizeof (size_t) * dim + num;
 	if (_program._arraysEnd + dist >= _program._sp) {
 		raiseError(DYNAMIC_ERROR, OUTTA_MEMORY);
 		return (NULL);

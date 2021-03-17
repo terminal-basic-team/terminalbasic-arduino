@@ -30,12 +30,6 @@
 #include "config_linux.hpp"
 #endif
 
-#if USEMATH
-#if !USE_REALS
-#error Math module requires real arithmetics support
-#endif
-#endif
-
 /**
  * @brief Simple BASIC language interpreter package
  */
@@ -70,7 +64,7 @@ enum class Token : uint8_t
 	COM_CLS,       // 4
 	KW_DATA,       // 5
 	KW_DEF,        // 6
-	COM_DELAY,     // 7
+//	COM_DELAY,     // 7
 	KW_DIM,        // 8
 #if USE_DUMP
 	COM_DUMP,      // 9
@@ -81,12 +75,18 @@ enum class Token : uint8_t
 	KW_GOSUB,      // 13
 	KW_GOTO,       // 14
 	KW_GO,         // 15
+#if USE_MATRIX
+	KW_IDN,
+#endif
 	KW_IF,         // 16
 	KW_INPUT,      // 17
 	KW_LET,        // 18
 	COM_LIST,      // 19
 #if USE_SAVE_LOAD
 	COM_LOAD,      // 20
+#endif
+#if USE_MATRIX
+	KW_MAT,
 #endif
 	COM_NEW,       // 21
 	KW_NEXT,
@@ -95,7 +95,9 @@ enum class Token : uint8_t
 	KW_OPTION,
 	OP_OR,
 	KW_PRINT,
+#if USE_RANDOM
 	KW_RANDOMIZE,
+#endif
 	KW_READ,
 	KW_REM,
 	KW_RETURN,
@@ -111,6 +113,9 @@ enum class Token : uint8_t
 	KW_TRUE,
 #if USE_DUMP
 	KW_VARS,
+#endif
+#if USE_MATRIX
+	KW_ZER,
 #endif
 
 	// *
@@ -150,7 +155,9 @@ enum class Token : uint8_t
 
 	REAL_IDENT,
 	INTEGER_IDENT,
+#if USE_LONGINT
 	LONGINT_IDENT,
+#endif
 	STRING_IDENT,
 	BOOL_IDENT,
 
@@ -183,6 +190,21 @@ enum class ProgMemStrings : uint8_t
 	S_DIR,
 	S_REALLY,
 	S_END,
+        VT100_ESCSEQ,
+	VT100_CLS,
+	VT100_NOATTR,
+	VT100_BRIGHT,
+	VT100_UNDERSCORE,
+	VT100_REVERSE,
+#if USE_COLORATTRIBUTES
+	VT100_RED,
+	VT100_GREEN,
+	VT100_YELLOW,
+	VT100_BLUE,
+	VT100_MAGENTA,
+	VT100_CYAN,
+	VT100_WHITE,
+#endif
 	NUM_STRINGS
 };
 

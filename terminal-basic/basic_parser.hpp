@@ -46,9 +46,10 @@ public:
 		NO_ERROR = 0,
 		OPERATOR_EXPECTED = 1,
 		EXPRESSION_EXPECTED = 2,
-		INTEGER_CONSTANT_EXPECTED,
-		THEN_OR_GOTO_EXPECTED,
-		VARIABLES_LIST_EXPECTED
+		INTEGER_CONSTANT_EXPECTED = 3,
+		THEN_OR_GOTO_EXPECTED = 4,
+		VARIABLES_LIST_EXPECTED = 5,
+		STRING_OVERFLOW = 6
 	};
 	
 	class CPS_PACKED Value;
@@ -105,6 +106,9 @@ private:
 	bool fArray(uint8_t&);
 	bool fDimensions(uint8_t&);
 	bool fIdentifierExpr(const char*, Value&);
+#if USE_MATRIX
+	bool fMatrixOperation();
+#endif
 	
 	// last static semantic error
 	ErrorCodes _error;

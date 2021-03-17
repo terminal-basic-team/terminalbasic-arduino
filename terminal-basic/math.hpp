@@ -27,6 +27,14 @@
 #include <float.h>
 #include <inttypes.h>
 
+#ifdef abs
+#undef abs
+#endif
+
+#ifdef round
+#undef round
+#endif
+
 #ifndef M_PI_2l
 #define M_PI_2l M_PI_2
 #endif
@@ -83,13 +91,60 @@ template <typename REAL>
 class math
 {
 public:
+	static REAL abs(REAL);
 	static constexpr REAL pi();
 	static constexpr REAL pi_2();
 	static constexpr REAL pi3_2();
 	static constexpr REAL minimum();
 	static constexpr REAL maximum();
 	static constexpr REAL epsilon();
+	static REAL floor(REAL);
+	static REAL round(REAL);
+	static bool almost_zero(REAL, unsigned = 1);
+	static bool almost_equal(REAL, REAL, unsigned = 1);
 };
+
+template <>
+inline float math<float>
+::abs(float arg)
+{
+	return (::fabsf(arg));
+}
+
+template <>
+inline double math<double>
+::abs(double arg)
+{
+	return (::fabs(arg));
+}
+
+template <>
+inline float math<float>
+::floor(float arg)
+{
+	return (::floorf(arg));
+}
+
+template <>
+inline double math<double>
+::floor(double arg)
+{
+	return (::floor(arg));
+}
+
+template <>
+inline float math<float>
+::round(float arg)
+{
+	return (::round(arg));
+}
+
+template <>
+inline double math<double>
+::round(double arg)
+{
+	return (::round(arg));
+}
 
 template <>
 inline constexpr float math<float>
@@ -231,11 +286,11 @@ inline constexpr long double math<long double>
  * @param d number
  * @param ulp precision
  */
-template <typename T>
-inline bool
-almost_zero(T d, unsigned ulp = 1)
+template <typename REAL>
+inline bool math<REAL>::
+almost_zero(REAL d, unsigned ulp)
 {
-	return (abs(d) <= math<T>::minimum() * ulp);
+	return (abs(d) <= minimum() * ulp);
 }
 
 /**
@@ -243,15 +298,15 @@ almost_zero(T d, unsigned ulp = 1)
  *
  * Code from http://en.cppreference.com/w/cpp/types/numeric_limits/epsilon
  */
-template<class T>
-inline bool
-almost_equal(T x, T y, unsigned ulp = 1)
+template<typename T>
+inline bool math<T>::
+almost_equal(T x, T y, unsigned ulp)
 {
 	if (x != y) {
 		if (x == T(0))
-			return (almost_zero(y));
+			return (almost_zero(y, ulp));
 		else if (y == T(0))
-			return (almost_zero(x));
+			return (almost_zero(x, ulp));
 		else
 			// the machine epsilon has to be scaled to the magnitude of the values used
 			// and multiplied by the desired precision in ULPs (units in the last place)

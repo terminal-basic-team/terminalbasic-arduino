@@ -1,5 +1,5 @@
 /*
- * ucBASIC is a lightweight BASIC-like language interpreter
+ * Terminal-BASIC is a lightweight BASIC-like language interpreter
  * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -41,11 +41,13 @@
  * KW_GOSUB = "GOSUB"   // 13
  * KW_GOTO = "GOTO"     // 14
  * KW_GO = "GO"         // 15
+ * KW_IDN = "IDN"
  * KW_IF = "IF"         // 16
  * KW_INPUT = "INPUT"   // 17
  * KW_LET = "LET"       // 18
  * COM_LIST = "LIST"    // 19
  * COM_LOAD = "LOAD"    // 20
+ * KW_MAT = "MAT"
  * COM_NEW = "NEW"      // 21
  * KW_NEXT = "NEXT"     // 22
  * OP_NOT = "NOT"
@@ -66,6 +68,7 @@
  * KW_TO = "TO"
  * KW_TRUE = "TRUE"
  * KW_VARS = "VARS"
+ * KW_ZER = "ZER"
  * 
  * STAR = '*'
  * SLASH = '/'
@@ -101,7 +104,7 @@ const char sCHAIN[] PROGMEM = "CHAIN";        // 4
 const char sCLS[] PROGMEM = "CLS";            // 5
 const char sDATA[] PROGMEM = "DATA";          // 6
 const char sDEF[] PROGMEM = "DEF";            // 7
-const char sDELAY[] PROGMEM = "DELAY";        // 8
+//const char sDELAY[] PROGMEM = "DELAY";        // 8
 const char sDIM[] PROGMEM = "DIM";            // 9
 #if USE_DUMP
 const char sDUMP[] PROGMEM = "DUMP";          // 10
@@ -112,12 +115,18 @@ const char sFOR[] PROGMEM = "FOR";            // 13
 const char sGOSUB[] PROGMEM = "GOSUB";        // 14
 const char sGOTO[] PROGMEM = "GOTO";          // 15
 const char sGO[] PROGMEM = "GO";              // 16
+#if USE_MATRIX
+const char sIDN[] PROGMEM = "IDN";
+#endif
 const char sIF[] PROGMEM = "IF";              // 17
 const char sINPUT[] PROGMEM = "INPUT";        // 18
 const char sLET[] PROGMEM = "LET";            // 19
 const char sLIST[] PROGMEM = "LIST";          // 20
 #if USE_SAVE_LOAD
 const char sLOAD[] PROGMEM = "LOAD";          // 21
+#endif
+#if USE_MATRIX
+const char sMAT[] PROGMEM = "MAT";
 #endif
 const char sNEW[] PROGMEM = "NEW";            // 22
 const char sNEXT[] PROGMEM = "NEXT";          // 23
@@ -126,7 +135,9 @@ const char sON[] PROGMEM = "ON";              // 24
 const char sOPTION[] PROGMEM = "OPTION";      // 25
 const char sOP_OR[] PROGMEM = "OR";
 const char sPRINT[] PROGMEM = "PRINT";        // 26
+#if USE_RANDOM
 const char sRANDOMIZE[] PROGMEM = "RANDOMIZE";// 27
+#endif
 const char sREAD[] PROGMEM = "READ";          // 28
 const char sREM[] PROGMEM = "REM";            // 29
 const char sRETURN[] PROGMEM = "RETURN";      // 30
@@ -143,7 +154,9 @@ const char sTRUE[] PROGMEM = "TRUE";
 #if USE_DUMP
 const char sVARS[] PROGMEM = "VARS";
 #endif
-
+#if USE_MATRIX
+const char sZER[] PROGMEM = "ZER";
+#endif
 const char sSTAR[] PROGMEM = "*";
 const char sSLASH[] PROGMEM = "/";
 const char sPLUS[] PROGMEM = "+";
@@ -161,7 +174,7 @@ const char sCOMMA[] PROGMEM = ",";
 const char sPOW[] PROGMEM = "^";
 const char sLPAREN[] PROGMEM = "(";
 const char sRPAREN[] PROGMEM = ")";
-
+/*
 const char sREAL_IDENT[] PROGMEM = "REAL_IDENT";
 const char sINTEGER_IDENT[] PROGMEM = "INTEGER_IDENT";
 const char sLONGINT_IDENT[] PROGMEM = "LONGINT_IDENT";
@@ -171,7 +184,7 @@ const char sBOOL_IDENT[] PROGMEM = "BOOL_IDENT";
 const char sINTEGER[] PROGMEM = "C_INTEGER";
 const char sREAL[] PROGMEM = "C_REAL";
 const char sBOOLEAN[] PROGMEM = "C_BOOLEAN";
-const char sSTRING[] PROGMEM = "C_STRING";
+const char sSTRING[] PROGMEM = "C_STRING";*/
 
 PGM_P const Lexer::tokenStrings[uint8_t(Token::NUM_TOKENS)] PROGMEM = {
 	sNOTOKENS,  // 0
@@ -186,7 +199,7 @@ PGM_P const Lexer::tokenStrings[uint8_t(Token::NUM_TOKENS)] PROGMEM = {
 	sCLS,       // 4
 	sDATA,      // 5
 	sDEF,       // 6
-	sDELAY,     // 7
+//	sDELAY,     // 7
 	sDIM,       // 8
 #if USE_DUMP
 	sDUMP,      // 9
@@ -197,12 +210,18 @@ PGM_P const Lexer::tokenStrings[uint8_t(Token::NUM_TOKENS)] PROGMEM = {
 	sGOSUB,     // 13
 	sGOTO,      // 14
 	sGO,        // 15
+#if USE_MATRIX
+	sIDN,
+#endif
 	sIF,        // 16
 	sINPUT,     // 17
 	sLET,       // 18
 	sLIST,      // 19
 #if USE_SAVE_LOAD
 	sLOAD,      // 20
+#endif
+#if USE_MATRIX
+	sMAT,
 #endif
 	sNEW,       // 21
 	sNEXT,      // 22
@@ -211,7 +230,9 @@ PGM_P const Lexer::tokenStrings[uint8_t(Token::NUM_TOKENS)] PROGMEM = {
 	sOPTION,    // 24
 	sOP_OR,
 	sPRINT,     // 25
+#if USE_RANDOM
 	sRANDOMIZE,
+#endif
 	sREAD,
 	sREM,
 	sRETURN,
@@ -228,6 +249,9 @@ PGM_P const Lexer::tokenStrings[uint8_t(Token::NUM_TOKENS)] PROGMEM = {
 #if USE_DUMP
 	sVARS,
 #endif
+#if USE_MATRIX
+	sZER,
+#endif
 
 	sSTAR, sSLASH, sPLUS, sMINUS,
 
@@ -240,10 +264,10 @@ PGM_P const Lexer::tokenStrings[uint8_t(Token::NUM_TOKENS)] PROGMEM = {
 	sPOW,
 	sLPAREN, sRPAREN,
 
-	sREAL_IDENT, sINTEGER_IDENT, sLONGINT_IDENT, sSTRING_IDENT,
+/*	sREAL_IDENT, sINTEGER_IDENT, sLONGINT_IDENT, sSTRING_IDENT,
 	sBOOL_IDENT,
 
-	sINTEGER, sREAL, sBOOLEAN, sSTRING
+	sINTEGER, sREAL, sBOOLEAN, sSTRING*/
 };
 
 static const uint8_t tokenTable[] PROGMEM = {
@@ -253,11 +277,13 @@ static const uint8_t tokenTable[] PROGMEM = {
 	'A', 'R', 'R', 'A', 'Y', 'S'+0x80, // 1
 #endif
 	'B', 'A', 'S', 'E'+0x80,           // 2
+#if USE_SAVE_LOAD
 	'C', 'H', 'A', 'I', 'N'+0x80,      // 3
+#endif
 	'C', 'L', 'S'+0x80,                // 4
 	'D', 'A', 'T', 'A'+0x80,           // 5
 	'D', 'E', 'F'+0x80,                // 6
-	'D', 'E', 'L', 'A', 'Y'+0x80,      // 7
+//	'D', 'E', 'L', 'A', 'Y'+0x80,      // 7
 	'D', 'I', 'M'+0x80,                // 8
 #if USE_DUMP
 	'D', 'U', 'M', 'P'+0x80,           // 9
@@ -268,11 +294,19 @@ static const uint8_t tokenTable[] PROGMEM = {
 	'G', 'O', 'S', 'U', 'B'+0x80,      // 13
 	'G', 'O', 'T', 'O'+0x80,           // 14
 	'G', 'O'+0x80,                     // 15
+#if USE_MATRIX
+	'I', 'D', 'N'+0x80,
+#endif
 	'I', 'F'+0x80,                     // 16
 	'I', 'N', 'P', 'U', 'T'+0x80,      // 17
 	'L', 'E', 'T'+0x80,                // 18
 	'L', 'I', 'S', 'T'+0x80,           // 19
+#if USE_SAVE_LOAD
 	'L', 'O', 'A', 'D'+0x80,           // 20
+#endif
+#if USE_MATRIX
+	'M', 'A', 'T'+0x80,
+#endif
 	'N', 'E', 'W'+0x80,                // 21
 	'N', 'E', 'X', 'T'+0x80,           // 22
 	'N', 'O', 'T'+0x80,
@@ -280,12 +314,16 @@ static const uint8_t tokenTable[] PROGMEM = {
 	'O', 'P', 'T', 'I', 'O', 'N'+0x80, // 24
 	'O', 'R'+0x80,
 	'P', 'R', 'I', 'N', 'T'+0x80,      // 25
+#if USE_RANDOM
 	'R', 'A', 'N', 'D', 'O', 'M', 'I', 'Z', 'E'+0x80, //26
+#endif
 	'R', 'E', 'A', 'D'+0x80,           // 27
 	'R', 'E', 'M'+0x80,
 	'R', 'E', 'T', 'U', 'R', 'N'+0x80,
 	'R', 'U', 'N'+0x80,
+#if USE_SAVE_LOAD
 	'S', 'A', 'V', 'E'+0x80,
+#endif
 	'S', 'T', 'E', 'P'+0x80,
 	'S', 'T', 'O', 'P'+0x80,
 	'T', 'A', 'B'+0x80,
@@ -294,6 +332,9 @@ static const uint8_t tokenTable[] PROGMEM = {
 	'T', 'R', 'U', 'E'+0x80,
 #if USE_DUMP
 	'V', 'A', 'R', 'S'+0x80,
+#endif
+#if USE_MATRIX
+	'Z', 'E', 'R'+0x80,
 #endif
 	0
 };
@@ -344,6 +385,7 @@ Lexer::getNext()
 	LOG_TRACE;
 
 	_token = Token::NOTOKENS;
+	_error = NO_ERROR;
 	_valuePointer = 0;
 	while (SYM > 0) {
 		if (isdigit(SYM)) {
@@ -368,6 +410,9 @@ Lexer::getNext()
 			_token = Token::SEMI;
 			next();
 			return true;
+		case '.':
+			decimalNumber();
+			return (true);
 		case ',':
 			_token = Token::COMMA;
 			next();
@@ -434,7 +479,7 @@ Lexer::getNext()
 			return true;
 		}
 	}
-	return (false);
+	return false;
 }
 
 void
@@ -442,6 +487,8 @@ Lexer::pushSYM()
 {
 	if (_valuePointer < STRINGSIZE - 1)
 		_id[_valuePointer++] = SYM;
+	else
+		_error = STRING_OVERFLOW;
 	next();
 }
 
@@ -499,14 +546,26 @@ Lexer::decimalNumber()
 	_value.type = Parser::Value::INTEGER;
 	Integer *val = &_value.value.integer;
 #endif
-	*val = SYM - '0';
+#if USE_REALS
+	if (SYM == '.')
+		*val = 0;
+	else
+#endif
+		*val = SYM - '0';
 	while (SYM > 0) {
-		next();
-		if (isdigit(SYM)) {
-			*val *= Integer(10);
-			*val += SYM - '0';
-			continue;
+#if USE_REALS
+		if (SYM != '.') {
+			
+#endif
+			next();
+			if (isdigit(SYM)) {
+				*val *= Integer(10);
+				*val += SYM - '0';
+				continue;
+			}
+#if USE_REALS
 		}
+#endif
 		switch (SYM) {
 #if USE_REALS
 		case '.':

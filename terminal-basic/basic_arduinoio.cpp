@@ -1,5 +1,5 @@
 /*
- * ucBASIC is a lightweight BASIC-like language interpreter
+ * Terminal-BASIC is a lightweight BASIC-like language interpreter
  * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -52,8 +52,7 @@ const FunctionBlock::command  ArduinoIO::_commands[] PROGMEM = {
 	ArduinoIO::comm_dwrite
 };
 
-ArduinoIO::ArduinoIO(FunctionBlock *next) :
-FunctionBlock(next)
+ArduinoIO::ArduinoIO()
 {
 	commands = _commands;
 	commandTokens = arduinoIOCommands;
@@ -155,10 +154,16 @@ ArduinoIO::aread_r(Real v)
 }
 #endif
 
-Integer
-ArduinoIO::aread_i(Integer v)
+#if USE_LONGINT
+#define INT LongInteger
+#else
+#define INT Integer
+#endif // USE_LONGINT
+INT
+ArduinoIO::aread_i(INT v)
 {
 	return analogRead(v);
 }
+#undef INT
 
 }

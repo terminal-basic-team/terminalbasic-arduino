@@ -1,5 +1,5 @@
 /*
- * ucBASIC is a lightweight BASIC-like language interpreter
+ * Terminal-BASIC is a lightweight BASIC-like language interpreter
  * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,7 +20,9 @@
 #include "arduino_logger.hpp"
 #include "basic_program.hpp"
 #include "basic_arduinoio.hpp"
+#ifdef ARDUINO
 #include "seriallight.hpp"
+#endif
 
 #if USESD
 #include "basic_sdfs.hpp"
@@ -36,6 +38,10 @@
 
 #if USETVOUT
 #include "TVoutPrint.hpp"
+#endif
+
+#if USE_EXTEEPROM
+#include "basic_exteeprom.hpp"
 #endif
 
 /**
@@ -61,6 +67,10 @@ static BASIC::Math mathBlock;
 static BASIC::ArduinoIO arduinoIo;
 #endif
 
+#if USE_EXTEEPROM
+static BASIC::ExtEEPROM extEeprom;
+#endif
+
 #if BASIC_MULTITERMINAL
 static BASIC::Interpreter::Program program(BASIC::PROGRAMSIZE / 5);
 static BASIC::Interpreter basic(Serial, Serial, program);
@@ -79,15 +89,11 @@ static BASIC::Interpreter basic3(Serial3, Serial3, program3);
 #else
 static BASIC::Interpreter::Program program(BASIC::PROGRAMSIZE);
 #if USEUTFT
-static BASIC::Interpreter basic(SerialL, utftPrint, program);
+static BASIC::Interpreter basic(SERIAL_PORT, utftPrint, program);
 #elif USETVOUT
-static BASIC::Interpreter basic(SerialL, tvoutPrint, program);
+static BASIC::Interpreter basic(SERIAL_PORT, tvoutPrint, program);
 #else
-#ifdef ARDUINO
-static BASIC::Interpreter basic(SerialL, SerialL, program);
-#else
-static BASIC::Interpreter basic(Serial, Serial, program);
-#endif
+static BASIC::Interpreter basic(SERIAL_PORT, SERIAL_PORT, program);
 #endif // USEUTFT
 #endif // BASIC_MULTITERMINAL
 
@@ -98,14 +104,10 @@ setup()
 	XMCRA |= 1ul<<7; // Switch ext mem iface on
 	XMCRB = 0;
 #endif
+	SERIAL_PORT.begin(115200);
 #if USETVOUT
 	tvoutPrint.begin();
 #endif
-#ifdef ARDUINO
-	SerialL.begin(115200);
-#else
-	Serial.begin(115200);
-#endif // ARDUINO
 #if USEUTFT
 	utftPrint.begin();
 #endif
@@ -133,10 +135,15 @@ setup()
 #if USEMATH
 	basic.addModule(&mathBlock);
 #endif
+
+#if USE_EXTEEPROM
+	basic.addModule(&extEeprom);
+#endif
 	
 #if USESD
 	basic.addModule(&sdfs);
 #endif
+	
 	basic.init();
 #if BASIC_MULTITERMINAL
 #if HAVE_HWSERIAL1

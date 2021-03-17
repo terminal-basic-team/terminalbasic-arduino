@@ -1,5 +1,5 @@
 /*
- * ucBASIC is a lightweight BASIC-like language interpreter
+ * Terminal-BASIC is a lightweight BASIC-like language interpreter
  * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -70,6 +70,13 @@ Interpreter::Program::last() const
 	return (stringByIndex(_textEnd));
 }
 
+void
+Interpreter::Program::jump(size_t newVal)
+{
+	_jump = newVal;
+	_jumpFlag = true;
+}
+
 Interpreter::Program::String*
 Interpreter::Program::stringByIndex(size_t index) const
 {
@@ -78,7 +85,7 @@ Interpreter::Program::stringByIndex(size_t index) const
 }
 
 Interpreter::Program::String*
-Interpreter::Program::stringByNumber(size_t number, size_t index)
+Interpreter::Program::lineByNumber(uint16_t number, uint16_t index)
 {
 	Program::String *result = NULL;
 
@@ -344,25 +351,41 @@ Interpreter::Program::addLine(uint16_t num, const char *line)
 	return (addLine(num, line, size));
 }
 
+void
+Interpreter::Program::removeLine(uint16_t num)
+{
+	const String *line = this->lineByNumber(num, 0);
+	if (line != NULL) {
+		const uint16_t index = stringIndex(line);
+		assert(index < _textEnd);
+		const uint16_t next = index+line->size;
+		const uint16_t len = _arraysEnd-next;
+		_textEnd -= line->size;
+		_variablesEnd -= line->size;
+		_arraysEnd -= line->size;
+		memmove(_text+index, _text+next, len);
+	}
+}
+
 bool
-Interpreter::Program::addLine(uint16_t num, const char *text, size_t len)
+Interpreter::Program::addLine(uint16_t num, const char *text, uint16_t len)
 {
 	reset();
 
 	if (_textEnd == 0) // First string insertion
 		return insert(num, text, len);
 
-	const size_t strLen = sizeof (String) + len;
+	const uint16_t strLen = sizeof (String) + len;
 	// Iterate over
 	String *cur;
 	for (cur = current(); _current < _textEnd; cur = current()) {
 		if (num < cur->number) {
 			break;
 		} else if (num == cur->number) { // Replace string
-			size_t newSize = strLen;
-			size_t curSize = cur->size;
-			long dist = long(newSize) - curSize;
-			size_t bytes2copy = _arraysEnd -
+			const uint16_t newSize = strLen;
+			const uint16_t curSize = cur->size;
+			const int16_t dist = long(newSize) - curSize;
+			const uint16_t bytes2copy = _arraysEnd -
 			    (_current + curSize);
 			if ((_arraysEnd + dist) >= _sp)
 				return (false);

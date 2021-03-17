@@ -23,6 +23,8 @@
 #include <Arduino.h>
 #include <Stream.h>
 
+#include <HardwareSerial.h>
+
 #define SERIAL_8N1 0x06
 
 class SerialLight : public Stream
@@ -62,6 +64,9 @@ extern SerialLight SerialL1;
 #endif
 #ifdef HAVE_HWSERIAL2
 extern SerialLight SerialL2;
+#endif
+#ifdef HAVE_HWSERIAL3
+extern SerialLight SerialL3;
 #endif
 
 #endif

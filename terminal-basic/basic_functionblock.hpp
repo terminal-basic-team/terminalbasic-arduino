@@ -49,8 +49,11 @@ protected:
 #if USE_REALS
 	typedef Real (*_funcReal)(Real);
 #endif
+#if USE_LONGINT
+	typedef LongInteger (*_funcInteger)(LongInteger);
+#else
 	typedef Integer (*_funcInteger)(Integer);
-	
+#endif // USE_LONGINT
 	explicit FunctionBlock(FunctionBlock* =NULL);
 	
 	virtual void _init() {}

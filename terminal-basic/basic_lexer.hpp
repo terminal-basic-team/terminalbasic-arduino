@@ -42,6 +42,11 @@ operator<<(Logger &logger, Token tok);
 class Lexer
 {
 public:
+	enum Error : uint8_t
+	{
+		NO_ERROR = 0,
+		STRING_OVERFLOW = 1
+	};
 	/**
 	 * @brief initialize lexer session
 	 * @param str string to extract tokens from
@@ -59,6 +64,10 @@ public:
 	Token getToken() const
 	{
 		return _token;
+	}
+	Error getError() const
+	{
+		return _error;
 	}
 	/**
 	 * @brief get current value (numberm boolean...)
@@ -110,6 +119,7 @@ private:
 	// identifier string pointer
 	uint8_t _valuePointer;
 	Token _token;
+	Error	_error;
 };
 
 }

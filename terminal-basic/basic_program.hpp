@@ -123,7 +123,7 @@ public:
 		{
 			GosubReturn	gosubReturn;
 			uint8_t		arrayDimensions;
-			size_t		arrayDimension;
+			uint16_t	arrayDimension;
 			ForBody		forFrame;
 			InputBody	inputObject;
 			char		string[STRINGSIZE];
@@ -152,19 +152,27 @@ public:
 	 *   and arrays
 	 */
 	void reset(size_t=0);
-	
+	/**
+	 * @brief get actual size of stored program in bytes
+	 * @return program size
+	 */
 	size_t size() const;
 	/**
 	 * @brief get next program line
 	 * @return line object or NULL if beyond last line
 	 */
 	String *getString();
-
+	/**
+	 * @brief Get current program line to be executed
+	 * @return pointer to current program line
+	 */
 	String *current() const;
+	
 	String *first() const;
+	
 	String *last() const;
 	
-	void jump(size_t newVal) { _jump = newVal; _jumpFlag = true; }
+	void jump(size_t newVal);
 	/**
 	 * @brief program string at given index
 	 * @param index
@@ -173,11 +181,11 @@ public:
 	String *stringByIndex(size_t) const;
 	/**
 	 * @brief program string of given number
-	 * @param number
-	 * @param index
+	 * @param number Program line number to get
+	 * @param index start of the search
 	 * @return string pointer or NULL if not found
 	 */
-	String *stringByNumber(size_t, size_t = 0);
+	String *lineByNumber(uint16_t, uint16_t = 0);
 	/**
 	 * @brief 
 	 * @param string pointer
@@ -213,13 +221,14 @@ public:
 	 * @brief reverse order of last same type elements
 	 */
 	void reverseLast(StackFrame::Type);
-	bool addLine(uint16_t, const char*);
 	/**
 	 * @brief Add new Program line
 	 * @param number decimal line number
 	 * @param text
+	 * @return flag of success
 	 */
-	bool addLine(uint16_t, const char*, size_t);
+	bool addLine(uint16_t, const char*);
+	void removeLine(uint16_t);
 	/**
 	 * @brief Insert line at current position
 	 * @param num line number
@@ -234,6 +243,14 @@ public:
 	const uint16_t programSize;
 private:
 	void pushBottom(StackFrame*);
+	/**
+	 * @brief Add tokenized program line
+	 * @param num
+	 * @param text
+	 * @param len
+	 * @return flag of success
+	 */
+	bool addLine(uint16_t, const char*, uint16_t);
 	// End of program text
 	uint16_t _textEnd;
 	uint16_t _current, _variablesEnd, _arraysEnd, _sp, _jump;

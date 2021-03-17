@@ -33,7 +33,7 @@ namespace BASIC
 class ArduinoIO : public FunctionBlock
 {
 public:
-	explicit ArduinoIO(FunctionBlock* =NULL);
+	explicit ArduinoIO();
 private:
 #if USE_REALS
 	static bool func_aread(Interpreter&);
@@ -45,8 +45,12 @@ private:
 	
 #if USE_REALS
 	static Real aread_r(Real);
-#endif
+#endif // USE_REALS
+#if USE_LONGINT
+	static LongInteger aread_i(LongInteger);
+#else
 	static Integer aread_i(Integer);
+#endif // USE_LONGINT
 	
 	static const FunctionBlock::function _funcs[] PROGMEM;
 	static const FunctionBlock::command _commands[] PROGMEM;

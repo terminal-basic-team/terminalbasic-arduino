@@ -1,0 +1,90 @@
+r0.8.1 (28.04.2017) - Release, dedicated to my wedding anniversary
+                      :).
+
+   * Add deletion of the program lines by entering line number with
+     empty string.
+   * Add functions INT, SGN, CHR$.
+   * Add string overflow errors (passes test 7 ANSI MINIMAL BASIC).
+   * Add TAB argument exceptions (passes test 8 ANSI MINIMAL BASIC).
+   * Optimisations, reducing FLASH/SRAM requirements. The smallest
+     (and almost useless :) ) variant can be forced into Atmega 168...
+   * Add string equality operator.
+   * Add many condition compilation options.
+   * Fix a couple of bugs.
+
+r0.8.0 (12.04.2017) - Release, dedicated to International Day of
+                      Human Space Flight.
+
+   * Add support of modified TVout library to output to composite video
+     and get 32x24 tv image and blinking cursor.
+   * Add support of color highlighted output on HX8357B based 480x320
+     TFT displays, using UTFT library.
+
+   Language core:
+   * Add CHAIN command, loading program from internal EEPROM, preserving
+     the state (variables and arrays).
+   * More flexible configuration helps save SRAM and FLASH
+   * PRINT command accepts TAB construct, ';' symbol, empty strings and
+     void print list. Passes first 6 tests from ANSI minimal basic test
+     set.
+
+   SDFS module:
+   * Add DCHAIN command, loading program from SD file, preserving
+     the state (variables and arrays).
+
+r0.7.1 (22.03.2017) Fix bug with real arrays declaration Fix dependency
+      on libarduinoemulator repo
+
+r0.7 (19.03.2017) Fix integer constants parsing bug; Fix arithmetic
+      operation presedence; Add condition compilation of real numbers
+      support; Use lightweight serail port Stream to save FLASH/SRAM
+      space; Extend PRINT command to pass MINIMAL BASIC tests; SD card
+      module uses sources in textual form to save and load programs.
+
+r0.6.3 (28.02.2017) Fix Atmega2560 with external memory build
+			FIx input/output boundary objects usage
+			Fix listing of variables ids
+			Fix string variables input
+			
+r0.6.2 (24.02.2017)	Fix program string size when saving to internal memory
+			Fix multivalue input
+			Fix input of real numbers
+			
+r0.6.1 (21.02.2017)	Fix in the optional long integer support;
+			Atmega128a build fix.
+			
+r0.6 (20.02.2017)	AWRITE command in ARduinoIO module;
+			Tokenization of integer constants;
+			Bug fixes;
+			
+r0.5 (27.01.2017)	4-byte integer optional datatype with %% variable name suffix;
+			RANDOMIZE command was added;
+			RND() function was added;
+			Optional keyword tokenization;
+			Script for make arduino ide sketch from netbeans-oriented sources.
+			
+r0.4 (26.12.2016)	LIST command outputs syntax-highlighted program text;
+			Boolean datatype with TRUE and FALSE constants and ! variable name suffix;
+			ArduinoIO module was  updated;
+			SDCard program save/load module;
+			
+r0.3 (07.12.2016)	Interpreter rewrited as FSM with short-time step() method. This allows to implement
+			time-sharing system with multiple terminals;
+			ArduinoIO module was added;
+			Darthmouth BASIC-style IF support;
+			Commodore BASIC-style IF with multiple true branch operators;
+			Add core command CLS (clear screen);
+			Add math function ACS (arccos);
+			Host sends echo symbols;
+			Break (Ctrl-C) command;
+			vt100 color/highlighted output supported;
+			Bug fixes.
+			
+r0.2 (29.11.2016)	REM operator;
+			Multioperator lines with operators separated by semicolons;
+     Input both positive and negative numbers;
+     Modular structure with math functions module;
+     Bug fixes.
+
+r0.1 (25.11.2016)	Initial release. Editing of the program in memory,
+      simple program can be executed.
