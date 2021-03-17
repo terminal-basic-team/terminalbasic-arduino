@@ -20,11 +20,11 @@
 #ifndef VT100_HPP
 #define VT100_HPP
 
-#include "cps.hpp"
+#include "arduinoext.hpp"
 
 class VT100
 {
-	CPS_PACKAGE(VT100);
+	EXT_PACKAGE(VT100);
 public:
 	// Terminal text attributes to use when printing
 	enum TextAttr : uint8_t

@@ -20,10 +20,30 @@
 #include "bytearray.hpp"
 
 #include "Print.h"
+#include <stdlib.h>
+
+ByteArray::ByteArray() :
+_data(nullptr), _size(0), _ownsData(false)
+{
+}
 
 ByteArray::ByteArray(const uint8_t *data, size_t size) :
-_data(data), _size(size)
+_data(const_cast<uint8_t*>(data)), _size(size), _ownsData(false)
 {
+}
+
+void
+ByteArray::createData()
+{
+	if (_ownsData && _data != nullptr)
+		free(_data);
+	
+	if (_size == 0) {
+		_data = nullptr;
+		return;
+	}
+	
+	_data = reinterpret_cast<uint8_t*>(malloc(_size));
 }
 
 size_t

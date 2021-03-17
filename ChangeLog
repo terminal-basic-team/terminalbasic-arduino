@@ -1,3 +1,10 @@
+r1.0-alpha1 (01.06.2017) - Release, dedicated to INternational day of protection of children
+
+   * Darthmouth BASIC-style matrix operations
+   * I2C eeprom module with functions ESAVE, ELOAD, ECHAIN
+   * Corrections to fix Arduino DUE build
+   * Interpreter FSM rewritten for fix bugs in multioperator lines processing
+
 r0.8.2 (9.05.2017) - Release, dedicated to Victory Day.
 
    * Fix buffer overflow in real numbers output.

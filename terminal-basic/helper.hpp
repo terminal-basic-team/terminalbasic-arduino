@@ -20,7 +20,7 @@
 #ifndef HELPER_HPP
 #define HELPER_HPP
 
-#include "cps.hpp"
+#include "arduinoext.hpp"
 #include <string.h>
 
 #ifdef ARDUINO

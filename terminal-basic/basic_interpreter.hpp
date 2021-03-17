@@ -37,23 +37,7 @@ public:
 	/**
 	 * @brief BASIC program memory
 	 */
-	class CPS_PACKED Program;
-
-	/**
-	 * Variable type
-	 */
-	enum Type : uint8_t
-	{
-		VF_INTEGER = 0,
-#if USE_LONGINT
-		VF_LONG_INTEGER,
-#endif
-#if USE_REALS
-		VF_REAL,
-#endif
-		VF_BOOLEAN,
-		VF_STRING
-	};
+	class EXT_PACKED Program;
 
 	/**
 	 * Dynamic (runtime error codes)
@@ -74,6 +58,9 @@ public:
 		INTEGER_EXPRESSION_EXPECTED = 11,// Integer expression expected
 		BAD_CHECKSUM = 12,		// Bad program checksum
 		INVALID_TAB_VALUE = 13,
+		INVALID_ELEMENT_INDEX = 14,
+		SQUARE_MATRIX_EXPECTED = 15,
+		DIMENSIONS_MISMATCH = 16,
 		INTERNAL_ERROR = 255
 	};
 
@@ -89,7 +76,7 @@ public:
 	/**
 	 * @brief variable memory frame
 	 */
-	struct CPS_PACKED VariableFrame
+	struct EXT_PACKED VariableFrame
 	{
 		/**
 		 * @brief size of the initialized frame
@@ -109,15 +96,15 @@ public:
 			{
 				const char *b;
 				const T *i;
-			} _U;
-			_U.b = bytes;
-			return *_U.i;
+			} U;
+			U.b = bytes;
+			return *U.i;
 		}
 
 		// Variable name
 		char name[VARSIZE];
 		// Variable type
-		Type type;
+		Parser::Value::Type type;
 		// Frame body
 		char bytes[];
 	};
@@ -132,6 +119,10 @@ public:
 		 * @return size
 		 */
 		uint16_t size() const;
+		
+		uint16_t dataSize() const;
+		
+		uint16_t numElements() const;
 
 		/**
 		 * @brief get array raw data pointer
@@ -160,19 +151,32 @@ public:
 		template <typename T>
 		T get(uint16_t index) const
 		{
-			union
+			const union
 			{
 				const uint8_t *b;
 				const T *i;
-			} _U;
-			_U.b = this->data();
-			return _U.i[index];
+			} U = { .b = this->data() };
+			return U.i[index];
+		}
+		
+		bool get(uint16_t, Parser::Value&) const;
+		bool set(uint16_t, const Parser::Value&);
+		
+		template <typename T>
+		void set(uint16_t index, T val)
+		{
+			union
+			{
+				uint8_t *b;
+				T *i;
+			} U = { .b = this->data() };
+			U.i[index] = val;
 		}
 
 		// Array data
 		char name[VARSIZE];
 		// Array type
-		Type type;
+		Parser::Value::Type type;
 		// Number of dimensions
 		uint8_t numDimensions;
 		// Actual dimensions values
@@ -185,6 +189,7 @@ public:
 		SHELL,		// Wait for user input of line or command
 		PROGRAM_INPUT,	// 
 		COLLECT_INPUT,	//
+		EXEC_INT,	// Interactive execute
 		EXECUTE,	// Runniong the program
 		VAR_INPUT,	// Input of the variable value
 		GET_VAR_VALUE,
@@ -229,6 +234,37 @@ public:
 	void newline();
 	void print(char);
 
+#if USE_MATRIX
+	/**
+	 * @bief Matrix expression oprations
+	 */
+	enum MatrixOperation_t : uint8_t
+	{
+		MO_NOP,
+		MO_SCALE,
+		MO_SUM,
+		MO_SUB,
+		MO_MUL,
+		MO_TRANSPOSE,
+		MO_INVERT
+	};
+	
+	void zeroMatrix(const char*);
+	void onesMatrix(const char*);
+	void identMatrix(const char*);
+	void printMatrix(const char*);
+	void matrixDet(const char*);
+	/**
+	 * @brief Assign matrix a result of matrix operation
+	 * @param name Name of the matrix to assign to
+	 * @param first First and possible the only matrix expression operand
+	 * @param second Second optional matrix exprerssion operand
+	 * @param op Operation type
+	 */
+	void assignMatrix(const char*, const char*, const char* = nullptr,
+	    MatrixOperation_t = MO_NOP);
+#endif
+	
 	void print(Integer, VT100::TextAttr = VT100::NO_ATTR);
 	void printTab(const Parser::Value&);
 	void print(long, VT100::TextAttr = VT100::NO_ATTR);
@@ -258,7 +294,7 @@ public:
 	// save for loop
 	void pushForLoop(const char*, uint8_t, const Parser::Value&,
 	    const Parser::Value&);
-	void pushValue(const Parser::Value&);
+	bool pushValue(const Parser::Value&);
 	void pushInputObject(const char*);
 	bool popValue(Parser::Value&);
 	bool popString(const char*&);
@@ -320,11 +356,14 @@ public:
 	 * @return frame pointer
 	 */
 	const VariableFrame *getVariable(const char*);
-
+	/**
+	 * @brief Fill value object with the value of a variable
+	 * @param val value object
+	 * @param var name of the variable
+	 */
 	void valueFromVar(Parser::Value&, const char*);
 
 	bool valueFromArray(Parser::Value&, const char*);
-
 	/**
 	 * @brief push string constant on the stack
 	 */
@@ -332,9 +371,8 @@ public:
 	/**
 	 * @brief push the next array dimesion on the stack
 	 * @param dim dimension value
-	 * @return 
 	 */
-	uint16_t pushDimension(uint16_t);
+	void pushDimension(uint16_t);
 	/**
 	 * @brief push the number of array dimesions on the stack
 	 * @param num number of dimensions
@@ -355,10 +393,16 @@ public:
 	{
 		_parser.stop();
 	}
+	
+	bool pushResult();
 
 	Program &_program;
 private:
 	class AttrKeeper;
+#if USE_MATRIX
+	void fillMatrix(const char*, const Parser::Value&);
+	void setMatrixSize(ArrayFrame&, uint16_t, uint16_t);
+#endif
 	// Get next input object from stack
 	bool nextInput();
 	// Place input values to objects
@@ -415,6 +459,8 @@ private:
 	uint8_t			 _inputPosition;
 	// Input variable name string;
 	char			 _inputVarName[VARSIZE];
+	// Global RESULT() variable
+	Parser::Value		 _result;
 #if BASIC_MULTITERMINAL
 	static uint8_t		 _termnoGen;
 	uint8_t			 _termno;

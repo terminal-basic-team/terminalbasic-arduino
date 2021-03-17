@@ -24,7 +24,7 @@
 
 #if USESD
 
-#include <SD.h>
+#include <sd.hpp>
 
 namespace BASIC
 {
@@ -47,9 +47,9 @@ private:
 	static bool header(Interpreter&);
 	
 	static bool getFileName(Interpreter&, char[]);
-	static bool _loadText(File&, Interpreter&);
+	static bool _loadText(SDCard::File&, Interpreter&);
 	
-	static File	_root;
+	static SDCard::File	_root;
 	static const FunctionBlock::function _commands[] PROGMEM;
 };
 

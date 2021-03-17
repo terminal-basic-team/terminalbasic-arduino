@@ -30,6 +30,14 @@
 #include "config_linux.hpp"
 #endif
 
+#ifdef true
+#undef true
+#endif
+
+#ifdef false
+#undef false
+#endif
+
 /**
  * @brief Simple BASIC language interpreter package
  */
@@ -65,9 +73,15 @@ enum class Token : uint8_t
 	COM_CHAIN,     // 3
 #endif
 	COM_CLS,       // 4
+#if USE_MATRIX
+	KW_CON,
+#endif
 	KW_DATA,       // 5
 	KW_DEF,        // 6
 //	COM_DELAY,     // 7
+#if USE_MATRIX
+	KW_DET,
+#endif
 	KW_DIM,        // 8
 #if USE_DUMP
 	COM_DUMP,      // 9
@@ -83,6 +97,9 @@ enum class Token : uint8_t
 #endif
 	KW_IF,         // 16
 	KW_INPUT,      // 17
+#if USE_MATRIX
+	KW_INV,
+#endif
 	KW_LET,        // 18
 	COM_LIST,      // 19
 #if USE_SAVE_LOAD
@@ -113,6 +130,9 @@ enum class Token : uint8_t
 	KW_TAB,
 	KW_THEN,
 	KW_TO,
+#if USE_MATRIX
+	KW_TRN,
+#endif
 	KW_TRUE,
 #if USE_DUMP
 	KW_VARS,
@@ -125,6 +145,9 @@ enum class Token : uint8_t
 	STAR,
 	// /
 	SLASH,
+#if USE_REALS
+	BACK_SLASH,
+#endif
 	// +
 	PLUS,
 	// -
@@ -156,8 +179,8 @@ enum class Token : uint8_t
 	// )
 	RPAREN,
 
-	REAL_IDENT,
 	INTEGER_IDENT,
+	REAL_IDENT,
 #if USE_LONGINT
 	LONGINT_IDENT,
 #endif

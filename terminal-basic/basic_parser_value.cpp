@@ -166,7 +166,7 @@ Parser::Value::operator-()
 		// undefined
 		break;
 	}
-	return (*this);
+	return *this;
 }
 
 bool
@@ -417,6 +417,27 @@ Parser::Value::notOp()
 	}
 }
 
+size_t
+Parser::Value::size(Type t)
+{
+	switch (t) {
+	case INTEGER:
+		return sizeof(Integer);
+#if USE_LONGINT
+	case LONG_INTEGER:
+		return sizeof(LongInteger);	
+#endif
+#if USE_REALS
+	case REAL:
+		return sizeof(Real);	
+#endif
+	case BOOLEAN:
+		return sizeof(bool);
+	case STRING:
+		return 0;
+	}
+}
+
 Parser::Value &
 Parser::Value::operator|=(const Value &v)
 {
@@ -461,7 +482,8 @@ Parser::Value::printTo(Print& p) const
 			t = Token::KW_TRUE;
 		else
 			t = Token::KW_FALSE;
-		strcpy_P(buf, Lexer::tokenStrings[uint8_t(t)]);
+		strcpy_P(buf, (PGM_P)pgm_read_word(&(Lexer::
+		    tokenStrings[uint8_t(t)])));
 		return p.print(buf);
 	}
 		break;
@@ -469,7 +491,7 @@ Parser::Value::printTo(Print& p) const
 	case REAL:
 	{
 		char buf[15];
-#ifdef ARDUINO
+#ifdef __AVR_ARCH__
 		uint8_t decWhole = 1;
 		Real n = math<Real>::abs(value.real);
 		while (n >= Real(10)) {
@@ -481,7 +503,7 @@ Parser::Value::printTo(Print& p) const
 		else
 			::dtostre(value.real, buf, 7, DTOSTR_ALWAYS_SIGN);
 #else
-		::sprintf(buf, "% .8G", value.real);
+		::sprintf(buf, "%- 10.7G", value.real);
 #endif // ARDUINO
 		return p.print(buf);
 	}

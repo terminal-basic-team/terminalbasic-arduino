@@ -105,7 +105,7 @@ scanTable(const uint8_t *token, const uint8_t table[], uint8_t &index)
 		uint8_t c = pgm_read_byte(table);
 		uint8_t ct = token[tokPos];
 		if (c == 0)
-			return (NULL);
+			return NULL;
 		
 		if (ct == c) {
 			++tokPos, ++table;
@@ -113,12 +113,12 @@ scanTable(const uint8_t *token, const uint8_t table[], uint8_t &index)
 		} else if (ct+uint8_t(0x80) == c) {
 			index = tabPos;
 			++tokPos;
-			return ((uint8_t*)token+tokPos);
+			return (uint8_t*)token+tokPos;
 		} else {
 			if (c & uint8_t(0x80))
 				c &= ~uint8_t(0x80);
 			if (c > ct && ct != 0)
-				return (NULL);
+				return NULL;
 			else {
 				while ((pgm_read_byte(table++) & uint8_t(0x80)) ==
 				    0);
@@ -136,9 +136,10 @@ scanTable(const uint8_t *token, const uint8_t table[], uint8_t &index)
 	return NULL;
 }
 
-PGM_P progmemString(ProgMemStrings index)
+PGM_P
+progmemString(ProgMemStrings index)
 {
-	return ((PGM_P)pgm_read_word(&progmemStrings[uint8_t(index)]));
+	return (PGM_P)pgm_read_word(&progmemStrings[uint8_t(index)]);
 }
 
 }

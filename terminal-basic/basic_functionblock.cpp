@@ -137,15 +137,15 @@ bool
 FunctionBlock::getIntegerFromStack(Interpreter &i, _Integer &num)
 {
 	Parser::Value v(Integer(0));
-	i.popValue(v);
-	if (v.type == Parser::Value::INTEGER
+	if (i.popValue(v) && (
+            v.type == Parser::Value::INTEGER
 #if USE_LONGINT
 	 || v.type == Parser::Value::LONG_INTEGER
 #endif
 #if USE_REALS
 	 || v.type == Parser::Value::REAL
 #endif
-	) {
+	)) {
 		num  = _Integer(v);
 		return true;
 	} else

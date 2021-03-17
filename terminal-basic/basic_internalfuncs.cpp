@@ -20,6 +20,7 @@
 #include "basic_interpreter.hpp"
 #include "Arduino.h"
 #include "math.hpp"
+#include "basic_program.hpp"
 
 #include <assert.h>
 
@@ -32,6 +33,7 @@ static const uint8_t intFuncs[] PROGMEM = {
 #if USE_REALS
 	'I', 'N', 'T'+0x80,
 #endif
+	'R', 'E', 'S'+0x80,
 #if USE_RANDOM
 	'R', 'N', 'D'+0x80,
 #endif
@@ -46,6 +48,7 @@ const FunctionBlock::function InternalFunctions::funcs[] PROGMEM = {
 #if USE_REALS
 	InternalFunctions::func_int,
 #endif
+	InternalFunctions::func_result,
 #if USE_RANDOM
 	InternalFunctions::func_rnd,
 #endif
@@ -92,6 +95,12 @@ InternalFunctions::func_chr(Interpreter &i)
 	i.pushString(buf);
 	i.pushValue(v);
 	return true;
+}
+
+bool
+InternalFunctions::func_result(Interpreter &i)
+{
+	return i.pushResult();
 }
 
 #if USE_REALS
@@ -168,7 +177,7 @@ InternalFunctions::func_tim(Interpreter &i)
 #else
 #define TYP Integer
 #endif
-	i.pushValue(TYP(millis()) / TYP(1000));
+	i.pushValue(TYP(TYP(millis()) / TYP(1000)));
 	return true;
 }
 

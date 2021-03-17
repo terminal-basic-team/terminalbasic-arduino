@@ -30,8 +30,10 @@
  * KW_BASE = "BASE"     // 2
  * COM_CHAIN = "CHAIN"  // 3
  * COM_CLS = "CLS"      // 4
+ * KW_CON = "CON"
  * KW_DATA = "DATA"     // 5
  * KW_DEF = "DEF"       // 6
+ * KW_DET = "DET"
  * COM_DELAY = "DELAY"  // 7
  * KW_DIM = "DIM"       // 8
  * COM_DUMP = "DUMP"    // 9
@@ -44,6 +46,7 @@
  * KW_IDN = "IDN"
  * KW_IF = "IF"         // 16
  * KW_INPUT = "INPUT"   // 17
+ * KW_INV = "INV"
  * KW_LET = "LET"       // 18
  * COM_LIST = "LIST"    // 19
  * COM_LOAD = "LOAD"    // 20
@@ -66,6 +69,7 @@
  * KW_TAB = "TAB"
  * KW_THEN = "THEN"
  * KW_TO = "TO"
+ * KW_TRN = "TRN"
  * KW_TRUE = "TRUE"
  * KW_VARS = "VARS"
  * KW_ZER = "ZER"
@@ -102,9 +106,15 @@ const char sBASE[] PROGMEM = "BASE";          // 3
 const char sCHAIN[] PROGMEM = "CHAIN";        // 4
 #endif
 const char sCLS[] PROGMEM = "CLS";            // 5
+#if USE_MATRIX
+const char sCON[] PROGMEM = "CON";            // 5
+#endif
 const char sDATA[] PROGMEM = "DATA";          // 6
 const char sDEF[] PROGMEM = "DEF";            // 7
 //const char sDELAY[] PROGMEM = "DELAY";        // 8
+#if USE_MATRIX
+const char sDET[] PROGMEM = "DET";            // 5
+#endif
 const char sDIM[] PROGMEM = "DIM";            // 9
 #if USE_DUMP
 const char sDUMP[] PROGMEM = "DUMP";          // 10
@@ -120,6 +130,9 @@ const char sIDN[] PROGMEM = "IDN";
 #endif
 const char sIF[] PROGMEM = "IF";              // 17
 const char sINPUT[] PROGMEM = "INPUT";        // 18
+#if USE_MATRIX
+const char sINV[] PROGMEM = "INV";	      // 18
+#endif
 const char sLET[] PROGMEM = "LET";            // 19
 const char sLIST[] PROGMEM = "LIST";          // 20
 #if USE_SAVE_LOAD
@@ -150,6 +163,9 @@ const char sSTOP[] PROGMEM = "STOP";
 const char sTAB[] PROGMEM = "TAB";
 const char sTHEN[] PROGMEM = "THEN";
 const char sTO[] PROGMEM = "TO";
+#if USE_MATRIX
+const char sTRN[] PROGMEM = "TRN";
+#endif
 const char sTRUE[] PROGMEM = "TRUE";
 #if USE_DUMP
 const char sVARS[] PROGMEM = "VARS";
@@ -159,6 +175,9 @@ const char sZER[] PROGMEM = "ZER";
 #endif
 const char sSTAR[] PROGMEM = "*";
 const char sSLASH[] PROGMEM = "/";
+#if USE_REALS
+const char sBACK_SLASH[] PROGMEM = "\\";
+#endif
 const char sPLUS[] PROGMEM = "+";
 const char sMINUS[] PROGMEM = "-";
 const char sEQUALS[] PROGMEM = "=";
@@ -175,8 +194,8 @@ const char sPOW[] PROGMEM = "^";
 const char sLPAREN[] PROGMEM = "(";
 const char sRPAREN[] PROGMEM = ")";
 /*
-const char sREAL_IDENT[] PROGMEM = "REAL_IDENT";
 const char sINTEGER_IDENT[] PROGMEM = "INTEGER_IDENT";
+const char sREAL_IDENT[] PROGMEM = "REAL_IDENT";
 const char sLONGINT_IDENT[] PROGMEM = "LONGINT_IDENT";
 const char sSTRING_IDENT[] PROGMEM = "STRING_IDENT";
 const char sBOOL_IDENT[] PROGMEM = "BOOL_IDENT";
@@ -197,9 +216,15 @@ PGM_P const Lexer::tokenStrings[uint8_t(Token::NUM_TOKENS)] PROGMEM = {
 	sCHAIN,     // 3
 #endif
 	sCLS,       // 4
+#if USE_MATRIX
+	sCON,
+#endif
 	sDATA,      // 5
 	sDEF,       // 6
 //	sDELAY,     // 7
+#if USE_MATRIX
+	sDET,
+#endif
 	sDIM,       // 8
 #if USE_DUMP
 	sDUMP,      // 9
@@ -215,6 +240,9 @@ PGM_P const Lexer::tokenStrings[uint8_t(Token::NUM_TOKENS)] PROGMEM = {
 #endif
 	sIF,        // 16
 	sINPUT,     // 17
+#if USE_MATRIX
+	sINV,
+#endif
 	sLET,       // 18
 	sLIST,      // 19
 #if USE_SAVE_LOAD
@@ -245,6 +273,9 @@ PGM_P const Lexer::tokenStrings[uint8_t(Token::NUM_TOKENS)] PROGMEM = {
 	sTAB,
 	sTHEN,
 	sTO,
+#if USE_MATRIX
+	sTRN,
+#endif
 	sTRUE,
 #if USE_DUMP
 	sVARS,
@@ -253,7 +284,12 @@ PGM_P const Lexer::tokenStrings[uint8_t(Token::NUM_TOKENS)] PROGMEM = {
 	sZER,
 #endif
 
-	sSTAR, sSLASH, sPLUS, sMINUS,
+	sSTAR,
+	sSLASH,
+#if USE_REALS
+	sBACK_SLASH,
+#endif
+	sPLUS, sMINUS,
 
 	sEQUALS,
 	sCOLON, sSEMI,
@@ -264,7 +300,7 @@ PGM_P const Lexer::tokenStrings[uint8_t(Token::NUM_TOKENS)] PROGMEM = {
 	sPOW,
 	sLPAREN, sRPAREN,
 
-/*	sREAL_IDENT, sINTEGER_IDENT, sLONGINT_IDENT, sSTRING_IDENT,
+/*	sINTEGER_IDENT, sREAL_IDENT, sLONGINT_IDENT, sSTRING_IDENT,
 	sBOOL_IDENT,
 
 	sINTEGER, sREAL, sBOOLEAN, sSTRING*/
@@ -281,9 +317,15 @@ static const uint8_t tokenTable[] PROGMEM = {
 	'C', 'H', 'A', 'I', 'N'+0x80,      // 3
 #endif
 	'C', 'L', 'S'+0x80,                // 4
+#if USE_MATRIX
+	'C', 'O', 'N'+0x80,
+#endif
 	'D', 'A', 'T', 'A'+0x80,           // 5
 	'D', 'E', 'F'+0x80,                // 6
 //	'D', 'E', 'L', 'A', 'Y'+0x80,      // 7
+#if USE_MATRIX
+	'D', 'E', 'T'+0x80,
+#endif
 	'D', 'I', 'M'+0x80,                // 8
 #if USE_DUMP
 	'D', 'U', 'M', 'P'+0x80,           // 9
@@ -299,6 +341,9 @@ static const uint8_t tokenTable[] PROGMEM = {
 #endif
 	'I', 'F'+0x80,                     // 16
 	'I', 'N', 'P', 'U', 'T'+0x80,      // 17
+#if USE_MATRIX
+	'I', 'N', 'V'+0x80,
+#endif
 	'L', 'E', 'T'+0x80,                // 18
 	'L', 'I', 'S', 'T'+0x80,           // 19
 #if USE_SAVE_LOAD
@@ -329,6 +374,9 @@ static const uint8_t tokenTable[] PROGMEM = {
 	'T', 'A', 'B'+0x80,
 	'T', 'H', 'E', 'N'+0x80,
 	'T', 'O'+0x80,
+#if USE_MATRIX
+	'T', 'R', 'N'+0x80,
+#endif
 	'T', 'R', 'U', 'E'+0x80,
 #if USE_DUMP
 	'V', 'A', 'R', 'S'+0x80,
@@ -388,17 +436,31 @@ Lexer::getNext()
 	_error = NO_ERROR;
 	_valuePointer = 0;
 	while (SYM > 0) {
-		if (isdigit(SYM)) {
+		if (SYM >= 0x80) {
+			_token = Token(SYM & 0x7F);
+			next();
+			if (_token == Token::C_INTEGER)
+				binaryInteger();
+			return true;
+		} else if (isdigit(SYM)) {
 			decimalNumber();
-			return (true);
+			return true;
 		} else if (isalpha(SYM)) {
 			uint8_t index;
 			uint8_t *pos = (uint8_t*)_string+_pointer;
 			if ((pos = scanTable(pos, tokenTable, index)) != NULL) {
 				_token = Token(index);
+				if (_token == Token::KW_TRUE)
+					_value = true, _token = Token::C_BOOLEAN;
+				else if (_token == Token::KW_FALSE)
+					_value = false, _token = Token::C_BOOLEAN;
 				_pointer += uint8_t(pos - ((uint8_t*)_string+
 				    _pointer));
-				return (true);
+				return true;
+			} else {
+				pushSYM();
+				ident();
+				return true;
 			}
 		}
 		switch (SYM) {
@@ -451,6 +513,12 @@ Lexer::getNext()
 			_token = Token::SLASH;
 			next();
 			return true;
+#if USE_REALS
+		case '\\':
+			_token = Token::BACK_SLASH;
+			next();
+			return true;
+#endif
 		case '^':
 			_token = Token::POW;
 			next();
@@ -466,16 +534,7 @@ Lexer::getNext()
 			next();
 			break;
 		default:
-			if (SYM >= 0x80) {
-				_token = Token(SYM & 0x7F);
-				next();
-				if (_token == Token::C_INTEGER)
-					binaryInteger();
-			} else if (isalpha(SYM)) {
-				pushSYM();
-				ident();
-			} else
-				next();
+			next();
 			return true;
 		}
 	}

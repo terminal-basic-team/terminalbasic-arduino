@@ -32,7 +32,7 @@ public:
 	/**
 	 * @brief BASIC program string object
 	 */
-	struct CPS_PACKED String
+	struct EXT_PACKED String
 	{
 		// string decimal number (label)
 		uint16_t number;
@@ -45,7 +45,7 @@ public:
 	/**
 	 * @program stack frame object
 	 */
-	struct CPS_PACKED StackFrame
+	struct EXT_PACKED StackFrame
 	{
 		/**
 		 * @brief Stack frame type
@@ -71,7 +71,7 @@ public:
 		/**
 		 * @brief FOR-loop state frame body
 		 */
-		struct CPS_PACKED ForBody
+		struct EXT_PACKED ForBody
 		{
 			// Program counter on loop begin
 			uint16_t	calleeIndex;
@@ -91,7 +91,7 @@ public:
 		/**
 		 * @brief Subprogram return address frame body
 		 */
-		struct CPS_PACKED GosubReturn
+		struct EXT_PACKED GosubReturn
 		{
 			// Program counter of the colee string
 			uint16_t calleeIndex;
@@ -102,7 +102,7 @@ public:
 		/**
 		 * @brief Input object frame body
 		 */
-		struct CPS_PACKED InputBody
+		struct EXT_PACKED InputBody
 		{
 			enum Type : uint8_t
 			{
@@ -115,11 +115,11 @@ public:
 
 		static uint8_t size(Type);
 		
-		uint8_t size() const { return (size(this->_type)); }
+		uint8_t size() const { return size(this->_type); }
 
 		Type _type;
 
-		union CPS_PACKED Body
+		union EXT_PACKED Body
 		{
 			GosubReturn	gosubReturn;
 			uint8_t		arrayDimensions;
@@ -207,7 +207,6 @@ public:
 
 	StackFrame *stackFrameByIndex(uint16_t index);
 	StackFrame *currentStackFrame();
-	
 	/**
 	 * @brief create new stack frame of given type and get its pointer
 	 * @param type
@@ -228,6 +227,10 @@ public:
 	 * @return flag of success
 	 */
 	bool addLine(uint16_t, const char*);
+	/**
+	 * @brief Remove program line
+	 * @param num line number
+	 */
 	void removeLine(uint16_t);
 	/**
 	 * @brief Insert line at current position
@@ -235,6 +238,31 @@ public:
 	 * @param text line text
 	 */
 	bool insert(uint16_t, const char*, uint8_t);
+	
+	uint16_t textEnd() const { return _textEnd; }
+	void setTextEnd(uint16_t newVal)
+	{
+		_textEnd = newVal;
+	}
+	
+	uint16_t varsEnd() const { return _variablesEnd; }
+	void setVarsEnd(uint16_t newVal)
+	{
+		_variablesEnd = newVal;
+	}
+	
+	uint16_t arraysEnd() const { return _arraysEnd; }
+	void setArraysEnd(uint16_t newVal)
+	{
+		_arraysEnd = newVal;
+	}
+	
+	uint16_t sp() const { return _sp; }
+	void setSP(uint16_t newVal)
+	{
+		_sp = newVal;
+	}
+	
 #if USE_EXTMEM
 	char *_text;
 #else
@@ -245,17 +273,25 @@ private:
 	void pushBottom(StackFrame*);
 	/**
 	 * @brief Add tokenized program line
-	 * @param num
-	 * @param text
-	 * @param len
+	 * @param num line number
+	 * @param text line body w/o number
+	 * @param len line body length
 	 * @return flag of success
 	 */
 	bool addLine(uint16_t, const char*, uint16_t);
 	// End of program text
 	uint16_t _textEnd;
-	uint16_t _current, _variablesEnd, _arraysEnd, _sp, _jump;
-	bool _jumpFlag;
+	// End of variables area
+	uint16_t _variablesEnd;
+	uint16_t _arraysEnd, _sp;
+	// Current line index
+	uint16_t _current;
+	// Position in current line
 	uint8_t _textPosition;
+	// Jump flag
+	bool _jumpFlag;
+	// Jump pointer
+	uint16_t _jump;
 };
 
 }

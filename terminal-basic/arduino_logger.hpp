@@ -20,7 +20,7 @@
 #ifndef ARDUINO_LOGGER_HPP
 #define ARDUINO_LOGGER_HPP
 
-#include "cps.hpp"
+#include "arduinoext.hpp"
 #include "Stream.h"
 #include "Arduino.h"
 

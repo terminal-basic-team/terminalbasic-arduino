@@ -16,16 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "math.hpp"
 #include <string.h>
 #include <assert.h>
 
-#include <EEPROM.h>
 #include <stdbool.h>
 
-#include "helper.hpp"
-#include <util/crc16.h>
+#include "basic.hpp"
 
+#if USE_SAVE_LOAD
+#include <EEPROM.h>
+#if SAVE_LOAD_CHECKSUM
+#include <util/crc16.h>
+#endif
+#endif // USE_SAVE_LOAD
+
+#include "helper.hpp"
+#include "math.hpp"
 #include "basic_interpreter.hpp"
 #include "basic_program.hpp"
 #include "basic_parser_value.hpp"
@@ -33,6 +39,9 @@
 #include "bytearray.hpp"
 #include "version.h"
 #include "ascii.hpp"
+#if USE_MATRIX
+#include "matrix.hpp"
+#endif
 
 namespace BASIC
 {
@@ -92,25 +101,24 @@ Interpreter::valueFromVar(Parser::Value &v, const char *varName)
 	const Interpreter::VariableFrame *f = getVariable(varName);
 	if (f == NULL)
 		return;
-
 	switch (f->type) {
-	case VF_INTEGER:
+	case Parser::Value::INTEGER:
 		v = f->get<Integer>();
 		break;
 #if USE_LONGINT
-	case VF_LONG_INTEGER:
+	case Parser::Value::LONG_INTEGER:
 		v = f->get<LongInteger>();
 		break;
 #endif
 #if USE_REALS
-	case VF_REAL:
+	case Parser::Value::REAL:
 		v = f->get<Real>();
 		break;
 #endif
-	case VF_BOOLEAN:
+	case Parser::Value::BOOLEAN:
 		v = f->get<bool>();
 		break;
-	case VF_STRING:
+	case Parser::Value::STRING:
 	{
 		v.type = Parser::Value::STRING;
 		Program::StackFrame *fr =
@@ -140,24 +148,21 @@ Interpreter::valueFromArray(Parser::Value &v, const char *name)
 		return false;
 	}
 
+	v.type = f->type;
 	switch (f->type) {
-	case VF_BOOLEAN:
-		v.type = Parser::Value::BOOLEAN;
+	case Parser::Value::BOOLEAN:
 		v.value.boolean = f->get<bool>(index);
 		break;
-	case VF_INTEGER:
-		v.type = Parser::Value::INTEGER;
+	case Parser::Value::INTEGER:
 		v.value.integer = f->get<Integer>(index);
 		break;
 #if USE_LONGINT
-	case VF_LONG_INTEGER:
-		v.type = Parser::Value::LONG_INTEGER;
+	case Parser::Value::LONG_INTEGER:
 		v.value.longInteger = f->get<LongInteger>(index);
 		break;
 #endif
 #if USE_REALS
-	case VF_REAL:
-		v.type = Parser::Value::REAL;
+	case Parser::Value::REAL:
 		v.value.real = f->get<Real>(index);
 		break;
 #endif
@@ -193,7 +198,8 @@ Interpreter::init()
 	print(ProgMemStrings::S_VERSION);
 	print(VERSION, VT100::BRIGHT), newline();
 #if BASIC_MULTITERMINAL
-	print(ProgMemStrings::TERMINAL, NO_ATTR), print(Integer(_termno), BRIGHT),
+	print(ProgMemStrings::TERMINAL, VT100::NO_ATTR),
+	    print(Integer(_termno), VT100::BRIGHT),
 	    _output.print(':'), _output.print(' ');
 #endif
 	print(long(_program.programSize - _program._arraysEnd), VT100::BRIGHT);
@@ -225,7 +231,10 @@ Interpreter::step()
 		// collection input buffer
 	case COLLECT_INPUT:
 		if (readInput())
-			exec();
+			_state = EXEC_INT;
+		break;
+	case EXEC_INT:
+		exec();
 		break;
 	case VAR_INPUT:
 		if (nextInput()) {
@@ -242,19 +251,25 @@ Interpreter::step()
 			_state = VAR_INPUT;
 		}
 		break;
-	case EXECUTE:
+	case EXECUTE: {
 		c = char(ASCII::NUL);
-#ifdef ARDUINO
+#if defined(ARDUINO) || BASIC_MULTITERMINAL
 		if (_input.available() > 0)
 			c = _input.read();
 #endif
-		if (_program._current < _program._textEnd && c != char(ASCII::EOT)) {
-			Program::String *s = _program.current();
-			if (!_parser.parse(s->text + _program._textPosition))
+		Program::String *s = _program.current();
+		if (s != nullptr && c != char(ASCII::EOT)) {
+			bool res;
+			if (!_parser.parse(s->text + _program._textPosition, res))
+				_program.getString();
+			else
+				_program._textPosition += _lexer.getPointer();
+			if (!res)
 				raiseError(STATIC_ERROR);
-			_program.getString();
 		} else
 			_state = SHELL;
+	}
+	// Fall through
 	default:
 		break;
 	}
@@ -264,7 +279,8 @@ void
 Interpreter::exec()
 {
 	_lexer.init(_inputBuffer);
-	if (_lexer.getNext() && (_lexer.getToken() == Token::C_INTEGER)) {
+	if (_inputPosition == 0 && _lexer.getNext() &&
+	    (_lexer.getToken() == Token::C_INTEGER)) {
 		Integer pLine = Integer(_lexer.getValue());
 		uint8_t position = _lexer.getPointer();
 		_lexer.getNext();
@@ -279,9 +295,13 @@ Interpreter::exec()
 			_state = PROGRAM_INPUT;
 		}
 	} else {
-		_state = SHELL;
-		if (!_parser.parse(_inputBuffer))
+		bool res;
+		if (!_parser.parse(_inputBuffer+_inputPosition, res))
+			if (_state == EXEC_INT)
+				_state = SHELL;
+		if (!res)
 			raiseError(STATIC_ERROR);
+		_inputPosition += _lexer.getPointer();
 	}
 }
 
@@ -400,7 +420,7 @@ Interpreter::print(const Parser::Value &v, VT100::TextAttr attr)
 	case Parser::Value::LONG_INTEGER:
 #endif
 	case Parser::Value::INTEGER:
-		_output.print(v);
+		_output.print(v), _output.write(' ');
 		break;
 	case Parser::Value::STRING:
 	{
@@ -439,6 +459,7 @@ Interpreter::print(Lexer &l)
 	if (t <= Token::RPAREN)
 		print(t);
 	else {
+#if OPT == OPT_SPEED
 		switch (t) {
 		case Token::C_INTEGER:
 		case Token::C_REAL:
@@ -459,13 +480,26 @@ Interpreter::print(Lexer &l)
 #if USE_LONGINT
 		case Token::LONGINT_IDENT:
 #endif
-		case Token::BOOL_IDENT:
 		case Token::STRING_IDENT:
+		case Token::BOOL_IDENT:
 			print(l.id(), VT100::C_BLUE);
 			break;
 		default:
 			_output.print('?');
 		}
+#else
+		if (t >= Token::C_INTEGER && t <= Token::C_BOOLEAN)
+			print(l.getValue(), VT100::C_CYAN);
+		else if (t == Token::C_STRING) {
+			AttrKeeper a(*this, VT100::C_MAGENTA);
+			_output.write(uint8_t(ASCII::QUMARK));
+			_output.print(l.id());
+			_output.write(uint8_t(ASCII::QUMARK));
+		} else if (t >= Token::INTEGER_IDENT && t <= Token::BOOL_IDENT)
+			print(l.id(), VT100::C_BLUE);
+		else
+			_output.print('?');
+#endif
 	}
 }
 
@@ -516,7 +550,7 @@ Interpreter::pushReturnAddress(uint8_t textPosition)
 void
 Interpreter::returnFromSub()
 {
-	Program::StackFrame *f = _program.stackFrameByIndex(_program._sp);
+	Program::StackFrame *f = _program.currentStackFrame();
 	if ((f != NULL) && (f->_type == Program::StackFrame::SUBPROGRAM_RETURN)) {
 		_program.jump(f->body.gosubReturn.calleeIndex);
 		_program._textPosition = f->body.gosubReturn.textPosition;
@@ -544,15 +578,18 @@ Interpreter::pushForLoop(const char *varName, uint8_t textPosition,
 		raiseError(DYNAMIC_ERROR, STACK_FRAME_ALLOCATION);
 }
 
-void
+bool
 Interpreter::pushValue(const Parser::Value &v)
 {
 	Program::StackFrame *f = _program.push(Program::StackFrame::
 	    VALUE);
-	if (f != NULL)
+	if (f != NULL) {
 		f->body.value = v;
-	else
+		return true;
+	} else {
 		raiseError(DYNAMIC_ERROR, STACK_FRAME_ALLOCATION);
+		return false;
+	}
 }
 
 void
@@ -569,7 +606,7 @@ Interpreter::pushInputObject(const char *varName)
 bool
 Interpreter::popValue(Parser::Value &v)
 {
-	Program::StackFrame *f = _program.stackFrameByIndex(_program._sp);
+	Program::StackFrame *f = _program.currentStackFrame();
 	if ((f != NULL) && (f->_type == Program::StackFrame::VALUE)) {
 		v = f->body.value;
 		_program.pop();
@@ -583,7 +620,7 @@ Interpreter::popValue(Parser::Value &v)
 bool
 Interpreter::popString(const char *&str)
 {
-	Program::StackFrame *f = _program.stackFrameByIndex(_program._sp);
+	Program::StackFrame *f = _program.currentStackFrame();
 	if ((f != NULL) && (f->_type == Program::StackFrame::STRING)) {
 		str = f->body.string;
 		_program.pop();
@@ -603,7 +640,7 @@ Interpreter::randomize()
 bool
 Interpreter::next(const char *varName)
 {
-	Program::StackFrame *f = _program.stackFrameByIndex(_program._sp);
+	Program::StackFrame *f = _program.currentStackFrame();
 	if ((f != NULL) && (f->_type == Program::StackFrame::FOR_NEXT) &&
 	    (strcmp(f->body.forFrame.varName, varName) == 0)) { // Correct frame
 		f->body.forFrame.currentValue += f->body.forFrame.stepValue;
@@ -623,7 +660,7 @@ Interpreter::next(const char *varName)
 	} else // Incorrect frame
 		raiseError(DYNAMIC_ERROR, INVALID_NEXT);
 
-	return (false);
+	return false;
 }
 
 #if USE_SAVE_LOAD
@@ -848,59 +885,56 @@ void
 Interpreter::set(VariableFrame &f, const Parser::Value &v)
 {
 	switch (f.type) {
-	case VF_BOOLEAN:
+	case Parser::Value::BOOLEAN:
 	{
-
 		union
 		{
 			char *b;
 			bool *i;
-		} _U;
-		_U.b = f.bytes;
-		*_U.i = bool(v);
+		} U;
+		U.b = f.bytes;
+		*U.i = bool(v);
 	}
 		break;
-	case VF_INTEGER:
+	case Parser::Value::INTEGER:
 	{
-
 		union
 		{
 			char *b;
 			Integer *i;
-		} _U;
-		_U.b = f.bytes;
-		*_U.i = Integer(v);
+		} U;
+		U.b = f.bytes;
+		*U.i = Integer(v);
 	}
 		break;
 #if USE_LONGINT
-	case VF_LONG_INTEGER:
+	case Parser::Value::LONG_INTEGER:
 	{
 
 		union
 		{
 			char *b;
 			LongInteger *i;
-		} _U;
-		_U.b = f.bytes;
-		*_U.i = LongInteger(v);
+		} U;
+		U.b = f.bytes;
+		*U.i = LongInteger(v);
 	}
 		break;
 #endif
 #if USE_REALS
-	case VF_REAL:
+	case Parser::Value::REAL:
 	{
-
 		union
 		{
 			char *b;
 			Real *r;
-		} _U;
-		_U.b = f.bytes;
-		*_U.r = Real(v);
+		} U;
+		U.b = f.bytes;
+		*U.r = Real(v);
 	}
 		break;
 #endif
-	case VF_STRING:
+	case Parser::Value::STRING:
 	{
 		Program::StackFrame *fr = _program.currentStackFrame();
 		if (fr == NULL || fr->_type != Program::StackFrame::STRING) {
@@ -916,73 +950,71 @@ Interpreter::set(VariableFrame &f, const Parser::Value &v)
 	}
 }
 
+
 void
 Interpreter::set(ArrayFrame &f, uint16_t index, const Parser::Value &v)
 {
 	switch (f.type) {
-	case VF_BOOLEAN:
+	case Parser::Value::BOOLEAN:
 	{
-
 		union
 		{
 			uint8_t *b;
 			bool *i;
-		} _U;
-		_U.b = f.data();
-		_U.i[index] = bool(v);
+		} U;
+		U.b = f.data();
+		U.i[index] = bool(v);
 	}
 		break;
-	case VF_INTEGER:
+	case Parser::Value::INTEGER:
 	{
-
 		union
 		{
 			uint8_t *b;
 			Integer *i;
-		} _U;
-		_U.b = f.data();
-		_U.i[index] = Integer(v);
+		} U;
+		U.b = f.data();
+		U.i[index] = Integer(v);
 	}
 		break;
 #if USE_LONGINT
-	case VF_LONG_INTEGER:
+	case Parser::Value::LONG_INTEGER:
 	{
-
 		union
 		{
 			uint8_t *b;
 			LongInteger *i;
-		} _U;
-		_U.b = f.data();
-		_U.i[index] = LongInteger(v);
+		} U;
+		U.b = f.data();
+		U.i[index] = LongInteger(v);
 	}
 		break;
 #endif
 #if USE_REALS
-	case VF_REAL:
+	case Parser::Value::REAL:
 	{
-
 		union
 		{
 			uint8_t *b;
 			Real *r;
-		} _U;
-		_U.b = f.data();
-		_U.r[index] = Real(v);
+		} U;
+		U.b = f.data();
+		U.r[index] = Real(v);
 	}
 		break;
 #endif
 	default:
 		raiseError(DYNAMIC_ERROR, INVALID_VALUE_TYPE);
-	};
+	}
 }
+
 
 bool
 Interpreter::readInput()
 {
 	int a = _input.available();
 	if (a <= 0)
-		return (false);
+		return false;
 
 	const uint8_t availableSize = PROGSTRINGSIZE - 1 - _inputPosition;
 	a = min(a, availableSize);
@@ -1005,7 +1037,8 @@ Interpreter::readInput()
 		case char(ASCII::CR):
 			_output.println();
 			_inputBuffer[i] = 0;
-			return (true);
+			_inputPosition = 0;
+			return true;
 		default:
 			// Only acept character if there is room for upcoming
 			// control one (line end or del/bs)
@@ -1015,7 +1048,7 @@ Interpreter::readInput()
 			}
 		}
 	}
-	return (false);
+	return false;
 }
 
 void
@@ -1043,6 +1076,400 @@ Interpreter::write(ProgMemStrings index)
 	_output.print(buf);
 }
 
+#if USE_MATRIX
+void
+Interpreter::zeroMatrix(const char *name)
+{
+	fillMatrix(name, Integer(0));
+}
+
+void
+Interpreter::onesMatrix(const char *name)
+{
+	fillMatrix(name, Integer(1));
+}
+
+void
+Interpreter::identMatrix(const char *name)
+{
+	ArrayFrame *array = _program.arrayByName(name);
+	if (array == nullptr || array->numDimensions != 2)
+		raiseError(DYNAMIC_ERROR, NO_SUCH_ARRAY);
+	else {
+		if (array->dimension[0] != array->dimension[1]) {
+			raiseError(DYNAMIC_ERROR, SQUARE_MATRIX_EXPECTED);
+		} else {
+			for (uint16_t row = 0; row <= array->dimension[0]; ++row) {
+				for (uint16_t column = 0; column <= array->dimension[1];
+				    ++column) {
+					Parser::Value v;
+					if (row == column)
+						v = Integer(1);
+					else
+						v = Integer(0);
+					if (!array->set(row*(array->dimension[1]+1)+column,
+					    v))
+						raiseError(DYNAMIC_ERROR,
+						    INVALID_ELEMENT_INDEX);
+				}
+			}
+		}
+	}
+}
+
+void
+Interpreter::fillMatrix(const char *name, const Parser::Value &v)
+{
+	ArrayFrame *array = _program.arrayByName(name);
+	if (array == nullptr || array->numDimensions != 2)
+		raiseError(DYNAMIC_ERROR, NO_SUCH_ARRAY);
+	else {
+		for (uint16_t index = 0; index<array->numElements(); ++index) {
+			if (!array->set(index, v)) {
+				raiseError(DYNAMIC_ERROR, INVALID_ELEMENT_INDEX);
+				return;
+			}
+		}
+	}
+}
+
+void
+Interpreter::printMatrix(const char *name)
+{
+	ArrayFrame *array = _program.arrayByName(name);
+	if (array == nullptr || array->numDimensions != 2)
+		raiseError(DYNAMIC_ERROR, NO_SUCH_ARRAY);
+	else {
+		for (uint16_t row = 0; row <= array->dimension[0]; ++row) {
+			for (uint16_t column = 0; column <= array->dimension[1];
+			    ++column) {
+				Parser::Value v;
+				if (array->get(row*(array->dimension[1]+1)+column,
+				    v))
+					this->print(v), _output.write(' ');
+				else
+					raiseError(DYNAMIC_ERROR,
+					    INVALID_ELEMENT_INDEX);
+			}
+			this->newline();
+		}
+	}
+}
+
+void
+Interpreter::matrixDet(const char *name)
+{
+	ArrayFrame *array = _program.arrayByName(name);
+	if (array == nullptr)
+		raiseError(DYNAMIC_ERROR, NO_SUCH_ARRAY);
+	else if (array->numDimensions != 2)
+		raiseError(DYNAMIC_ERROR, DIMENSIONS_MISMATCH);
+	else if (array->dimension[0] != array->dimension[1])
+		raiseError(DYNAMIC_ERROR, SQUARE_MATRIX_EXPECTED);
+	else {
+		const uint8_t eSize = Parser::Value::size(array->type);
+		if (eSize == 0)
+			return;
+		uint16_t bufSize = 0;
+		for (uint16_t i=1; i<array->dimension[0]+1; ++i)
+			bufSize += i*i*eSize;
+		if (_program._arraysEnd+bufSize >= _program._sp) {
+			raiseError(DYNAMIC_ERROR, OUTTA_MEMORY);
+			return;
+		}
+		uint8_t *tbuf = reinterpret_cast<uint8_t*>(_program._text+
+		    _program._arraysEnd);
+		_result.type = array->type;
+		switch (array->type) {
+		case Parser::Value::INTEGER: {
+			Integer r;
+			if (!Matrix<Integer>::determinant(
+			    reinterpret_cast<const Integer*>(array->data()),
+			    array->dimension[0]+1, r,
+			    reinterpret_cast<Integer*>(tbuf)))
+				_result = false;
+			_result.value.integer = r;
+		}
+		break;
+#if USE_LONGINT
+		case Parser::Value::LONG_INTEGER:
+			LongInteger r;
+			if (!Matrix<LongInteger>::determinant(
+			    reinterpret_cast<const LongInteger*>(array->data()),
+			    array->dimension[0]+1, r,
+			    reinterpret_cast<LongInteger*>(tbuf)))
+				_result = false;
+			_result.value.longInteger = r;
+#endif
+#if USE_REALS
+		case Parser::Value::REAL: {
+			Real r;
+			if (!Matrix<Real>::determinant(
+			    reinterpret_cast<const Real*>(array->data()),
+			    array->dimension[0]+1, r,
+			    reinterpret_cast<Real*>(tbuf)))
+				_result = false;
+			_result.value.real = r;
+		}
+		break;
+#endif
+		default:
+			_result = false;
+		}
+	}
+}
+
+void
+Interpreter::setMatrixSize(ArrayFrame &array, uint16_t rows, uint16_t columns)
+{
+	const uint16_t oldSize = array.size();
+	array.dimension[0] = rows, array.dimension[1] = columns;
+	const uint16_t newSize = array.size();
+	int32_t delta = newSize - oldSize;
+	const uint16_t aIndex = _program.arrayIndex(&array);
+	if (_program._arraysEnd + delta >= _program._sp) {
+		raiseError(DYNAMIC_ERROR, OUTTA_MEMORY);
+		return;
+	} else {
+		const uint16_t oldIndex = aIndex+oldSize;
+		const uint16_t newIndex = aIndex+newSize;
+		memmove(_program._text + newIndex, _program._text + oldIndex,
+		    _program._arraysEnd-oldIndex);
+		_program._arraysEnd += delta;
+	}
+}
+
+void
+Interpreter::assignMatrix(const char *name, const char *first, const char *second,
+    MatrixOperation_t op)
+{
+	ArrayFrame *array = _program.arrayByName(name);
+	ArrayFrame *arrayFirst = _program.arrayByName(first);
+	
+	if (array == nullptr ||
+	    array->numDimensions != 2 ||
+	    arrayFirst == nullptr ||
+	    arrayFirst->numDimensions != 2) {
+		raiseError(DYNAMIC_ERROR, NO_SUCH_ARRAY);
+		return;
+	}
+	
+	const uint8_t eSize = Parser::Value::size(arrayFirst->type);
+	if (eSize == 0)
+		return;
+	
+	// If first right side operand is not the target mat, resize
+	// target according to source and copy it's data
+	if (array != arrayFirst) {
+		setMatrixSize(*array, arrayFirst->dimension[0],
+		    arrayFirst->dimension[1]);
+		// If matrices are of the same type, simply memcpy
+		// In other case assign members through the Value
+		// converter
+		if (array->type == arrayFirst->type)
+			memcpy(array->data(), arrayFirst->data(), array->dataSize());
+		else {
+			Parser::Value val;
+			for (uint16_t index = 0; index<array->numElements();
+			    ++index) {
+				if (!arrayFirst->get(index, val) ||
+				    !array->set(index, val)) {
+					raiseError(DYNAMIC_ERROR, INTERNAL_ERROR);
+					return;
+				}
+			}
+		}
+	}
+	switch (op) {
+	case MO_NOP: // simple assign, already done
+		break;
+	case MO_SCALE: { // multiply by scalar
+		Parser::Value v;
+		if (!popValue(v)) {
+			raiseError(DYNAMIC_ERROR, INTERNAL_ERROR);
+			return;
+		}
+		Parser::Value elm;
+		for (uint16_t index = 0; index<array->numElements(); ++index) {
+			if (!array->get(index, elm) ||
+			    !array->set(index, elm*=v)) {
+				raiseError(DYNAMIC_ERROR, INVALID_ELEMENT_INDEX);
+				return;
+			}
+		}
+	}
+		break;
+	case MO_TRANSPOSE: { // source mat already have been copied,
+			     // performng in-place transpose
+		const uint16_t s = arrayFirst->dimension[0] *
+		     arrayFirst->dimension[1];
+		switch (array->type) {
+		case Parser::Value::INTEGER:
+			Matrix<Integer>::transpose(
+			    reinterpret_cast<Integer*>(array->data()),
+			    array->dimension[0]+1, array->dimension[1]+1);
+			break;
+#if USE_LONGINT
+		case Parser::Value::LONG_INTEGER:
+			Matrix<LongInteger>::transpose(
+			    reinterpret_cast<LongInteger*>(array->data()),
+			    array->dimension[0]+1, array->dimension[1]+1);
+			break;	
+#endif
+#if USE_REALS
+		case Parser::Value::REAL:
+			Matrix<Real>::transpose(
+			    reinterpret_cast<Real*>(array->data()),
+			    array->dimension[0]+1, array->dimension[1]+1);
+			break;
+		}
+#endif
+		setMatrixSize(*array, arrayFirst->dimension[1],
+		    arrayFirst->dimension[0]);
+	}
+		break;
+	case MO_SUM:
+	case MO_SUB: {
+		ArrayFrame *arraySecond;
+		if (second == nullptr ||
+		    (arraySecond = _program.arrayByName(second)) == nullptr) {
+			raiseError(DYNAMIC_ERROR, NO_SUCH_ARRAY);
+			return;
+		}
+		if (arraySecond->numDimensions != 2 ||
+		    arraySecond->dimension[0] != array->dimension[0] ||
+		    arraySecond->dimension[1] != array->dimension[1]) {
+			raiseError(DYNAMIC_ERROR, DIMENSIONS_MISMATCH);
+			return;
+		}
+		Parser::Value val, valOld;
+		for (uint16_t index = 0; index<array->numElements(); ++index) {
+			if (arraySecond->get(index, val) &&
+			    array->get(index, valOld)) {
+				if (op == MO_SUM)
+					valOld += val;
+				else // MO_SUB
+					valOld -=val;
+				if (array->set(index, valOld))
+					continue;
+			}
+			raiseError(DYNAMIC_ERROR, INTERNAL_ERROR);
+			return;
+		}
+	}
+		break;
+	case MO_MUL: {
+		ArrayFrame *arraySecond;
+		if (second == nullptr ||
+		    (arraySecond = _program.arrayByName(second)) == nullptr ||
+		    arraySecond->type != arrayFirst->type) {
+			raiseError(DYNAMIC_ERROR, NO_SUCH_ARRAY);
+			return;
+		}
+		if (arraySecond->numDimensions != 2 ||
+		    arraySecond->dimension[0] != arrayFirst->dimension[1]) {
+			raiseError(DYNAMIC_ERROR, DIMENSIONS_MISMATCH);
+			return;
+		}
+		const uint16_t r = arrayFirst->dimension[0]+1;
+		const uint16_t c = arraySecond->dimension[1]+1;
+		
+		const uint16_t bufSize = r*c*eSize;
+		if (_program._arraysEnd+bufSize >= _program._sp) {
+			raiseError(DYNAMIC_ERROR, OUTTA_MEMORY);
+			return;
+		}
+		uint8_t *tbuf = reinterpret_cast<uint8_t*>(_program._text+
+		    _program._arraysEnd);
+		switch (arrayFirst->type) {
+		case Parser::Value::INTEGER:
+			Matrix<Integer>::mul(
+			    reinterpret_cast<Integer*>(arrayFirst->data()),
+			    arrayFirst->dimension[0]+1, arrayFirst->dimension[1]+1,
+			    reinterpret_cast<Integer*>(arraySecond->data()),
+			    arraySecond->dimension[0]+1, arraySecond->dimension[1]+1,
+			    reinterpret_cast<Integer*>(tbuf));
+			break;
+#if USE_LONGINT
+		case Parser::Value::LONG_INTEGER:
+			Matrix<LongInteger>::mul(
+			    reinterpret_cast<LongInteger*>(arrayFirst->data()),
+			    arrayFirst->dimension[0]+1, arrayFirst->dimension[1]+1,
+			    reinterpret_cast<LongInteger*>(arraySecond->data()),
+			    arraySecond->dimension[0]+1, arraySecond->dimension[1]+1,
+			    reinterpret_cast<LongInteger*>(tbuf));
+			break;
+#endif
+#if USE_REALS
+		case Parser::Value::REAL:
+			Matrix<Real>::mul(
+			    reinterpret_cast<Real*>(arrayFirst->data()),
+			    arrayFirst->dimension[0]+1, arrayFirst->dimension[1]+1,
+			    reinterpret_cast<Real*>(arraySecond->data()),
+			    arraySecond->dimension[0]+1, arraySecond->dimension[1]+1,
+			    reinterpret_cast<Real*>(tbuf));
+			break;
+#endif
+		default:
+			return;
+		}
+		setMatrixSize(*array, r-1, c-1);
+		memcpy(array->data(), tbuf, bufSize);
+	}
+		return;
+	case MO_INVERT: {
+		if (array->dimension[0] != array->dimension[1]) {
+			raiseError(DYNAMIC_ERROR, DIMENSIONS_MISMATCH);
+			return;
+		}
+		const uint16_t r = array->dimension[0]+1;
+		const uint16_t bufSize = (r+r+r*r)*eSize;
+		if (_program._arraysEnd+bufSize >= _program._sp) {
+			raiseError(DYNAMIC_ERROR, OUTTA_MEMORY);
+			return;
+		}
+		uint8_t *tbuf = reinterpret_cast<uint8_t*>(_program._text+
+		    _program._arraysEnd);
+		bool res = false;
+		switch (array->type) {
+		case Parser::Value::INTEGER:
+			res = Matrix<Integer>::invert(
+			    reinterpret_cast<Integer*>(array->data()),
+			    r, reinterpret_cast<Integer*>(tbuf));
+			break;
+#if USE_LONGINT
+		case Parser::Value::LONG_INTEGER:
+			res = Matrix<LongInteger>::invert(
+			    reinterpret_cast<LongInteger*>(array->data()),
+			    r, reinterpret_cast<LongInteger*>(tbuf));
+			break;
+#endif
+#if USE_REALS
+		case Parser::Value::REAL:
+			res = Matrix<Real>::invert(
+			    reinterpret_cast<Real*>(array->data()),
+			    r, reinterpret_cast<Real*>(tbuf));
+			break;
+#endif
+		default:
+			break;
+		}
+		_result = res;
+	}
+		return;
+	default:
+		return;
+	}
+}
+
+#endif // USE_MATRIX
+
+bool
+Interpreter::pushResult()
+{
+	return pushValue(_result);
+}
+
 void
 Interpreter::print(Token t)
 {
@@ -1051,7 +1478,7 @@ Interpreter::print(Token t)
 	    uint8_t(t)])));
 	if (t < Token::STAR)
 		print(buf, VT100::TextAttr(uint8_t(VT100::BRIGHT) |
-	    uint8_t(VT100::C_GREEN)));
+		    uint8_t(VT100::C_GREEN)));
 	else
 		print(buf);
 }
@@ -1164,28 +1591,28 @@ Interpreter::setVariable(const char *name, const Parser::Value &v)
 		f = reinterpret_cast<VariableFrame*> (_program._text + index);
 
 	uint16_t dist = sizeof(VariableFrame);
-	Type t;
+	Parser::Value::Type t;
 #if USE_LONGINT
 	if (endsWith(name, "%%")) {
-		t = VF_LONG_INTEGER;
+		t = Parser::Value::LONG_INTEGER;
 		dist += sizeof(LongInteger);
 	} else
 #endif
 		if (endsWith(name, '%')) {
-		t = VF_INTEGER;
+		t = Parser::Value::INTEGER;
 		dist += sizeof(Integer);
 	} else if (endsWith(name, '!')) {
-		t = VF_BOOLEAN;
+		t = Parser::Value::BOOLEAN;
 		dist += sizeof(bool);
 	} else if (endsWith(name, '$')) {
-		t = VF_STRING;
+		t = Parser::Value::STRING;
 		dist += STRINGSIZE;
 	} else {
 #if USE_REALS
-		t = VF_REAL;
+		t = Parser::Value::REAL;
 		dist += sizeof(Real);
 #else
-		t = VF_INTEGER;
+		t = Parser::Value::INTEGER;
 		dist += sizeof(Integer);
 #endif
 	}
@@ -1276,17 +1703,15 @@ Interpreter::pushString(const char *str)
 	strcpy(f->body.string, str);
 }
 
-uint16_t
+void
 Interpreter::pushDimension(uint16_t dim)
 {
 	Program::StackFrame *f =
 	    _program.push(Program::StackFrame::ARRAY_DIMENSION);
-	if (f == NULL) {
+	if (f == NULL)
 		raiseError(DYNAMIC_ERROR, STACK_FRAME_ALLOCATION);
-		return 0;
-	}
-	f->body.arrayDimension = dim;
-	return (_program._sp);
+	else
+		f->body.arrayDimension = dim;
 }
 
 void
@@ -1376,37 +1801,109 @@ Interpreter::end()
 uint16_t
 Interpreter::ArrayFrame::size() const
 {
+	// Header with dimensions vector
 	uint16_t result = sizeof (Interpreter::ArrayFrame) +
 	    numDimensions * sizeof (uint16_t);
+	
+	uint16_t mul = dataSize();
+	result += mul;
 
-	uint16_t mul = 1;
+	return (result);
+}
 
-	for (uint8_t i = 0; i < numDimensions; ++i)
-		mul *= dimension[i] + 1;
+uint16_t
+Interpreter::ArrayFrame::dataSize() const
+{
+	uint16_t mul = numElements();
 
 	switch (type) {
-	case VF_INTEGER:
+	case Parser::Value::INTEGER:
 		mul *= sizeof (Integer);
 		break;
 #if USE_LONGINT
-	case VF_LONG_INTEGER:
+	case Parser::Value::LONG_INTEGER:
 		mul *= sizeof (LongInteger);
 		break;
 #endif
 #if USE_REALS
-	case VF_REAL:
+	case Parser::Value::REAL:
 		mul *= sizeof (Real);
 		break;
 #endif
-	case VF_BOOLEAN:
+	case Parser::Value::BOOLEAN:
 		mul *= sizeof (bool);
 		break;
 	default:
-		mul = 1;
+		break;
 	}
-	result += mul;
+	return mul;
+}
 
-	return (result);
+bool
+Interpreter::ArrayFrame::get(uint16_t index, Parser::Value& v) const
+{
+	assert(index < numElements());
+	if (index < numElements()) {
+		switch (type) {
+		case Parser::Value::INTEGER:
+			v = get<Integer>(index);
+			return true;
+#if USE_LONGINT
+		case Parser::Value::LONG_INTEGER:
+			v = get<LongInteger>(index);
+			return true;
+#endif
+#if USE_REALS
+		case Parser::Value::REAL:
+			v = get<Real>(index);
+			return true;
+#endif
+		case Parser::Value::BOOLEAN:
+			v = get<bool>(index);
+			return true;
+		}
+	}
+	return false;
+}
+
+bool
+Interpreter::ArrayFrame::set(uint16_t index, const Parser::Value &v)
+{
+	assert(index < numElements());
+	if (index < numElements()) {
+		switch (type) {
+		case Parser::Value::INTEGER:
+			set(index, Integer(v));
+			return true;
+#if USE_LONGINT
+		case Parser::Value::LONG_INTEGER:
+			set(index, LongInteger(v));
+			return true;
+#endif
+#if USE_REALS
+		case Parser::Value::REAL:
+			set(index, Real(v));
+			return true;
+#endif
+		case Parser::Value::BOOLEAN:
+			set(index, bool(v));
+			return true;
+		}
+	}
+	return false;
+}
+
+uint16_t
+Interpreter::ArrayFrame::numElements() const
+{
+	uint16_t mul = 1;
+	
+	// Every dimension is from 0 to dimension[i], thats why 
+	// it is increased by 1
+	for (uint8_t i = 0; i < numDimensions; ++i)
+		mul *= dimension[i] + 1;
+	
+	return mul;
 }
 
 Interpreter::ArrayFrame *
@@ -1428,25 +1925,25 @@ Interpreter::addArray(const char *name, uint8_t dim,
 	if (f == NULL)
 		f = reinterpret_cast<ArrayFrame*> (_program._text + index);
 
-	Type t;
+	Parser::Value::Type t;
 #if USE_LONGINT
 	if (endsWith(name, "%%")) {
-		t = VF_LONG_INTEGER;
+		t = Parser::Value::LONG_INTEGER;
 		num *= sizeof (LongInteger);
 	} else
 #endif
 		if (endsWith(name, '%')) {
-		t = VF_INTEGER;
+		t = Parser::Value::INTEGER;
 		num *= sizeof (Integer);
 	} else if (endsWith(name, '!')) {
-		t = VF_BOOLEAN;
+		t = Parser::Value::BOOLEAN;
 		num *= sizeof (bool);
 	} else { // real
 #if USE_REALS
-		t = VF_REAL;
+		t = Parser::Value::REAL;
 		num *= sizeof (Real);
 #else  // Integer
-		t = VF_INTEGER;
+		t = Parser::Value::INTEGER;
 		num *= sizeof (Integer);
 #endif
 	}

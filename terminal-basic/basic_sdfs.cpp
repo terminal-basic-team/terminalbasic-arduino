@@ -27,7 +27,7 @@
 namespace BASIC
 {
 
-File SDFSModule::_root;
+SDCard::File SDFSModule::_root;
 
 static const uint8_t sdfsCommands[] PROGMEM = {
 	'D', 'C', 'H', 'A', 'I', 'N'+0x80,
@@ -57,10 +57,10 @@ SDFSModule::SDFSModule()
 void
 SDFSModule::_init()
 {
-	if (!SD.begin())
+	if (!SDCard::SDFS.begin())
 		abort();
 	
-	_root = SD.open("/", FILE_WRITE);
+	_root = SDCard::SDFS.open("/", FILE_WRITE);
 	if (!_root || !_root.isDirectory())
 		abort();
 }
@@ -77,7 +77,7 @@ SDFSModule::directory(Interpreter &i)
 	i.print(buf);
 	i.newline();
 	Integer index = 0;
-	for (File ff = _root.openNextFile(); ff; ff = _root.openNextFile()) {
+	for (SDCard::File ff = _root.openNextFile(); ff; ff = _root.openNextFile()) {
 		i.print(++index);
 		i.print('\t');
 		i.print(ff.name());
@@ -103,7 +103,7 @@ SDFSModule::scratch(Interpreter &i)
 
 	char ss[16];
 	if (getFileName(i, ss)) {
-		SD.remove(ss);
+		SDCard::SDFS.remove(ss);
 		return (true);
 	} else
 		return (false);
@@ -116,7 +116,7 @@ SDFSModule::dchain(Interpreter &i)
 	if (!getFileName(i, ss))
 		return false;
 	
-	File f = SD.open(ss);
+	SDCard::File f = SDCard::SDFS.open(ss);
 	if (!f)
 		return false;
 	
@@ -130,12 +130,12 @@ SDFSModule::dchain(Interpreter &i)
 bool
 SDFSModule::dsave(Interpreter &i)
 {
-	File f;
+	SDCard::File f;
 	{
 		char ss[16];
 		if (getFileName(i, ss))
-			SD.remove(ss);
-		f = SD.open(ss, FILE_WRITE);
+			SDCard::SDFS.remove(ss);
+		f = SDCard::SDFS.open(ss, FILE_WRITE);
 	}
 	if (!f)
 		return (false);
@@ -175,7 +175,7 @@ SDFSModule::dsave(Interpreter &i)
 }
 
 bool
-SDFSModule::_loadText(File &f, Interpreter &i)
+SDFSModule::_loadText(SDCard::File &f, Interpreter &i)
 {
 	while (true) {
 		char buf[PROGSTRINGSIZE] = {0, };
@@ -207,7 +207,7 @@ SDFSModule::dload(Interpreter &i)
 	if (!getFileName(i, ss))
 		return false;
 	
-	File f = SD.open(ss);
+	SDCard::File f = SDCard::SDFS.open(ss);
 	if (!f)
 		return false;
 	
@@ -224,11 +224,11 @@ SDFSModule::header(Interpreter &i)
 
 	char ss[16];
 	_root.rewindDirectory();
-	for (File ff = _root.openNextFile(FILE_WRITE); ff;
+	for (SDCard::File ff = _root.openNextFile(FILE_WRITE); ff;
 	    ff = _root.openNextFile(FILE_WRITE)) {
 		ss[0] = '/'; strcpy(ss+1, ff.name());
 		ff.close();
-		if (!SD.remove(ss))
+		if (!SDCard::SDFS.remove(ss))
 			return (false);
 	}
 	return (true);
@@ -245,7 +245,7 @@ SDFSModule::getFileName(Interpreter &i, char ss[])
 	strcpy(ss + 1, s);
 	strcpy(ss + len + 1, ".BAS");
 
-	return (SD.exists(ss));
+	return (SDCard::SDFS.exists(ss));
 }
 
 }

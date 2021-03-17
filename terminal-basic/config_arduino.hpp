@@ -27,15 +27,15 @@
 #define USE_REALS            1 // Real arithmetics
 #define USE_STRINGOPS        1 // Basic string operations (concatenation and comparision)
 #define USE_LONGINT          0 // Long integer support
-#define USE_DUMP             1 // DUMP command support
-#define USE_RANDOM           1 // USE RND and RANDOMIZE
+#define USE_DUMP             0 // DUMP command support
+#define USE_RANDOM           1 // Use RND and RANDOMIZE
 #define CLEAR_PROGRAM_MEMORY 1 // Clear program memory with 0xFF on NEW
-#define USE_MATRIX           0 // Matrix operations
+#define USE_MATRIX           1 // Matrix operations
 #define USE_TEXTATTRIBUTES   1 // Use vt100 text attributes
 #if USE_TEXTATTRIBUTES
 #define USE_COLORATTRIBUTES  1 // Use vt100 color attributes
 #endif
-#define USE_EXTEEPROM        0 // External EEPROM functions module
+#define USE_EXTEEPROM        1 // External EEPROM functions module
 #if USE_EXTEEPROM
 #define EXTEEPROM_SIZE    32768 // Size in bytes
 #endif
@@ -63,37 +63,43 @@
 
 #define OPT_SPEED     1
 #define OPT_SIZE      2
-#define OPT           OPT_SPEED
+#define OPT           OPT_SIZE
 
 /*
  * Input and output for single terminal mode
  */
 
 // Input variants
-#define SERIAL_I 0 // SerialL input
-#define SERIAL3_I 1 // SerialL3 input
+#define SERIAL_I  0 // Serial input
+#define SERIALL_I 1 // SerialL input
+#define SERIAL3_I 2 // SerialL3 input
 
 // Output variants
 #define SERIAL_O  0 // SerialL output
-#define SERIAL3_O 1 // SerialL3 output
-#define UTFT_O    2 // UTFT output
-#define TVOUT_O   3 // TVout output
+#define SERIALL_O 1 // SerialL output
+#define SERIAL3_O 2 // SerialL3 output
+#define UTFT_O    3 // UTFT output
+#define TVOUT_O   4 // TVout output
 
-// Input select (SERIAL)
-#define S_INPUT SERIAL_I
+// Input select 
+#define S_INPUT SERIALL_I
 
 // Output select
-#define S_OUTPUT SERIAL_O
+#define S_OUTPUT SERIALL_O
 
 #define USEUTFT		          0
 #define USETVOUT	          0
 
 #if S_INPUT == SERIAL_I
+#define SERIAL_PORT Serial
+#elif S_INPUT == SERIALL_I
 #define SERIAL_PORT SerialL
 #elif S_INPUT == SERIAL3_I
 #define SERIAL_PORT SerialL3
 #endif
 #if S_OUTPUT == SERIAL_O
+#define SERIAL_PORT Serial
+#elif S_OUTPUT == SERIALL_O
 #define SERIAL_PORT SerialL
 #elif S_OUTPUT == SERIAL3_O
 #define SERIAL_PORT SerialL3
@@ -103,15 +109,18 @@
 #elif S_OUTPUT == TVOUT_O
 #undef USETVOUT
 #define USETVOUT	         1
-#define TVOUT_HORIZ	240
-#define TVOUT_VERT	192
 #endif
 
 // Use multiterminal mode
 #define BASIC_MULTITERMINAL       0
+#if BASIC_MULTITERMINAL
+#define SERIAL_PORT1 SerialL1
+#define SERIAL_PORT2 SerialL2
+#define SERIAL_PORT3 SerialL3
+#endif
 
 // Use external memory
-#define USE_EXTMEM                0
+#define USE_EXTMEM                1
 #if USE_EXTMEM
 #define EXTMEM_ADDRESS 0x8000
 #define EXTMEM_SIZE    32768
@@ -119,8 +128,9 @@
 
 namespace BASIC
 {
+
 // Max size of the program line
-const uint8_t PROGSTRINGSIZE = 73;
+const uint8_t PROGSTRINGSIZE = 65;
 
 // Number of bytes for program text, variables and stack
 #if USE_EXTMEM
@@ -128,17 +138,19 @@ const uint16_t PROGRAMSIZE = EXTMEM_SIZE;
 #elif defined (__AVR_ATmega1284__) || defined (__AVR_ATmega1284P__)
 const uint16_t PROGRAMSIZE = 14848;
 #elif defined (__AVR_ATmega2560__)
-const uint16_t PROGRAMSIZE = 4096;
+const uint16_t PROGRAMSIZE = 6144;
 #elif defined (__AVR_ATmega128__) || defined (__AVR_ATmega128A__)
 const uint16_t PROGRAMSIZE = 3072;
 #elif defined (__AVR_ATmega328__) || defined (__AVR_ATmega328P__)
 const uint16_t PROGRAMSIZE = 1024;
 #elif defined (__AVR_ATmega168__) || defined (__AVR_ATmega168P__)
 const uint16_t PROGRAMSIZE = 384;
+#else
+const uint16_t PROGRAMSIZE = 1024;
 #endif // USE_EXTMEM
 
 // Max size of the string constants/variables
-const uint8_t STRINGSIZE = 65;
+const uint8_t STRINGSIZE = 33;
 
 // Number of characters in variable name
 const uint8_t VARSIZE = 5;
