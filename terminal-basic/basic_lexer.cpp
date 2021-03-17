@@ -327,7 +327,7 @@ static const uint8_t tokenTable[] PROGMEM = {
 #if USE_DUMP
 	'A', 'R', 'R', 'A', 'Y', 'S'+0x80, // 1
 #endif
-	'B', 'A', 'S', 'E'+0x80,           // 2
+//	'B', 'A', 'S', 'E'+0x80,           // 2
 #if USE_SAVE_LOAD
 	'C', 'H', 'A', 'I', 'N'+0x80,      // 3
 #endif
@@ -343,7 +343,9 @@ static const uint8_t tokenTable[] PROGMEM = {
 #if USE_DATA
 	'D', 'A', 'T', 'A'+0x80,           // 5
 #endif
+#if USE_DEFFN
 	'D', 'E', 'F'+0x80,                // 6
+#endif
 #if USE_DELAY
 	'D', 'E', 'L', 'A', 'Y'+0x80,      // 7
 #endif
@@ -391,7 +393,7 @@ static const uint8_t tokenTable[] PROGMEM = {
 	'N', 'E', 'X', 'T'+0x80,           // 22
 	'N', 'O', 'T'+0x80,
 	'O', 'N'+0x80,                     // 23
-	'O', 'P', 'T', 'I', 'O', 'N'+0x80, // 24
+//	'O', 'P', 'T', 'I', 'O', 'N'+0x80, // 24
 	'O', 'R'+0x80,
 	'P', 'R', 'I', 'N', 'T'+0x80,      // 25
 #if USE_RANDOM

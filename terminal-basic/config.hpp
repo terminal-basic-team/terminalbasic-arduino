@@ -52,7 +52,7 @@ namespace BASIC
 /*
  * Mathematical functions support
  */
-#define USEMATH 	        1
+#define USEMATH                 1
 
 #if USEMATH
 /*
@@ -62,7 +62,7 @@ namespace BASIC
 /*
  * ACS ASN ATN
  */
-#define M_REVERSE_TRIGONOMETRIC	0
+#define M_REVERSE_TRIGONOMETRIC 0
 /*
  * CBR (cubic root) ...
  */
@@ -73,7 +73,7 @@ namespace BASIC
 
 // Use string functions and operations
 #define USE_STRINGOPS      1
-	
+
 #if USE_STRINGOPS
 // GET$ function, returns string from last pressed key symbol
 #define USE_GET            1
@@ -92,7 +92,7 @@ namespace BASIC
 /*
  * Use >< as not-equals operator (with default <>)
  */
-#define CONF_USE_ALTERNATIVE_NE 0
+#define CONF_USE_ALTERNATIVE_NE 1
 /*
  * Support of 4-byte integer datatype
  * Functions, variables and arrays of long integer type ends with double % mark
@@ -114,18 +114,22 @@ namespace BASIC
 /*
  * Support of Darthmouth BASIX-style matrix operations
  */
-#define USE_MATRIX           1
+#define USE_MATRIX           0
 /**
  * Support of DATA/READ statements
  */
 #define USE_DATA             0
+/*
+ * Support of DEF FN construct
+ */
+#define USE_DEFFN            0
 /*
  * Use vt100 text attributes
  */
 #define USE_TEXTATTRIBUTES   1
 #if USE_TEXTATTRIBUTES
 /*
- * Use vt100 color attributes
+ * Use ANSI color attributes
  */
 #define USE_COLORATTRIBUTES  1
 /*
@@ -134,28 +138,42 @@ namespace BASIC
 #define CONF_USE_SPC_PRINT_COM  1
 #endif // USE_TEXTATTRIBUTES
 
-#define USE_SAVE_LOAD        1 // SAVE, LOAD and CHAIN commands support
+/*
+ * SAVE, LOAD and CHAIN commands support
+ */
+#define USE_SAVE_LOAD        1
 #if USE_SAVE_LOAD
-#define SAVE_LOAD_CHECKSUM   1 // Compute checksums while SAVE, LOAD and CHAIN
+// Compute checksums while SAVE, LOAD and CHAIN
+#define SAVE_LOAD_CHECKSUM   1
 #endif // USE_SAVE_LOAD
 /*
  * STOP and CONTINUE commands support
  */
 #define USESTOPCONT       1
-#define AUTOCAPITALIZE    0 // Convert all input to upper register
+// Convert all input to upper register
+#define AUTOCAPITALIZE    0
 
-#define OPT_SPEED     1
-#define OPT_SIZE      2
-#define OPT           OPT_SIZE
+/*
+ * C++ level code optimisation mode
+ */
+#define OPT_SPEED     1 // Extensive use of switch/case constructs
+#define OPT_SIZE      2 // Use cascade of if/else if instead of switch/case
+#define OPT           OPT_SIZE // Selected mode
 
-#define USESD         0 // SDcard module
+/*
+ * SDcard module
+ */
+#define USESD         0
 
-#define CONF_MODULE_ARDUINOIO      1 // Arduino IO module
+// Arduino IO module
+#define CONF_MODULE_ARDUINOIO      1
 #if CONF_MODULE_ARDUINOIO
+// TONE command support
 #define CONF_MODULE_ARDUINOIO_TONE 1
 #endif // CONF_MODULE_ARDUINOIO
 
-#define USE_EXTEEPROM    0 // External EEPROM functions module
+// External EEPROM functions module
+#define USE_EXTEEPROM    0
 #if USE_EXTEEPROM
 /*
  * Size in bytes
@@ -163,20 +181,23 @@ namespace BASIC
 #define EXTEEPROM_SIZE   32768
 #endif // USE_EXTEEPROM
 
+/*
+ * Structured loop support
+ */
 #define USE_DOLOOP       0
 /*
  * Indention of the loop bodies
  */
 #define LOOP_INDENT      1
-
+/*
+ * Indention of the line numbers in LIST output
+ */
 #define LINE_NUM_INDENT  1
-
 /*
  * GFX module
  */
 #define USE_GFX          0
-    
-    
+
 /*
  * Input and output for single terminal mode
  */
@@ -184,21 +205,22 @@ namespace BASIC
 // Input variants
 #define SERIAL_I    1  // Serial input
 #define SERIAL1_I   2  // Serial1 input
-#define SERIALL_I   3  // SerialL input
-#define SERIALL1_I  4  // SerialL1 input
-#define SERIALL2_I  5  // SerialL2 input
-#define SERIALL3_I  6  // SerialL3 input
+#define SERIALL_I   3  // SerialL input (non-buffering, interrupt-free)
+#define SERIALL1_I  4  // SerialL1 input (non-buffering, interrupt-free)
+#define SERIALL2_I  5  // SerialL2 input (non-buffering, interrupt-free)
+#define SERIALL3_I  6  // SerialL3 input (non-buffering, interrupt-free)
 #define PS2UARTKB_I 7  // PS/2 keyboard through USART
+#define SDL_I       8  // SDL input on PC
 
 // Output variants
 #define SERIAL_O   1 // Serial output
 #define SERIAL1_O  2 // Serial1 output
-#define SERIALL_O  3 // SerialL output
-#define SERIALL1_O 4 // SerialL1 output
-#define SERIALL2_O 5 // SerialL2 output
-#define SERIALL3_O 6 // SerialL3 output
-#define UTFT_O     7 // UTFT output
-#define TVOUT_O    8 // TVout output
+#define SERIALL_O  3 // SerialL output (non-buffering, interrupt-free)
+#define SERIALL1_O 4 // SerialL1 output (non-buffering, interrupt-free)
+#define SERIALL2_O 5 // SerialL2 output (non-buffering, interrupt-free)
+#define SERIALL3_O 6 // SerialL3 output (non-buffering, interrupt-free)
+#define UTFT_O     7 // UTFT library output
+#define TVOUT_O    8 // TVoutEx library output
 	#define TVOUT_HORIZ 240
 	#define TVOUT_VERT 192
 
@@ -208,7 +230,7 @@ namespace BASIC
 const uint8_t PROGSTRINGSIZE = 73;
 
 // Max size of the string constants/variables
-const uint8_t STRINGSIZE = 65;
+const uint8_t STRINGSIZE = 73;
 
 // Number of characters in variable name
 const uint8_t VARSIZE = 5;

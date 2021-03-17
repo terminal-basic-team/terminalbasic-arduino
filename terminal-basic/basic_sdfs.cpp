@@ -23,7 +23,6 @@
 #include "basic_program.hpp"
 #include <assert.h>
 
-
 namespace BASIC
 {
 
@@ -92,7 +91,7 @@ SDFSModule::directory(Interpreter &i)
 		i.newline();
 		ff.close();
 	}
-	return (true);
+	return true;
 }
 
 bool
@@ -138,20 +137,31 @@ SDFSModule::dsave(Interpreter &i)
 		f = SDCard::SDFS.open(ss, FILE_WRITE);
 	}
 	if (!f)
-		return (false);
+		return false;
+	
 	i._program.reset();
 	Lexer lex;
-	for (Program::String *s = i._program.getString(); s != NULL;
+	for (Program::String *s = i._program.getString(); s != nullptr;
 	    s = i._program.getString()) {
 		f.print(s->number);
 		lex.init(s->text);
 		while (lex.getNext()) {
 			f.write(' ');
 			Token t = lex.getToken();
-			if (t <= Token::RPAREN) {
+			if (t < Token::STAR) {
+				char buf[16];
+				const uint8_t *res = Lexer::getTokenString(t,
+				    reinterpret_cast<uint8_t*>(buf));
+				if (res != nullptr)
+					f.print(buf);
+				else
+					f.print("TOKEN{"), f.print(uint16_t(t)),
+					    f.print('}');
+			} else if (t <= Token::RPAREN) {
 				char buf[16];
 				strcpy_P(buf, (PGM_P)pgm_read_word(
-					&(Lexer::tokenStrings[uint8_t(t)])));
+				    &(Lexer::tokenStrings[uint8_t(t)-
+				    uint8_t(Token::STAR)])));
 				f.print(buf);
 				if (t == Token::KW_REM) {
 					f.write(' ');
@@ -171,7 +181,7 @@ SDFSModule::dsave(Interpreter &i)
 		f.print('\n');
 	}
 	f.close();
-	return (true);
+	return true;
 }
 
 bool
@@ -222,7 +232,7 @@ bool
 SDFSModule::header(Interpreter &i)
 {
 	if (!i.confirm())
-		return (true);
+		return true;
 
 	char ss[16];
 	_root.rewindDirectory();
@@ -233,7 +243,7 @@ SDFSModule::header(Interpreter &i)
 		if (!SDCard::SDFS.remove(ss))
 			return (false);
 	}
-	return (true);
+	return true;
 }
 
 bool
@@ -247,7 +257,7 @@ SDFSModule::getFileName(Interpreter &i, char ss[])
 	strcpy(ss + 1, s);
 	strcpy(ss + len + 1, ".BAS");
 
-	return (SDCard::SDFS.exists(ss));
+	return SDCard::SDFS.exists(ss);
 }
 
 }

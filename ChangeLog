@@ -1,3 +1,8 @@
+r1.1-beta1 (17.10.2017) - Release, dedicated to the International Day for the Eradication of Poverty
+
+  * Fix bug in saving the program to SD card
+  * Add SDL-based emulator and autotools linux package
+
 r1.1-alpha2 (03.10.2017) - Release, dedicated to The International Day of Non-Violence
 
   * Netbeans project updated for usage of Arduino IDE 1.8.4

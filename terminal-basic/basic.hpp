@@ -45,6 +45,8 @@
 #elif S_INPUT == PS2UARTKB_I
 #undef USEPS2USARTKB
 #define USEPS2USARTKB     1
+#elif S_INPUT == SDL_I
+    #define USE_SDL_ISTREAM 1
 #endif
 #if S_OUTPUT == SERIAL_O
 #define SERIAL_PORT Serial
@@ -100,7 +102,7 @@ enum class Token : uint8_t
 #if USE_DUMP
 	KW_ARRAYS,     // 2
 #endif
-	KW_BASE,       // 3
+//	KW_BASE,       // 3
 #if USE_SAVE_LOAD
 	COM_CHAIN,     // 4
 #endif
@@ -116,7 +118,9 @@ enum class Token : uint8_t
 #if USE_DATA
 	KW_DATA,       // 8
 #endif
+#if USE_DEFFN
 	KW_DEF,        // 9
+#endif
 #if USE_DELAY
 	COM_DELAY,     // 10
 #endif
@@ -164,7 +168,7 @@ enum class Token : uint8_t
 	KW_NEXT,       // 30
 	OP_NOT,        // 31
 	KW_ON,         // 32
-	KW_OPTION,     // 33
+//	KW_OPTION,     // 33
 	OP_OR,         // 34
 	KW_PRINT,      // 35
 #if USE_RANDOM

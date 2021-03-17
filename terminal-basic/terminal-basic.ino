@@ -61,6 +61,10 @@
 #include "basic_gfx.hpp"
 #endif
 
+#if USE_SDL_ISTREAM
+#include "sdlstream.hpp"
+#endif
+
 /**
  * Instantiating modules
  */
@@ -98,6 +102,10 @@ static PS2UARTKeyboardStream ps2usartStream;
 static BASIC::GFXModule gfxModule;
 #endif
 
+#if USE_SDL_ISTREAM
+static SDLStream sdlStream;
+#endif
+
 #if BASIC_MULTITERMINAL
 static BASIC::Interpreter basic(SERIAL_PORT, SERIAL_PORT, BASIC::PROGRAMSIZE / 5);
 #ifdef HAVE_HWSERIAL1
@@ -117,7 +125,11 @@ static BASIC::Interpreter basic(ps2usartStream, tvoutPrint, BASIC::PROGRAMSIZE);
 #elif USEPS2USARTKB
 static BASIC::Interpreter basic(ps2usartStream, SERIAL_PORT, BASIC::PROGRAMSIZE);
 #elif USETVOUT
+#if USE_SDL_ISTREAM
+static BASIC::Interpreter basic(sdlStream, tvoutPrint, BASIC::PROGRAMSIZE);
+#else
 static BASIC::Interpreter basic(SERIAL_PORT, tvoutPrint, BASIC::PROGRAMSIZE);
+#endif // USE_SDL_ISTREAM
 #else
 static BASIC::Interpreter basic(SERIAL_PORT, SERIAL_PORT, BASIC::PROGRAMSIZE);
 #endif // USEUTFT
@@ -138,8 +150,8 @@ setup()
 	SERIAL_PORT.begin(115200);
 #endif
 #if USETVOUT
+	tvOut.selectFont(Font6x8_cyr);
 	tvOut.begin(PAL, TVOUT_HORIZ, TVOUT_VERT, tvOutBuf);
-        tvOut.selectFont(Font6x8_cyr);
 #endif
 #if USEPS2USARTKB
         ps2usartStream.begin();
@@ -147,6 +159,9 @@ setup()
 #if USEUTFT
 	utftPrint.begin();
 #endif
+#if USE_SDL_ISTREAM
+	sdlStream.init();
+#endif	
 	
 #if BASIC_MULTITERMINAL
 #ifdef HAVE_HWSERIAL1

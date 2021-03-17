@@ -92,7 +92,7 @@ Program::stringByIndex(uint16_t index) const
 Program::String*
 Program::lineByNumber(uint16_t number, uint16_t index)
 {
-	Program::String *result = NULL;
+	Program::String *result = nullptr;
 
 	if (index <= _textEnd) {
 		_current = index;
@@ -176,12 +176,12 @@ Program::newProg()
 #endif
 }
 
-VariableFrame *
+VariableFrame*
 Program::variableByName(const char *name)
 {
 	uint16_t index = _textEnd;
 
-	for (VariableFrame *f = variableByIndex(index); f != NULL;
+	for (VariableFrame *f = variableByIndex(index); f != nullptr;
 	    f = variableByIndex(index)) {
 		int8_t res = strcmp(name, f->name);
 		if (res == 0) {
@@ -220,7 +220,7 @@ Program::push(StackFrame::Type t)
 
 	_sp -= StackFrame::size(t);
 	StackFrame *f = stackFrameByIndex(_sp);
-	if (f != NULL)
+	if (f != nullptr)
 		f->_type = t;
 	return f;
 }
@@ -251,7 +251,7 @@ void
 Program::pushBottom(StackFrame *f)
 {
 	StackFrame *newFrame = this->currentStackFrame();
-	if ((newFrame == NULL) || (newFrame->_type != f->_type)) {
+	if ((newFrame == nullptr) || (newFrame->_type != f->_type)) {
 		newFrame = this->push(f->_type);
 		memcpy(newFrame, f, StackFrame::size(f->_type));
 	} else {
@@ -403,7 +403,7 @@ Program::addLine(uint16_t num, const char *text, uint16_t len)
 	if (_textEnd == 0) // First string insertion
 		return insert(num, text, len);
 
-	const uint16_t strLen = sizeof (String) + len;
+	const uint16_t strLen = sizeof(String) + len;
 	// Iterate over
 	String *cur;
 	for (cur = current(); _current < _textEnd; cur = current()) {
@@ -435,7 +435,7 @@ bool
 Program::insert(uint16_t num, const char *text, uint8_t len)
 {
 	assert(len <= PROGSTRINGSIZE);
-	const uint8_t strLen = sizeof (String) + len;
+	const uint8_t strLen = sizeof(String) + len;
 
 	if (_arraysEnd + strLen >= _sp)
 		return false;

@@ -25,8 +25,24 @@
 
 #include "HardwareSerial.h"
 
-#define SERIAL_8N1 0x06
+#ifdef ARDUINO_ARCH_SAM
 
+typedef HardwareSerial SerialLight;
+
+#define SerialL Serial;
+#ifdef HAVE_HWSERIAL1
+#define SerialL1 Serial1;
+#endif
+#ifdef HAVE_HWSERIAL2
+#define SerialL2 Serial2;
+#endif
+#ifdef HAVE_HWSERIAL3
+#define SerialL3 Serial3;
+#endif
+
+#elif ARDUINO_ARCH_AVR
+
+#define SERIAL_8N1 0x06
 class SerialLight : public Stream
 {
 public:
@@ -67,6 +83,8 @@ extern SerialLight SerialL2;
 #endif
 #ifdef HAVE_HWSERIAL3
 extern SerialLight SerialL3;
+#endif
+
 #endif
 
 #endif

@@ -74,14 +74,14 @@ ArduinoIO::ArduinoIO()
 bool
 ArduinoIO::func_aread(Interpreter &i)
 {
-	return (general_func(i, aread_r));
+	return general_func(i, aread_r);
 }
 #endif
 
 bool
 ArduinoIO::func_aread_int(Interpreter &i)
 {
-	return (general_func(i, aread_i));
+	return general_func(i, aread_i);
 }
 
 bool
@@ -91,9 +91,9 @@ ArduinoIO::func_dread(Interpreter &i)
 	if (getIntegerFromStack(i, v)) {
 		pinMode(v, INPUT);
 		i.pushValue(bool(digitalRead(v)));
-		return (true);
+		return true;
 	} else
-		return (false);
+		return false;
 }
 
 bool

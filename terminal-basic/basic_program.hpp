@@ -144,7 +144,7 @@ public:
 	 */
 	void clearProg();
 	/**
-	 * @brief Move program state (variables and arrays to dest)
+	 * @brief Move program state (variables and arrays) to dest
 	 * @param dest New Data start
 	 */
 	void moveData(uint16_t);
