@@ -1329,9 +1329,10 @@ Interpreter::addArray(const char *name, uint8_t dim,
 #if USE_REALS
 		t = VF_REAL;
 		num *= sizeof (Real);
-#endif		// Integer
+#else		// Integer
 		t = VF_INTEGER;
 		num *= sizeof (Integer);
+#endif
 	}
 	
 	size_t dist = sizeof (ArrayFrame) + sizeof (size_t) * dim + num;
