@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <inttypes.h>
 
-#include "cps.hpp"
+#include "arduinoext.hpp"
 #include "basic.hpp"
 #include "basic_internalfuncs.hpp"
 
@@ -52,7 +52,7 @@ public:
 		STRING_OVERFLOW = 6
 	};
 	
-	class CPS_PACKED Value;
+	class EXT_PACKED Value;
 	/**
 	 * @brief constructor
 	 * @param lexer Lexical analyzer object refertence
@@ -63,9 +63,10 @@ public:
 	/**
 	 * @brief Parse a text string
 	 * @param str string to parse
-	 * @return successfull parsing flag
+	 * @param ok successfull parsing flag
+	 * @return end of parsed string
 	 */
-	bool parse(const char*);
+	bool parse(const char*, bool&);
 	
 	void stop();
 	/**
@@ -86,7 +87,7 @@ private:
 	{
 		SCAN = 0, EXECUTE
 	};
-	bool fOperators();
+	bool fOperators(bool&);
 	bool fOperator();
 	bool fImplicitAssignment(char*);
 	bool fPrintList();
@@ -108,6 +109,8 @@ private:
 	bool fIdentifierExpr(const char*, Value&);
 #if USE_MATRIX
 	bool fMatrixOperation();
+	bool fMatrixPrint();
+	bool fMatrixExpression(const char*);
 #endif
 	
 	// last static semantic error

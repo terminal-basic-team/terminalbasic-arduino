@@ -20,10 +20,31 @@
 #include "bytearray.hpp"
 
 #include "Print.h"
+#include "ascii.hpp"
+#include <stdlib.h>
+
+ByteArray::ByteArray() :
+_data(nullptr), _size(0), _ownsData(false)
+{
+}
 
 ByteArray::ByteArray(const uint8_t *data, size_t size) :
-_data(data), _size(size)
+_data(const_cast<uint8_t*>(data)), _size(size), _ownsData(false)
 {
+}
+
+void
+ByteArray::createData()
+{
+	if (_ownsData && _data != nullptr)
+		free(_data);
+	
+	if (_size == 0) {
+		_data = nullptr;
+		return;
+	}
+	
+	_data = reinterpret_cast<uint8_t*>(malloc(_size));
 }
 
 size_t
@@ -36,46 +57,38 @@ ByteArray::printTo(Print& p) const
 		// Leading zeros of the absolute address
 		size_t addr = i + uintptr_t(data());
 		uint8_t digits;
-		/*for (digits = 0; addr > 15; addr >>= 4, ++digits);
-		while (++digits < sizeof(intptr_t)*2)
-			p.print('0');
 		
-		p.print(i + intptr_t(data()), HEX), p.print('(');
-		*/
 		// Leading zeros of the relative address
 		addr = i;
 		for (digits = 0; addr > 15; addr >>= 4, ++digits);
 		while (++digits < sizeof(intptr_t)*2)
 			p.print('0');
 		
-		p.print(i, HEX)/*, p.print(')')*/, p.print(":\t");
+		p.print(i, HEX), p.print(':');
 		size_t j;
 		for (j = 0; j < 8; ++j, ++ii) {
 			if (ii >= size())
 				break;
 			uint8_t c = data()[ii];
-			if (c > 0x0F) {
-				res += p.print(' ');
-				res += p.print(c, 16);
-			} else {
-				res += p.print(' ');
+			res += p.print(char(ASCII::SPACE));
+			if (c < 0x10)
 				res += p.print('0');
-				res += p.print(c, 16);
-			}
+			res += p.print(c, HEX);
 		}
-		for (; j < 8; ++j)
-			res += p.print("   ");
-		res += p.print('\t');
-		for (size_t j = 0; j < 8; ++j, ++i) {
+		j*=3;
+		for (; j < 8*3; ++j)
+			res += p.print(char(ASCII::SPACE));
+		res += 2; p.print("  ");
+		for (j = 0; j < 8; ++j, ++i) {
 			if (i >= size())
 				break;
-			const char c = ((const char*) data())[i];
+			const signed char c = ((const signed char*)data())[i];
 			if (c < ' ')
 				res += p.print('.');
 			else
-				res += p.print(c);
+				res += p.print((char)c);
 		}
 		res += p.println();
 	}
-	return (res);
+	return res;
 }

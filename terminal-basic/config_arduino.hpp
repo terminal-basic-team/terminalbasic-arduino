@@ -16,99 +16,58 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file config_arduino.hpp
+ * @brief Configuration parameters, specific for Arduino builds
+ */
+
 #ifndef CONFIG_ARDUINO_HPP
 #define CONFIG_ARDUINO_HPP
 
-#include <stdint.h>
+#include "config.hpp"
 
 /**
- * Paraeters
+ * Parameters
  */
-#define USE_REALS            1 // Real arithmetics
-#define USE_STRINGOPS        1 // Basic string operations (concatenation and comparision)
-#define USE_LONGINT          0 // Long integer support
-#define USE_DUMP             1 // DUMP command support
-#define USE_RANDOM           1 // USE RND and RANDOMIZE
-#define CLEAR_PROGRAM_MEMORY 1 // Clear program memory with 0xFF on NEW
-#define USE_MATRIX           0 // Matrix operations
-#define USE_TEXTATTRIBUTES   1 // Use vt100 text attributes
-#if USE_TEXTATTRIBUTES
-#define USE_COLORATTRIBUTES  1 // Use vt100 color attributes
-#endif
-#define USE_EXTEEPROM        0 // External EEPROM functions module
-#if USE_EXTEEPROM
-#define EXTEEPROM_SIZE    32768 // Size in bytes
-#endif
-
-#define USE_SAVE_LOAD        1 // SAVE, LOAD and CHAIN commands support
-#if USE_SAVE_LOAD
-#define SAVE_LOAD_CHECKSUM   1 // Compute checksums while SAVE, LOAD and CHAIN
-#endif
-
-#define USE_GFX              0 // GFX module
-
-/**
- * Used modules
- */
-#define USESD                0 // SDcard module
-#define USEARDUINOIO         1 // Arduino IO module
-/*
- * Math module (requires USE_REALS)
- */
-#define USEMATH                 1
-#if USEMATH
-#define M_TRIGONOMETRIC         1 // SIN COS TAN COT
-#define M_REVERSE_TRIGONOMETRIC	1 // ACS ASN ATN
-#endif
-
-#define OPT_SPEED     1
-#define OPT_SIZE      2
-#define OPT           OPT_SPEED
 
 /*
  * Input and output for single terminal mode
  */
 
 // Input variants
-#define SERIAL_I 0 // SerialL input
-#define SERIAL3_I 1 // SerialL3 input
+#define SERIAL_I   0 // Serial input
+#define SERIALL_I  1 // SerialL input
+#define SERIALL1_I 2 // SerialL1 input
+#define SERIALL2_I 3 // SerialL2 input
+#define SERIALL3_I 4 // SerialL3 input
 
 // Output variants
-#define SERIAL_O  0 // SerialL output
-#define SERIAL3_O 1 // SerialL3 output
-#define UTFT_O    2 // UTFT output
-#define TVOUT_O   3 // TVout output
+#define SERIAL_O   0 // SerialL output
+#define SERIALL_O  1 // SerialL output
+#define SERIALL1_O 2 // SerialL1 output
+#define SERIALL2_O 3 // SerialL2 output
+#define SERIALL3_O 4 // SerialL3 output
+#define UTFT_O     5 // UTFT output
+#define TVOUT_O    6 // TVout output
+	#define TVOUT_HORIZ 240
+	#define TVOUT_VERT 192
 
-// Input select (SERIAL)
-#define S_INPUT SERIAL_I
+// Input select 
+#define S_INPUT SERIALL_I
 
 // Output select
-#define S_OUTPUT SERIAL_O
+#define S_OUTPUT SERIALL_O
 
 #define USEUTFT		          0
 #define USETVOUT	          0
 
-#if S_INPUT == SERIAL_I
-#define SERIAL_PORT SerialL
-#elif S_INPUT == SERIAL3_I
-#define SERIAL_PORT SerialL3
-#endif
-#if S_OUTPUT == SERIAL_O
-#define SERIAL_PORT SerialL
-#elif S_OUTPUT == SERIAL3_O
-#define SERIAL_PORT SerialL3
-#elif S_OUTPUT == UTFT_O
-#undef USEUTFT
-#define USEUTFT		          1
-#elif S_OUTPUT == TVOUT_O
-#undef USETVOUT
-#define USETVOUT	         1
-#define TVOUT_HORIZ	240
-#define TVOUT_VERT	192
-#endif
-
 // Use multiterminal mode
 #define BASIC_MULTITERMINAL       0
+#if BASIC_MULTITERMINAL
+#define SERIAL_PORT1 SerialL1
+#define SERIAL_PORT2 SerialL2
+#define SERIAL_PORT3 SerialL3
+#endif
 
 // Use external memory
 #define USE_EXTMEM                0
@@ -119,6 +78,7 @@
 
 namespace BASIC
 {
+
 // Max size of the program line
 const uint8_t PROGSTRINGSIZE = 73;
 
@@ -128,13 +88,15 @@ const uint16_t PROGRAMSIZE = EXTMEM_SIZE;
 #elif defined (__AVR_ATmega1284__) || defined (__AVR_ATmega1284P__)
 const uint16_t PROGRAMSIZE = 14848;
 #elif defined (__AVR_ATmega2560__)
-const uint16_t PROGRAMSIZE = 4096;
+const uint16_t PROGRAMSIZE = 6144;
 #elif defined (__AVR_ATmega128__) || defined (__AVR_ATmega128A__)
 const uint16_t PROGRAMSIZE = 3072;
 #elif defined (__AVR_ATmega328__) || defined (__AVR_ATmega328P__)
 const uint16_t PROGRAMSIZE = 1024;
 #elif defined (__AVR_ATmega168__) || defined (__AVR_ATmega168P__)
 const uint16_t PROGRAMSIZE = 384;
+#else
+const uint16_t PROGRAMSIZE = 1024;
 #endif // USE_EXTMEM
 
 // Max size of the string constants/variables

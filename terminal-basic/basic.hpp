@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-#include "helper.hpp"
+#include <Arduino.h>
 
 #ifdef ARDUINO
 #include "config_arduino.hpp"
@@ -30,12 +30,44 @@
 #include "config_linux.hpp"
 #endif
 
+#if S_INPUT == SERIAL_I
+    #define SERIAL_PORT Serial
+#elif S_INPUT == SERIALL_I
+    #define SERIAL_PORT SerialL
+#elif S_INPUT == SERIALL1_I
+    #define SERIAL_PORT SerialL1
+#elif S_INPUT == SERIALL2_I
+    #define SERIAL_PORT SerialL2
+#elif S_INPUT == SERIALL3_I
+    #define SERIAL_PORT SerialL3
+#endif
+#if S_OUTPUT == SERIAL_O
+#define SERIAL_PORT Serial
+#elif S_OUTPUT == SERIALL_O
+#define SERIAL_PORT SerialL
+#elif S_OUTPUT == SERIALL3_O
+#define SERIAL_PORT SerialL3
+#elif S_OUTPUT == UTFT_O
+#undef USEUTFT
+#define USEUTFT		          1
+#elif S_OUTPUT == TVOUT_O
+#undef USETVOUT
+#define USETVOUT	          1
+#endif
+
+#ifdef true
+#undef true
+#endif
+
+#ifdef false
+#undef false
+#endif
+
 /**
  * @brief Simple BASIC language interpreter package
  */
 namespace BASIC
 {
-
 // integer type
 typedef int16_t Integer;
 #if USE_LONGINT
@@ -55,86 +87,104 @@ typedef float Real;
  */
 enum class Token : uint8_t
 {
-	NOTOKENS = 0,
+	NOTOKENS = 0,  // 0
 	OP_AND,        // 1
 #if USE_DUMP
-	KW_ARRAYS,     // 1
+	KW_ARRAYS,     // 2
 #endif
-	KW_BASE,       // 2
+	KW_BASE,       // 3
 #if USE_SAVE_LOAD
-	COM_CHAIN,     // 3
+	COM_CHAIN,     // 4
 #endif
-	COM_CLS,       // 4
-	KW_DATA,       // 5
-	KW_DEF,        // 6
-//	COM_DELAY,     // 7
-	KW_DIM,        // 8
+	COM_CLS,       // 5
+#if USESTOPCONT
+	COM_CONT,      // 6
+#endif
+#if USE_MATRIX
+	KW_CON,        // 7
+#endif
+	KW_DEF,        // 9
+//	COM_DELAY,     // 10
+#if USE_MATRIX
+	KW_DET,        // 11
+#endif
+	KW_DIM,        // 12
 #if USE_DUMP
-	COM_DUMP,      // 9
+	COM_DUMP,      // 14
 #endif
-	KW_END,        // 10
-	KW_FALSE,      // 11
-	KW_FOR,        // 12
-	KW_GOSUB,      // 13
-	KW_GOTO,       // 14
-	KW_GO,         // 15
+	KW_END,        // 15
+	KW_FALSE,      // 16
+	KW_FOR,        // 17
+	KW_GOSUB,      // 18
+	KW_GOTO,       // 19
+	KW_GO,         // 20
 #if USE_MATRIX
-	KW_IDN,
+	KW_IDN,        // 21
 #endif
-	KW_IF,         // 16
-	KW_INPUT,      // 17
-	KW_LET,        // 18
-	COM_LIST,      // 19
+	KW_IF,         // 22
+	KW_INPUT,      // 23
+#if USE_MATRIX
+	KW_INV,        // 24
+#endif
+	KW_LET,        // 25
+	COM_LIST,      // 26
 #if USE_SAVE_LOAD
-	COM_LOAD,      // 20
+	COM_LOAD,      // 27
 #endif
 #if USE_MATRIX
-	KW_MAT,
+	KW_MAT,        // 28
 #endif
-	COM_NEW,       // 21
-	KW_NEXT,
-	OP_NOT,
-	KW_ON,
-	KW_OPTION,
-	OP_OR,
-	KW_PRINT,
+	COM_NEW,       // 29
+	KW_NEXT,       // 30
+	OP_NOT,        // 31
+	KW_ON,         // 32
+	KW_OPTION,     // 33
+	OP_OR,         // 34
+	KW_PRINT,      // 35
 #if USE_RANDOM
-	KW_RANDOMIZE,
+	KW_RANDOMIZE,  // 36
 #endif
-	KW_READ,
-	KW_REM,
-	KW_RETURN,
-	COM_RUN,
+	KW_REM,        // 38
+	KW_RETURN,     // 39
+	COM_RUN,       // 40
 #if USE_SAVE_LOAD
-	COM_SAVE,
+	COM_SAVE,      // 41
 #endif
-	KW_STEP,
-	KW_STOP,
-	KW_TAB,
-	KW_THEN,
-	KW_TO,
-	KW_TRUE,
+	KW_STEP,       // 42
+#if USESTOPCONT
+	KW_STOP,       // 43
+#endif
+	KW_TAB,        // 44
+	KW_THEN,       // 45
+	KW_TO,         // 46
+#if USE_MATRIX
+	KW_TRN,        // 47
+#endif
+	KW_TRUE,       // 48
 #if USE_DUMP
-	KW_VARS,
+	KW_VARS,       // 49
 #endif
 #if USE_MATRIX
-	KW_ZER,
+	KW_ZER,        // 50
 #endif
 
 	// *
-	STAR,
+	STAR,          // 51
 	// /
-	SLASH,
+	SLASH,         // 52
+#if USE_REALS
+	BACK_SLASH,    // 53
+#endif
 	// +
-	PLUS,
+	PLUS,          // 54
 	// -
-	MINUS,
+	MINUS,         // 55
 	// =
-	EQUALS,
+	EQUALS,        // 56
 	// :
-	COLON,
+	COLON,         // 57
 	// ;
-	SEMI,
+	SEMI,          // 58
 	// <
 	LT,
 	// >
@@ -156,8 +206,8 @@ enum class Token : uint8_t
 	// )
 	RPAREN,
 
-	REAL_IDENT,
 	INTEGER_IDENT,
+	REAL_IDENT,
 #if USE_LONGINT
 	LONGINT_IDENT,
 #endif
@@ -190,7 +240,9 @@ enum class ProgMemStrings : uint8_t
 	S_VARS,
 	S_ARRAYS,
 	S_STACK,
+#if USESD
 	S_DIR,
+#endif
 	S_REALLY,
 	S_END,
         VT100_ESCSEQ,

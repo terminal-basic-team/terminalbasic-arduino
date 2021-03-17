@@ -37,7 +37,9 @@ static const char strOF[] PROGMEM = "OF";
 static const char strVARS[] PROGMEM = "VARS";
 static const char strARRAYS[] PROGMEM = "ARRAYS";
 static const char strSTACK[] PROGMEM = "STACK";
+#if USESD
 static const char strDIR[] PROGMEM = "DIR";
+#endif
 static const char strREALLY[] PROGMEM = "REALLY";
 static const char strEND[] PROGMEM = "END";
 static const char strVT100_PROLOGUESEQ[] PROGMEM = "\x1B[";
@@ -75,7 +77,9 @@ static PGM_P const progmemStrings[uint8_t(ProgMemStrings::NUM_STRINGS)] PROGMEM 
 	strVARS, // VARS
 	strARRAYS, // ARRAYS
 	strSTACK, // STACK
+#if USESD
 	strDIR, // DIR
+#endif
 	strREALLY, // REALLY
 	strEND, // END
 	strVT100_PROLOGUESEQ, // x1B[
@@ -105,7 +109,7 @@ scanTable(const uint8_t *token, const uint8_t table[], uint8_t &index)
 		uint8_t c = pgm_read_byte(table);
 		uint8_t ct = token[tokPos];
 		if (c == 0)
-			return (NULL);
+			return NULL;
 		
 		if (ct == c) {
 			++tokPos, ++table;
@@ -113,12 +117,12 @@ scanTable(const uint8_t *token, const uint8_t table[], uint8_t &index)
 		} else if (ct+uint8_t(0x80) == c) {
 			index = tabPos;
 			++tokPos;
-			return ((uint8_t*)token+tokPos);
+			return (uint8_t*)token+tokPos;
 		} else {
 			if (c & uint8_t(0x80))
 				c &= ~uint8_t(0x80);
 			if (c > ct && ct != 0)
-				return (NULL);
+				return NULL;
 			else {
 				while ((pgm_read_byte(table++) & uint8_t(0x80)) ==
 				    0);
@@ -136,9 +140,10 @@ scanTable(const uint8_t *token, const uint8_t table[], uint8_t &index)
 	return NULL;
 }
 
-PGM_P progmemString(ProgMemStrings index)
+PGM_P
+progmemString(ProgMemStrings index)
 {
-	return ((PGM_P)pgm_read_word(&progmemStrings[uint8_t(index)]));
+	return (PGM_P)pgm_read_ptr(&progmemStrings[uint8_t(index)]);
 }
 
 }

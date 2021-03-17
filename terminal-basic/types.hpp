@@ -17,43 +17,51 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BYTEARRAY_HPP
-#define BYTEARRAY_HPP
+#ifndef TYPES_HPP
+#define TYPES_HPP
 
-#include <inttypes.h>
-
-#include "Printable.h"
-
-class ByteArray : public Printable
+template <typename T>
+class typespec
 {
 public:
-	ByteArray();
-	ByteArray(const uint8_t*, size_t);
-	ByteArray(const char *c, size_t s) :
-	  ByteArray(reinterpret_cast<const uint8_t*>(c), s) {}
+	typedef void longer;
+	typedef void shorter;
 	
-	void createData();
+	static constexpr bool isinteger = false;
+	static constexpr bool isreal = false;
+};
 
-	size_t printTo(Print& p) const override;
-
-	const uint8_t *data() const
-	{
-		return (_data);
-	}
+template <>
+class typespec<float>
+{
+public:
+	typedef double longer;
+	typedef float shorter;
 	
-	uint8_t *data()
-	{
-		return (_data);
-	}
+	static constexpr bool isinteger = false;
+	static constexpr bool isreal = true;
+};
 
-	size_t size() const
-	{
-		return (_size);
-	}
-private:
-	uint8_t *_data;
-	size_t _size;
-	bool _ownsData;
+template <>
+class typespec<int>
+{
+public:
+	typedef long longer;
+	typedef short shorter;
+	
+	static constexpr bool isinteger = true;
+	static constexpr bool isreal = false;
+};
+
+template <>
+class typespec<short>
+{
+public:
+	typedef int longer;
+	typedef signed char shorter;
+	
+	static constexpr bool isinteger = true;
+	static constexpr bool isreal = false;
 };
 
 #endif

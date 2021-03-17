@@ -41,10 +41,12 @@
 
 #if USETVOUT
 #include "TVoutPrint.hpp"
+#include "fonts/Font6x8.h"
 #endif
 
 #if USE_EXTEEPROM
 #include "basic_exteeprom.hpp"
+#include <Wire.h>
 #endif
 
 /**
@@ -55,7 +57,9 @@
 static UTFT	utft(CTE32HR, 38, 39, 40, 41);
 static UTFTTerminal utftPrint(utft);
 #elif USETVOUT
-static TVoutPrint tvoutPrint;
+static uint8_t		tvOutBuf[TVoutEx::bufferSize(TVOUT_HORIZ, TVOUT_VERT)];
+static TVoutEx		tvOut;
+static TVoutPrint	tvoutPrint;
 #endif
 
 #if USESD
@@ -76,18 +80,18 @@ static BASIC::ExtEEPROM extEeprom;
 
 #if BASIC_MULTITERMINAL
 static BASIC::Interpreter::Program program(BASIC::PROGRAMSIZE / 5);
-static BASIC::Interpreter basic(Serial, Serial, program);
-#if HAVE_HWSERIAL1
+static BASIC::Interpreter basic(SERIAL_PORT, SERIAL_PORT, program);
+#ifdef HAVE_HWSERIAL1
 static BASIC::Interpreter::Program program1(BASIC::PROGRAMSIZE / 5);
-static BASIC::Interpreter basic1(Serial1, Serial1, program1);
+static BASIC::Interpreter basic1(SERIAL_PORT1, SERIAL_PORT1, program1);
 #endif
-#if HAVE_HWSERIAL2
+#ifdef HAVE_HWSERIAL2
 static BASIC::Interpreter::Program program2(BASIC::PROGRAMSIZE / 5);
-static BASIC::Interpreter basic2(Serial2, Serial2, program2);
+static BASIC::Interpreter basic2(SERIAL_PORT2, SERIAL_PORT2, program2);
 #endif
-#if HAVE_HWSERIAL3
+#ifdef HAVE_HWSERIAL3
 static BASIC::Interpreter::Program program3(BASIC::PROGRAMSIZE / 5);
-static BASIC::Interpreter basic3(Serial3, Serial3, program3);
+static BASIC::Interpreter basic3(SERIAL_PORT3, SERIAL_PORT3, program3);
 #endif
 #else
 static BASIC::Interpreter::Program program(BASIC::PROGRAMSIZE);
@@ -103,31 +107,36 @@ static BASIC::Interpreter basic(SERIAL_PORT, SERIAL_PORT, program);
 void
 setup()
 {
+#if USE_EXTEEPROM
+	Wire.begin();
+	Wire.setClock(400000);
+#endif
 #if USE_EXTMEM
 	XMCRA |= 1ul<<7; // Switch ext mem iface on
 	XMCRB = 0;
 #endif
 	SERIAL_PORT.begin(115200);
 #if USETVOUT
-	tvoutPrint.begin(PAL, TVOUT_HORIZ, TVOUT_VERT);
+	tvOut.begin(PAL, TVOUT_HORIZ, TVOUT_VERT, tvOutBuf);
+        tvOut.selectFont(Font6x8);
 #endif
 #if USEUTFT
 	utftPrint.begin();
 #endif
 	
 #if BASIC_MULTITERMINAL
-#if HAVE_HWSERIAL1
-	Serial1.begin(57600);
+#ifdef HAVE_HWSERIAL1
+	SERIAL_PORT1.begin(115200);
 #endif
-#if HAVE_HWSERIAL2
-	Serial2.begin(57600);
+#ifdef HAVE_HWSERIAL2
+	SERIAL_PORT2.begin(115200);
 #endif
-#if HAVE_HWSERIAL3
-	Serial3.begin(57600);
+#ifdef HAVE_HWSERIAL3
+	SERIAL_PORT3.begin(115200);
 #endif
 #endif
 
-	LOG_INIT(SerialL);
+	LOG_INIT(SERIAL_PORT);
 
 	LOG_TRACE;
 
@@ -137,7 +146,12 @@ setup()
 	
 #if USEMATH
 	basic.addModule(&mathBlock);
+#if BASIC_MULTITERMINAL
+#ifdef HAVE_HWSERIAL1
+	basic1.addModule(&mathBlock);
 #endif
+#endif // BASIC_MULTITERMINAL
+#endif // USEMATH
 
 #if USE_EXTEEPROM
 	basic.addModule(&extEeprom);
@@ -149,13 +163,13 @@ setup()
 	
 	basic.init();
 #if BASIC_MULTITERMINAL
-#if HAVE_HWSERIAL1
+#ifdef HAVE_HWSERIAL1
 	basic1.init();
 #endif
-#if HAVE_HWSERIAL2
+#ifdef HAVE_HWSERIAL2
 	basic2.init();
 #endif
-#if HAVE_HWSERIAL3
+#ifdef HAVE_HWSERIAL3
 	basic3.init();
 #endif
 #endif
@@ -177,5 +191,5 @@ loop()
 #ifdef HAVE_HWSERIAL3
 	basic3.step();
 #endif
-#endif
+#endif // BASIC_MULTITERMINAL
 }

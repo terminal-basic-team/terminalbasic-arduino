@@ -22,7 +22,7 @@
 #include <memorysaver.h>
 #include <UTFT.h>
 #include "math.hpp"
-#include "cps.hpp"
+#include "arduinoext.hpp"
 #include "vt100.hpp"
 
 #define W 30
@@ -45,7 +45,7 @@ private:
 		REGULAR = 0, ESCAPE, I_BRAC, F_ATTR1
 	};
 	
-	struct CPS_PACKED ScreenCoordinates
+	struct EXT_PACKED ScreenCoordinates
 	{
 		void next()
 		{
@@ -71,7 +71,7 @@ private:
 	CartesianCoordinates2D<uint16_t> _screenSizePixels;
 	CartesianCoordinates2D<uint8_t> _screenSizeChars;
 	ScreenCoordinates _cursorPosition;
-	struct CPS_PACKED Cell
+	struct EXT_PACKED Cell
 	{
 		VT100::TextAttr _attrs;
 		char	     _symbol;

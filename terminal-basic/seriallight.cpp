@@ -16,14 +16,21 @@
  * License along with Posixcpp library. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-
-#include <avr/io.h>
+ 
+#ifdef __AVR_ARCH__
 
 #include "seriallight.hpp"
 
+#include <avr/io.h>
 #include "wiring_private.h"
 
 SerialLight SerialL(&UBRR0H, &UBRR0L, &UCSR0A, &UCSR0B, &UCSR0C, &UDR0);
+#ifdef HAVE_HWSERIAL1
+SerialLight SerialL1(&UBRR1H, &UBRR1L, &UCSR1A, &UCSR1B, &UCSR1C, &UDR1);
+#endif
+#ifdef HAVE_HWSERIAL2
+SerialLight SerialL2(&UBRR2H, &UBRR2L, &UCSR2A, &UCSR2B, &UCSR2C, &UDR2);
+#endif
 #ifdef HAVE_HWSERIAL3
 SerialLight SerialL3(&UBRR3H, &UBRR3L, &UCSR3A, &UCSR3B, &UCSR3C, &UDR3);
 #endif
@@ -119,3 +126,6 @@ SerialLight::write(uint8_t c)
 	
 	return 1;
 }
+
+#endif // __AVR_ARCH__
+

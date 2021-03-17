@@ -20,6 +20,7 @@
 
 #include "math.hpp"
 #include "basic_lexer.hpp"
+#include "ascii.hpp"
 
 namespace BASIC
 {
@@ -95,9 +96,9 @@ Parser::Value::operator bool() const
 		return (bool(value.real));
 #endif // USE_REALS
 	case BOOLEAN:
-		return (value.boolean);
+		return value.boolean;
 	default:
-		return (false);
+		return false;
 	}
 }
 
@@ -166,7 +167,7 @@ Parser::Value::operator-()
 		// undefined
 		break;
 	}
-	return (*this);
+	return *this;
 }
 
 bool
@@ -257,7 +258,7 @@ Parser::Value::operator+=(const Value &rhs)
 	default: break;
 	}
 
-	return (*this);
+	return *this;
 }
 
 Parser::Value &
@@ -282,7 +283,7 @@ Parser::Value::operator-=(const Value &rhs)
 	default: break;
 	}
 
-	return (*this);
+	return *this;
 }
 
 Parser::Value &
@@ -307,7 +308,7 @@ Parser::Value::operator*=(const Value &rhs)
 	default: break;
 	}
 
-	return (*this);
+	return *this;
 }
 
 // '/' operation always return REAL if real numbers support used
@@ -324,7 +325,7 @@ Parser::Value::operator/=(const Value &rhs)
 	value.integer = Integer(*this) / Integer(rhs);
 	type = Value::INTEGER;
 #endif
-	return (*this);
+	return *this;
 }
 
 void
@@ -352,7 +353,7 @@ Parser::Value::operator^=(const Value &rhs)
 	case INTEGER:
 	{
 		Integer r = 1;
-		for (Integer i = 0; i < Integer(rhs); ++i)
+		for (Integer i = Integer(rhs); i > 0; --i)
 			r *= value.integer;
 		value.integer = r;
 	}
@@ -361,7 +362,7 @@ Parser::Value::operator^=(const Value &rhs)
 	case LONG_INTEGER:
 	{
 		LongInteger r = 1;
-		for (LongInteger i = 0; i < LongInteger(rhs); ++i)
+		for (LongInteger i = LongInteger(rhs); i > 0 ; --i)
 			r *= value.longInteger;
 		value.longInteger = r;
 	}
@@ -372,8 +373,10 @@ Parser::Value::operator^=(const Value &rhs)
 		value.real = pow(value.real, Real(rhs));
 		break;
 #endif
+	default:
+		break;
 	}
-	return (*this);
+	return *this;
 }
 
 void
@@ -417,6 +420,27 @@ Parser::Value::notOp()
 	}
 }
 
+size_t
+Parser::Value::size(Type t)
+{
+	switch (t) {
+	case INTEGER:
+		return sizeof(Integer);
+#if USE_LONGINT
+	case LONG_INTEGER:
+		return sizeof(LongInteger);	
+#endif
+#if USE_REALS
+	case REAL:
+		return sizeof(Real);	
+#endif
+	case BOOLEAN:
+		return sizeof(bool);
+	case STRING:
+		return 0;
+	}
+}
+
 Parser::Value &
 Parser::Value::operator|=(const Value &v)
 {
@@ -430,7 +454,7 @@ Parser::Value::operator|=(const Value &v)
 	default:
 		break;
 	}
-	return (*this);
+	return *this;
 }
 
 Parser::Value &
@@ -446,7 +470,7 @@ Parser::Value::operator&=(const Value &v)
 	default:
 		break;
 	}
-	return (*this);
+	return *this;
 }
 
 size_t
@@ -461,7 +485,8 @@ Parser::Value::printTo(Print& p) const
 			t = Token::KW_TRUE;
 		else
 			t = Token::KW_FALSE;
-		strcpy_P(buf, Lexer::tokenStrings[uint8_t(t)]);
+		strcpy_P(buf, (PGM_P)pgm_read_word(&(Lexer::
+		    tokenStrings[uint8_t(t)])));
 		return p.print(buf);
 	}
 		break;
@@ -469,19 +494,29 @@ Parser::Value::printTo(Print& p) const
 	case REAL:
 	{
 		char buf[15];
-#ifdef ARDUINO
-		uint8_t decWhole = 1;
+#ifdef __AVR_ARCH__
+		int8_t decWhole = 1;
 		Real n = math<Real>::abs(value.real);
-		while (n >= Real(10)) {
-			n /= Real(10);
-			++decWhole;
+                
+		if (n >= Real(1)) {
+			while (n >= Real(10)) {
+				n /= Real(10);
+				++decWhole;
+			}
+		} else {
+			while (n < Real(1)) {
+				n *= Real(10);
+				--decWhole;
+				if (decWhole <= -3)
+					break;
+			}
 		}
-		if (decWhole < 4)
-			::dtostrf(value.real, 10, 8 - decWhole, buf);
+		if (decWhole >= -3 && decWhole <= 8)
+			::dtostrf(value.real, 14, 8 - decWhole, buf);
 		else
 			::dtostre(value.real, buf, 7, DTOSTR_ALWAYS_SIGN);
 #else
-		::sprintf(buf, "% .8G", value.real);
+		::sprintf(buf, "%- 10.7G", value.real);
 #endif // ARDUINO
 		return p.print(buf);
 	}
@@ -490,15 +525,15 @@ Parser::Value::printTo(Print& p) const
 #if USE_LONGINT
 	case Parser::Value::LONG_INTEGER:
 		if (value.longInteger >= LongInteger(0))
-			p.write(' ');
+			p.print(char(ASCII::SPACE));
 		return p.print(value.longInteger) + 1;
 #endif // USE_LONGINT
 	case Parser::Value::INTEGER:
 		if (value.integer >= Integer(0))
-			p.write(' ');
+			p.print(char(ASCII::SPACE));
 		return p.print(value.integer) + 1;
 	default:
-		return p.print('?');
+		return p.print(char(ASCII::QMARK));
 	}
 }
 

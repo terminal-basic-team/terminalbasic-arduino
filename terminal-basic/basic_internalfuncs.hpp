@@ -32,6 +32,7 @@ public:
 private:
 	static bool func_abs(Interpreter&);
 	static bool func_chr(Interpreter&);
+	static bool func_result(Interpreter&);
 #if USE_REALS
 	static bool func_int(Interpreter&);
 #endif

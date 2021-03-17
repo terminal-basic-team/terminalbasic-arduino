@@ -17,38 +17,42 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CPS_HPP
-#define CPS_HPP
+#ifndef EXT_HPP
+#define EXT_HPP
 
 #if __cplusplus <  201103L
 #error This file requires C++11-able compiler
 #endif
 
-#define CPS_PACKED __attribute__ ((__packed__))
+// Packed data object
+#define EXT_PACKED __attribute__ ((__packed__))
 
-#define CPS_NOTCOPYABLE(ClassName)        \
+// Class of not copyable objects
+#define EXT_NOTCOPYABLE(ClassName)        \
 private:                                  \
   ClassName(const ClassName&) = delete;   \
   ClassName(ClassName&&) = delete;        \
   ClassName &operator =(const ClassName&) = delete;
 
-#define CPS_STATIC(ClassName)        \
+// Not instantiable class
+#define EXT_STATIC(ClassName)        \
 private:                             \
   ClassName() = delete;
 
+// Class-package (Ada nostalgie)
 #define Package(ClassName) class ClassName final
+#define EXT_PACKAGE(ClassName) \
+  EXT_STATIC(ClassName) \
+  EXT_NOTCOPYABLE(ClassName)
 
-#define CPS_PACKAGE(ClassName) \
-  CPS_STATIC(ClassName) CPS_NOTCOPYABLE(ClassName)
-
-#define Interface (ClassName) class ClassName
-
-#define CPS_INTERFACE (ClassName) \
+// Interface class (Wanna be java)
+#define Interface(ClassName) class ClassName
+#define EXT_INTERFACE (ClassName) \
 public: \
   virtual ~ClassName() = default; \
 protected: \
   ClassName() = default; \
-  CPS_NOTCOPYABLE(ClassName)
+  EXT_NOTCOPYABLE(ClassName)
 
-#endif //CPS_HPP
+#endif //EXT_HPP
 

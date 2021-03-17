@@ -55,6 +55,7 @@ enum class ASCII : uint8_t
 	LPAREN = '(',
 	RPAREN = ')',
 	COMMA = ',',
+	GT = '>',
 	TILDE = 0x7E,
 	DEL = 0x7F
 };

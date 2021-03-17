@@ -1,3 +1,39 @@
+r1.0-beta1 (20.08.2017) - Release, dedicated to the Russian Day of Air Fleet and
+                          the Belarussian Day of Air Forces
+
+  * Fix bug with matrix multiplication
+  * Fix bug with unary plus support
+  * Fix conflict with Arduino DUE libset when matrix support is enabled
+  * Code cleanup and removal of the unfinished features, deferred to 1.1 branch
+
+r1.0-alpha4 (26.07.2017) - Release, dedicated to the Cuba National Rebellion Day
+                           ¡Salud camaradas!
+
+  * Fix regression with print real 0
+  * Add condition compilable loop body indention
+
+r1.0-alpha3 (26.06.2017) - Release, dedicated to the Skydiver day
+
+  * Single terminal mode optimisation
+  * Different code size optimisations
+  * STOP/CONT works and are condition compilable
+  * Fix bug with TAB() expression under a false IF THEN branch
+
+r1.0-alpha2 (12.06.2017) - Release, dedicated to the Russia day
+
+  * Synchronized with tvoutex library
+  * Fix the i2c eeprom operations
+  * Fix output of the reals, less then 1.0 in absolute value
+  * Fix generation of the arduino sketch
+  * Fix build with Arduino IDE
+
+r1.0-alpha1 (01.06.2017) - Release, dedicated to International day of protection of children
+
+   * Darthmouth BASIC-style matrix operations
+   * I2C eeprom module with functions ESAVE, ELOAD, ECHAIN
+   * Corrections to fix Arduino DUE build
+   * Interpreter FSM rewritten for fix bugs in multioperator lines processing
+
 r0.8.2 (9.05.2017) - Release, dedicated to Victory Day.
 
    * Fix buffer overflow in real numbers output.

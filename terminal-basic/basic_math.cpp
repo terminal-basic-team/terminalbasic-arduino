@@ -178,7 +178,7 @@ Math::func_pi(Interpreter &i)
 {
 	Parser::Value v(Real(M_PI));
 	i.pushValue(v);
-	return (true);
+	return true;
 }
 
 #if M_REVERSE_TRIGONOMETRIC

@@ -16,21 +16,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BASIC_GFX_HPP
-#define BASIC_GFX_HPP
+/**
+ * @file basic_exteeprom.hpp
+ * @brief I2C/SPI external eeprom functions and commands
+ */
+
+#ifndef BASIC_EXTEEPROM_HPP
+#define BASIC_EXTEEPROM_HPP
 
 #include "basic_functionblock.hpp"
-#include "basic_interpreter.hpp"
 
 namespace BASIC
 {
 
-class GFXModule : public FunctionBlock
+class ExtEEPROM : public FunctionBlock
 {
 public:
-	explicit GFXModule();
+	explicit ExtEEPROM();
+private:
+	static bool com_echain(Interpreter&);
+	static bool com_eload(Interpreter&);
+	static bool com_esave(Interpreter&);
 	
-	void command_circle(Interpreter&);
+	static const FunctionBlock::command _commands[] PROGMEM;
+// FunctionBlock interface
+public:
+	void _init() override;
 };
 
 }

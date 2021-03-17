@@ -20,7 +20,7 @@
 #ifndef HELPER_HPP
 #define HELPER_HPP
 
-#include "cps.hpp"
+#include "arduinoext.hpp"
 #include <string.h>
 
 #ifdef ARDUINO
@@ -53,13 +53,6 @@ negativeLedBlink(size_t num = 1)
 #ifndef ARDUINO
 #define positiveLedBlink(a...)
 #define negativeLedBlink(a...)
-#define PGM_P const char*
-#define PROGMEM
-#define pgm_read_byte(a) (*a)
-#define pgm_read_word(a) (*a)
-#define pgm_read_ptr(a) (*a)
-#define strcpy_P(a,b) strcpy(a,b)
-#define strcmp_P(a,b) strcmp(a,b)
 #endif
 
 #endif
