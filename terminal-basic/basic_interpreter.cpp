@@ -25,6 +25,7 @@
 #include <stdbool.h>
 
 #include "helper.hpp"
+#include <avr/crc16.h>
 
 #include "basic_interpreter.hpp"
 #include "basic_interpreter_program.hpp"
@@ -65,6 +66,12 @@ public:
 			_i._output.print("\x1B[31m");
 		else if ((uint8_t(a) & 0xF0) == C_BLUE)
 			_i._output.print("\x1B[34m");
+		else if ((uint8_t(a) & 0xF0) == C_MAGENTA)
+			_i._output.print("\x1B[35m");
+		else if ((uint8_t(a) & 0xF0) == C_CYAN)
+			_i._output.print("\x1B[36m");
+		else if ((uint8_t(a) & 0xF0) == C_WHITE)
+			_i._output.print("\x1B[37m");
 	}
 
 	~AttrKeeper()
@@ -194,7 +201,8 @@ Interpreter::valueFromArray(Parser::Value &v, const char *name)
 	return true;
 }
 
-Interpreter::Interpreter(Stream &stream, Print &output, Program &program, FunctionBlock *first) :
+Interpreter::Interpreter(Stream &stream, Print &output, Program &program,
+    FunctionBlock *first) :
     _program(program), _state(SHELL), _input(stream), _output(output),
     _parser(_lexer, *this, first)
 {
@@ -204,7 +212,7 @@ Interpreter::Interpreter(Stream &stream, Print &output, Program &program, Functi
 void
 Interpreter::init()
 {
-	_parser.firstFB()->init();
+	_parser.init();
 	print(ucBASIC, BRIGHT);
 
 	print(S_VERSION), print(VERSION, BRIGHT), newline();
@@ -265,15 +273,16 @@ Interpreter::exec()
 	const char *pString;
 	
 	_lexer.init(_inputBuffer);
-	if (_lexer.getNext() && (_lexer.getToken() == Token::C_INTEGER) &&
-	    (_lexer.getValue().type == Parser::Value::INTEGER)) {
+	if (_lexer.getNext() && (_lexer.getToken() == Token::C_INTEGER)) {
 		Integer pLine = Integer(_lexer.getValue());
 		if (TOKENIZE) {
 			tokenize();
 			pString = _inputBuffer;
-		} else
+		} else {
 			pString = _inputBuffer + _lexer.getPointer();
-		if (!_program.addLine(pLine, pString)) {
+			_inputPosition -= _lexer.getPointer();
+		}
+		if (!_program.addLine(pLine, pString, _inputPosition)) {
 			raiseError(DYNAMIC_ERROR, OUTTA_MEMORY);
 			_state = SHELL;
 			return;
@@ -292,11 +301,11 @@ Interpreter::tokenize()
 	char tempBuffer[PROGSTRINGSIZE];
 	size_t position = 0, lexerPosition = _lexer.getPointer();
 	while (_lexer.getNext()) {
-		if (_lexer.getToken() <= Token::OP_NOT) {
-			uint8_t t = uint8_t(128) + uint8_t(_lexer.getToken());
+		uint8_t t = uint8_t(0x80) + uint8_t(_lexer.getToken());
+		if (_lexer.getToken() <= Token::OP_NOT) { // One byte tokens
 			tempBuffer[position++] = t;
 			lexerPosition = _lexer.getPointer();
-			if (_lexer.getToken() == Token::KW_REM) {
+			if (_lexer.getToken() == Token::KW_REM) { // Save rem text as is
 				while (_inputBuffer[lexerPosition] == ' ' ||
 				    _inputBuffer[lexerPosition] == '\t')
 					++lexerPosition;
@@ -306,7 +315,21 @@ Interpreter::tokenize()
 				position += remaining;
 				break;
 			}
-		} else {
+		} else if (_lexer.getToken() == Token::C_INTEGER) {
+			tempBuffer[position++] = t;
+#if USE_LONGINT
+			LongInteger v = LongInteger(_lexer.getValue());
+			tempBuffer[position++] = v >> 24;
+			tempBuffer[position++] = (v >> 16) & 0xFF;
+			tempBuffer[position++] = (v >> 8) & 0xFF;
+			tempBuffer[position++] = v & 0xFF;
+#else
+			Integer v = Integer(_lexer.getValue());
+			tempBuffer[position++] = (v >> 8) & 0xFF;
+			tempBuffer[position++] = v & 0xFF;
+#endif
+			lexerPosition = _lexer.getPointer();
+		} else { // Other tokens
 			while (_inputBuffer[lexerPosition] == ' ' ||
 			    _inputBuffer[lexerPosition] == '\t')
 				++lexerPosition;
@@ -501,10 +524,9 @@ Interpreter::print(Real number)
 {
 	char buf[17];
 #ifdef ARDUINO
-	//::dtostre(number, buf, 9, DTOSTR_ALWAYS_SIGN);
 	::dtostrf(number, 12, 9, buf);
 #else
-	::sprintf(buf, "% .8G", number);
+	::sprintf(buf, "% .7G", number);
 #endif
 	print(buf);
 }
@@ -520,10 +542,10 @@ Interpreter::print(Lexer &l)
 		case Token::C_INTEGER:
 		case Token::C_REAL:
 		case Token::C_BOOLEAN:
-			print(l.getValue()); break;
+			print(l.getValue(), C_CYAN); break;
 		case Token::C_STRING:
 		{
-			AttrKeeper a(*this, C_RED);
+			AttrKeeper a(*this, C_MAGENTA);
 			_output.write("\"");
 			_output.print(l.id());
 			_output.write("\" ");
@@ -548,7 +570,12 @@ Interpreter::run()
 void
 Interpreter::gotoLine(const Parser::Value &l)
 {
+#if USE_LONGINT
+	if (l.type != Parser::Value::INTEGER &&
+	    l.type != Parser::Value::LONG_INTEGER) {
+#else
 	if (l.type != Parser::Value::INTEGER) {
+#endif
 		raiseError(DYNAMIC_ERROR, INTEGER_EXPRESSION_EXPECTED);
 		return;
 	}
@@ -678,14 +705,31 @@ Interpreter::next(const char *varName)
 void
 Interpreter::save()
 {
+	/**
+	 * struct SavedProgram_t
+	 * {
+	 *	uint16_t	length;
+	 *	uint8_t		data[length];
+	 *	uint16_t	crc;
+	 * };
+	 */
+	
+	// Program text buffer length
 	size_t len = _program._textEnd;
+	uint16_t crc = 0;
+	
 	EEPROMClass e;
+	// First 2 bytes is program length
 	e.update(0, (len << 8) >> 8);
 	e.update(1, len >> 8);
-	for (size_t p = 0; p < _program._textEnd; ++p) {
+	size_t p;
+	for (p = 0; p < _program._textEnd; ++p) {
 		e.update(p + 2, _program._text[p]);
+		crc = _crc16_update(crc, _program._text[p]);
 		_output.print('.');
 	}
+	e.update(p + 2, (crc << 8) >> 8);
+	e.update(p + 3, crc >> 8);
 	newline();
 }
 
@@ -693,12 +737,20 @@ void Interpreter::load()
 {
 	_program.newProg();
 	EEPROMClass e;
+	
+	uint16_t crc = 0;
 	size_t len = size_t(e.read(0));
 	len |= size_t(e.read(1)) << 8;
-	for (size_t p = 0; p < len; ++p) {
+	size_t p;
+	for (p = 0; p < len; ++p) {
 		_program._text[p] = e.read(p + 2);
+		crc = _crc16_update(crc, _program._text[p]);
 		_output.print('.');
 	}
+	uint16_t pCrc = uint16_t(e.read(p+2));
+	pCrc |= size_t(e.read(p+3)) << 8;
+	if (pCrc != crc)
+		newline(), raiseError(DYNAMIC_ERROR, BAD_CHECKSUM);
 	newline();
 	_program._textEnd = _program._variablesEnd = _program._arraysEnd = len;
 }

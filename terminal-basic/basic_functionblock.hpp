@@ -42,6 +42,7 @@ public:
 	void init();
 	
 	FunctionBlock *next() { return _next; }
+	void setNext(FunctionBlock *newVal) { _next = newVal; }
 	
 protected:
 	

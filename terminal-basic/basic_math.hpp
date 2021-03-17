@@ -45,7 +45,6 @@ private:
 	static bool func_cot(Interpreter&);
 	static bool func_exp(Interpreter&);
 	static bool func_log(Interpreter&);
-	static bool func_rnd(Interpreter&);
 	static bool func_sin(Interpreter&);
 	static bool func_sqr(Interpreter&);
 	static bool func_pi(Interpreter&);
@@ -53,7 +52,7 @@ private:
 	
 	enum FuncNames : uint8_t
 	{
-		F_ABS = 0, F_ACS, F_ATN, F_COS, F_COT, F_EXP, F_LOG, F_PI, F_RND,
+		F_ABS = 0, F_ACS, F_ATN, F_COS, F_COT, F_EXP, F_LOG, F_PI,
 		F_SIN, F_SQR, F_TAN, NUM_FUNC
 	};
 	

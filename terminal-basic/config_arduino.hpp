@@ -27,7 +27,7 @@
 #define USEUTFT 0
 // Use multiterminal mode
 #define BASIC_MULTITERMINAL 0
-// USe long integer
+// Use long integer
 #define USE_LONGINT 0
 // Tokenize keywords in program text
 const bool TOKENIZE = true;

@@ -31,13 +31,12 @@ static const char sCOT[] PROGMEM = "COT";
 static const char sEXP[] PROGMEM = "EXP";
 static const char sLOG[] PROGMEM = "LOG";
 static const char sPI[] PROGMEM = "PI";
-static const char sRND[] PROGMEM = "RND";
 static const char sSIN[] PROGMEM = "SIN";
 static const char sSQR[] PROGMEM = "SQR";
 static const char sTAN[] PROGMEM = "TAN";
 
 PGM_P const Math::funcStrings[NUM_FUNC] PROGMEM = {
-	sABS, sACS, sATN, sCOS, sCOT, sEXP, sLOG, sPI, sRND, sSIN, sSQR, sTAN
+	sABS, sACS, sATN, sCOS, sCOT, sEXP, sLOG, sPI, sSIN, sSQR, sTAN
 };
 
 Math::Math(FunctionBlock *next) :
@@ -66,8 +65,6 @@ Math::_getFunction(const char *name) const
 		return func_sin;
 	else if (strcmp_P(name, (PGM_P)pgm_read_word(&(funcStrings[F_SQR]))) == 0)
 		return func_sqr;
-	else if (strcmp_P(name, (PGM_P)pgm_read_word(&(funcStrings[F_RND]))) == 0)
-		return func_rnd;
 	else if (strcmp_P(name, (PGM_P)pgm_read_word(&(funcStrings[F_PI]))) == 0)
 		return func_pi;
 	else if (strcmp_P(name, (PGM_P)pgm_read_word(&(funcStrings[F_TAN]))) == 0)
@@ -81,7 +78,13 @@ Math::func_abs(Interpreter &i)
 {
 	Parser::Value v(Integer(0));
 	i.popValue(v);
+#if USE_LONGINT
+	if (v.type == Parser::Value::INTEGER ||
+	    v.type == Parser::Value::LONG_INTEGER ||
+	    v.type == Parser::Value::REAL) {
+#else
 	if (v.type == Parser::Value::INTEGER || v.type == Parser::Value::REAL) {
+#endif
 		if (v < Parser::Value(Integer(0)))
 			v.switchSign();
 		i.pushValue(v);
@@ -124,14 +127,6 @@ bool
 Math::func_log(Interpreter &i)
 {
 	return general_func(i, &log_r);
-}
-
-bool
-Math::func_rnd(Interpreter &i)
-{
-	Parser::Value v(Real(random())/Real(RANDOM_MAX));
-	i.pushValue(v);
-	return (true);
 }
 
 bool

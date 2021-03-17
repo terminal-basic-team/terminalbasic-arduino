@@ -39,7 +39,9 @@ ArduinoIO::_getFunction(const char *name) const
 		switch (c) {
 		case 'A':
 			++position;
-			if (name[position] == 'R') {
+			c = name[position];
+			switch (c) {
+			case 'R':
 				++position;
 				if (name[position] == 'E') {
 					++position;
@@ -56,6 +58,7 @@ ArduinoIO::_getFunction(const char *name) const
 						}
 					}
 				}
+				break;
 			}
 			break;
 		case 'D':
@@ -91,6 +94,23 @@ ArduinoIO::_getCommand(const char *name) const
 	char c = name[position];
 	if (c != 0) {
 		switch (c) {
+		case 'A':
+			++position;
+			if (name[position] == 'W') {
+				++position;
+				if (name[position] == 'R') {
+					++position;
+					if (name[position] == 'I') {
+						++position;
+						if (name[position] == 'T') {
+							++position;
+							if (name[position] == 'E')
+								return (comm_awrite);
+						}
+					}
+				}
+			}
+			break;
 		case 'D':
 			++position;
 			if (name[position] == 'W') {
@@ -133,13 +153,46 @@ ArduinoIO::func_dread(Interpreter &i)
 {
 	Parser::Value v(Integer(0));
 	i.popValue(v);
+#if USE_LONGINT
+	if (v.type == Parser::Value::INTEGER ||
+	    v.type == Parser::Value::LONG_INTEGER) {
+#else
 	if (v.type == Parser::Value::INTEGER) {
+#endif
 		pinMode(Integer(v), INPUT);
 		v = bool(digitalRead(Integer(v)));
 		i.pushValue(v);
 		return (true);
 	} else
 		return (false);
+}
+
+bool
+ArduinoIO::comm_awrite(Interpreter &i)
+{
+	Parser::Value v(Integer(0));
+	i.popValue(v);
+#if USE_LONGINT
+	if (v.type == Parser::Value::INTEGER ||
+	    v.type == Parser::Value::LONG_INTEGER) {
+#else
+	if (v.type == Parser::Value::INTEGER) {
+#endif
+		Parser::Value v2(Integer(0));
+		i.popValue(v2);
+#if USE_LONGINT
+		if (v2.type == Parser::Value::INTEGER ||
+		    v2.type == Parser::Value::LONG_INTEGER) {
+#else
+		if (v2.type == Parser::Value::INTEGER) {
+#endif
+			pinMode(Integer(v2), OUTPUT);
+			analogWrite(Integer(v2), Integer(v));
+			return (true);
+		}
+	}
+
+	return (false);
 }
 
 bool
@@ -150,13 +203,18 @@ ArduinoIO::comm_dwrite(Interpreter &i)
 	if (v.type == Parser::Value::BOOLEAN) {
 		Parser::Value v2(Integer(0));
 		i.popValue(v2);
+#if USE_LONGINT
+		if (v2.type == Parser::Value::INTEGER ||
+		    v2.type == Parser::Value::LONG_INTEGER) {
+#else
 		if (v2.type == Parser::Value::INTEGER) {
+#endif
 			pinMode(Integer(v2), OUTPUT);
 			digitalWrite(Integer(v2), bool(v));
 			return (true);
 		}
 	}
-	
+
 	return (false);
 }
 

@@ -69,6 +69,7 @@ public:
 		INVALID_VALUE_TYPE,
 		NO_SUCH_ARRAY,
 		INTEGER_EXPRESSION_EXPECTED, // Integer expression expected
+		BAD_CHECKSUM,		// Bad program checksum
 		INTERNAL_ERROR = 255
 	};
 	
@@ -378,23 +379,23 @@ private:
 	bool arrayElementIndex(ArrayFrame*, size_t&);
 	
 	// Interpreter FSM state
-	State	 _state;
+	State			 _state;
 	// Input oject
-	Stream	&_input;
+	Stream			&_input;
 	// Output object
-	Print	&_output;
+	Print			&_output;
 	// Lexical analyzer object
-	Lexer	 _lexer;
+	Lexer			 _lexer;
 	// Syntactical analyzer object
-	Parser	 _parser;
+	Parser			 _parser;
 	//Input buffer
-	char _inputBuffer[PROGSTRINGSIZE];
+	char			 _inputBuffer[PROGSTRINGSIZE];
 	// Position in the input buffer
-	uint8_t _inputPosition;
+	uint8_t			 _inputPosition;
 	// Input variable name string;
-	char _inputVarName[VARSIZE];
+	char			 _inputVarName[VARSIZE];
 	// Static text strings
-	static PGM_P const _progmemStrings[];
+	static PGM_P const	 _progmemStrings[];
 };
 
 }

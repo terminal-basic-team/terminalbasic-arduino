@@ -103,7 +103,10 @@ private:
 	void fitst_LT();
 	void fitst_GT();
 	
+	// Parse decimal number
 	void decimalNumber();
+	// Parse Binary number
+	void binaryInteger();
 	bool numberScale();
 	void ident();
 	void stringConst();

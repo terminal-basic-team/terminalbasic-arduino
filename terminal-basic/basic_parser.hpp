@@ -24,7 +24,7 @@
 
 #include "cps.hpp"
 #include "basic.hpp"
-#include "basic_functionblock.hpp"
+#include "basic_internalfuncs.hpp"
 
 namespace BASIC
 {
@@ -70,7 +70,8 @@ public:
 	 * @return error code
 	 */
 	ErrorCodes getError() const { return _error; }
-	FunctionBlock *firstFB() { return _firstFB; }
+	
+	void init();
 private:
 	/**
 	 * Parser mode: syntax check or execute commands of the interpreter
@@ -111,7 +112,7 @@ private:
 	// stop parsing string flag
 	bool	_stopParse;
 	// first module in chain reference
-	FunctionBlock *_firstFB;
+	InternalFunctions _internal;
 };
 
 }

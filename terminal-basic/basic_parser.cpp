@@ -77,8 +77,13 @@ namespace BASIC
 {
 
 Parser::Parser(Lexer &l, Interpreter &i, FunctionBlock *first) :
-_lexer(l), _interpreter(i), _mode(EXECUTE), _firstFB(first)
+_lexer(l), _interpreter(i), _mode(EXECUTE), _internal(first)
 {
+}
+
+void Parser::init()
+{
+	_internal.init();
 }
 
 bool
@@ -641,31 +646,31 @@ Parser::fCommand()
 		if (_mode == EXECUTE)
 			_interpreter.list(start, stop);
 	}
-		return true;
+		return (true);
 	case Token::COM_LOAD:
 		if (_mode == EXECUTE)
 			_interpreter.load();
 		_lexer.getNext();
-		return true;
+		return (true);
 	case Token::COM_NEW:
 		if (_mode == EXECUTE)
 			_interpreter.newProgram();
 		_lexer.getNext();
-		return true;
+		return (true);
 	case Token::COM_RUN:
 		if (_mode == EXECUTE)
 			_interpreter.run();
 		_lexer.getNext();
-		return true;
+		return (true);
 	case Token::COM_SAVE:
 		if (_mode == EXECUTE)
 			_interpreter.save();
 		_lexer.getNext();
-		return true;
+		return (true);
 	case Token::REAL_IDENT:
 	case Token::INTEGER_IDENT:
 		FunctionBlock::command c;
-		if (_firstFB != NULL && (c=_firstFB->getCommand(_lexer.id()))) {
+		if ((c=_internal.getCommand(_lexer.id())) != NULL) {
 			while (_lexer.getNext()) {
 				Value v;
 				// String value already on stack after fExpression
@@ -683,7 +688,7 @@ Parser::fCommand()
 			return (*c)(_interpreter);
 		}
 	default:
-		return false;
+		return (false);
 	}
 }
 
@@ -695,17 +700,17 @@ Parser::fForConds()
 	if (!fImplicitAssignment(vName) ||
 	    _lexer.getToken()!=Token::KW_TO || !_lexer.getNext() ||
 	    !fExpression(v)) {
-		return false;
+		return (false);
 	}
 	Value vStep(Integer(1));
 	if (_lexer.getToken() == Token::KW_STEP && (!_lexer.getNext() ||
 	    !fExpression(vStep)))
-		return false;
+		return (false);
 	
 	if (_mode == EXECUTE)
 		_interpreter.pushForLoop(vName, _lexer.getPointer(), v, vStep);
 	
-	return true;
+	return (true);
 }
 
 bool
@@ -715,14 +720,14 @@ Parser::fVarList()
 	char varName[VARSIZE];
 	do {
 		if (!_lexer.getNext() || !fVar(varName))
-			return false;
+			return (false);
 		if (_mode == EXECUTE) {
 			_interpreter.input(varName);
 		} if (!_lexer.getNext())
-			return true;
+			return (true);
 		t = _lexer.getToken();
 	} while (t == Token::COMMA);
-	return true;
+	return (true);
 }
 
 bool
@@ -731,9 +736,9 @@ Parser::fVar(char *varName)
 	if ((_lexer.getToken() >= Token::REAL_IDENT) &&
 	    (_lexer.getToken() <= Token::BOOL_IDENT)) {
 		strcpy(varName, _lexer.id());
-		return true;
+		return (true);
 	} else
-		return false;
+		return (false);
 }
 
 bool
@@ -745,7 +750,7 @@ Parser::fArrayList()
 	do {
 		if (!fVar(arrName) ||
 		    !_lexer.getNext() || !fArray(dimensions))
-			return false;
+			return (false);
 		_interpreter.pushDimensions(dimensions);
 		_interpreter.newArray(arrName);
 		t = _lexer.getToken();
@@ -762,10 +767,10 @@ Parser::fArray(uint8_t &dimensions)
 {
 	if (_lexer.getToken() != Token::LPAREN ||
 	    !fDimensions(dimensions) || _lexer.getToken() != Token::RPAREN)
-		return false;
+		return (false);
 
 	_lexer.getNext();
-	return true;
+	return (true);
 }
 
 bool
@@ -775,11 +780,11 @@ Parser::fDimensions(uint8_t &dimensions)
 	dimensions = 0;
 	do {
 		if (!_lexer.getNext() || !fExpression(v))
-			return false;
+			return (false);
 		_interpreter.pushDimension(Integer(v));
 		++dimensions;
 	} while (_lexer.getToken() == Token::COMMA);
-	return true;
+	return (true);
 }
 
 bool
@@ -789,17 +794,17 @@ Parser::fIdentifierExpr(const char *varName, Value &v)
 	if (_lexer.getNext() && _lexer.getToken()==
 	    Token::LPAREN) { // (, array or function
 		FunctionBlock::function f;
-		if (_firstFB != NULL && (f=_firstFB->getFunction(varName))) {
+		if ((f=_internal.getFunction(varName)) != NULL) {
 			// function
 			Value arg;
 			do {
 				if (!_lexer.getNext())
-					return false;
+					return (false);
 				else if (_lexer.getToken() == Token::RPAREN) {
 					break;
 				} else {
 					if (!fExpression(arg))
-						return false;
+						return (false);
 					_interpreter.pushValue(arg);
 				}
 			} while (_lexer.getToken() == Token::COMMA);
@@ -807,22 +812,22 @@ Parser::fIdentifierExpr(const char *varName, Value &v)
 			bool result = true;
 			if (_mode == EXECUTE) {
 				result = ((*f)(_interpreter));
-				if (!_interpreter.popValue(v) || !result)
-					return false;
+				if (!result || !_interpreter.popValue(v))
+					return (false);
 			}
 		} else { // No such function, array variable
 			uint8_t dim;
 			if (fArray(dim)) {
 				if (_mode == EXECUTE &&
 				    _interpreter.valueFromArray(v, varName))
-					return true;
+					return (true);
 			} else
-				return false;
+				return (false);
 		}
 	} else
 		if (_mode == EXECUTE)
 			_interpreter.valueFromVar(v, varName);
-	return true;
+	return (true);
 }
 
 }

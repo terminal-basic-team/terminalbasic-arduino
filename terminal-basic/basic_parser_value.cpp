@@ -292,6 +292,13 @@ Parser::Value::operator+=(const Value &rhs)
 		break;
 	case BOOLEAN:
 		switch (rhs.type) {
+#if USE_LONGINT
+		case LONG_INTEGER:
+			value.longInteger = Integer(value.boolean) +
+			    rhs.value.longInteger;
+			type = Value::LONG_INTEGER;
+			break;
+#endif
 		case INTEGER:
 			value.integer = Integer(value.boolean) +
 			    rhs.value.integer;
@@ -357,6 +364,13 @@ Parser::Value::operator-=(const Value &rhs)
 		break;
 	case BOOLEAN:
 		switch (rhs.type) {
+#if USE_LONGINT
+		case LONG_INTEGER:
+			value.longInteger = Integer(value.boolean) -
+			    rhs.value.longInteger;
+			type = Value::LONG_INTEGER;
+			break;
+#endif
 		case INTEGER:
 			value.integer = Integer(value.boolean) -
 			    rhs.value.integer;
