@@ -43,20 +43,20 @@ static BASIC::ArduinoIO arduinoIo(&mathBlock);
 #if BASIC_MULTITERMINAL
 static BASIC::Interpreter::Program program(BASIC::PROGRAMSIZE / 5);
 static BASIC::Interpreter basic(Serial, Serial, program, &arduinoIo);
-#ifdef HAVE_HWSERIAL1
+#if HAVE_HWSERIAL1
 static BASIC::Interpreter::Program program1(BASIC::PROGRAMSIZE / 5);
 static BASIC::Interpreter basic1(Serial1, Serial1, program1, &arduinoIo);
 #endif
-#ifdef HAVE_HWSERIAL2
+#if HAVE_HWSERIAL2
 static BASIC::Interpreter::Program program2(BASIC::PROGRAMSIZE / 5);
 static BASIC::Interpreter basic2(Serial2, Serial2, program2, &arduinoIo);
 #endif
-#ifdef HAVE_HWSERIAL3
+#if HAVE_HWSERIAL3
 static BASIC::Interpreter::Program program3(BASIC::PROGRAMSIZE / 5);
 static BASIC::Interpreter basic3(Serial3, Serial3, program3, &arduinoIo);
 #endif
 #else
-static BASIC::Interpreter::Program program(PROGRAMSIZE);
+static BASIC::Interpreter::Program program(BASIC::PROGRAMSIZE);
 #if USEUTFT
 static BASIC::Interpreter basic(Serial, utftPrint, program, &arduinoIo);
 #else
@@ -71,14 +71,15 @@ setup()
 #if USEUTFT
 	utftPrint.begin();
 #endif
+	
 #if BASIC_MULTITERMINAL
-#ifdef HAVE_HWSERIAL1
+#if HAVE_HWSERIAL1
 	Serial1.begin(57600);
 #endif
-#ifdef HAVE_HWSERIAL2
+#if HAVE_HWSERIAL2
 	Serial2.begin(57600);
 #endif
-#ifdef HAVE_HWSERIAL3
+#if HAVE_HWSERIAL3
 	Serial3.begin(57600);
 #endif
 #endif
@@ -89,13 +90,13 @@ setup()
 	
 	basic.init();
 #if BASIC_MULTITERMINAL
-#ifdef HAVE_HWSERIAL1
+#if HAVE_HWSERIAL1
 	basic1.init();
 #endif
-#ifdef HAVE_HWSERIAL2
+#if HAVE_HWSERIAL2
 	basic2.init();
 #endif
-#ifdef HAVE_HWSERIAL3
+#if HAVE_HWSERIAL3
 	basic3.init();
 #endif
 #endif

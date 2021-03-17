@@ -21,17 +21,19 @@
 
 #include <stdint.h>
 
+namespace BASIC
+{
+
 // Use SDCARD module
 #define USESD 0
-// USe TFT output
+// Uыe TFT output
 #define USEUTFT 0
 // Use multiterminal mode
 #define BASIC_MULTITERMINAL 0
 // Use long integer
-#define USE_LONGINT 0
+#define USE_LONGINT 1
 // Tokenize keywords in program text
 const bool TOKENIZE = true;
-
 // Max size of the program line
 const uint8_t PROGSTRINGSIZE = 72;
 
@@ -51,5 +53,7 @@ const uint8_t STRINGSIZE = 32;
 
 // Number of characters in variable name
 const uint8_t VARSIZE = 8;
+
+}
 
 #endif

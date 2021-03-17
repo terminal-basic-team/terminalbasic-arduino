@@ -83,6 +83,7 @@ _lexer(l), _interpreter(i), _mode(EXECUTE), _internal(first)
 
 void Parser::init()
 {
+	_mode = EXECUTE;
 	_internal.init();
 }
 
@@ -207,6 +208,9 @@ Parser::fOperator()
 		if (!fVarList()) {
 			_error = VARIABLES_LIST_EXPECTED;
 			return (false);
+		} else if (_mode == EXECUTE) {
+			_interpreter.input();
+			_stopParse = true;
 		}
 		break;
 	}
@@ -722,7 +726,7 @@ Parser::fVarList()
 		if (!_lexer.getNext() || !fVar(varName))
 			return (false);
 		if (_mode == EXECUTE) {
-			_interpreter.input(varName);
+			_interpreter.pushInputObject(varName);
 		} if (!_lexer.getNext())
 			return (true);
 		t = _lexer.getToken();

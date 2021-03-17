@@ -30,54 +30,104 @@ class CPS_PACKED Interpreter::Program
 public:
 
 	/**
-	 * BASIC string
-	 * @return 
+	 * @brief BASIC program string object
 	 */
 	struct CPS_PACKED String
 	{
+		// string decimal number (label)
 		uint16_t number;
+		// size in bytes
 		uint8_t size;
+		// string body
 		char text[];
 	};
 
+	/**
+	 * @program stack frame object
+	 */
 	struct CPS_PACKED StackFrame
 	{
+		/**
+		 * @brief Stack frame type
+		 */
 		enum Type : uint8_t
 		{
-			SUBPROGRAM_RETURN, FOR_NEXT, STRING, ARRAY_DIMENSION,
-			ARRAY_DIMENSIONS, VALUE
+			// Subprogram return address
+			SUBPROGRAM_RETURN,
+			// FOR-loop state frame
+			FOR_NEXT,
+			// String frame
+			STRING,
+			// One array dimension
+			ARRAY_DIMENSION,
+			// Number of array dimensions
+			ARRAY_DIMENSIONS,
+			// Value frame
+			VALUE,
+			// Input object frame
+			INPUT_OBJECT
 		};
 
+		/**
+		 * @brief FOR-loop state frame body
+		 */
 		struct CPS_PACKED ForBody
 		{
-			size_t calleeIndex;
-			uint8_t textPosition;
-			char varName[VARSIZE];
-			Parser::Value current;
-			Parser::Value step;
-			Parser::Value finalv;
+			// Program counter on loop begin
+			size_t		calleeIndex;
+			// Loop begin position in the program string
+			uint8_t		textPosition;
+			// Loop variable name
+			char		varName[VARSIZE];
+			// Current value of the loop variable
+			Parser::Value	currentValue;
+			// Loop step value
+			Parser::Value	stepValue;
+			// Loop final value
+			Parser::Value	finalvalue;
 		};
 		static_assert (sizeof (ForBody) <= UINT8_MAX, "bad size");
 		
+		/**
+		 * @brief Subprogram return address frame body
+		 */
 		struct CPS_PACKED GosubReturn
 		{
-			size_t calleeIndex;
-			uint8_t textPosition;
+			// Program counter of the colee string
+			size_t	calleeIndex;
+			// Position in the program string
+			uint8_t	textPosition;
+		};
+		
+		/**
+		 * @brief Input object frame body
+		 */
+		struct CPS_PACKED InputBody
+		{
+			enum Type : uint8_t
+			{
+				INPUT_VAR, INPUT_ARR_ELM
+			};
+			// Program counter of the colee string
+			Type	type;
+			char	name[VARSIZE];
 		};
 
 		static uint8_t size(Type);
 
 		Type _type;
 
-		union CPS_PACKED
+		union CPS_PACKED Body
 		{
 			GosubReturn	gosubReturn;
 			uint8_t		arrayDimensions;
 			size_t		arrayDimension;
 			ForBody		forFrame;
+			InputBody	inputObject;
 			char		string[STRINGSIZE];
 			Parser::Value	value;
-		} body;
+		};
+		Body body;
 	};
 
 	Program(size_t=PROGRAMSIZE);
@@ -139,7 +189,14 @@ public:
 	 * @param type
 	 */
 	StackFrame *push(StackFrame::Type);
+	/**
+	 * @brief pop top value
+	 */
 	void pop();
+	/**
+	 * @brief reverse order of last same type elements
+	 */
+	void reverseLast(StackFrame::Type);
 	/**
 	 * @brief Add new Program line
 	 * @param number decimal line number
@@ -159,6 +216,7 @@ public:
 #endif
 	const size_t programSize;
 private:
+	void pushBottom(StackFrame*);
 	// End of program text
 	size_t _textEnd;
 	size_t _current, _variablesEnd, _arraysEnd, _sp, _jump;

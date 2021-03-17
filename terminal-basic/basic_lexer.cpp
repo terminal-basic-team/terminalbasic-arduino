@@ -978,19 +978,26 @@ Lexer::decimalNumber()
 				} else if (SYM == 0) {
 					_token = Token::C_REAL;
 					return;
-				} else
-					break;
+				} else if (SYM == 'E') {
+					if (!numberScale())
+						_token = Token::NOTOKENS;
+					else
+						_token = Token::C_REAL;
+					return;
+				} else {
+					_token = Token::C_REAL;
+					return;
+				}
 			}
 		}
 		break;
 		case 'E':
 		{
+			if (_value.type == Parser::Value::INTEGER
 #if USE_LONGINT
-			if (_value.type == Parser::Value::INTEGER ||
-			    _value.type == Parser::Value::LONG_INTEGER)
-#else
-			if (_value.type == Parser::Value::INTEGER)
-#endif
+			 || _value.type == Parser::Value::LONG_INTEGER
+#endif			
+			)
 				_value = Real(_value);
 			if (!numberScale()) {
 				_token = Token::NOTOKENS;
@@ -998,14 +1005,13 @@ Lexer::decimalNumber()
 			}
 		}
 		default:
+			if (_value.type == Parser::Value::INTEGER
 #if USE_LONGINT
-			if (_value.type == Parser::Value::INTEGER ||
-			     _value.type == Parser::Value::LONG_INTEGER)
-				_token = Token::C_INTEGER;
-#else
-			if (_value.type == Parser::Value::INTEGER)
-				_token = Token::C_INTEGER;
+			 || _value.type == Parser::Value::LONG_INTEGER
 #endif
+			    )
+				_token = Token::C_INTEGER;
+
 			else
 				_token = Token::C_REAL;
 			return;

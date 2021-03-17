@@ -182,6 +182,7 @@ public:
 		COLLECT_INPUT,	//
 		EXECUTE,	// Runniong the program
 		VAR_INPUT,	// Input of the variable value
+		GET_VAR_VALUE,
 		CONFIRM_INPUT	// Input of the confirmation
 	};
 	// Memory dump modes
@@ -218,7 +219,7 @@ public:
 	enum ProgMemStrings : uint8_t
 	{
 		S_STATIC = 0, S_DYNAMIC, S_ERROR, S_SEMANTIC, READY, BYTES,
-		AVAILABLE, ucBASIC, S_VERSION, S_TEXT, S_OF, S_VARS,
+		AVAILABLE, TERMINAL, ucBASIC, S_VERSION, S_TEXT, S_OF, S_VARS,
 		S_ARRAYS, S_STACK, S_DIR, S_REALLY, NUM_STRINGS
 	};
 	/**
@@ -274,6 +275,7 @@ public:
 	void pushForLoop(const char*, uint8_t, const Parser::Value&,
 	    const Parser::Value&);
 	void pushValue(const Parser::Value&);
+	void pushInputObject(const char*);
 	bool popValue(Parser::Value&);
 	bool popString(const char*&);
 	void randomize();
@@ -288,10 +290,9 @@ public:
 	
 	void load();
 	/**
-	 * @breif Input variable
-	 * @param variable name
+	 * @breif Input variables
 	 */
-	void input(const char*);
+	void input();
 	
 	void end();
 	/**
@@ -356,7 +357,9 @@ public:
 	Program &_program;
 private:
 	class AttrKeeper;
-		
+	// Get next input object from stack
+	bool nextInput();
+	// Place input values to objects
 	void doInput();
 	
 	void print(Lexer&);
@@ -396,6 +399,8 @@ private:
 	char			 _inputVarName[VARSIZE];
 	// Static text strings
 	static PGM_P const	 _progmemStrings[];
+	static uint8_t		 _termnoGen;
+	uint8_t			 _termno;
 };
 
 }

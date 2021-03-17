@@ -19,6 +19,8 @@
 #ifndef ASCII_HPP
 #define ASCII_HPP
 
+#include <inttypes.h>
+
 /**
  * @brief ASCII control characters
  */
@@ -34,7 +36,8 @@ enum class ASCII : uint8_t
 	LF  = 0x0A,
 	CR  = 0x0D,
 	CAN = 0x18,
-	ESC = 0x1B
+	ESC = 0x1B,
+	DEL = 0x7F
 };
 
 #endif
