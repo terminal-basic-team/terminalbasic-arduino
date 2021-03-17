@@ -187,7 +187,7 @@ const char sZER[] PROGMEM = "ZER";
 #endif*/
 const char sSTAR[] PROGMEM = "*";
 const char sSLASH[] PROGMEM = "/";
-#if USE_REALS
+#if USE_REALS && USE_INTEGER_DIV
 const char sBACK_SLASH[] PROGMEM = "\\";
 #endif
 const char sPLUS[] PROGMEM = "+";
@@ -209,101 +209,9 @@ const char sLPAREN[] PROGMEM = "(";
 const char sRPAREN[] PROGMEM = ")";
 
 PGM_P const Lexer::tokenStrings[] PROGMEM = {
-/*	nullptr,	// 0
-	nullptr,	// 1
-#if USE_DUMP
-	nullptr,	// 2
-#endif
-	nullptr,	// 3
-#if USE_SAVE_LOAD
-	nullptr,	// 4
-#endif
-	nullptr,	// 5
-#if USESTOPCONT
-	nullptr,	// 6
-#endif
-#if USE_MATRIX
-	nullptr,	// 7
-#endif
-#if USE_DATA
-	nullptr,	// 8
-#endif
-	nullptr,	// 6
-//	sDELAY,		// 7
-#if USE_MATRIX
-	nullptr,
-#endif
-	nullptr,       // 8
-#if USE_DOLOOP
-	nullptr,
-#endif
-#if USE_DUMP
-	nullptr,      // 9
-#endif
-	nullptr,       // 10
-	nullptr,     // 11
-	nullptr,       // 12
-	nullptr,     // 13
-	nullptr,      // 14
-	nullptr,        // 15
-#if USE_MATRIX
-	nullptr,
-#endif
-	nullptr,        // 16
-	nullptr,     // 17
-#if USE_MATRIX
-	nullptr,
-#endif
-	nullptr,       // 18
-	nullptr,      // 19
-#if USE_SAVE_LOAD
-	nullptr,      // 20
-#endif
-#if USE_DOLOOP
-	nullptr,
-#endif
-#if USE_MATRIX
-	nullptr,
-#endif
-	nullptr,       // 21
-	nullptr,      // 22
-	nullptr,
-	nullptr,        // 23
-	nullptr,    // 24
-	nullptr,
-	nullptr,     // 25
-#if USE_RANDOM
-	nullptr,
-#endif
-	nullptr,
-	nullptr,
-	nullptr,
-	nullptr,
-#if USE_SAVE_LOAD
-	nullptr,
-#endif
-	nullptr,
-#if USESTOPCONT
-	nullptr,
-#endif
-	nullptr,
-	nullptr,
-	nullptr,
-#if USE_MATRIX
-	nullptr,
-#endif
-	nullptr,
-#if USE_DUMP
-	nullptr,
-#endif
-#if USE_MATRIX
-	nullptr,
-#endif
- */
-///////////////////
 	sSTAR,
 	sSLASH,
-#if USE_REALS
+#if USE_REALS && USE_INTEGER_DIV
 	sBACK_SLASH,
 #endif
 	sPLUS, sMINUS,
@@ -353,6 +261,9 @@ static const uint8_t tokenTable[] PROGMEM = {
 	'D', 'E', 'T'+0x80,
 #endif
 	'D', 'I', 'M'+0x80,                // 8
+#if USE_DIV_KW
+	'D', 'I', 'V'+0x80,
+#endif
 #if USE_DOLOOP
 	'D', 'O'+0x80,
 #endif
@@ -388,6 +299,9 @@ static const uint8_t tokenTable[] PROGMEM = {
 #endif
 #if USE_MATRIX
 	'M', 'A', 'T'+0x80,
+#endif
+#if USE_INTEGER_DIV
+	'M', 'O', 'D'+0x80,
 #endif
 	'N', 'E', 'W'+0x80,                // 21
 	'N', 'E', 'X', 'T'+0x80,           // 22
@@ -571,7 +485,7 @@ Lexer::getNext()
 			_token = Token::SLASH;
 			next();
 			return true;
-#if USE_REALS
+#if USE_REALS && USE_INTEGER_DIV
 		case '\\':
 			_token = Token::BACK_SLASH;
 			next();

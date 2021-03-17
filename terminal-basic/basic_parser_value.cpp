@@ -203,7 +203,7 @@ Parser::Value::operator==(const Value &rhs) const
 	switch (this->type) {
 #if USE_REALS
 	case REAL:
-		return this->value.real == Real(rhs);
+		return math<Real>::almost_equal(this->value.real, Real(rhs));
 		//eturn math<Real>::almost_equal(this->value.real, Real(rhs), 2);
 #endif
 #if USE_LONGINT
@@ -349,6 +349,33 @@ Parser::Value::operator/=(const Value &rhs)
 #endif
 	return *this;
 }
+
+Parser::Value&
+Parser::Value::divEquals(const Value &rhs)
+{
+#if USE_LONGINT
+	if (type == Value::INTEGER || type == Value::BOOLEAN)
+		*this = Integer(Integer(*this) / Integer(rhs));
+	else
+#endif
+		*this = INT(INT(*this) / INT(rhs));
+	
+	return *this;
+}
+
+Parser::Value&
+Parser::Value::modEquals(const Value &rhs)
+{
+#if USE_LONGINT
+	if (type == Value::INTEGER || type == Value::BOOLEAN)
+		*this = Integer(Integer(*this) % Integer(rhs));
+	else
+#endif
+		*this = INT(INT(*this) % INT(rhs));
+	
+	return *this;
+}
+
 
 void
 Parser::Value::powerMatchValue(const Value &rhs)

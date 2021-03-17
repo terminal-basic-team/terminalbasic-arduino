@@ -137,6 +137,9 @@ enum class Token : uint8_t
 	KW_DET,        // 11
 #endif
 	KW_DIM,        // 12
+#if USE_DIV_KW
+	KW_DIV,
+#endif
 #if USE_DOLOOP
 	KW_DO,         // 13
 #endif
@@ -172,6 +175,9 @@ enum class Token : uint8_t
 #endif
 #if USE_MATRIX
 	KW_MAT,        // 28
+#endif
+#if USE_INTEGER_DIV
+	KW_MOD,        // 29
 #endif
 	COM_NEW,       // 29
 	KW_NEXT,       // 30
@@ -222,7 +228,7 @@ enum class Token : uint8_t
 	STAR,          // 51
 	// /
 	SLASH,         // 52
-#if USE_REALS
+#if USE_REALS && USE_INTEGER_DIV
 	BACK_SLASH,    // 53
 #endif
 	// +

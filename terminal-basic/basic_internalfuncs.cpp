@@ -233,9 +233,9 @@ bool
 InternalFunctions::func_rnd(Interpreter &i)
 {
 #if USE_REALS
-	Parser::Value v(Real(random()) / Real(RANDOM_MAX));
+	Parser::Value v(Real(random(0x7FFFFFFF)) / Real(0x7FFFFFFF));
 #else
-	Parser::Value v(Integer(random()));
+	Parser::Value v(Integer(random(0x7FFFFFFF)));
 #endif
 	i.pushValue(v);
 	return true;

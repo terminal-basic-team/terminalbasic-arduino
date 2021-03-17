@@ -88,10 +88,13 @@ public:
 	bool operator>(const Value&) const;
 	friend bool operator >=(const Value&, const Value&);
 	friend bool operator <=(const Value&, const Value&);
+
 	Value &operator+=(const Value&);
 	Value &operator-=(const Value&);
 	Value &operator*=(const Value&);
 	Value &operator/=(const Value&);
+	Value &divEquals(const Value&);
+	Value &modEquals(const Value&);
 	Value &operator^=(const Value&);
 	Value &operator|=(const Value&);
 	Value &operator&=(const Value&);

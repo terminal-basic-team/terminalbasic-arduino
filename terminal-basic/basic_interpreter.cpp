@@ -128,7 +128,7 @@ Interpreter::valueFromVar(Parser::Value &v, const char *varName)
 		v.type = Parser::Value::STRING;
 		Program::StackFrame *fr =
 		    _program.push(Program::StackFrame::STRING);
-		if (fr == NULL) {
+		if (fr == nullptr) {
 			raiseError(DYNAMIC_ERROR, STACK_FRAME_ALLOCATION);
 			return;
 		}
@@ -379,6 +379,8 @@ Interpreter::exec()
 			}
 			_inputPosition += _lexer.getPointer();
 		}
+		if (_state == PROGRAM_INPUT)
+			_state = SHELL;
 	}
 }
 
@@ -766,12 +768,12 @@ Interpreter::returnFromSub()
 		raiseError(DYNAMIC_ERROR, RETURN_WO_GOSUB);
 }
 
-void
+Program::StackFrame*
 Interpreter::pushForLoop(const char *varName, uint8_t textPosition,
     const Parser::Value &v, const Parser::Value &vStep)
 {
 	Program::StackFrame *f = _program.push(Program::StackFrame::FOR_NEXT);
-	if (f != NULL) {
+	if (f != nullptr) {
 		f->body.forFrame.calleeIndex = _program._current.index;
 		f->body.forFrame.textPosition = _program._current.position +
 		    textPosition;
@@ -783,6 +785,8 @@ Interpreter::pushForLoop(const char *varName, uint8_t textPosition,
 		setVariable(varName, f->body.forFrame.currentValue);
 	} else
 		raiseError(DYNAMIC_ERROR, STACK_FRAME_ALLOCATION);
+	
+	return f;
 }
 
 bool
@@ -851,22 +855,30 @@ Interpreter::next(const char *varName)
 	if ((f != nullptr) && (f->_type == Program::StackFrame::FOR_NEXT) &&
 	    (strcmp(f->body.forFrame.varName, varName) == 0)) { // Correct frame
 		f->body.forFrame.currentValue += f->body.forFrame.stepValue;
-		if (f->body.forFrame.stepValue > Parser::Value(Integer(0))) {
-			if (f->body.forFrame.currentValue >
-			    f->body.forFrame.finalvalue) {
-				_program.pop();
-				return true;
-			}
-		} else if (f->body.forFrame.currentValue < f->body.forFrame.finalvalue) {
-			_program.pop();
-			return true;
-		}
-		_program.jump(f->body.forFrame.calleeIndex);
-		_program._current.position = f->body.forFrame.textPosition;
 		setVariable(f->body.forFrame.varName, f->body.forFrame.currentValue);
+		if (testFor(*f))
+			return true;
 	} else // Incorrect frame
 		raiseError(DYNAMIC_ERROR, INVALID_NEXT);
 
+	return false;
+}
+
+bool
+Interpreter::testFor(Program::StackFrame &f)
+{
+	if (f.body.forFrame.stepValue > Parser::Value(Integer(0))) {
+		if (f.body.forFrame.currentValue >
+		    f.body.forFrame.finalvalue) {
+			_program.pop();
+			return true;
+		}
+	} else if (f.body.forFrame.currentValue < f.body.forFrame.finalvalue) {
+		_program.pop();
+		return true;
+	}
+	_program.jump(f.body.forFrame.calleeIndex);
+	_program._current.position = f.body.forFrame.textPosition;
 	return false;
 }
 
@@ -897,7 +909,7 @@ Interpreter::save()
 	newline();
 #if SAVE_LOAD_CHECKSUM
 	// Compute checksum
-	uint16_t crc = eepromProgramChecksum(h.len);
+	const uint16_t crc = eepromProgramChecksum(h.len);
 
 	if (crc == h.crc16) {
 #endif
@@ -1068,6 +1080,7 @@ Interpreter::doInput()
 uint8_t
 VariableFrame::size() const
 {
+#if OPT == OPT_SPEED
 	switch (type) {
 #if USE_LONGINT
 	case Parser::Value::LONG_INTEGER:
@@ -1086,6 +1099,27 @@ VariableFrame::size() const
 	default:
 		return sizeof(VariableFrame);
 	}
+#else
+	 uint8_t res = sizeof(VariableFrame);
+	
+#if USE_LONGINT
+	if (type == Parser::Value::LONG_INTEGER)
+		res += sizeof(LongInteger);
+	else
+#endif
+		if (type == Parser::Value::INTEGER)
+			res += sizeof(Integer);
+#if USE_REALS
+	else if (type == Parser::Value::REAL)
+		res += sizeof(Real);
+#endif
+	else if (type == Parser::Value::BOOLEAN)
+		res += sizeof(bool);
+	else if (type == Parser::Value::STRING)
+		res += STRINGSIZE;
+	
+	return res;
+#endif
 }
 
 void
@@ -1380,6 +1414,31 @@ Interpreter::matrixDet(const char *name)
 		}
 	}
 }
+
+#if USE_DATA
+void
+Interpreter::matrixRead(const char *name)
+{
+	ArrayFrame *array = _program.arrayByName(name);
+	if (array == nullptr)
+		raiseError(DYNAMIC_ERROR, NO_SUCH_ARRAY);
+	else if (array->numDimensions != 2)
+		raiseError(DYNAMIC_ERROR, DIMENSIONS_MISMATCH);
+	else {
+		for (uint16_t row = 0; row <= array->dimension[0]; ++row) {
+			for (uint16_t column = 0; column <= array->dimension[1];
+			    ++column) {
+				Parser::Value v;
+				this->read(v);
+				if (!array->set(row*
+				    (array->dimension[1]+1)+column, v))
+					raiseError(DYNAMIC_ERROR,
+					    INVALID_ELEMENT_INDEX);
+			}
+		}
+	}
+}
+#endif // USE_DATA
 
 void
 Interpreter::setMatrixSize(ArrayFrame &array, uint16_t rows, uint16_t columns)
@@ -1720,7 +1779,9 @@ Interpreter::printTab(const Parser::Value &v, bool flag)
 	else
 #endif
 		tabs = Integer(v);
-	if (tabs > 0) {	
+	if (tabs > 0) {
+		if (tabs == 1)
+			return;
 		write(ProgMemStrings::VT100_ESCSEQ);
 		if (flag) {
 			write(ProgMemStrings::VT100_LINEHOME);
@@ -1772,7 +1833,7 @@ Interpreter::arrayElementIndex(ArrayFrame *f, uint16_t &index)
 	uint8_t dim = f->numDimensions, mul = 1;
 	while (dim-- > 0) {
 		Program::StackFrame *sf = _program.currentStackFrame();
-		if (sf == NULL ||
+		if (sf == nullptr ||
 		    sf->_type != Program::StackFrame::ARRAY_DIMENSION ||
 		    sf->body.arrayDimension > f->dimension[dim]) {
 			return false;
@@ -1790,7 +1851,7 @@ Interpreter::setVariable(const char *name, const Parser::Value &v)
 	uint16_t index = _program._textEnd;
 
 	VariableFrame *f;
-	for (f = _program.variableByIndex(index); f != NULL; index += f->size(),
+	for (f = _program.variableByIndex(index); f != nullptr; index += f->size(),
 	    f = _program.variableByIndex(index)) {
 		int res = strcmp(name, f->name);
 		if (res == 0) {

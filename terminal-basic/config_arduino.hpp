@@ -66,6 +66,8 @@ const uint16_t PROGRAMSIZE = 3072;
 const uint16_t PROGRAMSIZE = 1024;
 #elif defined (__AVR_ATmega168__) || defined (__AVR_ATmega168P__)
 const uint16_t PROGRAMSIZE = 384;
+#elif defined __SAM3X8E__
+const uint16_t PROGRAMSIZE = 65535;
 #else
 const uint16_t PROGRAMSIZE = 1024;
 #endif // USE_EXTMEM
@@ -79,6 +81,6 @@ const uint16_t PROGRAMSIZE = 1024;
 
 // END PRIVATE
 
-}
+} // nameespace BASIC
 
 #endif // CONFIG_ARDUINO_HPP

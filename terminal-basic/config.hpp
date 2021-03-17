@@ -51,7 +51,7 @@ namespace BASIC
 	/*
 	 * Mathematical functions support
 	 */
-	#define USEMATH                 1
+	#define USEMATH  1
 	#if USEMATH
 		/*
 		 * SIN COS TAN COT
@@ -93,6 +93,16 @@ namespace BASIC
  * Functions, variables and arrays of long integer type ends with double % mark
  */
 #define USE_LONGINT          0
+/*
+ * Support of integer division and modulo operation
+ */
+#define USE_INTEGER_DIV      1
+#if USE_INTEGER_DIV
+	/*
+	 * Use DIV keyword for integer division in addition to \ operation
+	 */
+	#define USE_DIV_KW           0
+#endif // USE_INTEGER_DIV
 /**
  * DUMP command support
  * This command can be used to see BASIC memory image, variables and arrays list
@@ -134,7 +144,7 @@ namespace BASIC
 	/*
 	 * Set print zones width (tab spacing)
 	 */
-	#define SET_PRINTZNES  1
+	#define SET_PRINTZNES  0
 	#if SET_PRINTZNES
 		#define PRINT_ZONE_WIDTH 16
 		#define PRINT_ZONES_NUMBER 6
@@ -250,10 +260,10 @@ namespace BASIC
 	#define LIQCR_D3 2
 
 // Input select
-#define S_INPUT SERIALL_I
+#define S_INPUT SERIAL_I
 
 // Output select
-#define S_OUTPUT SERIALL_O
+#define S_OUTPUT SERIAL_O
 
 #if USE_EXTEEPROM
 	#define USE_WIRE 1
