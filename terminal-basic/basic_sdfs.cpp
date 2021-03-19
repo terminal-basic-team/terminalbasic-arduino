@@ -312,6 +312,12 @@ SDFSModule::dsave(Interpreter &i)
 					f.close();
 					return false;
 				}
+				if (t == Token::KW_REM) {
+					f.write(' ');
+					f.print((const char*)s->text + 
+					    lex.getPointer());
+					break;
+				}
 			} else if (t < Token::C_INTEGER) {
 				f.print(lex.id());
 			} else if (t < Token::C_STRING) {

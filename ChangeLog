@@ -1,3 +1,8 @@
+r2.0.1 (21.04.2019)
+
+  * Fix bug with parsing real constants with E/e and w/o decimal point
+  * Fix bug wirh saving program by DSAVE with REM lines
+
 r2.0 (11.04.2019)
 
   * Reduce unnecessary spaces, generated in source file with DSAVE

@@ -1,6 +1,6 @@
 /*
  * ArduinoExt is a set of utility libraries for Arduino
- * Copyright (C) 2016, 2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -30,9 +30,15 @@
 typedef HardwareSerial SerialLight;
 
 #define SerialL Serial
+#ifdef HAVE_HWSERIAL1
 #define SerialL1 Serial1
+#endif
+#ifdef HAVE_HWSERIAL2
 #define SerialL2 Serial2
+#endif
+#ifdef HAVE_HWSERIAL3
 #define SerialL3 Serial3
+#endif
 
 #elif ARDUINO_ARCH_AVR
 
@@ -81,4 +87,4 @@ extern SerialLight SerialL3;
 
 #endif
 
-#endif // SERIALLIGHT_HPP
+#endif

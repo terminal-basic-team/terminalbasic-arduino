@@ -159,7 +159,7 @@ lexer_number_scale(basic_lexer_context_t *self)
 		} else {
 			if (!sign)
 				scale = -scale;
-			real_t pw = mf_pow((real_t) (10), (real_t) scale);
+			real_t pw = powf((real_t) (10), (real_t) scale);
 			basic_value_t pwv = basic_value_from_real(pw);
 			basic_value_multeq(&self->value, &pwv);
 			return TRUE;
@@ -211,6 +211,7 @@ _basic_lexer_decimallongint(basic_lexer_context_t *self)
 static void
 _basic_lexer_decimalreal(basic_lexer_context_t *self)
 {
+	self->value.type = BASIC_VALUE_TYPE_REAL;
 	real_t val = self->value.body.real;
 	while (TRUE) {
 		if (isdigit(SYM)) {
@@ -266,7 +267,7 @@ _basic_lexer_decimalint(basic_lexer_context_t *self)
 			}
 #elif USE_REALS
 			if ((val > MAX_INTEGER / (integer_t) (10)) ||
-			(v > MAX_INTEGER - d)) {
+			    (v > MAX_INTEGER - d)) {
 				self->value.body.real = val;
 				_basic_lexer_decimalreal(self);
 				return;
