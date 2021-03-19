@@ -1,6 +1,8 @@
 /*
  * ArduinoExt is a set of utility libraries for Arduino
- * Copyright (C) 2016-2020 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2019 Terminal-BASIC team
+ *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
  * This program is free software: is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -58,12 +60,6 @@ public:
 		CB_CYAN = 0xE0,
 		CB_WHITE = 0xF0,
 	};
-	
-	friend TextAttr& operator |=(TextAttr& self, TextAttr other)
-	{
-		reinterpret_cast<uint8_t&>(self) |= uint8_t(other);
-		return self;
-	}
 
 	/**
 	 * @brief Print print wrapper with vt100 capabilities
@@ -116,5 +112,5 @@ public:
 	};
 };
 
-#endif /* VT100_HPP */
+#endif // VT100_HPP
 

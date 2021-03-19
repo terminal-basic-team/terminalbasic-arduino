@@ -1558,7 +1558,6 @@ Parser::fCommand()
 		break;
 #if FAST_MODULE_CALL
 	case Token::COMMAND: {
-		auto sp = _lexer.getPointer();
 		FunctionBlock::command c =
 		    reinterpret_cast<FunctionBlock::command>(
 		    readValue<uintptr_t>((const uint8_t*)_lexer.id()));

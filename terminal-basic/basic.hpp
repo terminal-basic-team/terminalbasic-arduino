@@ -25,6 +25,7 @@
 #include <Arduino.h>
 
 #include "tools.h"
+#include "types.hpp"
 
 #ifdef ARDUINO
 #include "config_arduino.hpp"
@@ -373,19 +374,14 @@ enum class Token : uint8_t
 	NUM_TOKENS = BASIC_TOKEN_NUM_TOKENS    // 88
 };
 
-template <typename T>
-inline T readValue(const uint8_t*)
+template <uint8_t s>
+inline typename type_factory<s>::unsigned_type readValueOfSize(const uint8_t*)
 {
-	return T(0);
-}
-
-template <typename T>
-inline void writeValue(T, uint8_t*)
-{
+	return 0;
 }
 
 template <>
-inline uint64_t readValue<uint64_t>(const uint8_t* str)
+inline uint64_t readValueOfSize<8>(const uint8_t* str)
 {
 	uint64_t result;
 	readU64(&result, str);
@@ -393,13 +389,7 @@ inline uint64_t readValue<uint64_t>(const uint8_t* str)
 }
 
 template <>
-inline void writeValue<uint64_t>(uint64_t val, uint8_t* str)
-{
-	writeU64(val, str);
-}
-
-template <>
-inline uint32_t readValue<uint32_t>(const uint8_t* str)
+inline uint32_t readValueOfSize<4>(const uint8_t* str)
 {
 	uint32_t result;
 	readU32(&result, str);
@@ -407,23 +397,46 @@ inline uint32_t readValue<uint32_t>(const uint8_t* str)
 }
 
 template <>
-inline void writeValue<uint32_t>(uint32_t val, uint8_t* str)
-{
-	writeU32(val, str);
-}
-
-template <>
-inline uint16_t readValue<uint16_t>(const uint8_t* str)
+inline uint16_t readValueOfSize<2>(const uint8_t* str)
 {
 	uint16_t result;
 	readU16(&result, str);
 	return result;
 }
 
+template <typename T>
+inline typename type_factory<sizeof(T)>::unsigned_type readValue(const uint8_t* str)
+{
+	return readValueOfSize<sizeof(T)>(str);
+}
+
+template <uint8_t s>
+inline void writeValueOfSize(typename type_factory<s>::unsigned_type v, uint8_t* str)
+{
+}
+
 template <>
-inline void writeValue<uint16_t>(uint16_t val, uint8_t* str)
+inline void writeValueOfSize<8>(uint64_t val, uint8_t* str)
+{
+	writeU64(val, str);
+}
+
+template <>
+inline void writeValueOfSize<4>(uint32_t val, uint8_t* str)
+{
+	writeU32(val, str);
+}
+
+template <>
+inline void writeValueOfSize<2>(uint16_t val, uint8_t* str)
 {
 	writeU16(val, str);
+}
+
+template <typename T>
+inline void writeValue(T v, uint8_t* str)
+{
+	writeValueOfSize<sizeof(T)>(v, str);
 }
 
 } // namespace BASIC

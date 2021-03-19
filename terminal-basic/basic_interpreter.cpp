@@ -713,7 +713,7 @@ Interpreter::print(Lexer &l)
 			    reinterpret_cast<FunctionBlock::command>(
 			    readValue<uintptr_t>((const uint8_t*)l.id()));
 			_parser.getCommandName(com, buf);
-			print((const char*)buf, VT100::C_BLUE);
+			print((const char*)buf, VT100::C_GREEN);
 		}
 #endif
 		else

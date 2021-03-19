@@ -1,6 +1,8 @@
 /*
  * ArduinoExt is a set of utility libraries for Arduino
- * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2019,2020 Terminal-BASIC team
+ *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
  * This program is free software: is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -19,6 +21,36 @@
 
 #ifndef TYPES_HPP
 #define TYPES_HPP
+
+#include <inttypes.h>
+
+template <unsigned char size>
+class type_factory
+{
+public:
+	using unsigned_type = uint8_t;
+};
+
+template <>
+class type_factory<2>
+{
+public:
+	using unsigned_type = uint16_t;
+};
+
+template <>
+class type_factory<4>
+{
+public:
+	using unsigned_type = uint32_t;
+};
+
+template <>
+class type_factory<8>
+{
+public:
+	using unsigned_type = uint64_t;
+};
 
 template <typename T>
 class typespec
@@ -64,4 +96,4 @@ public:
 	static constexpr bool isreal = false;
 };
 
-#endif
+#endif // TYPES_HPP
