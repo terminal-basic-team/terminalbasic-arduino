@@ -23,7 +23,7 @@
 #include <inttypes.h>
 
 #include "arduinoext.hpp"
-#include "basic.hpp"
+#include "basic_common.hpp"
 #include "basic_internalfuncs.hpp"
 
 namespace BASIC
@@ -112,6 +112,7 @@ private:
 #endif // USE_DATA
 #if USE_DEFFN
 	bool fDefStatement();
+	bool fFnexec(Value&);
 #endif
 	bool fImplicitAssignment(char*);
 	bool fPrintList();
@@ -146,14 +147,8 @@ private:
 	Interpreter &_interpreter;
 	// current mode
 	Mode _mode;
-	struct
-	{
-		// stop parsing string flag
-		bool _stopParse : 1;
-#if USE_DEFFN
-		bool m_definedFunctionExecute : 1;
-#endif
-	};
+	// stop parsing string flag
+	bool _stopParse;
 	// first module in chain reference
 	InternalFunctions _internal;
 };

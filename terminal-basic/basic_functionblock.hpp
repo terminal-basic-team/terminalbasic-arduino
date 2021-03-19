@@ -20,7 +20,7 @@
 #define BASIC_FUNCTIONBLOCK_HPP
 
 #include <stdlib.h>
-#include "basic.hpp"
+#include "basic_common.hpp"
 
 namespace BASIC
 {

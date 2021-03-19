@@ -22,7 +22,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 
-#include "basic.hpp"
+#include "basic_common.hpp"
 
 #if USE_SAVE_LOAD
 #include <EEPROM.h>
@@ -236,9 +236,9 @@ Interpreter::step()
 	case SHELL:
 	{
 		print(ProgMemStrings::S_READY, VT100::BRIGHT);
-#if CLI_PROMPT_NELINE
+#if CLI_PROMPT_NEWLINE
 		newline();
-#endif // CLI_PROMPT_NELINE
+#endif // CLI_PROMPT_NEWLINE
 	}
 #if BASIC_MULTITERMINAL
 		// fall through
@@ -518,6 +518,10 @@ Interpreter::dump(DumpMode mode)
 		    (f != nullptr) && (_program.objectIndex(f) <
 		    _program._variablesEnd); f = _program.variableByIndex(
 		    _program.objectIndex(f) + f->size())) {
+#if USE_DEFFN
+			if (f->type & TYPE_DEFFN)
+				continue;
+#endif
 			_output.print(f->name);
 			_output.print(":\t");
 			Parser::Value v;
@@ -835,8 +839,77 @@ Interpreter::execFn(const char *name)
 }
 
 void
+Interpreter::setFnVars()
+{
+	Pointer sp = _program._sp;
+	Pointer paramPtr;
+	// Set old function variables
+	uint8_t numberOfParameters = 0;
+	while (true) {
+		const auto f = _program.currentStackFrame();
+		if (f->_type == Program::StackFrame::INPUT_OBJECT) {
+			_program.pop();
+			const auto ff = _program.currentStackFrame();
+			if (ff->_type == Program::StackFrame::VALUE) {
+				++numberOfParameters;
+				_program.pop();
+				continue;
+			}
+		} else if (f->_type == Program::StackFrame::SUBPROGRAM_RETURN) {
+			_program.pop();
+			paramPtr = _program._sp;
+			break;
+		}
+		raiseError(DYNAMIC_ERROR, INTERNAL_ERROR);
+		return;
+	}
+	_program._sp = sp;
+	for (uint8_t i=0; i<numberOfParameters; ++i) {
+		const auto f = _program.currentStackFrame();
+		_program.pop();
+		const auto ff = _program.currentStackFrame();
+		_program.pop();
+		const Pointer ret = _program._sp;
+		_program._sp = paramPtr;
+		const auto fff = _program.currentStackFrame();
+		if (fff->_type == Program::StackFrame::VALUE) {
+			setVariable(f->body.inputObject.name,
+			    fff->body.value);
+		} else {
+			raiseError(DYNAMIC_ERROR, INTERNAL_ERROR);
+			break;
+		}
+		_program.pop();
+		paramPtr = _program._sp;
+		_program._sp = ret;
+	}
+	_program._sp = sp;
+}
+
+void
 Interpreter::returnFromFn()
 {
+	uint8_t numParameters = 0;
+	// Restore variables
+	while (true) {
+		const auto *f = _program.currentStackFrame();
+		if (f->_type == Program::StackFrame::INPUT_OBJECT) {
+			_program.pop();
+			const auto *ff = _program.currentStackFrame();
+			if (ff->_type == Program::StackFrame::VALUE) {
+				setVariable(f->body.inputObject.name,
+				    ff->body.value);
+				_program.pop();
+				++numParameters;
+				continue;
+			} else {
+				raiseError(DYNAMIC_ERROR, INTERNAL_ERROR);
+				return;
+			}
+		} else
+			break;
+	}
+	
 	const auto f = _program.currentStackFrame();
 	if ((f != nullptr) && (f->_type == Program::StackFrame::SUBPROGRAM_RETURN)) {
 		_program._current.index = f->body.gosubReturn.calleeIndex;
@@ -849,10 +922,21 @@ Interpreter::returnFromFn()
 	Program::Line *s = _program.current(_program._current);
 	if (s != nullptr)
 		_lexer.init(s->text + _program._current.position);
-	else
+	else {
 		raiseError(DYNAMIC_ERROR, INTERNAL_ERROR);
+		return;
+	}
+	for (uint8_t i=0; i<numParameters; ++i) {
+		const auto f=_program.currentStackFrame();
+		if (f->_type == Program::StackFrame::VALUE)
+			_program.pop();
+		else {
+			raiseError(DYNAMIC_ERROR, INTERNAL_ERROR);
+			return;
+		}
+	}
 }
-#endif
+#endif // USE_DEFFN
 
 bool
 Interpreter::next(const char *varName)
@@ -1296,15 +1380,9 @@ Interpreter::writePgm(PGM_P str)
 	_output.print(buf);
 }
 
-bool
-Interpreter::pushResult()
-{
-	return pushValue(_result);
-}
-
 #if USE_DEFFN
 void
-Interpreter::newFunction(const char *fname)
+Interpreter::newFunction(const char *fname, uint8_t pos)
 {
 	Pointer index = _program._textEnd;
 
@@ -1353,7 +1431,7 @@ Interpreter::newFunction(const char *fname)
 	strncpy(f->name, fname, VARSIZE);
 	FunctionFrame *ff = reinterpret_cast<FunctionFrame*>(f->bytes);
 	ff->lineNumber = _program._current.index;
-	ff->linePosition = _program._current.position+_lexer.getPointer();
+	ff->linePosition = _program._current.position+pos;
 	_program._variablesEnd += f->size();
 	_program._arraysEnd += f->size();
 }
@@ -1680,6 +1758,12 @@ Interpreter::pushDimensions(uint8_t dim)
 		f->body.arrayDimensions = dim;
 	else
 		raiseError(DYNAMIC_ERROR, STACK_FRAME_ALLOCATION);
+}
+
+bool
+Interpreter::pushResult()
+{
+	return pushValue(_result);
 }
 
 bool

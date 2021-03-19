@@ -20,7 +20,7 @@
 #define BASIC_INTERPRETER_PROGRAM_HPP
 
 #include "arduinoext.hpp"
-#include "basic.hpp"
+#include "basic_common.hpp"
 #include "basic_parser_value.hpp"
 
 namespace BASIC
@@ -126,7 +126,6 @@ public:
 			{
 				INPUT_VAR, INPUT_ARR_ELM
 			};
-			// Program counter of the colee string
 			Type	type;
 			char	name[VARSIZE];
 		};

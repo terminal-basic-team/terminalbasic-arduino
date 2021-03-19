@@ -1,3 +1,14 @@
+r1.2-rc1 (20.11.2018) Release, dedicated to the World Children's Day
+
+  Complete functionality for the 1.2 release.
+  Current limitations:
+    - DATA ... READ statements do not support string variables and constants
+    - DEF FN x functions can not use the name of the existing scalar variables
+  Such limitations will be removed in the release 2.0
+
+  * Complete implementation of the 1-line user defined functions with arbitrary parameters number
+  * One byte tokens saved as indexed ones to save some RAM
+
 r1.2-beta4 (22.10.2018)
 
   * Add RIGHT$ function

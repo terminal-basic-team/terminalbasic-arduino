@@ -19,7 +19,7 @@
 #ifndef INTERPRETER_HPP
 #define INTERPRETER_HPP
 
-#include "basic.hpp"
+#include "basic_common.hpp"
 #include "basic_lexer.hpp"
 #include "basic_parser.hpp"
 #include "basic_program.hpp"
@@ -189,6 +189,7 @@ public:
 		COMMAND_FAILED = 17,
 #if USE_DEFFN
 		VAR_FUNCTION_DUPLICATE = 18,
+		NO_SUCH_FUNCION = 19,
 #endif
 		INTERNAL_ERROR = 255
 	};
@@ -367,6 +368,7 @@ public:
 	void randomize();
 #if USE_DEFFN
 	void execFn(const char*);
+	void setFnVars();
 	void returnFromFn();
 #endif
 	/**
@@ -447,6 +449,8 @@ public:
 	 * @param num number of dimensions
 	 */
 	void pushDimensions(uint8_t);
+        
+	bool pushResult();
 
 #if USE_STRINGOPS
 	void strConcat();
@@ -463,14 +467,12 @@ public:
 		_parser.stop();
 	}
 	
-	bool pushResult();
-	
 #if USE_DEFFN
 	/**
 	 * @brief Create new function frame
 	 * @param fname
 	 */
-	void newFunction(const char*);
+	void newFunction(const char*, uint8_t pos);
 #endif // USE_DEFFN
 
 	Program _program;

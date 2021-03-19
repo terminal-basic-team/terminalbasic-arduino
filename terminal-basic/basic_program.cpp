@@ -326,7 +326,7 @@ Program::addLine(uint16_t num, const char *line)
 		
 		const Token tok = _lexer.getToken();
 		const uint8_t t = uint8_t(0x80) + uint8_t(tok);
-		if (tok < Token::STAR) { // One byte tokens
+		if (tok < Token::RPAREN) { // One byte tokens
 			tempBuffer[position++] = t;
 			lexerPosition = _lexer.getPointer();
 			if (tok == Token::KW_REM) { // Save rem text as is

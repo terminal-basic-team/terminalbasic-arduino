@@ -21,7 +21,7 @@
 #define GFXTERM_HPP
 
 #include "ascii.hpp"
-#include "helper.hpp"
+#include "arduinoext.hpp"
 
 Package(GFXTERM)
 {
