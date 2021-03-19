@@ -1512,6 +1512,7 @@ Parser::fCommand()
 #endif
 	case Token::REAL_IDENT:
 	case Token::INTEGER_IDENT:
+	case Token::BOOL_IDENT:
 		FunctionBlock::command c;
 		if ((c=_internal.getCommand(_lexer.id())) != nullptr) {
 			while (_lexer.getNext()) {
@@ -1754,7 +1755,7 @@ Parser::fMatrixOperation()
 			return true;
 		}
 	}
-#endif
+#endif // USE_DATA
 	return false;
 }
 

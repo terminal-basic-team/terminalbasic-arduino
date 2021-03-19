@@ -30,12 +30,12 @@ namespace BASIC
 SDCard::File SDFSModule::_root;
 
 static const uint8_t sdfsCommands[] PROGMEM = {
-	'D', 'C', 'H', 'A', 'I', 'N' ASCII_NUL,
-	'D', 'I', 'R', 'E', 'C', 'T', 'O', 'R', 'Y' ASCII_NUL,
-	'D', 'L', 'O', 'A', 'D' ASCII_NUL,
-	'D', 'S', 'A', 'V', 'E' ASCII_NUL,
-	'H', 'E', 'A', 'D', 'E', 'R' ASCII_NUL,
-	'S', 'C', 'R', 'A', 'T', 'C', 'H' ASCII_NUL,
+	'D', 'C', 'H', 'A', 'I', 'N', ASCII_NUL,
+	'D', 'I', 'R', 'E', 'C', 'T', 'O', 'R', 'Y', ASCII_NUL,
+	'D', 'L', 'O', 'A', 'D', ASCII_NUL,
+	'D', 'S', 'A', 'V', 'E', ASCII_NUL,
+	'H', 'E', 'A', 'D', 'E', 'R', ASCII_NUL,
+	'S', 'C', 'R', 'A', 'T', 'C', 'H', ASCII_NUL,
 	ASCII_ETX
 };
 
@@ -149,35 +149,24 @@ SDFSModule::dsave(Interpreter &i)
 	for (Program::Line *s = i._program.getNextLine(); s != nullptr;
 	    s = i._program.getNextLine()) {
 		f.print(s->number);
-		lex.init(s->text);
+		lex.init(s->text, false);
 		while (lex.getNext()) {
 			f.write(' ');
 			Token t = lex.getToken();
 			if (t < Token::STAR) {
-				char buf[16];
-				const uint8_t *res = Lexer::getTokenString(t,
+				uint8_t buf[16];
+				const bool res = Lexer::getTokenString(t,
 				    reinterpret_cast<uint8_t*>(buf));
-				if (res != nullptr)
-					f.print(buf);
+				if (res)
+					f.print((char*)buf);
 				else {
 					f.close();
 					return false;
 				}
-			} else if (t <= Token::RPAREN) {
-				char buf[16];
-				strcpy_P(buf, (PGM_P)pgm_read_ptr(
-				    &(Lexer::tokenStrings[uint8_t(t)-
-				    uint8_t(Token::STAR)])));
-				f.print(buf);
-				if (t == Token::KW_REM) {
-					f.write(' ');
-					f.print(s->text+lex.getPointer());
-					break;
-				}
 			} else if (t <= Token::BOOL_IDENT) {
 				f.print(lex.id());
 			} else if (t <= Token::C_BOOLEAN) {
-				f.print(lex.getValue());
+				lex.getValue().printTo(f);
 			} else if (t == Token::C_STRING) {
 				f.write('"');
 				f.print(lex.id());
@@ -202,12 +191,12 @@ SDFSModule::_loadText(SDCard::File &f, Interpreter &i)
                 	if (buf[res-1] == '\r')
                         	buf[res-1] = 0;
 			Lexer lex;
-			lex.init(buf);
+			lex.init((uint8_t*)buf, false);
 			if (!lex.getNext() || lex.getToken() !=
 			    Token::C_INTEGER)
 				return false;
 			if (!i._program.addLine(Integer(lex.getValue()),
-			    buf+lex.getPointer()))
+			    (uint8_t*)buf+lex.getPointer()))
 				return false;
 		} else
 			break;

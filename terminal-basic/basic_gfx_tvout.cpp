@@ -52,7 +52,7 @@ GFXModule::command_cursor(Interpreter &i)
 {
 	Parser::Value v(false);
 	if (i.popValue(v)) {
-		if (v.type == Parser::Value::BOOLEAN) {
+		if (v.type() == Parser::Value::LOGICAL) {
 			TVoutEx::instance()->setCursorVisible(bool(v));
 			return true;
 		}

@@ -218,10 +218,12 @@ Interpreter::step()
 #if USE_DELAY
 	case DELAY:
 		c = char(ASCII::NUL);
-		if (_input.available() > 0)
+		if (_input.available() > 0) {
 			c = _input.read();
-		if (c == char(ASCII::EOT))
-			_state = SHELL;
+			_inputBuffer[0] = c;
+			if (c == char(ASCII::EOT))
+				_state = SHELL;
+		}
 		if (millis() >= _delayTimeout)
 			_state = _lastState;
 		break;
@@ -459,7 +461,7 @@ Interpreter::list(uint16_t start, uint16_t stop)
 		while (lex.getNext()) {
 			print(lex);
 			if (lex.getToken() == Token::KW_REM) {
-				print(s->text + lex.getPointer());
+				print((char*)s->text + lex.getPointer());
 				break;
 			}
 		}

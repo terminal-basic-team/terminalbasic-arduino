@@ -392,10 +392,12 @@ basic_lexer_getnextPlain(basic_lexer_context_t *self)
 						&index)) != NULL) {
 					self->token = (basic_token_t)index;
 					if (self->token == BASIC_TOKEN_KW_TRUE) {
-						self->value.body.logical = TRUE;
+						basic_value_setFromLogical(
+						    &self->value, TRUE);
 						self->token = BASIC_TOKEN_C_BOOLEAN;
 					} else if (self->token == BASIC_TOKEN_KW_FALSE) {
-						self->value.body.logical = FALSE;
+						basic_value_setFromLogical(
+						    &self->value, FALSE);
 						self->token = BASIC_TOKEN_C_BOOLEAN;
 					}
 					self->string_pointer += (uint8_t) (pos - ((uint8_t*) self->string_to_parse +
@@ -424,6 +426,12 @@ _basic_lexer_tokenizedNext(basic_lexer_context_t *self)
 		self->token = SYM;
 		++self->string_pointer;
 		switch (self->token) {
+                case BASIC_TOKEN_KW_TRUE :
+		case BASIC_TOKEN_KW_FALSE :
+			basic_value_setFromLogical(&self->value,
+			    self->token == BASIC_TOKEN_KW_TRUE);
+			self->token = BASIC_TOKEN_C_BOOLEAN;
+			break;
 		case BASIC_TOKEN_C_INTEGER :
 			self->value.type = BASIC_VALUE_TYPE_INTEGER;
 			readU16((uint16_t*)&self->value.body.integer,
@@ -469,6 +477,7 @@ basic_lexer_getnextTokenized(basic_lexer_context_t *self)
 		case '"':
 			++self->string_pointer;
 			_basic_lexer_stringConst(self);
+			++self->string_pointer;
 			return TRUE;
 		case ' ':
 		case '\t':

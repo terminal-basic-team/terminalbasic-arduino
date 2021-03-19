@@ -166,7 +166,7 @@ Interpreter::matrixDet(const char *name)
 			    array->dimension[0]+1, r,
 			    reinterpret_cast<LongInteger*>(tbuf)))
 				_result = false;
-			_result.value.longInteger = r;
+			_result = r;
 #endif // USE_LONGINT
 #if USE_REALS
 		case Parser::Value::REAL: {

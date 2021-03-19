@@ -36,17 +36,17 @@ scanTable(const uint8_t *token, const uint8_t table[], uint8_t *index)
 		/* If token table is over */
 		if (c == ASCII_ETX)
 			return NULL;
-		/* Current symbol matches table element */
-		if (c > ct)
+		else if (c > ct && ct > ' ')
 			return NULL;
+		/* Current symbol matches table element */
 		else if (ct == c) {
-			if (c == ASCII_NUL) {
+			++tokPos, ++table;
+			if (pgm_read_byte(table) == ASCII_NUL) {
 				*index = tabPos;
 				return (uint8_t*)token+tokPos;
 			}
-			++tokPos, ++table;
 			continue;
-		} else if (ct <= ' ') {
+		} else if (ct <= ' ' && c == ASCII_NUL) {
 			*index = tabPos;
 			return (uint8_t*)token+tokPos;
 		} else {

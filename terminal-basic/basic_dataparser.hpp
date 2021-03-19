@@ -32,8 +32,8 @@ class DataParser
 {
 public:
 	DataParser(Interpreter&);
-	bool searchData(const char*, Parser::Value&);
-	bool read(const char*, Parser::Value&);
+	bool searchData(const uint8_t*, Parser::Value&);
+	bool read(const uint8_t*, Parser::Value&);
 	const Lexer &lexer() const { return _lexer; }
 private:
 	bool readValue(Parser::Value&);

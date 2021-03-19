@@ -44,16 +44,16 @@ const FunctionBlock::function ArduinoIO::_funcs[] PROGMEM = {
 };
 
 static const uint8_t arduinoIOCommands[] PROGMEM = {
-	'A', 'W', 'R', 'I', 'T', 'E' + 0x80,
+	'A', 'W', 'R', 'I', 'T', 'E', ASCII_NUL,
 #if CONF_BEEP
-	'B', 'E', 'E', 'P' + 0x80,
+	'B', 'E', 'E', 'P', ASCII_NUL,
 #endif
 #if CONF_MODULE_ARDUINOIO_TONE
-	'D', 'N', 'O', 'T', 'O', 'N', 'E' + 0x80,
-	'D', 'T', 'O', 'N', 'E' + 0x80,
+	'D', 'N', 'O', 'T', 'O', 'N', 'E', ASCII_NUL,
+	'D', 'T', 'O', 'N', 'E', ASCII_NUL,
 #endif
-	'D', 'W', 'R', 'I', 'T', 'E' + 0x80,
-	0
+	'D', 'W', 'R', 'I', 'T', 'E', ASCII_NUL,
+	ASCII_ETX
 };
 
 const FunctionBlock::command ArduinoIO::_commands[] PROGMEM = {

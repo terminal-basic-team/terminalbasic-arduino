@@ -1,3 +1,7 @@
+r2.0-alpha-2 (19.02.2019)
+
+  * Fix some lexer-related regressions
+
 r2.0-alpha-1 (17.02.2019)
 
   * New lexical analyzer, written in pure C. Ability to localize keywords.
