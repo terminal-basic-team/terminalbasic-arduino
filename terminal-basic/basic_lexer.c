@@ -287,7 +287,7 @@ _basic_lexer_decimalint(basic_lexer_context_t *self)
 static void
 _basic_lexer_stringConst(basic_lexer_context_t *self)
 {
-	while (SYM != 0) {
+	while (SYM != ASCII_NUL) {
 		if (SYM == '"') {
 			self->token = BASIC_TOKEN_C_STRING;
 			self->_id[self->_value_pointer] = 0;
@@ -574,7 +574,9 @@ basic_lexer_tokenize(basic_lexer_context_t *self, uint8_t *dst, uint8_t dstlen,
 			break;
 		}
 		const basic_token_t tok = self->token;
-		if (tok <= BASIC_TOKEN_RPAREN) {
+		if (tok == BASIC_TOKEN_NOTOKEN)
+			continue;
+		else if (tok <= BASIC_TOKEN_RPAREN) {
 			/* One byte tokens need space of 2 bytes - DLE and token */
 			if (position+2 >= dstlen)
 				break;

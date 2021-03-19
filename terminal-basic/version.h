@@ -1,1 +1,1 @@
-#define VERSION "2.0-beta1-232"
+#define VERSION "2.0-beta2-232"

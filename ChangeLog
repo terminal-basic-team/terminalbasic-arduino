@@ -1,3 +1,7 @@
+r2.0-beta-2 (9.03.2019)
+
+  * Fix lexer bug with input errors handling
+
 r2.0-beta-1 (8.03.2019) Release, dedicated to the international women day
 
   * Add autostart of the AUTORUN.BAS program if SD support is enabled
