@@ -661,9 +661,8 @@ bool
 Parser::fFnexec(Value &v)
 {
 	char varName[IDSIZE];
-	if (_lexer.getNext() && fIdentifier(varName) &&
-	    _lexer.getNext()) {
-		if ((_lexer.getToken() == Token::LPAREN) &&
+	if (_lexer.getNext() && fIdentifier(varName)) {
+		if (_lexer.getNext() && (_lexer.getToken() == Token::LPAREN) &&
 		    _lexer.getNext()) {
 			while (true) {
 				Parser::Value val;
@@ -683,8 +682,9 @@ Parser::fFnexec(Value &v)
 			_interpreter.pushReturnAddress();
 			_interpreter.execFn(varName);
 
-			if (_lexer.getNext() &&
-			    (_lexer.getToken() == Token::LPAREN)) {
+			if (!_lexer.getNext())
+				return false;
+			if (_lexer.getToken() == Token::LPAREN) {
 				while (true) {
 					if (_lexer.getNext() &&
 					    _lexer.getToken() >= Token::INTEGER_IDENT &&
@@ -696,14 +696,15 @@ Parser::fFnexec(Value &v)
 					} else if (_lexer.getToken() == Token::COMMA)
 						continue;
 					else if ((_lexer.getToken() == Token::RPAREN) &&
-					    _lexer.getNext() &&
-					    (_lexer.getToken() == Token::EQUALS) &&
 					    _lexer.getNext())
 						break;
 					else
 						return false;
 				}
 			}
+			if ((_lexer.getToken() != Token::EQUALS) ||
+			    !_lexer.getNext())
+				return false;
 			_interpreter.setFnVars();
 			fExpression(v);
 			_interpreter.returnFromFn();

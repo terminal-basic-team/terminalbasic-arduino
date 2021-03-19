@@ -79,7 +79,7 @@
 /*
  * Allow GO TO OPERATOR in addition to GOTO
  */
-#define CONF_SEPARATE_GO_TO     1
+#define CONF_SEPARATE_GO_TO     0
 
 /*
  * Support of integer division and modulo operation
@@ -89,7 +89,7 @@
 	/*
 	 * Use DIV keyword for integer division in addition to \ operation
 	 */
-	#define USE_DIV_KW   1
+	#define USE_DIV_KW   0
 #endif // USE_INTEGER_DIV
 
 /*

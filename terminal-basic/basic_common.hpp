@@ -64,6 +64,10 @@
 #define SERIAL_PORT_O Serial3
 #elif S_OUTPUT == SERIALL_O
 #define SERIAL_PORT_O SerialL
+#elif S_OUTPUT == SERIALL1_O
+#define SERIAL_PORT_O SerialL1
+#elif S_OUTPUT == SERIALL2_O
+#define SERIAL_PORT_O SerialL2
 #elif S_OUTPUT == SERIALL3_O
 #define SERIAL_PORT_O SerialL3
 #elif S_OUTPUT == UTFT_O

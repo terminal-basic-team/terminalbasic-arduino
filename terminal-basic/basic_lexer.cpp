@@ -446,71 +446,61 @@ Lexer::getNext()
 		switch (SYM) {
 		case '=':
 			_token = Token::EQUALS;
-			next();
-			return true;
+			goto token_ready;
 		case ';':
 			_token = Token::SEMI;
-			next();
-			return true;
+			goto token_ready;
+#if USE_REALS
 		case '.':
 			decimalNumber();
-			return (true);
+			return true;
+#endif
 		case ',':
 			_token = Token::COMMA;
-			next();
-			return true;
+			goto token_ready;
 		case ':':
 			_token = Token::COLON;
-			next();
-			return true;
+			goto token_ready;
 		case '<':
+			next();
 			fitst_LT();
 			return true;
 		case '>':
+			next();
 			fitst_GT();
 			return true;
 		case '(':
 			_token = Token::LPAREN;
-			next();
-			return true;
+			goto token_ready;
 		case ')':
 			_token = Token::RPAREN;
-			next();
-			return true;
+			goto token_ready;
 		case '+':
 			_token = Token::PLUS;
-			next();
-			return true;
+			goto token_ready;
 		case '-':
 			_token = Token::MINUS;
-			next();
-			return true;
+			goto token_ready;
 		case '*':
 			_token = Token::STAR;
-			next();
-			return true;
+			goto token_ready;
 		case '/':
 			_token = Token::SLASH;
-			next();
-			return true;
+			goto token_ready;
 #if USE_REALS && USE_INTEGER_DIV
 		case '\\':
 			_token = Token::BACK_SLASH;
-			next();
-			return true;
+			goto token_ready;
 #endif
 		case '^':
 			_token = Token::POW;
-			next();
-			return true;
+			goto token_ready;
 		case '"':
 			next();
 			stringConst();
 			return true;
 		case ' ':
 		case '\t':
-		case '\r':
-		case '\n':
 			next();
 			break;
 		default:
@@ -519,6 +509,9 @@ Lexer::getNext()
 		}
 	}
 	return false;
+token_ready:
+	next();
+	return true;
 }
 
 void
@@ -540,7 +533,6 @@ Lexer::next()
 void
 Lexer::fitst_LT()
 {
-	next();
 #if OPT == OPT_SPEED
 	switch (SYM) {
 	case '=':
@@ -569,7 +561,6 @@ Lexer::fitst_LT()
 void
 Lexer::fitst_GT()
 {
-	next();
 #if OPT == OPT_SPEED
 	switch (SYM) {
 	case '=':
@@ -833,4 +824,4 @@ Lexer::stringConst()
 	}
 }
 
-}
+} // namespace BASIC

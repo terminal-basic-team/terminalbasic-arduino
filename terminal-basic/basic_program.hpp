@@ -219,6 +219,9 @@ public:
 	 */
 	VariableFrame *variableByIndex(Pointer);
 	VariableFrame *variableByName(const char*);
+#if USE_DEFFN
+	VariableFrame *functionByName(const char*);
+#endif
 	
 	ArrayFrame *arrayByIndex(Pointer);
 	ArrayFrame *arrayByName(const char*);

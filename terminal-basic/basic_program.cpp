@@ -189,15 +189,42 @@ Program::variableByName(const char *name)
 
 	for (auto f = variableByIndex(index); f != nullptr;
 	    f = variableByIndex(index)) {
-		const int8_t res = strncmp(name, f->name, VARSIZE);
-		if (res == 0) {
-			return f;
-		} else if (res < 0)
-			break;
+#if USE_DEFFN
+		if (!(f->type & TYPE_DEFFN)) {
+#endif
+			const int8_t res = strncmp(name, f->name, VARSIZE);
+			if (res == 0)
+				return f;
+			else if (res < 0)
+				break;
+#if USE_DEFFN
+		}
+#endif
 		index += f->size();
 	}
 	return nullptr;
 }
+
+#if USE_DEFFN
+VariableFrame*
+Program::functionByName(const char *name)
+{
+	auto index = _textEnd;
+
+	for (auto f = variableByIndex(index); f != nullptr;
+	    f = variableByIndex(index)) {
+		if (f->type & TYPE_DEFFN) {
+			const int8_t res = strncmp(name, f->name, VARSIZE);
+			if (res == 0)
+				return f;
+			else if (res < 0)
+				break;
+		}
+		index += f->size();
+	}
+	return nullptr;
+}
+#endif // DEF_FN
 
 Pointer
 Program::objectIndex(const void *obj) const

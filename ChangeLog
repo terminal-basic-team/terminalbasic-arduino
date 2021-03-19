@@ -1,3 +1,9 @@
+r1.2-rc2 (13.12.2018)
+
+  * User defined functions may have the names of existing variables
+  * Code size was slightly optimized
+  * AVR 8-bit: Fix usage of the SerialL I/O on ports, other then USART0
+
 r1.2-rc1 (20.11.2018) Release, dedicated to the World Children's Day
 
   Complete functionality for the 1.2 release.

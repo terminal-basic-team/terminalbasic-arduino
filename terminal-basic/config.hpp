@@ -89,10 +89,6 @@ namespace BASIC
 	 */
 	#define USE_COLORATTRIBUTES       1
 	/*
-	 * Support of SPC(N) print command
-	 */
-	#define CONF_USE_SPC_PRINT_COM    1
-	/*
 	 * Set print zones width (tab spacing)
 	 */
 	#define SET_PRINTZNES             1
@@ -104,7 +100,7 @@ namespace BASIC
 
 #if USE_SAVE_LOAD
 	// Compute checksums while SAVE, LOAD and CHAIN
-	#define SAVE_LOAD_CHECKSUM   1
+	#define SAVE_LOAD_CHECKSUM   0
 #endif // USE_SAVE_LOAD
 
 // Convert all input to upper register
@@ -245,10 +241,10 @@ namespace BASIC
 /*
  * Max size of the program line
  */
-const uint8_t PROGSTRINGSIZE = 80;
+const uint8_t PROGSTRINGSIZE = 72;
 
 // Max size of the string constants/variables
-const uint8_t STRINGSIZE = 80;
+const uint8_t STRINGSIZE = 72;
 
 // Number of characters in variable name
 const uint8_t VARSIZE = 5;
