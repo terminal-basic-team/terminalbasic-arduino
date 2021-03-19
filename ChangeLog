@@ -1,3 +1,8 @@
+r2.3-a1 (18.10.2020)
+
+  * Introduction of HAL layer, simplifying the process of porting to different platforms
+  * Add double precision math functions
+
 r2.2.1 (08.03.2020) As always dedicated to International women day.
     Thank you, our sweets for frendship, love and children
 
@@ -75,6 +80,12 @@ r2.1-alpha1 (22.04.2019)
   * Change GET$ function to more common INKEY$
   * Add partial support of long reals (variable/array name ends with "!")
   * Add functions MID$/SEG$
+
+r2.0.3 (9.05.2019 Release, dedicated to the USSR Victory Day
+
+  * Fix error in confirmation of the file operations
+  * Fix regression in SD functions while reading the files with "CR LF" line endings
+  * Output reals with 6 significant decimal digits
 
 r2.0.2 (24.04.2019)
 

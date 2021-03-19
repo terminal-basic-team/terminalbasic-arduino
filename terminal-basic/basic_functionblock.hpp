@@ -53,6 +53,9 @@ public:
 protected:
 #if USE_REALS
 	typedef Real (*_funcReal)(Real);
+#if USE_LONG_REALS
+	typedef LongReal (*_funcLongReal)(LongReal);
+#endif
 #endif // USE_REALS
 	typedef INT (*_funcInteger)(INT);
 
@@ -81,6 +84,9 @@ protected:
 	 * @return ok status
 	 */
 	static bool general_func(Interpreter&, _funcReal);
+#if USE_LONG_REALS
+	static bool general_func(Interpreter&, _funcLongReal);
+#endif
 #endif // USE_REALS
 	/**
 	 * @brief general function wrapper with 1 Real argument

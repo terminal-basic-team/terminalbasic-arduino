@@ -339,6 +339,9 @@ InternalFunctions::func_int(Interpreter &i)
 	 || v.type() == Parser::Value::LONG_INTEGER
 #endif
 	 || v.type() == Parser::Value::REAL
+#if USE_LONG_REALS
+	 || v.type() == Parser::Value::LONG_REAL
+#endif
 	    ) {
 		Real vv = math<Real>::floor(Real(v));
 #if USE_LONGINT
@@ -414,7 +417,7 @@ InternalFunctions::func_mid(Interpreter& i)
 			if (i.popString(str)) {
 				char buf[STRING_SIZE];
 				const auto strl = strlen(str);
-				if (start > strl)
+				if (size_t(start) > strl)
 					buf[0] = 0;
 				else {
 					start = min(uint8_t(start), uint8_t(strl));

@@ -36,8 +36,8 @@
 #include "ps2uartstream.hpp"
 #endif
 
-#if USESD
-#include "basic_sdfs.hpp"
+#if CONF_USE_EXTMEMFS
+#include "basic_extmemfs.hpp"
 #endif
 
 #if USEUTFT
@@ -74,6 +74,13 @@
 #include "sdlstream.hpp"
 #endif
 
+#if USE_SDL_OSTREAM
+#include "sdlvt100print.hpp"
+#include "HAL_sdl.h"
+#endif
+
+static BASIC::HALProxyStream halproxy1(0);
+
 /**
  * Instantiating modules
  */
@@ -81,6 +88,7 @@
 #if USEUTFT
 static UTFT	utft(CTE32HR, 38, 39, 40, 41);
 static UTFTTerminal utftPrint(utft);
+#define OUTPUT_PRINT utftPrint
 #elif USETVOUT
 static uint8_t		tvOutBuf[TVoutEx::bufferSize(TVOUT_HORIZ, TVOUT_VERT)];
 static TVoutEx		tvOut;
@@ -89,10 +97,11 @@ static TVoutPrint	tvoutPrint;
 static LiquidCrystal lCrystal(LIQCR_RS, LIQCR_E, LIQCR_D0, LIQCR_D1, LIQCR_D2, LIQCR_D3);
 static uint8_t lCrBuf[20*4];
 static LiquidCrystalVt100 lsvt100(lCrystal, 20, 4, lCrBuf);
+#define OUTPUT_PRINT lsvt100
 #endif
 
-#if USESD
-BASIC::SDFSModule sdfs;
+#if CONF_USE_EXTMEMFS
+BASIC::ExtmemFSModule sdfs;
 #endif
 
 #if USEMATH
@@ -117,6 +126,12 @@ static BASIC::GFXModule gfxModule;
 
 #if USE_SDL_ISTREAM
 static SDLStream sdlStream;
+#define INPUT_STREAM sdlStream
+#endif
+
+#if USE_SDL_OSTREAM
+static SDL2vt100Print sdlPrint(*hal_sdl_renderer);
+#define OUTPUT_PRINT sdlPrint
 #endif
 
 #if BASIC_MULTITERMINAL
@@ -131,9 +146,7 @@ static BASIC::Interpreter basic2(SERIAL_PORT2, SERIAL_PORT2, BASIC::SINGLE_PROGS
 static BASIC::Interpreter basic3(SERIAL_PORT3, SERIAL_PORT3, BASIC::SINGLE_PROGSIZE);
 #endif
 #else
-#if USEUTFT
-static BASIC::Interpreter basic(SERIAL_PORT_I, utftPrint, BASIC::SINGLE_PROGSIZE);
-#elif (USEPS2USARTKB && USETVOUT)
+#if (USEPS2USARTKB && USETVOUT)
 static BASIC::Interpreter basic(ps2usartStream, tvoutPrint, BASIC::SINGLE_PROGSIZE);
 #elif USEPS2USARTKB
 static BASIC::Interpreter basic(ps2usartStream, SERIAL_PORT_O, BASIC::SINGLE_PROGSIZE);
@@ -143,10 +156,8 @@ static BASIC::Interpreter basic(sdlStream, tvoutPrint, BASIC::SINGLE_PROGSIZE);
 #else
 static BASIC::Interpreter basic(SERIAL_PORT_I, tvoutPrint, BASIC::SINGLE_PROGSIZE);
 #endif // USE_SDL_ISTREAM
-#elif USELIQUIDCRYSTAL
-static BASIC::Interpreter basic(SERIAL_PORT_I, lsvt100, BASIC::SINGLE_PROGSIZE);
 #else
-static BASIC::Interpreter basic(SERIAL_PORT_I, SERIAL_PORT_O, BASIC::SINGLE_PROGSIZE);
+static BASIC::Interpreter basic(INPUT_STREAM, OUTPUT_PRINT, BASIC::SINGLE_PROGSIZE);
 #endif // USEUTFT
 #endif // BASIC_MULTITERMINAL
 
@@ -227,7 +238,7 @@ setup()
 	basic.addModule(&extEeprom);
 #endif
 	
-#if USESD
+#if CONF_USE_EXTMEMFS
 	basic.addModule(&sdfs);
 #endif
 	

@@ -4,12 +4,12 @@
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  * Copyright (C) 2019,2020 Terminal-BASIC team
  *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
- *
+ * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -120,15 +120,12 @@ namespace BASIC
 #define AUTOCAPITALIZE    0
 
 /*
- * SDcard module
+ * External memory filesystem module
  */
-#define USESD         0
-#if USESD
+#define CONF_USE_EXTMEMFS         0
+#if CONF_USE_EXTMEMFS
 	// Unix-like file operations
 	#define USE_FILEOP 1
-	#if USE_FILEOP
-		#define FILE_NUMBER 3
-	#endif
 #endif
 
 // Use text error strings
@@ -210,6 +207,7 @@ namespace BASIC
 	#define SERIAL_I_BR 115200
 #define PS2UARTKB_I 9  // PS/2 keyboard through USART
 #define SDL_I       10  // SDL input on PC
+#define HAL_I       11
 
 // Output variants
 #define SERIAL_O   1 // Serial output
@@ -236,6 +234,8 @@ namespace BASIC
 	#define LIQCR_D1 4
 	#define LIQCR_D2 3
 	#define LIQCR_D3 2
+#define SDL_O       12
+#define HAL_O         13
 
 // Input select
 #define S_INPUT SERIALL_I

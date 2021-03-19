@@ -30,6 +30,7 @@
 
 #include "tools.h"
 #include "types.hpp"
+#include "HALProxyStream.hpp"
 
 #ifdef ARDUINO
 #include "config_arduino.hpp"
@@ -40,27 +41,34 @@
 #include "basic.h"
 
 #if S_INPUT == SERIAL_I
-    #define SERIAL_PORT_I Serial
+	#define SERIAL_PORT_I Serial
 #elif S_INPUT == SERIAL1_I
-    #define SERIAL_PORT_I Serial1
+	#define SERIAL_PORT_I Serial1
 #elif S_INPUT == SERIAL2_I
-    #define SERIAL_PORT_I Serial2
+	#define SERIAL_PORT_I Serial2
 #elif S_INPUT == SERIAL3_I
-    #define SERIAL_PORT_I Serial3
+	#define SERIAL_PORT_I Serial3
 #elif S_INPUT == SERIALL_I
-    #define SERIAL_PORT_I SerialL
+	#define SERIAL_PORT_I SerialL
 #elif S_INPUT == SERIALL1_I
-    #define SERIAL_PORT_I SerialL1
+	#define SERIAL_PORT_I SerialL1
 #elif S_INPUT == SERIALL2_I
-    #define SERIAL_PORT_I SerialL2
+	#define SERIAL_PORT_I SerialL2
 #elif S_INPUT == SERIALL3_I
-    #define SERIAL_PORT_I SerialL3
+	#define SERIAL_PORT_I SerialL3
 #elif S_INPUT == PS2UARTKB_I
-#undef USEPS2USARTKB
-#define USEPS2USARTKB     1
+	#undef USEPS2USARTKB
+	#define USEPS2USARTKB     1
 #elif S_INPUT == SDL_I
-    #define USE_SDL_ISTREAM 1
+	#define USE_SDL_ISTREAM 1
+#elif S_INPUT == HAL_I
+	#define SERIAL_PORT_I halproxy1
 #endif
+
+#ifdef SERIAL_PORT_I
+#define INPUT_STREAM SERIAL_PORT_I
+#endif
+
 #if S_OUTPUT == SERIAL_O
 #define SERIAL_PORT_O Serial
 #elif S_OUTPUT == SERIAL1_O
@@ -86,6 +94,14 @@
 #elif S_OUTPUT == LIQCR_O
 #undef USELIQUIDCRYSTAL
 #define USELIQUIDCRYSTAL   1
+#elif S_OUTPUT == SDL_O
+	#define USE_SDL_OSTREAM 1
+#elif S_OUTPUT == HAL_O
+	#define SERIAL_PORT_O halproxy1
+#endif // S_OUTPUT
+
+#ifdef SERIAL_PORT_O
+#define OUTPUT_PRINT SERIAL_PORT_O
 #endif
 
 #ifdef true
@@ -149,9 +165,6 @@ enum class ProgMemStrings : uint8_t
 	S_ARRAYS,
 	S_STACK,
 #endif // USE_DUMP
-#if USESD
-	S_DIR,
-#endif // USESD
 	S_REALLY,
 	S_END,
 #if USE_TEXTATTRIBUTES

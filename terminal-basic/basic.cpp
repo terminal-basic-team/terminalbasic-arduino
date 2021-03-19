@@ -21,6 +21,14 @@
 
 #include "basic.hpp"
 
+#if USE_SAVE_LOAD and !(HAL_NVRAM)
+#error "USE_SAVE_LOAD option requires HAL to support HAL_NVRAM"
+#endif
+
+#if USE_GFX and !(HAL_GFX)
+#error "USE_GFX option requires HAL to support HAL_GFX"
+#endif
+
 namespace BASIC
 {
 
@@ -50,9 +58,6 @@ static const char strOF[] PROGMEM = "OF";
 static const char strVARS[] PROGMEM = "VARS";
 static const char strARRAYS[] PROGMEM = "ARRAYS";
 static const char strSTACK[] PROGMEM = "STACK";
-#endif
-#if USESD
-static const char strDIR[] PROGMEM = "DIR";
 #endif
 static const char strREALLY[] PROGMEM = "REALLY";
 static const char strEND[] PROGMEM = "END";
@@ -98,9 +103,6 @@ static PGM_P const progmemStrings[uint8_t(ProgMemStrings::NUM_STRINGS)] PROGMEM 
 	strVARS, // VARS
 	strARRAYS, // ARRAYS
 	strSTACK, // STACK
-#endif
-#if USESD
-	strDIR, // DIR
 #endif
 	strREALLY, // REALLY
 	strEND, // END

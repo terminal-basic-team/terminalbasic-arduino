@@ -45,9 +45,9 @@
 #include "basic_dataparser.hpp"
 #endif
 
-#if USESD
-#include "basic_sdfs.hpp"
-extern BASIC::SDFSModule sdfs;
+#if CONF_USE_EXTMEMFS
+#include "basic_extmemfs.hpp"
+extern BASIC::ExtmemFSModule sdfs;
 #endif
 
 namespace BASIC
@@ -151,7 +151,7 @@ Interpreter::init()
 	print(long(_program.programSize - _program._arraysEnd), VT100::BRIGHT);
 	print(ProgMemStrings::S_BYTES), print(ProgMemStrings::AVAILABLE), newline();
 	_state = SHELL;
-#if USESD
+#if CONF_USE_EXTMEMFS
 	sdfs.loadAutorun(*this);
 #endif
 }
@@ -417,6 +417,9 @@ Interpreter::list(uint16_t start, uint16_t stop)
 			}
 		}
 		newline();
+#ifdef ARDUINO_ARCH_ESP8266
+	ESP.wdtFeed();
+#endif
 	}
 }
 

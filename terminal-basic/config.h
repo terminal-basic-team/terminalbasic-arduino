@@ -85,22 +85,22 @@
 /*
  * Allow GO TO OPERATOR in addition to GOTO
  */
-#define CONF_SEPARATE_GO_TO     0
+#define CONF_SEPARATE_GO_TO 0
 
 /*
  * Fast command call using function address
  */
-#define FAST_MODULE_CALL 1
+#define FAST_MODULE_CALL    1
 
 /*
  * Support of integer division and modulo operation
  */
-#define USE_INTEGER_DIV      1
+#define USE_INTEGER_DIV     1
 #if USE_INTEGER_DIV
 	/*
 	 * Use DIV keyword for integer division in addition to \ operation
 	 */
-	#define USE_DIV_KW   0
+	#define USE_DIV_KW  0
 #endif // USE_INTEGER_DIV
 
 /*
@@ -132,7 +132,7 @@
 /**
  * PEEK FUNCTION, POKE command support
  */
-#define USE_PEEK_POKE 1
+#define USE_PEEK_POKE 0
 
 #define LANG_EN 0
 #define LANG_RU 1

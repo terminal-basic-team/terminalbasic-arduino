@@ -79,9 +79,9 @@ const pointer_t PROGRAMSIZE = 14336;
 const pointer_t PROGRAMSIZE = 8192;
 #endif
 #elif defined (__AVR_ATmega2560__)
-#if (S_OUTPUT != TVOUT_O) && (!USE_EXTMEM) && (!USESD)
+#if (S_OUTPUT != TVOUT_O) && (!USE_EXTMEM) && (!CONF_USE_EXTMEMFS)
 const pointer_t PROGRAMSIZE = 6144;
-#elif (!USE_EXTMEM) && (USESD)
+#elif (!USE_EXTMEM) && (CONF_USE_EXTMEMFS)
 const pointer_t PROGRAMSIZE = 5900;
 #else
 const pointer_t PROGRAMSIZE = 512;
@@ -89,7 +89,7 @@ const pointer_t PROGRAMSIZE = 512;
 #elif defined (__AVR_ATmega128__) || defined (__AVR_ATmega128A__)
 const pointer_t PROGRAMSIZE = 3072;
 #elif defined (__AVR_ATmega328__) || defined (__AVR_ATmega328P__)
-#if USESD
+#if CONF_USE_EXTMEMFS
 const pointer_t PROGRAMSIZE = 256;
 #else
 const pointer_t PROGRAMSIZE = 1024;

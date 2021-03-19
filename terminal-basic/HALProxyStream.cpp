@@ -19,36 +19,56 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef ARDUINO_ARCH_AVR
+#include "HALProxyStream.hpp"
 
-#include <avr/io.h>
-#include <avr/eeprom.h>
-
-#include "HAL.h"
-
-void
-HAL_initialize()
+namespace BASIC
 {
+
+HALProxyStream::HALProxyStream(uint8_t term) :
+    m_term(term), m_hasByte(false)
+{
+}
+
+int
+HALProxyStream::available()
+{
+	return HAL_terminal_isdataready(m_term) ? 1 : 0;
+}
+
+size_t
+HALProxyStream::write(uint8_t byte)
+{
+	HAL_terminal_write(m_term, byte);
 }
 
 void
-HAL_finalize()
+HALProxyStream::flush()
 {
 }
 
-HAL_nvram_address_t HAL_nvram_getsize()
+int
+HALProxyStream::peek()
 {
-	return (HAL_nvram_address_t)(E2END+1);
+	if (m_hasByte) {
+		m_hasByte = false;
+	} else if (HAL_terminal_isdataready(m_term)) {
+		m_byte = HAL_terminal_read(m_term);
+		m_hasByte = true;
+	} else
+		return -1;
+	return m_byte;
 }
 
-uint8_t HAL_nvram_read(HAL_nvram_address_t addr)
+int
+HALProxyStream::read()
 {
-	return eeprom_read_byte((uint8_t*)addr);
+	if (m_hasByte)
+		return  m_byte;
+	else if (HAL_terminal_isdataready(m_term))
+		return HAL_terminal_read(m_term);
+	else
+		return -1;
+		
 }
 
-void HAL_nvram_write(HAL_nvram_address_t addr, uint8_t byte)
-{
-	return eeprom_update_byte((uint8_t*)addr, byte);
-}
-
-#endif /* ARDUINO_ARCH_AVR */
+} // namespace BASIC

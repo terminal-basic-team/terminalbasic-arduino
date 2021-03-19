@@ -25,25 +25,80 @@
 #include "basic_functionblock.hpp"
 #include "basic_interpreter.hpp"
 
-#if USESD
-
-#include <sd.hpp>
+#if CONF_USE_EXTMEMFS
 
 namespace BASIC
 {
+
+class FileStream : public Stream
+{
+public:
+	
+	FileStream() : m_file(0) {}
+	
+	explicit FileStream(HAL_extmem_file_t f) :
+	m_file(f) {}
+	
+	void setFile(HAL_extmem_file_t f)
+	{
+		m_file = f;
+	}
+	
+	void close()
+	{
+		HAL_extmem_closefile(m_file);
+	}
+	
+private:
+	
+	HAL_extmem_file_t m_file;
+	
+// Print  interface
+public:
+	size_t write(uint8_t b) override
+	{
+		HAL_extmem_writetofile(m_file, b);
+		return 1;
+	}
+	
+// Stream interface
+public:
+	int available() override
+	{
+		return HAL_extmem_getfilesize(m_file)-
+		    HAL_extmem_getfileposition(m_file);
+	}
+	
+	void flush() override
+	{
+	}
+	
+	int peek() override
+	{
+		auto pos = HAL_extmem_getfileposition(m_file);
+		int res = HAL_extmem_readfromfile(m_file);
+		HAL_extmem_setfileposition(m_file, pos);
+		return res;
+	}
+	
+	int read() override
+	{
+		return HAL_extmem_readfromfile(m_file);
+	}
+};
+
 /**
- * @brief Module with commands to store the programs on SD card
+ * @brief Module with commands to store the programs on the exxternal memory
+ *     file system
  */
-class SDFSModule : public FunctionBlock
+class ExtmemFSModule : public FunctionBlock
 {
 	// Function block interface
 public:
-	SDFSModule();
+	ExtmemFSModule();
 	
 	void loadAutorun(Interpreter&);
 	
-protected:
-	void _init() override;
 private:
 	static bool dchain(Interpreter&);
 	static bool dsave(Interpreter&);
@@ -53,18 +108,17 @@ private:
 	static bool header(Interpreter&);
 #if USE_FILEOP
 	static bool com_fclose(Interpreter&);
+	static bool com_fdelete(Interpreter&);
 	static bool com_fseek(Interpreter&);
 	static bool com_fwrite(Interpreter&);
 	
 	static bool func_fopen(Interpreter&);
 	static bool func_fsize(Interpreter&);
 	static bool func_fread(Interpreter&);
-#endif
-	
+#endif // USE_FILEOP
 	static bool getFileName(Interpreter&, char[]);
-	static bool _loadText(SDCard::File&, Interpreter&);
+	static bool _loadText(FileStream&, Interpreter&);
 	
-	static SDCard::File	_root;
 	static const FunctionBlock::function _commands[] PROGMEM;
 #if USE_FILEOP
 	static const FunctionBlock::function _functions[] PROGMEM;

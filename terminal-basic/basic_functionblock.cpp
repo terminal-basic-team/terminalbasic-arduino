@@ -54,7 +54,7 @@ FunctionBlock::function
 FunctionBlock::getFunction(const char *name) const
 {
 	function result;
-	if (((result = _getFunction(name)) == NULL) &&
+	if (((result = _getFunction(name)) == nullptr) &&
 	    _next != nullptr)
 		result = _next->getFunction(name);
 	return result;
@@ -139,7 +139,27 @@ FunctionBlock::general_func(Interpreter &i, _funcReal f)
 	}
 	return false;
 }
-#endif // USE_LONGINT
+
+#if USE_LONG_REALS
+bool
+FunctionBlock::general_func(Interpreter &i, _funcLongReal f)
+{
+	Parser::Value v(LongReal(0));
+	i.popValue(v);
+	if (v.type() == Parser::Value::INTEGER ||
+#if USE_LONGINT
+	    v.type() == Parser::Value::LONG_INTEGER ||
+#endif
+	    v.type() == Parser::Value::LONG_REAL ||
+	    v.type() == Parser::Value::REAL) {
+		v = (*f)(LongReal(v));
+		if (i.pushValue(v))
+			return true;
+	}
+	return false;
+}
+#endif // USE_LONG_REALS
+#endif // USE_REALS
 
 bool
 FunctionBlock::general_func(Interpreter &i, _funcInteger f)
