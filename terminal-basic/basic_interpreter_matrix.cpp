@@ -114,20 +114,19 @@ Interpreter::printMatrix(const char *name)
 {
 	ArrayFrame *array = get2DArray(name);
 	
-	if (array != nullptr) {
-		for (uint16_t row = 0; row <= array->dimension[0]; ++row) {
-			for (uint16_t column = 0; column <= array->dimension[1];
-			    ++column) {
-				Parser::Value v;
-				if (array->get(row*(array->dimension[1]+1)+column,
-				    v))
-					this->print(v), _output.print(char(ASCII::SPACE));
-				else
-					raiseError(DYNAMIC_ERROR,
-					    INTERNAL_ERROR);
-			}
-			this->newline();
+	if (array == nullptr)
+		return;
+	
+	for (uint16_t row = 0; row <= array->dimension[0]; ++row) {
+		for (uint16_t column = 0; column <= array->dimension[1];
+		     ++column) {
+			Parser::Value v;
+			if (array->get(row * (array->dimension[1] + 1) + column, v))
+				this->print(v), _output.print(char(ASCII::SPACE));
+			else
+				raiseError(DYNAMIC_ERROR, INTERNAL_ERROR);
 		}
+		this->newline();
 	}
 }
 

@@ -46,6 +46,10 @@ HAL_initialize_concrete()
 	SerialL3.begin(HAL_ARDUINO_AVR8_TERMINAL_SERIAL_3_BR);
 #endif
 #endif // HAL_ARDUINO_AVR8_TERMINAL
+#if USE_EXTMEM
+	XMCRA |= 1ul<<7; // Switch ext mem iface on
+	XMCRB = 0;
+#endif // USE_EXTMEM
 }
 __END_DECLS
 
@@ -109,7 +113,13 @@ HAL_terminal_isdataready(HAL_terminal_t t)
 #endif
 	return FALSE;
 }
-
 #endif // HAL_ARDUINO_AVR8_TERMINAL
+
+__BEGIN_DECLS
+void
+HAL_update_concrete()
+{
+}
+__END_DECLS
 
 #endif // ARDUINO_ARCH_AVR

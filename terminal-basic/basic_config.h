@@ -1,6 +1,7 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2017-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * 
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  * Copyright (C) 2019,2020 Terminal-BASIC team
  *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
@@ -26,23 +27,38 @@
 #ifndef BASIC_CONFIG_H
 #define BASIC_CONFIG_H
 
-#include <stdint.h>
-
 /*
- * Real arithmetics
+ * 1. Real arithmetics
  * 
  * Support of operations with real numbers.
  * When enabled, all variables and arrays, which names are not ending with "$ ! %"
  * are treated as reals. Mathematical functions support depend on this option
+ * This type is 4-byte binary floating point (C/C++ float)
  */
 #define USE_REALS            1
+
 #if USE_REALS
+    /**
+     * 1.1 Long real numbers
+     * 
+     * Support of long real numbers.  Arrays, variables and functions, ending
+     * with "!" character are long real.
+     * This type is 8-byte binary floating point (C/C++ double). This means
+     * it can't be used on systems w/o double type support, such as 8-bit AVR
+     * arduino boards (UNO/NANO/PRO mini/Mega...)
+     * 
+     * All real number constants (1e6, 0.5, 3., .04 ... ) treated as long reals
+     */
 #define USE_LONG_REALS       0
 #endif
 
 /*
  * Support of 4-byte integer datatype
- * Functions, variables and arrays of long integer type ends with double % mark
+ * 
+ * Default integer constants are 2-byte signed [-32768 .. 32768), but this 
+ * option enables 4-byte signed type.
+ * Functions, variables and arrays of long integer type ends with double "%!"
+ * symbols
  */
 #define USE_LONGINT          0
 
@@ -58,14 +74,14 @@
 #define USE_RANDOM           1
 
 /*
- * Support of Darthmouth BASIX-style matrix operations
+ * Support of Darthmouth BASIC-style matrix operations
  */
 #define USE_MATRIX           0
 
 /**
  * Support of DATA/READ statements
  */
-#define USE_DATA             0
+#define USE_DATA             1
 
 /*
  * Support of DEF FN construct
@@ -80,17 +96,17 @@
 /*
  * Allow ON ... GOTO ... statements
  */
-#define CONF_USE_ON_GOTO    0
+#define CONF_USE_ON_GOTO    1
 
 /*
  * Allow GO TO OPERATOR in addition to GOTO
  */
-#define CONF_SEPARATE_GO_TO 0
+#define CONF_SEPARATE_GO_TO 1
 
 /*
- * Fast command call using function address
+ * Fast command call using C-function address
  */
-#define FAST_MODULE_CALL    1
+#define FAST_MODULE_CALL    0
 
 /*
  * Support of integer division and modulo operation
@@ -134,16 +150,19 @@
  */
 #define USE_PEEK_POKE 0
 
-#define LANG_EN 0
-#define LANG_RU 1
-#define LANG_FR 3
+/**
+ * Language constants for later usage
+ */
+#define LANG_EN 0 /* English */
+#define LANG_RU 1 /* Russian */
+#define LANG_FR 3 /* French */
 
-/*
- * Messages localization
+/**
+ * Messages and errors localization
  */
 #define CONF_LANG LANG_EN
 
-/*
+/**
  * Lexer localization
  */
 #define CONF_LEXER_LANG LANG_EN
@@ -151,15 +170,17 @@
 /* Size of the string identifiers */
 #define STRING_SIZE 72
 
+/**
+ * Enabling packed structures reduces BASIC memory usage, but results to
+ * unaligned memory acces. It should be desabled on ESP8266, Motorola 68k, etc.
+ */
 #define USE_PACKED_STRUCT 1
 
 /*
  * High-level code optimisation mode
  */
-#define OPT_SPEED     1 // Extensive use of switch/case constructs
-#define OPT_SIZE      2 // Use cascade of if/else if instead of switch/case
-#define OPT           OPT_SIZE // Selected mode
-
-typedef uintptr_t pointer_t;
+#define OPT_SPEED     1 /* Extensive use of switch/case constructs */
+#define OPT_SIZE      2 /* Use cascade of if/else if instead of switch/case */
+#define OPT           OPT_SIZE /* Selected mode */
 
 #endif /* BASIC_CONFIG_H */

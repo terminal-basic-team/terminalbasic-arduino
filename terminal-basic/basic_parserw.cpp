@@ -86,10 +86,13 @@ namespace BASIC
 #include "strings_ru.hpp"
 #elif (CONF_LANG == LANG_EN)
 #include "strings_en.hpp"
+#elif (CONF_LANG == LANG_FR)
+#include "strings_fr.hpp"
 #endif
 
 static const char noerror[] PROGMEM = STR_NO_ERROR;
 static const char operexp[] PROGMEM = STR_OPERATOR_EXPECTED;
+static const char strIdentExp[] PROGMEM = STR_IDENTIFYER_EXPECTED;
 static const char exprexp[] PROGMEM = STR_EXPRESSION_EXPECTED;
 static const char intexp[] PROGMEM = STR_INTEGER_CONSTANT_EXPECTED;
 static const char thengtexp[] PROGMEM = STR_THEN_OR_GOTO_EXPECTED;
@@ -97,17 +100,26 @@ static const char invdata[] PROGMEM = STR_INVALID_DATA_EXPRESSION;
 static const char invread[] PROGMEM = STR_INVALID_READ_EXPRESSION;
 static const char varlistexp[] PROGMEM = STR_VARIABLES_LIST_EXPECTED;
 static const char stringovf[] PROGMEM = STR_STRING_OVERFLOW;
+static const char strMissParen[] PROGMEM = STR_MISSING_RPAREN;
+#if CONF_USE_ON_GOTO
+static const char strInvalidOnGoto[] PROGMEM = STR_INVALID_ONGOTO_INDEX;
+#endif
 
 PGM_P const Parser::errorStrings[] PROGMEM = {
-	noerror,
-	operexp,
-	exprexp,
-	intexp,
-	thengtexp,
-	invdata,
-	invread,
-	varlistexp,
-	stringovf
+	noerror,          // 0
+	operexp,          // 1
+	strIdentExp,      // 2
+	exprexp,          // 3
+	intexp,           // 4
+	thengtexp,        // 5
+	invdata,          // 6
+	invread,          // 7
+	varlistexp,       // 8
+	stringovf,        // 9
+	strMissParen,     // 10
+#if CONF_USE_ON_GOTO
+	strInvalidOnGoto  // 11
+#endif
 };
 #endif // CONF_ERROR_STRINGS
 
@@ -592,6 +604,7 @@ Parser::fOnStatement(uint8_t index)
 				break;
 		}
 	}
+	_error = ErrorCodes::INVALID_ONGOTO_INDEX;
 	return false;
 }
 #endif // CONF_USE_ON_GOTO
@@ -1903,9 +1916,9 @@ Parser::fMatrixExpression(const char *buf)
 	}
 		break;
 	case Token::KW_TRN:
-		mo = Interpreter::MO_TRANSPOSE;
 	case Token::KW_INV:
-		mo = Interpreter::MO_INVERT;
+		mo = t == Token::KW_TRN ? Interpreter::MO_TRANSPOSE :
+			Interpreter::MO_INVERT;
 	{
 		char first[IDSIZE];
 		if (_lexer.getNext() && _lexer.getToken() == Token::LPAREN &&
@@ -1939,7 +1952,7 @@ Parser::fMatrixExpression(const char *buf)
 			default:
 				return false;
 			}
-			char second[VARSIZE];
+			char second[IDSIZE];
 			if (_lexer.getNext() && fIdentifier(second)) {
 				if (getMode() == EXECUTE)
 					_interpreter.assignMatrix(buf, first,

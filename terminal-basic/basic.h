@@ -22,13 +22,15 @@
 #include "sys/cdefs.h"
 #include <stdint.h>
 
-#include "config.h"
+#include "basic_config.h"
 
 #if USE_REALS
 #include <math.h>
 #endif
 
 __BEGIN_DECLS
+
+typedef uintptr_t pointer_t;
 
 /**
  * @brief ASCII characters

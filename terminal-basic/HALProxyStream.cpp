@@ -39,6 +39,7 @@ size_t
 HALProxyStream::write(uint8_t byte)
 {
 	HAL_terminal_write(m_term, byte);
+	return 1;
 }
 
 void

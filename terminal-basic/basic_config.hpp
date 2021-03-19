@@ -27,12 +27,7 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 
-#include <stdint.h>
-
-#include "config.h"
-
-namespace BASIC
-{
+#include "basic_config.h"
 
 /*
  * Allow '_' symbol in identifiers
@@ -132,20 +127,20 @@ namespace BASIC
 #define CONF_ERROR_STRINGS 0
 
 // Arduino IO module
-#define CONF_MODULE_ARDUINOIO      1
+#define CONF_MODULE_ARDUINOIO      0
 #if CONF_MODULE_ARDUINOIO
 	// TONE command support
-	#define CONF_MODULE_ARDUINOIO_TONE 0
+	#define CONF_MODULE_ARDUINOIO_TONE 1
+	// BEEP command
+	#if CONF_MODULE_ARDUINOIO_TONE
+		#define CONF_BEEP     1
+		#if CONF_BEEP
+			#define BEEP_PIN 32
+			#define BEEP_FREQ 440
+			#define BEEP_DURATION 300
+		#endif // CONF_BEEP
+	#endif // CONF_MODULE_ARDUINOIO_TONE
 #endif // CONF_MODULE_ARDUINOIO
-
-// BEEP command
-#if CONF_MODULE_ARDUINOIO_TONE
-	#define CONF_BEEP     1
-	#if CONF_BEEP
-		#define BEEP_PIN 5
-		#define BEEP_FREQ 440
-	#endif // CONF_BEEP
-#endif // CONF_MODULE_ARDUINOIO_TONE
 
 // External EEPROM functions module
 #define USE_EXTEEPROM    0
@@ -160,12 +155,17 @@ namespace BASIC
  * Indention of the loop bodies
  */
 #define LOOP_INDENT      1
+
 /*
  * Indention of the line numbers in LIST output
  */
 #define LINE_NUM_INDENT  1
 
+/**
+ * Aligned memory access. A bit slower, but necessary on ESP8266, MC68k, etc.
+ */
 #define CONF_USE_ALIGN 0
+
 /*
  * GFX module
  */
@@ -181,6 +181,7 @@ namespace BASIC
  * Prompt on new line
  */
 #define CLI_PROMPT_NEWLINE 1
+
 /*
  * LF character processing
  */
@@ -238,10 +239,10 @@ namespace BASIC
 #define HAL_O         13
 
 // Input select
-#define S_INPUT SERIALL_I
+#define S_INPUT HAL_I
 
 // Output select
-#define S_OUTPUT SERIALL_O
+#define S_OUTPUT HAL_O
 
 #if USE_EXTEEPROM
 	#define USE_WIRE 1
@@ -255,11 +256,9 @@ namespace BASIC
 /*
  * Max size of the program line
  */
-const uint8_t PROGSTRINGSIZE = 80;
+#define PROGSTRINGSIZE 80
 
 // Number of characters in variable name
-const uint8_t VARSIZE = 5;
-
-} // namespace BASIC
+#define VARSIZE 5
 
 #endif // CONFIG_HPP

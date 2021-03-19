@@ -19,41 +19,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef HAL_CONFIG_H
-#define HAL_CONFIG_H
-
-/*
- * Number of available terminals
+/**
+ * @brief Configuration for the Arduino core AVR8 HAL implementation
  */
-#define HAL_TERMINAL_NUM 1
 
-/*
- * Enable NVRAM read/write functions
- */
-#define HAL_NVRAM 1
+#ifndef HAL_AVR8_H
+#define HAL_AVR8_H
 
-/*
- * Enable external memory interface functions
- */
-#define HAL_EXTMEM 0
-#if HAL_EXTMEM
-/*
- * Maximal number of simulteniously opened files
- */
-#define HAL_EXTMEM_NUM_FILES 2
-#endif /* HAL_EXTMEM */
+#include "HAL.h"
 
-/*
- * Enable GFX interface functions
- */
-#define HAL_GFX 0
-#if HAL_GFX
-/* Default implementation of the explicit color setting commands */
-#define HAL_GFX_EXPCOLOR_SIMPL 1
-#endif /* HAL_GFX */
+#define HAL_ARDUINO_AVR8_TERMINAL_NONE 0
+/* Use SerialL[N] objects for terminal */
+#define HAL_ARDUINO_AVR8_TERMINAL_SERIALLIGHT 1
 
-#define HAL_GPIO 1
+#define HAL_ARDUINO_AVR8_TERMINAL HAL_ARDUINO_AVR8_TERMINAL_NONE
 
-#define HAL_BUZZER 0
+#if HAL_ARDUINO_AVR8_TERMINAL == HAL_ARDUINO_AVR8_TERMINAL_SERIALLIGHT
+#define HAL_ARDUINO_AVR8_TERMINAL_SERIAL_0_BR 115200
+#if HAL_TERMINAL_NUM > 0
+#define HAL_ARDUINO_AVR8_TERMINAL_SERIAL_1_BR 115200
+#endif /* HAL_TERMINAL_NUM */
+#if HAL_TERMINAL_NUM > 1
+#define HAL_ARDUINO_AVR8_TERMINAL_SERIAL_2_BR 115200
+#endif /* HAL_TERMINAL_NUM */
+#if HAL_TERMINAL_NUM > 2
+#define HAL_ARDUINO_AVR8_TERMINAL_SERIAL_3_BR 115200
+#endif /* HAL_TERMINAL_NUM */
+#endif /* HAL_ARDUINO_AVR8_TERMINAL */
 
-#endif /* HAL_CONFIG_H */
+// Use ATMega128/2560 external memory interface
+#define HAL_ARDUINO_AVR8_EXTMEM 1
+
+#endif /* HAL_ARDUINO_H */

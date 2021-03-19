@@ -62,6 +62,19 @@ public:
 		CB_WHITE = 0xF0,
 	};
 
+	enum Color : uint8_t
+	{
+		COLOR_BLACK = 0,
+		COLOR_RED,
+		COLOR_GREEN,
+		COLOR_YELLOW,
+		COLOR_BLUE,
+		COLOR_MAGENTA,
+		COLOR_CYAN,
+		COLOR_WHITE,
+		NUM_COLORS
+	};
+
 	/**
 	 * @brief Print print wrapper with vt100 capabilities
 	 */

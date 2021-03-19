@@ -24,6 +24,9 @@
 #if CONF_MODULE_ARDUINOIO
 
 #include "Arduino.h"
+#ifdef ARDUINO_ARCH_ESP32
+#include "HAL_esp32.h"
+#endif
 #include <assert.h>
 
 namespace BASIC
@@ -62,11 +65,11 @@ static const uint8_t arduinoIOCommands[] PROGMEM = {
 const FunctionBlock::command ArduinoIO::_commands[] PROGMEM = {
 	ArduinoIO::comm_awrite
 #if CONF_BEEP
-	, ArduinoIO::comm_beep,
+	, ArduinoIO::comm_beep
 #endif
 #if CONF_MODULE_ARDUINOIO_TONE
-	, ArduinoIO::comm_notone,
-	, ArduinoIO::comm_tone,
+	, ArduinoIO::comm_notone
+	, ArduinoIO::comm_tone
 #endif
 	, ArduinoIO::comm_dwrite
 #if FAST_MODULE_CALL
@@ -101,11 +104,9 @@ bool
 ArduinoIO::func_dread(Interpreter &i)
 {
 	INT v;
-	if (getIntegerFromStack(i, v)) {
-		pinMode(v, INPUT);
-		if (i.pushValue(bool(digitalRead(v))))
-			return true;
-	}
+	if (getIntegerFromStack(i, v))
+		return i.pushValue(bool(HAL_gpio_readPin(v)));
+	
 	return false;
 }
 
@@ -132,8 +133,7 @@ ArduinoIO::comm_dwrite(Interpreter &i)
 		if (v.type() == Parser::Value::LOGICAL) {
 			INT v2;
 			if (getIntegerFromStack(i, v2)) {
-				pinMode(v2, OUTPUT);
-				digitalWrite(v2, bool(v));
+				HAL_gpio_writePin(v2, bool(v));
 				return true;
 			}
 		}
@@ -152,7 +152,7 @@ ArduinoIO::comm_tone(Interpreter &i)
 	if (getIntegerFromStack(i, dur)) {
 		if (getIntegerFromStack(i, freq)) {
 			if (getIntegerFromStack(i, pin)) {
-				tone(pin, freq, dur);
+				HAL_buzzer_tone(pin, freq, dur);
 				return true;
 			}
 		}
@@ -165,7 +165,7 @@ ArduinoIO::comm_notone(Interpreter &i)
 {
 	INT pin;
 	if (getIntegerFromStack(i, pin)) {
-		noTone(pin);
+		HAL_buzzer_notone(pin);
 		return true;
 	}
 	return false;
@@ -193,10 +193,9 @@ ArduinoIO::aread_i(INT v)
 #if CONF_BEEP
 
 bool
-ArduinoIO::comm_beep(Interpreter &i)
+ArduinoIO::comm_beep(Interpreter &)
 {
-	pinMode(BEEP_PIN, OUTPUT);
-	tone(BEEP_PIN, BEEP_FREQ, 333);
+	HAL_buzzer_tone(BEEP_PIN, BEEP_FREQ, BEEP_DURATION);
 	return true;
 }
 #endif // CONF_BEEP

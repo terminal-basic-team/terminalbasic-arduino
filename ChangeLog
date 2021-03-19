@@ -1,3 +1,9 @@
+r2.3-a2 (26.02.2021) Release, dedicated to 4 years of TB and 4k downloads from sourceforge.net
+
+  * Output to SPI TFT screens via Adafruit_ILI9341 and TFT_eSPI libs
+  * ESP32: add DTONE/NOTONE implementation
+  * Working MS Windows port
+
 r2.3-a1 (18.10.2020)
 
   * Introduction of HAL layer, simplifying the process of porting to different platforms

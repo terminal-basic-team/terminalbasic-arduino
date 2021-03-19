@@ -104,18 +104,18 @@ static const char intFuncs[] PROGMEM = {
 	'S', 'G', 'N', ASCII_NUL,
 	'T', 'I', 'M', 'E', ASCII_NUL,
 #if USE_LEN
-	'Ñ', 'ã', 'à', 'ç', 'Ä', ASCII_NUL,
+	'ÔøΩ', 'ÔøΩ', 'ÔøΩ', 'ÔøΩ', 'ÔøΩ', ASCII_NUL,
 #endif
 #if USE_LEFT
-	'ã', 'Ö', 'Ç', '$', ASCII_NUL,
+	'ÔøΩ', 'ÔøΩ', 'ÔøΩ', '$', ASCII_NUL,
 #endif
 #if USE_RIGHT
-	'è', 'ê', 'Ä', 'Ç', '$', ASCII_NUL,
+	'ÔøΩ', 'ÔøΩ', 'ÔøΩ', 'ÔøΩ', '$', ASCII_NUL,
 #endif
 #if USE_MID
-	'ë', 'ê', 'Ö', 'Ñ', '$', ASCII_NUL,
+	'ÔøΩ', 'ÔøΩ', 'ÔøΩ', 'ÔøΩ', '$', ASCII_NUL,
 #endif
-	'ë', 'í', 'ê', '$', ASCII_NUL,
+	'ÔøΩ', 'ÔøΩ', 'ÔøΩ', '$', ASCII_NUL,
 #endif // CONF_LANG
 	ASCII_ETX
 };
@@ -515,9 +515,9 @@ InternalFunctions::func_rnd(Interpreter &i)
 	INT val;
 	getIntegerFromStack(i, val);
 #if USE_REALS
-	Parser::Value v(Real(random(0x7FFFFFFF)) / Real(0x7FFFFFFF));
+	Parser::Value v(Real(HAL_random_generate(INT32_MAX)) / Real(INT32_MAX));
 #else
-	Parser::Value v(Integer(random(0x7FFFFFFF)));
+	Parser::Value v(Integer(random(-1)));
 #endif
 	return i.pushValue(v);
 }

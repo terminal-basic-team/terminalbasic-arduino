@@ -47,11 +47,169 @@
 
 #if CONF_USE_EXTMEMFS
 #include "basic_extmemfs.hpp"
-extern BASIC::ExtmemFSModule sdfs;
 #endif
 
 namespace BASIC
 {
+
+#if (CONF_LANG == LANG_RU)
+#include "strings_ru.hpp"
+#elif (CONF_LANG == LANG_EN)
+#include "strings_en.hpp"
+#elif (CONF_LANG == LANG_FR)
+#include "strings_fr.hpp"
+#endif
+
+static const char strStatic[] PROGMEM = "STATIC";
+static const char strDynamic[] PROGMEM = "DYNAMIC";
+static const char strError[] PROGMEM = STR_ERROR;
+static const char strSemantic[] PROGMEM = STR_SEMANTIC;
+static const char strSyntax[] PROGMEM = STR_SYNTAX;
+static const char strAt[] PROGMEM = "AT";
+static const char strReady[] PROGMEM = STR_CLI_PROMPT;
+static const char strBytes[] PROGMEM = STR_BYTES;
+static const char strAvailable[] PROGMEM = STR_AVAILABLE;
+static const char strucTERMINAL[] PROGMEM = "TERMINAL";
+static const char strucBASIC[] PROGMEM = "BASIC";
+static const char strVERSION[] PROGMEM = STR_VERSION;
+static const char strTEXT[] PROGMEM = "TEXT";
+static const char strOF[] PROGMEM = "OF";
+#if USE_DUMP
+static const char strVARS[] PROGMEM = "VARS";
+static const char strARRAYS[] PROGMEM = "ARRAYS";
+static const char strSTACK[] PROGMEM = "STACK";
+#endif
+static const char strREALLY[] PROGMEM = "REALLY";
+static const char strEND[] PROGMEM = "END";
+#if USE_TEXTATTRIBUTES
+static const char strVT100_PROLOGUESEQ[] PROGMEM = "\x1B[";
+static const char strVT100_CLS[] PROGMEM = "2J";
+static const char strVT100_NOATTR[] PROGMEM = "0m";
+static const char strVT100_BRIGHT[] PROGMEM = "1m";
+static const char strVT100_UNDERSCORE[] PROGMEM = "4m";
+static const char strVT100_REVERSE[] PROGMEM = "7m";
+static const char strVT100_LINEHOME[] PROGMEM = "80D";
+#if SET_PRINTZNES
+static const char strVT100_CLEARZONES[] PROGMEM = "3g";
+static const char strVT100_SETZONE[] PROGMEM = "\x1BH";
+#endif
+#if USE_COLORATTRIBUTES
+static const char strVT100_RED[] PROGMEM = "31m";
+static const char strVT100_GREEN[] PROGMEM = "32m";
+static const char strVT100_YELLOW[] PROGMEM = "33m";
+static const char strVT100_BLUE[] PROGMEM = "34m";
+static const char strVT100_MAGENTA[] PROGMEM = "35m";
+static const char strVT100_CYAN[] PROGMEM = "36m";
+static const char strVT100_WHITE[] PROGMEM = "37m";
+#endif
+#endif // USE_TEXTATTRIBUTES
+
+static PGM_P const progmemStrings[uint8_t(ProgMemStrings::NUM_STRINGS)] PROGMEM = {
+	strAt,     // AT
+	strBytes, // BYTES
+	strStatic, // STATIC
+	strDynamic, // DYNAMAIC
+	strError, // ERROR
+	strSemantic, // SEMANTIC
+	strSyntax, // SYNTAX
+	strReady, // READY
+	strAvailable, // AVAILABLE
+	strucTERMINAL, // TERMINAL
+	strucBASIC, // BASIC
+	strVERSION, // VERSION
+	strTEXT, // TEXT
+	strOF, // OF
+#if USE_DUMP
+	strVARS, // VARS
+	strARRAYS, // ARRAYS
+	strSTACK, // STACK
+#endif
+	strREALLY, // REALLY
+	strEND, // END
+#if USE_TEXTATTRIBUTES
+	strVT100_PROLOGUESEQ, // x1B[
+	strVT100_CLS,
+	strVT100_NOATTR,
+	strVT100_BRIGHT,
+	strVT100_UNDERSCORE,
+	strVT100_REVERSE,
+	strVT100_LINEHOME,
+#if SET_PRINTZNES
+	strVT100_CLEARZONES,
+	strVT100_SETZONE,
+#endif
+#if USE_COLORATTRIBUTES
+	strVT100_RED,
+	strVT100_GREEN,
+	strVT100_YELLOW,
+	strVT100_BLUE,
+	strVT100_MAGENTA,
+	strVT100_CYAN,
+	strVT100_WHITE
+#endif // USE_COLORATTRIBUTES
+#endif // USE_TEXTATTRIBUTES
+};
+
+#if CONF_ERROR_STRINGS
+
+static const char noerror[] PROGMEM = STR_NO_ERROR;
+static const char outtamemerror[] PROGMEM = STR_OUTTA_MEMORY;
+static const char strRedimedArray[] PROGMEM = STR_REDIMED_ARRAY;
+static const char stackFrameAlloc[] PROGMEM = STR_STACK_FRAME_ALLOC;
+static const char strStringFrameMiss[] PROGMEM = STR_MISING_STRING_FRAME;
+static const char strInvalidNext[] PROGMEM = STR_INVALID_NEXT;
+static const char strReturnWOGosub[] PROGMEM = STR_RETURN_WO_GOSUB;
+static const char strNoSuchLine[] PROGMEM = STR_NO_SUCH_LINE;
+static const char strInvalidVal[] PROGMEM = STR_INVALID_VALUE_TYPE;
+static const char strNoSuchArray[] PROGMEM = STR_NO_SUCH_ARRAY;
+static const char strInegerExpExpected[] PROGMEM = STR_INTEGER_EXP_EXPECTED;
+#if SAVE_LOAD_CHECKSUM
+static const char strBadChecksum[] PROGMEM = STR_BAD_CHECKSUM;
+#endif
+#if USE_TEXTATTRIBUTES
+static const char strInvalidTab[] PROGMEM = STR_INVALID_TAB;
+#endif
+/*
+		INVALID_ELEMENT_INDEX = 14,
+#if USE_MATRIX
+		SQUARE_MATRIX_EXPECTED = 15,
+#endif
+		DIMENSIONS_MISMATCH = 16,
+		COMMAND_FAILED = 17,
+#if USE_DEFFN
+		VAR_DUPLICATE = 18,
+		FUNCTION_DUPLICATE = 19,
+		NO_SUCH_FUNCION = 20,
+#endif
+		INTERNAL_ERROR = 255*/
+
+PGM_P const Interpreter::errorStrings[] PROGMEM = {
+	noerror,
+	outtamemerror,
+	strRedimedArray,
+	stackFrameAlloc,
+	strStringFrameMiss,
+	strInvalidNext,
+	strReturnWOGosub,
+	strNoSuchLine,
+	strInvalidVal,
+	strNoSuchArray,
+	strInegerExpExpected,
+#if SAVE_LOAD_CHECKSUM
+	strBadChecksum,
+#endif
+#if USE_TEXTATTRIBUTES
+	strInvalidTab
+#endif
+};
+
+#endif // CONF_ERROR_STRINGS
+
+PGM_P
+progmemString(ProgMemStrings index)
+{
+	return (PGM_P)pgm_read_ptr(&progmemStrings[uint8_t(index)]);
+}
 
 class Interpreter::AttrKeeper
 {
@@ -110,10 +268,13 @@ Interpreter::Interpreter(Stream &stream, Print &output, Pointer progSize) :
 _program(progSize), _state(SHELL), _input(stream), _output(output),
 _parser(_lexer, *this)
 #if BASIC_MULTITERMINAL
-,_termno(++_termnoGen)
+, _termno(++_termnoGen)
 #endif
 #if USE_DATA
-,_dataParserContinue(false)
+, _dataParserContinue(false)
+#endif
+#if CONF_USE_EXTMEMFS
+, m_sdfs(nullptr)
 #endif
 {
 	_input.setTimeout(10000L);
@@ -152,7 +313,8 @@ Interpreter::init()
 	print(ProgMemStrings::S_BYTES), print(ProgMemStrings::AVAILABLE), newline();
 	_state = SHELL;
 #if CONF_USE_EXTMEMFS
-	sdfs.loadAutorun(*this);
+	if (m_sdfs != nullptr)
+		m_sdfs->loadAutorun(*this);
 #endif
 }
 
@@ -217,10 +379,12 @@ Interpreter::step()
 		// fall through
 		// waiting for user input next program line
 	case PROGRAM_INPUT:
-		//_state = COLLECT_INPUT;
 		_inputPosition = 0;
 		memset(_inputBuffer, 0xFF, PROGSTRINGSIZE);
-		while (!readInput());
+		while (!readInput()) {
+			HAL_update();
+			HAL_time_sleep_ms(10);
+		}
 		exec();
 		break;
 	case VAR_INPUT:
@@ -228,7 +392,10 @@ Interpreter::step()
 			_output.print('?');
 			_inputPosition = 0;
 			memset(_inputBuffer, 0xFF, PROGSTRINGSIZE);
-			while (!readInput());
+			while (!readInput()) {
+				HAL_update();
+				HAL_time_sleep_ms(10);
+			}
 			doInput();
 		}
 		_state = EXECUTE;
@@ -519,7 +686,9 @@ Interpreter::dump(DumpMode mode)
 void
 Interpreter::print(const Parser::Value &v, VT100::TextAttr attr)
 {
+#if USE_TEXTATTRIBUTES
 	AttrKeeper keeper(*this, attr);
+#endif
 
 	switch (v.type()) {
 	case Parser::Value::LOGICAL:
@@ -549,7 +718,6 @@ Interpreter::print(const Parser::Value &v, VT100::TextAttr attr)
 	}
 	default:
 		raiseError(DYNAMIC_ERROR, INVALID_VALUE_TYPE);
-		break;
 	}
 }
 
@@ -690,7 +858,7 @@ Interpreter::gotoLine(const Parser::Value &l)
 	if (s != nullptr)
 		_program.jump(_program.objectIndex(s));
 	else
-		raiseError(DYNAMIC_ERROR, NO_SUCH_STRING);
+		raiseError(DYNAMIC_ERROR, NO_SUCH_LINE);
 }
 
 void
@@ -735,7 +903,7 @@ Interpreter::pushForLoop(const char *varName, uint8_t textPosition,
     const Parser::Value &v, const Parser::Value &vStep)
 {
 	// push new FOR .. NEXT stack frame
-	auto f = _program.push(Program::StackFrame::FOR_NEXT);
+	const auto f = _program.push(Program::StackFrame::FOR_NEXT);
 	if (f != nullptr) {
 	    	auto &fBody = f->body.forFrame;
 		WRITE_VALUE(fBody.calleeIndex, _program._current.index);
@@ -753,7 +921,7 @@ Interpreter::pushForLoop(const char *varName, uint8_t textPosition,
 bool
 Interpreter::pushValue(const Parser::Value &v)
 {
-	auto f = _program.push(Program::StackFrame::VALUE);
+	const auto f = _program.push(Program::StackFrame::VALUE);
 	if (f != nullptr) {
 		WRITE_VALUE(f->body.value, v);
 		return true;
@@ -802,7 +970,7 @@ Interpreter::popString(const char *&str)
 void
 Interpreter::randomize()
 {
-	::randomSeed(HAL_time_gettime_ms());
+	::HAL_random_seed(::HAL_time_gettime_ms());
 }
 
 #if USE_DEFFN
@@ -1103,23 +1271,33 @@ Interpreter::nextInput()
 void
 Interpreter::doInput()
 {
+	// Initialize lexer with just inputed string
 	Lexer l;
 	l.init(_inputBuffer, false);
 	Parser::Value v(Integer(0));
-	bool neg = false;
+	bool neg = false; // Negative value flag
 
+	// input parsing cycle
 	do {
 		if (l.getNext()) {
 			switch (l.getToken()) {
+			////////// Prefix signs /////////////
 			case Token::MINUS:
 				neg = !neg;
 				continue;
 			case Token::PLUS:
 				continue;
+			////////////////////////////////////
+			
+			///////// Numeric constants /////////
 			case Token::C_INTEGER:
 			case Token::C_REAL:
 				v = l.getValue();
 				break;
+			/////////////////////////////////////
+			
+			///////// String constants //////////
+			// Constant w/o quotes is parsed as identifier
 			case Token::C_STRING:
 			case Token::REAL_IDENT:
 			case Token::INTEGER_IDENT:
@@ -1133,6 +1311,7 @@ Interpreter::doInput()
 				pushString(l.id());
 			}
 				break;
+			/////////////////////////////////////
 			default:
 				raiseError(DYNAMIC_ERROR, INVALID_VALUE_TYPE);
 				return;
@@ -1539,11 +1718,15 @@ Interpreter::raiseError(ErrorType type, ErrorCodes errorCode, bool fatal)
 		print(ProgMemStrings::S_SEMANTIC);
 	else // STATIC_ERROR
 		print(ProgMemStrings::S_SYNTAX);
-	//print(ProgMemStrings::S_SEMANTIC);
+	
 	print(ProgMemStrings::S_ERROR, VT100::C_RED);
-	if (type == DYNAMIC_ERROR)
+	if (type == DYNAMIC_ERROR) {
 		print(Integer(errorCode));
-	else {// STATIC_ERROR
+#if CONF_ERROR_STRINGS
+		writePgm((PGM_P)pgm_read_ptr(
+		    &errorStrings[Integer(errorCode)] ));
+#endif
+	} else { // STATIC_ERROR
 		print(Integer(_parser.getError()));
 #if CONF_ERROR_STRINGS
 		writePgm((PGM_P)pgm_read_ptr(

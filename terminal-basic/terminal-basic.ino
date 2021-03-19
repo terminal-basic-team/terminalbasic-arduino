@@ -20,6 +20,7 @@
  */
 
 #include "basic.hpp"
+#include "HALProxyStream.hpp"
 #include "basic_interpreter.hpp"
 
 #include "arduino_logger.hpp"
@@ -78,6 +79,19 @@
 #include "sdlvt100print.hpp"
 #include "HAL_sdl.h"
 #endif
+
+namespace BASIC
+{
+
+#if USE_SAVE_LOAD && (!HAL_NVRAM)
+#error "USE_SAVE_LOAD option requires HAL to support HAL_NVRAM"
+#endif
+
+#if USE_GFX && !(HAL_GFX)
+#error "USE_GFX option requires HAL to support HAL_GFX"
+#endif
+
+} // namespace BASIC
 
 static BASIC::HALProxyStream halproxy1(0);
 
@@ -169,11 +183,7 @@ setup()
 #if USE_WIRE
 	Wire.begin();
 	Wire.setClock(400000);
-#endif
-#if USE_EXTMEM
-	XMCRA |= 1ul<<7; // Switch ext mem iface on
-	XMCRB = 0;
-#endif
+#endif // USE_WIRE
 #ifdef SERIAL_PORT_I
 	SERIAL_PORT_I.begin(SERIAL_I_BR);
 #endif
@@ -260,6 +270,8 @@ void
 loop()
 {
 	LOG_TRACE;
+	
+	HAL_update();
 	
 	basic.step();
 #if BASIC_MULTITERMINAL

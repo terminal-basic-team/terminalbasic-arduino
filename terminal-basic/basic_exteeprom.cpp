@@ -28,7 +28,6 @@
 #include "basic_program.hpp"
 
 #include "i2ceeprom.hpp"
-#include "seriallight.hpp"
 
 namespace BASIC
 {

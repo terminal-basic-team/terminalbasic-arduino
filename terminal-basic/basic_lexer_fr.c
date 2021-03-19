@@ -17,7 +17,7 @@
  */
 
 #include "avr/pgmspace.h"
-#include "config.h"
+#include "basic_config.h"
 #include "basic.h"
 
 #if CONF_LEXER_LANG == LANG_FR

@@ -25,7 +25,11 @@
 
 #include "basic_program.hpp"
 #include <assert.h>
+#ifdef ARDUINO_ARCH_ESP32
+#include <pgmspace.h>
+#else
 #include <avr/pgmspace.h>
+#endif
 
 namespace BASIC
 {

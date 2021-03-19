@@ -32,6 +32,10 @@
 namespace BASIC
 {
 
+#if CONF_USE_EXTMEMFS
+class ExtmemFSModule;
+#endif
+
 /**
  * @brief variable memory frame
  */
@@ -174,28 +178,27 @@ public:
 		OUTTA_MEMORY = 1,		// Out of memory
 		REDIMED_ARRAY = 2,		// Attempt to define existing array
 		STACK_FRAME_ALLOCATION = 3,	// Unable to allocate stack frame
-		ARRAY_DECLARATION = 4,		// 
-		STRING_FRAME_SEARCH = 5,	// Missing string frame
-		INVALID_NEXT = 6,		// 
-		RETURN_WO_GOSUB = 7,
-		NO_SUCH_STRING = 8,
-		INVALID_VALUE_TYPE = 9,
-		NO_SUCH_ARRAY = 10,
-		INTEGER_EXPRESSION_EXPECTED = 11,// Integer expression expected
+		STRING_FRAME_SEARCH = 4,	// Missing string frame
+		INVALID_NEXT = 5,		// 
+		RETURN_WO_GOSUB = 6,
+		NO_SUCH_LINE = 7,
+		INVALID_VALUE_TYPE = 8,
+		NO_SUCH_ARRAY = 9,
+		INTEGER_EXPRESSION_EXPECTED = 10, // Integer expression expected
 #if SAVE_LOAD_CHECKSUM
-		BAD_CHECKSUM = 12,		// Bad program checksum
+		BAD_CHECKSUM = 11,		// Bad program checksum
 #endif
-		INVALID_TAB_VALUE = 13,
-		INVALID_ELEMENT_INDEX = 14,
+		INVALID_TAB_VALUE = 12,
+		INVALID_ELEMENT_INDEX = 13,
 #if USE_MATRIX
-		SQUARE_MATRIX_EXPECTED = 15,
+		SQUARE_MATRIX_EXPECTED = 14,
 #endif
-		DIMENSIONS_MISMATCH = 16,
-		COMMAND_FAILED = 17,
+		DIMENSIONS_MISMATCH = 15,
+		COMMAND_FAILED = 16,
 #if USE_DEFFN
-		VAR_DUPLICATE = 18,
-		FUNCTION_DUPLICATE = 19,
-		NO_SUCH_FUNCION = 20,
+		VAR_DUPLICATE = 17,
+		FUNCTION_DUPLICATE = 18,
+		NO_SUCH_FUNCION = 19,
 #endif
 		INTERNAL_ERROR = 255
 	};
@@ -491,6 +494,11 @@ public:
 	Program _program;
 	
 	Parser& parser() { return _parser; }
+	
+#if CONF_USE_EXTMEMFS
+	void setSDFSModule(BASIC::ExtmemFSModule* newVal) { m_sdfs = newVal; }
+#endif
+	
 private:
 	
 	class AttrKeeper;
@@ -604,6 +612,12 @@ private:
 #if USE_DATA
 	// Data statement parser continue flag
 	bool			_dataParserContinue;
+#endif
+#if CONF_USE_EXTMEMFS
+	BASIC::ExtmemFSModule*	m_sdfs;
+#endif
+#if CONF_ERROR_STRINGS
+	static PGM_P const errorStrings[] PROGMEM;
 #endif
 };
 
