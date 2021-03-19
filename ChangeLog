@@ -1,3 +1,7 @@
+r2.2-beta1 (7.02.2020) Release, dedicated to my sisters Birthday
+
+  * Fix error with fast modules calling on some 32-bit platforms
+
 r2.2-alpha3 (5.02.2020)
 
   * Add optional feature of aligned variable and array frames (step
