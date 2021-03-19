@@ -404,7 +404,6 @@ Program::addLine(uint16_t num, const uint8_t *text, uint8_t len)
 bool
 Program::insert(uint16_t num, const uint8_t *text, uint8_t len)
 {
-	assert(len <= PROGSTRINGSIZE);
 	const uint8_t strLen = sizeof(Line) + len;
 
 	if (_arraysEnd + strLen >= _sp)

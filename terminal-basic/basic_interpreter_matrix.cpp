@@ -349,10 +349,10 @@ Interpreter::assignMatrix(const char *name, const char *first, const char *secon
 			raiseError(DYNAMIC_ERROR, NO_SUCH_ARRAY); //@TODO type mismatch
 			return;
 		}
-		/*if (arraySecond->dimension[0] != arrayFirst->dimension[1]) {
+		if (arraySecond->dimension[0] != arrayFirst->dimension[1]) {
 			raiseError(DYNAMIC_ERROR, DIMENSIONS_MISMATCH);
 			return;
-		}*/
+		}
 		const uint16_t r = arrayFirst->dimension[0]+1;
 		const uint16_t c = arraySecond->dimension[1]+1;
 		

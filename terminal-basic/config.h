@@ -95,7 +95,7 @@
 /*
  * Use >< as not-equals operator (with default <>)
  */
-#define CONF_USE_ALTERNATIVE_NE 1
+#define CONF_USE_ALTERNATIVE_NE 0
 
 /*
  * Structured loop support
