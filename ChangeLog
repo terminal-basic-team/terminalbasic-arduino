@@ -1,3 +1,7 @@
+r2.1-alpha2 (22.04.2019)
+
+  * Fix regression in functions call when using long reals
+
 r2.1-alpha1 (22.04.2019)
 
   * Fix FOR loop limit and increment evaluation order (ANSI standad 11.2, 11.4)

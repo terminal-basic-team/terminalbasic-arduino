@@ -33,14 +33,14 @@
  */
 #define USE_REALS            1
 #if USE_REALS
-#define USE_LONG_REALS       0
+#define USE_LONG_REALS       1
 #endif
 
 /*
  * Support of 4-byte integer datatype
  * Functions, variables and arrays of long integer type ends with double % mark
  */
-#define USE_LONGINT          0
+#define USE_LONGINT          1
 
 /**
  * DUMP command support
