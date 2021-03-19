@@ -35,6 +35,14 @@ HAL_initialize()
 	if (!SPIFFS.begin(false))
 		if (!SPIFFS.begin(true))
 			exit(1);
+	
+	f = SPIFFS.open("/nvram.bin", "r+");
+	if (!f) {
+		f = SPIFFS.open("/nvram.bin", "w");
+		if (!f)
+			exit(4);
+		f.close();
+	}
 }
 
 void
@@ -67,18 +75,15 @@ HAL_nvram_write(HAL_nvram_address_t addr, uint8_t b)
 	Serial.println((uint32_t) addr, HEX);
 	f = SPIFFS.open("/nvram.bin", "r+");
 	if (!f) {
-		f = SPIFFS.open("/nvram.bin", "w");
-		if (!f) {
-			exit(1);
-		}
+		exit(5);
 	}
 
 	if (f.size() > uint32_t(addr)) {
 		if (!f.seek(uint32_t(addr)))
-			exit(2);
+			exit(6);
 	} else {
 		if (!f.seek(f.size()))
-			exit(2);
+			exit(7);
 		while (f.size() < uint32_t(addr)) {
 			f.write(0xFF);
 		}

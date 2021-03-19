@@ -56,11 +56,10 @@ DataParser::read(const uint8_t *str, Parser::Value &value)
 bool
 DataParser::readValue(Parser::Value &value)
 {
-	bool minus = false;
-	if (_lexer.getToken() == Token::MINUS) {
+	bool minus = _lexer.getToken() == Token::MINUS;
+	if (minus || _lexer.getToken() == Token::PLUS) {
 		if (!_lexer.getNext())
 			return false;
-		minus = true;
 	}
 	if ((_lexer.getToken() >= Token::C_INTEGER)
 	 && (_lexer.getToken() <= Token::C_STRING)) {

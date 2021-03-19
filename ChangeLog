@@ -1,3 +1,8 @@
+r2.2 (23.02.2020) Release, dedicated tpo the Day of the Soviet army and NAVY
+
+  * Add support of the string arrays
+  * TVout output uses cp866 code page font by default
+
 r2.2-rc1 (18.02.2020)
 
   * Fix bug with multidimentional arrays with one of the dimensions >= 255

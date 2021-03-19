@@ -102,70 +102,6 @@ private:
 	VT100::TextAttr _a;
 };
 
-void
-Interpreter::valueFromVar(Parser::Value &v, const char *varName)
-{
-	const auto f = getVariable(varName);
-	if (f == nullptr)
-		return;
-	switch (f->type) {
-	case Parser::Value::INTEGER:
-		v = f->get<Integer>();
-		break;
-#if USE_LONGINT
-	case Parser::Value::LONG_INTEGER:
-		v = f->get<LongInteger>();
-		break;
-#endif
-#if USE_REALS
-	case Parser::Value::REAL:
-		v = f->get<Real>();
-		break;
-#if USE_LONG_REALS
-	case Parser::Value::LONG_REAL:
-		v = f->get<LongReal>();
-		break;
-#endif
-#endif // USE_REALS
-	case Parser::Value::LOGICAL:
-		v = f->get<bool>();
-		break;
-	case Parser::Value::STRING:
-	{
-		v.setType(Parser::Value::STRING);
-		auto fr = _program.push(Program::StackFrame::STRING);
-		if (fr == nullptr) {
-			raiseError(DYNAMIC_ERROR, STACK_FRAME_ALLOCATION);
-			return;
-		}
-		strcpy(fr->body.string, f->bytes);
-	}
-		break;
-	}
-}
-
-bool
-Interpreter::valueFromArray(Parser::Value &v, const char *name)
-{
-	const auto f = _program.arrayByName(name);
-	if (f == nullptr) {
-		raiseError(DYNAMIC_ERROR, NO_SUCH_ARRAY);
-		return false;
-	}
-
-	uint16_t index;
-	if (!arrayElementIndex(f, index)) {
-		raiseError(DYNAMIC_ERROR, INVALID_VALUE_TYPE);
-		return false;
-	}
-
-	if (!f->get(index, v)) {
-		raiseError(DYNAMIC_ERROR, INVALID_VALUE_TYPE);
-		return false;
-	}
-	return true;
-}
-
 #if BASIC_MULTITERMINAL
 uint8_t Interpreter::_termnoGen = 0;
 #endif
@@ -1737,6 +1673,20 @@ Interpreter::setArrayElement(const char *name, const Parser::Value &v)
 		}
 #endif
 	}
+	
+	if (f->type == Parser::Value::STRING) {
+		auto fr = _program.currentStackFrame();
+		if (fr == nullptr || fr->_type != Program::StackFrame::STRING) {
+			raiseError(DYNAMIC_ERROR, STRING_FRAME_SEARCH);
+			return;
+		}
+		if (_program._arraysEnd + strlen(fr->body.string) >= _program._sp) {
+			raiseError(DYNAMIC_ERROR, OUTTA_MEMORY);
+			return;
+		}
+		strcpy(_program._text+_program._arraysEnd, fr->body.string);
+		_program.pop();
+	}
 
 	uint16_t index;
 	if (!arrayElementIndex(f, index)) {
@@ -1744,6 +1694,10 @@ Interpreter::setArrayElement(const char *name, const Parser::Value &v)
 		return;
 	}
 	f->set(index, v);
+	if (f->type == Parser::Value::STRING) {
+		strcpy((char*)(f->data()+index*STRING_SIZE),
+		    _program._text+_program._arraysEnd);
+	}
 }
 
 void
@@ -1944,6 +1898,9 @@ ArrayFrame::dataSize() const
 		mul = s;
 		break;
 	}
+	case Parser::Value::STRING:
+		mul *= STRING_SIZE;
+		break;
 	default:
 		break;
 	}
@@ -1980,6 +1937,9 @@ ArrayFrame::get(uint16_t index, Parser::Value& v) const
 			v = bool((_byte >> (index % 8)) & 1);
 			return true;
 		}
+		case Parser::Value::STRING:
+			v.setType(Parser::Value::STRING);
+			return true;
 		default:
 			return false;
 		}
@@ -2021,6 +1981,8 @@ ArrayFrame::set(uint16_t index, const Parser::Value &v)
 				_byte &= ~(uint8_t(1) << (index % uint8_t(8)));
 			return true;
 		}
+		case Parser::Value::STRING:
+			return true;
 		default:
 			return false;
 		}
@@ -2072,8 +2034,11 @@ Interpreter::addArray(const char *name, uint8_t dim, uint16_t num)
 		t = Parser::Value::LONG_INTEGER;
 		num *= sizeof (LongInteger);
 	} else
-#endif  
-	if (endsWith(name, '%')) {
+#endif
+	if (endsWith(name, '$')) {
+		t = Parser::Value::STRING;
+		num *= STRING_SIZE;
+	} else if (endsWith(name, '%')) {
 		t = Parser::Value::INTEGER;
 		num *= sizeof (Integer);
 	} else if (endsWith(name, '@')) {
@@ -2115,6 +2080,79 @@ Interpreter::addArray(const char *name, uint8_t dim, uint16_t num)
 	_program._arraysEnd += dist;
 
 	return f;
+}
+
+
+void
+Interpreter::valueFromVar(Parser::Value &v, const char *varName)
+{
+	const auto f = getVariable(varName);
+	if (f == nullptr)
+		return;
+	switch (f->type) {
+	case Parser::Value::INTEGER:
+		v = f->get<Integer>();
+		break;
+#if USE_LONGINT
+	case Parser::Value::LONG_INTEGER:
+		v = f->get<LongInteger>();
+		break;
+#endif
+#if USE_REALS
+	case Parser::Value::REAL:
+		v = f->get<Real>();
+		break;
+#if USE_LONG_REALS
+	case Parser::Value::LONG_REAL:
+		v = f->get<LongReal>();
+		break;
+#endif
+#endif // USE_REALS
+	case Parser::Value::LOGICAL:
+		v = f->get<bool>();
+		break;
+	case Parser::Value::STRING:
+	{
+		v.setType(Parser::Value::STRING);
+		auto fr = _program.push(Program::StackFrame::STRING);
+		if (fr == nullptr) {
+			raiseError(DYNAMIC_ERROR, STACK_FRAME_ALLOCATION);
+			return;
+		}
+		strcpy(fr->body.string, f->bytes);
+	}
+		break;
+	}
+}
+
+bool
+Interpreter::valueFromArray(Parser::Value &v, const char *name)
+{
+	const auto f = _program.arrayByName(name);
+	if (f == nullptr) {
+		raiseError(DYNAMIC_ERROR, NO_SUCH_ARRAY);
+		return false;
+	}
+
+	uint16_t index;
+	if (!arrayElementIndex(f, index)) {
+		raiseError(DYNAMIC_ERROR, INVALID_VALUE_TYPE);
+		return false;
+	}
+
+	if (!f->get(index, v)) {
+		raiseError(DYNAMIC_ERROR, INVALID_VALUE_TYPE);
+		return false;
+	}
+	if (v.type() == Parser::Value::STRING) {
+		auto fr = _program.push(Program::StackFrame::STRING);
+		if (fr == nullptr) {
+			raiseError(DYNAMIC_ERROR, STACK_FRAME_ALLOCATION);
+			return false;
+		}
+		strcpy(fr->body.string, (char*)f->data() + (STRING_SIZE*index));
+	}
+	return true;
 }
 
 } // namespace BASIC

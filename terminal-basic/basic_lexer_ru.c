@@ -71,7 +71,6 @@ const uint8_t _basic_lexer_tokenTable[] PROGMEM = {
 #if USE_INTEGER_DIV
 	'M', 'O', 'D', ASCII_NUL,                // 24
 #endif
-	'N', 'E', 'W', ASCII_NUL,                // 21
 #if USE_PEEK_POKE
 	'P', 'O', 'K', 'E', ASCII_NUL,
 #endif
@@ -120,6 +119,7 @@ const uint8_t _basic_lexer_tokenTable[] PROGMEM = {
 #endif
 	'ç', 'Ä', ASCII_NUL,
 	'ç', 'Ö', ASCII_NUL,
+	'ç', 'é', 'Ç', 'Ä', 'ü', ASCII_NUL,      // 21
 #if USE_DEFFN
 	'é', 'è', 'ê', ASCII_NUL,
 #endif

@@ -69,7 +69,6 @@ typedef enum basic_token
 #if USE_INTEGER_DIV
 	BASIC_TOKEN_KW_MOD,        // 33
 #endif
-	BASIC_TOKEN_COM_NEW,       // 34
 //	KW_OPTION,     // 38
 #if USE_PEEK_POKE
 	BASIC_TOKEN_KW_POKE,
@@ -119,6 +118,7 @@ typedef enum basic_token
 #endif
 	BASIC_TOKEN_KW_GOTO,
 	BASIC_TOKEN_OP_NOT,
+	BASIC_TOKEN_COM_NEW,       // 34
 #if USE_DEFFN
 	BASIC_TOKEN_KW_DEF,
 #endif

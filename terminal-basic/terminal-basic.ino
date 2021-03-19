@@ -56,7 +56,7 @@
 #include "tvoutprint.hpp"
 #include "utility/Font6x8.h"
 #include "utility/Font8x8.h"
-#include "utility/Font6x8_cyr_koe13.hpp"
+#include "utility/font6x8_cp866.h"
 #endif
 
 #if USE_EXTEEPROM
@@ -176,7 +176,7 @@ setup()
 	ps2usartStream.begin();
 #endif
 #if USETVOUT
-	tvOut.selectFont(Font6x8);
+	tvOut.selectFont(Font6x8_cp866);
 	tvOut.begin(PAL, TVOUT_HORIZ, TVOUT_VERT, tvOutBuf);
 #elif USEUTFT
 	utftPrint.begin();
