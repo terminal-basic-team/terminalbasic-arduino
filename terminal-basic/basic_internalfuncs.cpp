@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -121,41 +121,41 @@ InternalFunctions::func_abs(Interpreter &i)
 	    ) {
 		if (v < Parser::Value(Integer(0)))
 			v.switchSign();
-		i.pushValue(v);
-		return true;
-	} else
-		return false;
+		if (i.pushValue(v))
+			return true;
+	}
+        return false;
 }
 
 #if USE_ASC
 bool
 InternalFunctions::func_asc(Interpreter &i)
 {
-	Parser::Value v;
-	i.popValue(v);
-	if (v.type() == Parser::Value::STRING) {
-		const char *str;
-		i.popString(str);
+	const char *str;
+	if (i.popString(str)) {
+		Parser::Value v;
 		v = Integer(str[0]);
-		i.pushValue(v);
-		return true;
-	} else
-		return false;
+		if (i.pushValue(v))
+			return true;
+	}
+	return false;
 }
-#endif
+#endif // USE_ASC
 
 #if USE_CHR
 bool
 InternalFunctions::func_chr(Interpreter &i)
 {
-	Parser::Value v;
-	i.popValue(v);
-	char buf[2] = {0,0};
-	buf[0] = Integer(v);
-	v.setType(Parser::Value::STRING);
-	i.pushString(buf);
-	i.pushValue(v);
-	return true;
+	INT iv;
+	if (getIntegerFromStack(i, iv)) {
+		char buf[2] = { iv ,0 };
+		Parser::Value v;
+		v.setType(Parser::Value::STRING);
+		i.pushString(buf);
+		if (i.pushValue(v))
+			return true;
+	}
+	return false;
 }
 #endif
 
@@ -168,10 +168,23 @@ InternalFunctions::func_get(Interpreter &i)
 	buf[0] = i.lastKey();
 	v.setType(Parser::Value::STRING);
 	i.pushString(buf);
-	i.pushValue(v);
-	return true;
+	return i.pushValue(v);
 }
 #endif // USE_GET
+
+#if USE_PEEK_POKE
+bool
+InternalFunctions::func_peek(Interpreter &i)
+{
+	INT addr;
+	if (getIntegerFromStack(i, addr)) {
+		Parser::Value v(Integer(*((volatile uint8_t*)(addr))));
+		if (i.pushValue(v))
+                    return true;
+	}
+	return false;
+}
+#endif // USE_PEEK_POKE
 
 bool
 InternalFunctions::func_result(Interpreter &i)
@@ -197,10 +210,10 @@ InternalFunctions::func_int(Interpreter &i)
 #else
 		v = Integer(v);
 #endif
-		i.pushValue(v);
-		return true;
-	} else
-		return false;
+		if (i.pushValue(v))
+                    return true;
+	}
+        return false;
 }
 #endif // USE_REALS
 
@@ -211,19 +224,17 @@ InternalFunctions::func_left(Interpreter &i)
 {
 	INT len;
 	if (getIntegerFromStack(i, len)) {
-		Parser::Value v;
-		i.popValue(v);
-		if (v.type() == Parser::Value::STRING) {
-			const char *str;
-			if (i.popString(str)) {
-				char buf[STRING_SIZE];
-				strncpy(buf, str, STRING_SIZE);
-				const uint8_t pos = min(len, strlen(str));
-				buf[pos] = char(0);
-				i.pushString(buf);
-				i.pushValue(v);
+		const char *str;
+		if (i.popString(str)) {
+			char buf[STRING_SIZE];
+			strncpy(buf, str, STRING_SIZE);
+			const uint8_t pos = min(len, strlen(str));
+			buf[pos] = char(0);
+			i.pushString(buf);
+			Parser::Value v;
+			v.setType(Parser::Value::STRING);
+			if (i.pushValue(v))
 				return true;
-			}
 		}
 	}
 	return false;
@@ -236,19 +247,17 @@ InternalFunctions::func_right(Interpreter &i)
 {
 	INT len;
 	if (getIntegerFromStack(i, len)) {
-		Parser::Value v;
-		i.popValue(v);
-		if (v.type() == Parser::Value::STRING) {
-			const char *str;
-			if (i.popString(str)) {
-				char buf[STRING_SIZE];
-				strncpy(buf, str, STRING_SIZE);
-				const uint8_t strl = strlen(str);
-				len = min(len, strl);
-				i.pushString(buf+strl-len);
-				i.pushValue(v);
+		const char *str;
+		if (i.popString(str)) {
+			char buf[STRING_SIZE];
+			strncpy(buf, str, STRING_SIZE);
+			const uint8_t strl = strlen(str);
+			len = min(len, strl);
+			i.pushString(buf+strl-len);
+			Parser::Value v;
+			v.setType(Parser::Value::STRING);
+			if (i.pushValue(v))
 				return true;
-			}
 		}
 	}
 	return false;
@@ -259,15 +268,11 @@ InternalFunctions::func_right(Interpreter &i)
 bool
 InternalFunctions::func_len(Interpreter &i)
 {
-	Parser::Value v;
-	i.popValue(v);
-	if (v.type() == Parser::Value::STRING) {
-		const char *str;
-		if (i.popString(str)) {
-			v = Integer(strnlen(str, STRING_SIZE));
-			i.pushValue(v);
+	const char *str;
+	if (i.popString(str)) {
+		Parser::Value v(Integer(strnlen(str, STRING_SIZE)));
+		if (i.pushValue(v))
 			return true;
-		}
 	}
 	return false;
 }
@@ -326,8 +331,7 @@ InternalFunctions::func_str(Interpreter &i)
 	p.buf[res] = '\0';
 	v.setType(Parser::Value::STRING);
 	i.pushString(p.buf);
-	i.pushValue(v);
-	return true;
+	return (i.pushValue(v));
 }
 
 #if USE_RANDOM
@@ -341,8 +345,7 @@ InternalFunctions::func_rnd(Interpreter &i)
 #else
 	Parser::Value v(Integer(random(0x7FFFFFFF)));
 #endif
-	i.pushValue(v);
-	return true;
+	return i.pushValue(v);
 }
 #endif // USE_RANDOM
 
@@ -356,8 +359,7 @@ InternalFunctions::func_tim(Interpreter &i)
 #else
 #define TYP Integer
 #endif
-	i.pushValue(TYP(TYP(millis()) / TYP(1000)));
-	return true;
+	return i.pushValue(TYP(TYP(millis()) / TYP(1000)));
 }
 
 } // namespace BASIC

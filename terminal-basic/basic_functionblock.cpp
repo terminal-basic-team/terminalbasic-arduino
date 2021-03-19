@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -109,12 +109,12 @@ FunctionBlock::general_func(Interpreter &i, _funcReal f)
 #endif
 	    v.type() == Parser::Value::REAL) {
 		v = (*f)(Real(v));
-		i.pushValue(v);
-		return true;
-	} else
-		return false;
+		if (i.pushValue(v))
+			return true;
+	}
+	return false;
 }
-#endif
+#endif // USE_LONGINT
 
 bool
 FunctionBlock::general_func(Interpreter &i, _funcInteger f)
@@ -122,10 +122,10 @@ FunctionBlock::general_func(Interpreter &i, _funcInteger f)
 	INT v;
 	if (getIntegerFromStack(i, v)) {
 		v = (*f)(v);
-		i.pushValue(v);
-		return true;
-	} else
-		return false;
+		if (i.pushValue(v))
+			return true;
+	}
+	return false;
 }
 
 bool
@@ -143,8 +143,8 @@ FunctionBlock::getIntegerFromStack(Interpreter &i, INT &num)
 	)) {
 		num  = INT(v);
 		return true;
-	} else
-		return false;
+	}
+	return false;
 }
 
 #undef _Integer

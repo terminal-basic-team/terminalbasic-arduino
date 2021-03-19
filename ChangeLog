@@ -1,3 +1,10 @@
+r2.0-alpha-3 (23.02.2019) Release, dedicated to the Defender of the Fatherlad Day
+
+  * Fix commands and functions parameters passing
+  * Fix a conflict of GET$() FUNCTION and DELAY command
+  * Fix some lexer regressions
+  * Add more russian keywords from BASIC-6 system for BESM-6 computer
+
 r2.0-alpha-2 (19.02.2019)
 
   * Fix some lexer-related regressions

@@ -1,3 +1,21 @@
+/*
+ * Terminal-BASIC is a lightweight BASIC-like language interpreter
+ * Copyright (C) 2017-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "basic.h"
 
 /**
@@ -22,9 +40,6 @@ typedef enum basic_token
 #if USE_MATRIX
 	BASIC_TOKEN_KW_CON,        // 7
 #endif
-#if USE_DATA
-	BASIC_TOKEN_KW_DATA,       // 8
-#endif
 #if USE_DEFFN
 	BASIC_TOKEN_KW_DEF,        // 9
 #endif
@@ -34,7 +49,6 @@ typedef enum basic_token
 #if USE_MATRIX
 	BASIC_TOKEN_KW_DET,        // 11
 #endif
-	BASIC_TOKEN_KW_DIM,        // 12
 #if USE_DIV_KW
 	BASIC_TOKEN_KW_DIV,        // 13
 #endif
@@ -59,7 +73,6 @@ typedef enum basic_token
 #if USE_MATRIX
 	BASIC_TOKEN_KW_INV,        // 26
 #endif
-	BASIC_TOKEN_COM_LIST,      // 28
 #if USE_SAVE_LOAD
 	BASIC_TOKEN_COM_LOAD,      // 29
 #endif
@@ -79,15 +92,11 @@ typedef enum basic_token
 	BASIC_TOKEN_OP_NOT,        // 36
 	BASIC_TOKEN_KW_ON,         // 37
 //	KW_OPTION,     // 38
+#if USE_PEEK_POKE
+	BASIC_TOKEN_KW_POKE,
+#endif
 #if USE_RANDOM
 	BASIC_TOKEN_KW_RANDOMIZE,  // 41
-#endif
-#if USE_DATA
-	BASIC_TOKEN_KW_READ,       // 42
-#endif
-	BASIC_TOKEN_KW_REM,        // 43
-#if USE_DATA
-	BASIC_TOKEN_KW_RESTORE,    // 44
 #endif
 #if USE_SAVE_LOAD
 	BASIC_TOKEN_COM_SAVE,      // 47
@@ -110,20 +119,32 @@ typedef enum basic_token
 	BASIC_TOKEN_KW_ZER,        // 58
 #endif
 	BASIC_TOKEN_KW_INPUT,
+#if USE_DATA
+	BASIC_TOKEN_KW_READ,
+#endif
 	BASIC_TOKEN_KW_RETURN,
-	BASIC_TOKEN_KW_NEXT,
 	BASIC_TOKEN_KW_PRINT,
+#if USE_DATA
+	BASIC_TOKEN_KW_DATA,
+#endif
 	BASIC_TOKEN_KW_FOR,
 	BASIC_TOKEN_KW_TO,
 	BASIC_TOKEN_KW_IF,
 	BASIC_TOKEN_OP_OR,
+	BASIC_TOKEN_KW_REM,
 	BASIC_TOKEN_KW_END,
+	BASIC_TOKEN_COM_LIST,
 	BASIC_TOKEN_COM_RUN,
 	BASIC_TOKEN_KW_LET,
+	BASIC_TOKEN_KW_DIM,
+#if USE_DATA
+	BASIC_TOKEN_KW_RESTORE,
+#endif
 #if USESTOPCONT
 	BASIC_TOKEN_KW_STOP,
 #endif
 	BASIC_TOKEN_KW_THEN,
+	BASIC_TOKEN_KW_NEXT,
 	BASIC_TOKEN_KW_STEP,
 	// *
 	BASIC_TOKEN_STAR,          // 59

@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -123,7 +123,7 @@ Program::StackFrame::size(Type t)
 	case FOR_NEXT:
 		return sizeof (Type) + sizeof (ForBody);
 	case STRING:
-		return sizeof (Type) + STRINGSIZE;
+		return sizeof (Type) + STRING_SIZE;
 	case ARRAY_DIMENSION:
 		return sizeof (Type) + sizeof (uint16_t);
 	case ARRAY_DIMENSIONS:

@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2017-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2017-2019 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
  */
 
 /**
- * @file config.hpp
+ * @file basic_config.h
  * @brief Configuration parameters, common among versions
  */
 
@@ -122,6 +122,11 @@
  * STOP and CONTINUE commands support
  */
 #define USESTOPCONT       1
+
+/**
+ * PEEK FUNCTION, POKE command support
+ */
+#define USE_PEEK_POKE 1
 
 #define LANG_EN 0
 #define LANG_RU 1

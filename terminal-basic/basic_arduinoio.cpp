@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -97,10 +97,10 @@ ArduinoIO::func_dread(Interpreter &i)
 	INT v;
 	if (getIntegerFromStack(i, v)) {
 		pinMode(v, INPUT);
-		i.pushValue(bool(digitalRead(v)));
-		return true;
-	} else
-		return false;
+		if (i.pushValue(bool(digitalRead(v))))
+			return true;
+	}
+	return false;
 }
 
 bool
@@ -115,7 +115,6 @@ ArduinoIO::comm_awrite(Interpreter &i)
 			return true;
 		}
 	}
-
 	return false;
 }
 
@@ -169,7 +168,6 @@ ArduinoIO::comm_notone(Interpreter &i)
 #endif
 
 #if USE_REALS
-
 Real
 ArduinoIO::aread_r(Real v)
 {

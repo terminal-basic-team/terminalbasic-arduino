@@ -629,7 +629,7 @@ Interpreter::poke(Pointer a, Integer d)
 {
 	*((volatile uint8_t*)(a)) = d;
 }
-#endif
+#endif // USE_PEEK_POKE
 
 void
 Interpreter::print(Lexer &l)
@@ -1203,10 +1203,10 @@ VariableFrame::size(Parser::Value::Type t)
 	case Parser::Value::REAL:
 		return sizeof(VariableFrame) + sizeof (Real);
 #endif
-	case Parser::Value::BOOLEAN:
+	case Parser::Value::LOGICAL:
 		return sizeof(VariableFrame) + sizeof (bool);
 	case Parser::Value::STRING:
-		return sizeof(VariableFrame) + STRINGSIZE;
+		return sizeof(VariableFrame) + STRING_SIZE;
 	default:
 		return sizeof(VariableFrame);
 	}

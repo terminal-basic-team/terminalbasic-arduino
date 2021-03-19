@@ -18,7 +18,7 @@
 
 /**
  * @file config.hpp
- * @brief Configuration parameters
+ * @brief Configuration parameters, specific to Terminal-BASIC
  */
 
 #ifndef CONFIG_HPP
@@ -70,9 +70,9 @@ namespace BASIC
 	// LEN function, returns length of the string
 	#define USE_LEN            1
 	// LEFT$ function, return leftmost part of the string
-	#define USE_LEFT           1
+	#define USE_LEFT           0
 	// RIGHT$ function, return rightmost part of the string
-	#define USE_RIGHT          1
+	#define USE_RIGHT          0
 #endif // USE_STRINGOPS
 /*
  * Clear program memory on NEW command
@@ -81,7 +81,7 @@ namespace BASIC
 /**
  * Allow INPUT command with text message e.g. INPUT "A:";A
  */
-#define INPUT_WITH_TEXT      1
+#define INPUT_WITH_TEXT      0
 
 #if USE_TEXTATTRIBUTES
 	/*
@@ -227,6 +227,9 @@ namespace BASIC
 #else
 	#define USE_WIRE 0
 #endif
+
+// Use multiterminal mode
+#define BASIC_MULTITERMINAL       0
 
 /*
  * Max size of the program line

@@ -1,3 +1,21 @@
+/*
+ * Terminal-BASIC is a lightweight BASIC-like language interpreter
+ * Copyright (C) 2017-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "basic_lexer.h"
 
 #include <stdlib.h>
@@ -611,6 +629,16 @@ basic_lexer_tokenize(basic_lexer_context_t *self, uint8_t *dst, uint8_t dstlen,
 			position += sizeof (real_t);
 		}
 #endif // USE_REALS
+		else if (tok == BASIC_TOKEN_C_BOOLEAN) {
+			/* One byte tokens need space of 2 bytes - DLE and token */
+			if (position+2 >= dstlen)
+				break;
+			dst[position++] = ASCII_DLE;
+			dst[position++] = self->value.body.logical ?
+				BASIC_TOKEN_KW_TRUE :
+				BASIC_TOKEN_KW_FALSE ;
+			lexerPosition = self->string_pointer;
+		}
 		else { // Other tokens
 			dst[position++] = ' ';
 			while (src[lexerPosition] == ' ' ||

@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -98,7 +98,7 @@ GFXModule::command_cursor(Interpreter &i)
 {
 	Parser::Value v(false);
 	if (i.popValue(v)) {
-		if (v.type == Parser::Value::BOOLEAN) {
+		if (v.type() == Parser::Value::LOGICAL) {
 			i.print(char(ASCII::DLE));
 			i.print(char(GFXTERM::Command::CURSOR));
 			i.print(bool(v) ? char(1) : char(0));

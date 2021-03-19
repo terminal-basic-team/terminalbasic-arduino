@@ -1,3 +1,21 @@
+/*
+ * Terminal-BASIC is a lightweight BASIC-like language interpreter
+ * Copyright (C) 2017-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "basic.h"
 
 /**
@@ -80,12 +98,12 @@ typedef enum basic_token
 #if USE_INTEGER_DIV
 	BASIC_TOKEN_KW_MOD,        // 33
 #endif
-	BASIC_TOKEN_COM_NEW,       // 34
-	BASIC_TOKEN_KW_NEXT,       // 35
-	BASIC_TOKEN_OP_NOT,        // 36
-	BASIC_TOKEN_KW_ON,         // 37
-//	KW_OPTION,     // 38
-	BASIC_TOKEN_OP_OR,         // 39
+	BASIC_TOKEN_COM_NEW,
+	BASIC_TOKEN_KW_NEXT,
+	BASIC_TOKEN_OP_NOT,
+	BASIC_TOKEN_KW_ON,
+//	KW_OPTION,
+	BASIC_TOKEN_OP_OR,
 #if USE_PEEK_POKE
 	BASIC_TOKEN_KW_POKE,
 #endif
