@@ -1,6 +1,9 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * 
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2019,2020 Terminal-BASIC team
+ *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,31 +60,6 @@ GFXModule::command_box(Interpreter &i)
 }
 
 bool
-GFXModule::command_boxc(Interpreter &i)
-{
-	INT x,y,w,h,z;
-	if (getIntegerFromStack(i, z)) {
-		if (getIntegerFromStack(i, h)) {
-			if (getIntegerFromStack(i, w)) {
-				if (getIntegerFromStack(i, y)) {
-					if (getIntegerFromStack(i, x)) {
-						i.print(char(ASCII::DLE));
-						i.print(char(GFXTERM::Command::BOXC));
-						write16(i, x);
-						write16(i, y);
-						write16(i, w);
-						write16(i, h);
-						i.print(char(z));
-						return true;
-					}
-				}
-			}
-		}
-	}
-	return false;
-}
-
-bool
 GFXModule::command_ellipse(Interpreter &i)
 {
 	INT x,y,w,h;
@@ -105,40 +83,16 @@ GFXModule::command_ellipse(Interpreter &i)
 }
 
 bool
-GFXModule::command_ellipsec(Interpreter &i)
-{
-	INT x,y,w,h,z;
-	if (getIntegerFromStack(i, z)) {
-		if (getIntegerFromStack(i, h)) {
-			if (getIntegerFromStack(i, w)) {
-				if (getIntegerFromStack(i, y)) {
-					if (getIntegerFromStack(i, x)) {
-						i.print(char(ASCII::DLE));
-						i.print(char(GFXTERM::Command::ELLIPSEC));
-						write16(i, x);
-						write16(i, y);
-						write16(i, w);
-						write16(i, h);
-						i.print(char(z));
-						return true;
-					}
-				}
-			}
-		}
-	}
-	return false;
-}
-
-bool
 GFXModule::command_circle(Interpreter &i)
 {
-	INT x,y,r;
-	
+	INT r;
 	if (getIntegerFromStack(i, r)) {
+		INT y;
 		if (getIntegerFromStack(i, y)) {
+			INT x;
 			if (getIntegerFromStack(i, x)) {
 				i.print(char(ASCII::DLE));
-				i.print(char(GFXTERM::Command::CIRCLE));
+				i.print(char(GFXTERM::Command::CIRCLEC));
 				write16(i, x);
 				write16(i, y);
 				write16(i, r);
@@ -146,6 +100,7 @@ GFXModule::command_circle(Interpreter &i)
 			}
 		}
 	}
+	
 	return false;
 }
 
@@ -253,6 +208,61 @@ GFXModule::command_screen(Interpreter &i)
 	return false;
 }
 
+#if GFX_EXP_COLOR
+bool
+GFXModule::command_boxc(Interpreter &i)
+{
+	INT z;
+	if (getIntegerFromStack(i, z)) {
+		INT h;
+		if (getIntegerFromStack(i, h)) {
+			INT w;
+			if (getIntegerFromStack(i, w)) {
+				INT y;
+				if (getIntegerFromStack(i, y)) {
+					INT x;
+					if (getIntegerFromStack(i, x)) {
+						i.print(char(ASCII::DLE));
+						i.print(char(GFXTERM::Command::BOXC));
+						write16(i, x);
+						write16(i, y);
+						write16(i, w);
+						write16(i, h);
+						i.print(char(z));
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool
+GFXModule::command_ellipsec(Interpreter &i)
+{
+	INT x,y,w,h,z;
+	if (getIntegerFromStack(i, z)) {
+		if (getIntegerFromStack(i, h)) {
+			if (getIntegerFromStack(i, w)) {
+				if (getIntegerFromStack(i, y)) {
+					if (getIntegerFromStack(i, x)) {
+						i.print(char(ASCII::DLE));
+						i.print(char(GFXTERM::Command::ELLIPSEC));
+						write16(i, x);
+						write16(i, y);
+						write16(i, w);
+						write16(i, h);
+						i.print(char(z));
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
 bool
 GFXModule::command_pointc(Interpreter &i)
 {
@@ -320,6 +330,8 @@ GFXModule::command_linec(Interpreter &i)
 	}
 	return false;
 }
+#endif
+
 } // namespace BASIC
 
 #endif // USE_GFX && SERIAL_GFX

@@ -1,6 +1,9 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * 
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2019,2020 Terminal-BASIC team
+ *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +26,10 @@
 #include <inttypes.h>
 
 #include <Arduino.h>
+#include "HAL.h"
+
+#include "tools.h"
+#include "types.hpp"
 
 #ifdef ARDUINO
 #include "config_arduino.hpp"
@@ -111,6 +118,12 @@ using Real = real_t;
 using LongReal = long_real_t;
 #endif
 #endif // USE_REALS
+
+#if USE_PACKED_STRUCT
+#define PACKED EXT_PACKED
+#else
+#define PACKED
+#endif
 
 // Number of characters in command/function identifier
 const uint8_t IDSIZE = 8;
@@ -253,7 +266,9 @@ enum class Token : uint8_t
 	COM_NEW = BASIC_TOKEN_COM_NEW,      // 34
 	KW_NEXT = BASIC_TOKEN_KW_NEXT,      // 35
 	OP_NOT = BASIC_TOKEN_OP_NOT,        // 36
+#if CONF_USE_ON_GOTO
 	KW_ON = BASIC_TOKEN_KW_ON,          // 37
+#endif
 //	KW_OPTION,     // 38
 	OP_OR = BASIC_TOKEN_OP_OR,
 #if USE_PEEK_POKE
@@ -341,7 +356,7 @@ enum class Token : uint8_t
 	INTEGER_IDENT = BASIC_TOKEN_INTEGER_IDENT, // 77
 	REAL_IDENT = BASIC_TOKEN_REAL_IDENT,    // 78
 #if USE_LONG_REALS
-	ONG_REAL_IDENT = BASIC_TOKEN_LONG_REAL_IDENT,
+	LONG_REAL_IDENT = BASIC_TOKEN_LONG_REAL_IDENT,
 #endif
 #if USE_LONGINT        // 79
 	LONGINT_IDENT = BASIC_TOKEN_LONGINT_IDENT, // 80
@@ -359,9 +374,84 @@ enum class Token : uint8_t
 #endif
 	C_BOOLEAN = BASIC_TOKEN_C_BOOLEAN,     // 85
 	C_STRING = BASIC_TOKEN_C_STRING,       // 86
-
-	NUM_TOKENS = BASIC_TOKEN_NUM_TOKENS    // 87
+#if FAST_MODULE_CALL
+	COMMAND = BASIC_TOKEN_COMMAND,         // 87
+#endif
+	NUM_TOKENS = BASIC_TOKEN_NUM_TOKENS    // 88
 };
+
+template <uint8_t s>
+inline typename type_factory<s>::unsigned_type readValueOfSize(const uint8_t*)
+{
+	return 0;
+}
+
+template <>
+inline uint64_t readValueOfSize<8>(const uint8_t* str)
+{
+	uint64_t result;
+	readU64(&result, str);
+	return result;
+}
+
+template <>
+inline uint32_t readValueOfSize<4>(const uint8_t* str)
+{
+	uint32_t result;
+	readU32(&result, str);
+	return result;
+}
+
+template <>
+inline uint16_t readValueOfSize<2>(const uint8_t* str)
+{
+	uint16_t result;
+	readU16(&result, str);
+	return result;
+}
+
+template <typename T>
+inline T readValue(const uint8_t* str)
+{
+	return readValueOfSize<sizeof(T)>(str);
+}
+
+template <uint8_t s>
+inline void writeValueOfSize(typename type_factory<s>::unsigned_type v, uint8_t* str)
+{
+}
+
+template <>
+inline void writeValueOfSize<8>(uint64_t val, uint8_t* str)
+{
+	writeU64(val, str);
+}
+
+template <>
+inline void writeValueOfSize<4>(uint32_t val, uint8_t* str)
+{
+	writeU32(val, str);
+}
+
+template <>
+inline void writeValueOfSize<2>(uint16_t val, uint8_t* str)
+{
+	writeU16(val, str);
+}
+
+template <typename T>
+inline void writeValue(T v, uint8_t* str)
+{
+	writeValueOfSize<sizeof(T)>(v, str);
+}
+
+#if CONF_USE_ALIGN
+#define READ_VALUE(V) readValue<decltype(V)>(reinterpret_cast<const uint8_t*>(&(V)))
+#define WRITE_VALUE(D, V) writeValue(V, reinterpret_cast<uint8_t*>(&D))
+#else
+#define READ_VALUE(V) (V)
+#define WRITE_VALUE(D, V) D = (V)
+#endif // CONF_USE_ALIGN
 
 } // namespace BASIC
 

@@ -19,48 +19,73 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "tvoutprint.hpp"
+#ifdef ARDUINO_ARCH_ESP8266
 
-#if USETVOUT
+#include "HAL.h"
+#include "FS.h"
 
-#include "ascii.hpp"
+#define NVRAMSIZE 32768
 
-#if TVOUT_DEBUG
-#include "seriallight.hpp"
-#endif
+static File f;
 
-TVoutPrint::TVoutPrint()
+void
+HAL_initialize()
 {
+	if (!SPIFFS.begin())
+		exit(1);
+	
+	f = SPIFFS.open("/nvram.bin", "r+");
+	if (!f) {
+		f = SPIFFS.open("/nvram.bin", "w");
+		if (!f)
+			exit(4);
+		f.close();
+	}
 }
 
 void
-TVoutPrint::writeChar(uint8_t c)
+HAL_finalize()
 {
-	TVoutEx::instance()->write(c);
+}
+
+HAL_nvram_address_t
+HAL_nvram_getsize()
+{
+	return NVRAMSIZE;
 }
 
 uint8_t
-TVoutPrint::getCursorX()
+HAL_nvram_read(HAL_nvram_address_t addr)
 {
-	return TVoutEx::instance()->getCursorX();
+	f = SPIFFS.open("/nvram.bin", "r");
+	if (!f)
+		exit(2);
+	if (!f.seek(uint32_t(addr)))
+		exit(3);
+	uint8_t r = f.read();
+	f.close();
+	return r;
 }
 
 void
-TVoutPrint::setCursorX(uint8_t x)
+HAL_nvram_write(HAL_nvram_address_t addr, uint8_t b)
 {
-	TVoutEx::instance()->setCursorX(x);
+	f = SPIFFS.open("/nvram.bin", "r+");
+	if (!f)
+		exit(5);
+
+	if (f.size() > uint32_t(addr)) {
+		if (!f.seek(uint32_t(addr)))
+			exit(6);
+	} else {
+		if (!f.seek(f.size()))
+			exit(7);
+		while (f.size() < uint32_t(addr)) {
+			f.write(0xFF);
+		}
+	}
+	f.write(b);
+	f.close();
 }
 
-void
-TVoutPrint::setCursor(uint8_t x, uint8_t y)
-{
-	TVoutEx::instance()->setCursorCharPosition(x, y);
-}
-
-void
-TVoutPrint::clear()
-{
-	TVoutEx::instance()->clearScreen();
-}
-
-#endif // USETVOUT
+#endif // ARDUINO_ARCH_ESP8266

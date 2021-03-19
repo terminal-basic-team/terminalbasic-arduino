@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2017-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2017-2020 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -462,20 +462,20 @@ _basic_lexer_tokenizedNext(basic_lexer_context_t *self)
 		case BASIC_TOKEN_KW_TRUE:
 		case BASIC_TOKEN_KW_FALSE:
 			basic_value_setFromLogical(&self->value,
-						self->token == BASIC_TOKEN_KW_TRUE);
+			    self->token == BASIC_TOKEN_KW_TRUE);
 			self->token = BASIC_TOKEN_C_BOOLEAN;
 			break;
 		case BASIC_TOKEN_C_INTEGER:
 			self->value.type = BASIC_VALUE_TYPE_INTEGER;
-			readU16((uint16_t*) & self->value.body.integer,
-				self->string_to_parse + self->string_pointer);
+			readU16((uint16_t*)&self->value.body.integer,
+			    self->string_to_parse + self->string_pointer);
 			self->string_pointer += sizeof (integer_t);
 			break;
 #if USE_LONGINT
 		case BASIC_TOKEN_C_LONG_INTEGER:
 			self->value.type = BASIC_VALUE_TYPE_LONG_INTEGER;
 			readU32((uint32_t*) & self->value.body.long_integer,
-				self->string_to_parse + self->string_pointer);
+			    self->string_to_parse + self->string_pointer);
 			self->string_pointer += sizeof (long_integer_t);
 			break;
 #endif
@@ -485,6 +485,21 @@ _basic_lexer_tokenizedNext(basic_lexer_context_t *self)
 			readR32(&self->value.body.real,
 				self->string_to_parse + self->string_pointer);
 			self->string_pointer += sizeof (real_t);
+			break;
+#if USE_LONG_REALS
+		case BASIC_TOKEN_C_LONG_REAL:
+			self->value.type = BASIC_VALUE_TYPE_LONG_REAL;
+			readR64(&self->value.body.long_real,
+				self->string_to_parse + self->string_pointer);
+			self->string_pointer += sizeof (long_real_t);
+			break;
+#endif // USE_LONG_REALS
+#endif // USE_REALS
+#if FAST_MODULE_CALL
+		case BASIC_TOKEN_COMMAND:
+			memcpy(&self->_id, self->string_to_parse + self->string_pointer,
+			    sizeof (uintptr_t));
+			self->string_pointer += sizeof (uintptr_t);
 			break;
 #endif
 		default:
@@ -499,7 +514,6 @@ BOOLEAN
 basic_lexer_getnextTokenized(basic_lexer_context_t *self)
 {
 	self->token = BASIC_TOKEN_NOTOKEN;
-	/*_error = NO_ERROR;*/
 	self->_value_pointer = 0;
 	/* Iterate until end of input string */
 	while (SYM > ASCII_NUL) {
@@ -543,8 +557,7 @@ basic_lexer_tokenString(basic_token_t t, uint8_t *buf)
 	if (t < BASIC_TOKEN_STAR) {
 		const uint8_t *result = _basic_lexer_tokenTable,
 		    *pointer = result;
-		uint8_t c;
-		uint8_t index = 0;
+		uint8_t c, index = 0;
 
 		do {
 			c = pgm_read_byte(pointer++);
@@ -563,7 +576,7 @@ basic_lexer_tokenString(basic_token_t t, uint8_t *buf)
 	} else if (t < BASIC_TOKEN_INTEGER_IDENT) {
 		strcpy_P((char*) buf,
 			(PGM_P) pgm_read_ptr(&(_basic_lexer_tokenStrings[
-					(uint8_t) (t)-(uint8_t) (BASIC_TOKEN_STAR)]))
+			    (uint8_t) (t)-(uint8_t) (BASIC_TOKEN_STAR)]))
 			);
 	} else {
 		*buf = '\0';
@@ -630,7 +643,7 @@ basic_lexer_tokenize(basic_lexer_context_t *self, uint8_t *dst, uint8_t dstlen,
 			dst[position++] = ASCII_DLE;
 			dst[position++] = tok;
 			const long_integer_t v = self->value.body.long_integer;
-			writeU32((uint32_t) v, dst + position);
+			writeU32((uint32_t)v, dst + position);
 			position += sizeof (long_integer_t);
 		}
 #endif // USE_LONGINT
@@ -642,10 +655,22 @@ basic_lexer_tokenize(basic_lexer_context_t *self, uint8_t *dst, uint8_t dstlen,
 			dst[position++] = tok;
 
 			const real_t v = self->value.body.real;
-			writeR32((real_t) v, dst + position);
+			writeR32((float)v, dst + position);
 			position += sizeof (real_t);
 		}
-#endif // USE_REALS
+#if USE_LONG_REALS
+		else if (tok == BASIC_TOKEN_C_LONG_REAL) {
+			if (position + 2 + sizeof (long_real_t) >= dstlen)
+				break;
+			dst[position++] = ASCII_DLE;
+			dst[position++] = tok;
+
+			const long_real_t v = self->value.body.long_real;
+			writeR64((double)v, dst + position);
+			position += sizeof (long_real_t);
+		}
+#endif // USE_LONG_REALS
+#endif // USE_REALS     
 		else if (tok == BASIC_TOKEN_C_BOOLEAN) {
 			/* One byte tokens need space of 2 bytes - DLE and token */
 			if (position + 2 >= dstlen)

@@ -1,6 +1,9 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * 
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2019,2020 Terminal-BASIC team
+ *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,7 +56,7 @@
 #include "tvoutprint.hpp"
 #include "utility/Font6x8.h"
 #include "utility/Font8x8.h"
-#include "utility/Font6x8_cyr_koe13.hpp"
+#include "utility/font6x8_cp866.h"
 #endif
 
 #if USE_EXTEEPROM
@@ -150,6 +153,8 @@ static BASIC::Interpreter basic(SERIAL_PORT_I, SERIAL_PORT_O, BASIC::SINGLE_PROG
 void
 setup()
 {
+	HAL_initialize();
+	
 #if USE_WIRE
 	Wire.begin();
 	Wire.setClock(400000);
@@ -171,7 +176,7 @@ setup()
 	ps2usartStream.begin();
 #endif
 #if USETVOUT
-	tvOut.selectFont(Font6x8);
+	tvOut.selectFont(Font6x8_cp866);
 	tvOut.begin(PAL, TVOUT_HORIZ, TVOUT_VERT, tvOutBuf);
 #elif USEUTFT
 	utftPrint.begin();
@@ -237,7 +242,7 @@ setup()
 #ifdef HAVE_HWSERIAL3
 	basic3.init();
 #endif
-#endif
+#endif // BASIC_MULTITERMINAL
 }
 
 void

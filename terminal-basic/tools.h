@@ -4,6 +4,8 @@
 #include "sys/cdefs.h"
 #include <stdint.h>
 
+#include "HAL.h"
+
 __BEGIN_DECLS
 
 typedef uint8_t BOOLEAN;
@@ -16,6 +18,10 @@ typedef uint8_t BOOLEAN;
 #define FALSE ((BOOLEAN)0)
 #endif
 
+/**
+ * @brief Test if character is alphabetic
+ * @param 
+ */
 BOOLEAN tools_isAlpha(uint8_t);
 
 BOOLEAN tools_isAlphaNum(uint8_t);
@@ -32,9 +38,21 @@ void readU32(uint32_t*, const uint8_t*);
 
 void writeU32(uint32_t, uint8_t*);
 
+void readU64(uint64_t*, const uint8_t*);
+
+void writeU64(uint64_t, uint8_t*);
+
 void readR32(float*, const uint8_t*);
 
 void writeR32(float, uint8_t*);
+
+void writeR64(double, uint8_t*);
+
+void readR64(double*, const uint8_t*);
+
+void HAL_nvram_read_buf(HAL_nvram_address_t, void*, uint32_t);
+
+void HAL_nvram_write_buf(HAL_nvram_address_t, const void*, uint32_t);
 
 #define ARRAY_SIZE(a) (sizeof(a)/sizeof(a[0]))
 

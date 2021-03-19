@@ -1,6 +1,9 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * 
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2019,2020 Terminal-BASIC team
+ *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -149,6 +152,7 @@ SDFSModule::com_fseek(Interpreter& i)
 			}
 		}
 	}
+	return false;
 }
 
 bool
@@ -230,6 +234,17 @@ bool
 SDFSModule::directory(Interpreter &i)
 {
 	static const char str[] PROGMEM = "SD CARD CONTENTS";
+	
+	uint16_t startFile = 0;
+	uint16_t endFile = 65535;
+	INT iv;
+	if (getIntegerFromStack(i, iv)) {
+		startFile = iv;
+		if (getIntegerFromStack(i, iv)) {
+			endFile = startFile;
+			startFile = iv;
+		}
+	}
 
 	_root.rewindDirectory();
 
@@ -239,7 +254,16 @@ SDFSModule::directory(Interpreter &i)
 	i.newline();
 	Integer index = 0;
 	for (SDCard::File ff = _root.openNextFile(); ff; ff = _root.openNextFile()) {
-		i.print(++index);
+		++index;
+		if (index < startFile) {
+			ff.close();
+			continue;
+		}
+		if (index > endFile) {
+			ff.close();
+			break;
+		}
+		i.print(index);
 		i.print('\t');
 		i.print(ff.name());
 		uint8_t len = min((uint8_t(13)-strlen(ff.name())),
@@ -308,7 +332,7 @@ SDFSModule::dsave(Interpreter &i)
 	Lexer lex;
 	for (Program::Line *s = i._program.getNextLine(); s != nullptr;
 	    s = i._program.getNextLine()) {
-		f.print(s->number);
+		f.print(READ_VALUE(s->number));
 		lex.init(s->text, true);
 		Token tPrev = Token::NOTOKENS;
 		while (lex.getNext()) {
@@ -343,6 +367,16 @@ SDFSModule::dsave(Interpreter &i)
 				f.print(lex.id());
 				f.write('"');
 			}
+#if FAST_MODULE_CALL
+			else if (t == Token::COMMAND) {
+				uint8_t buf[16];
+				FunctionBlock::command com =
+				    reinterpret_cast<FunctionBlock::command>(
+				    readValue<uintptr_t>((const uint8_t*)lex.id()));
+				i.parser().getCommandName(com, buf);
+				f.print((const char*)buf);
+			}
+#endif
 		}
 		f.print('\n');
 	}
@@ -377,7 +411,7 @@ SDFSModule::_loadText(SDCard::File &f, Interpreter &i)
 			if (!lex.getNext() || lex.getToken() !=
 			    Token::C_INTEGER)
 				return false;
-			if (!i._program.addLine(Integer(lex.getValue()),
+			if (!i._program.addLine(i.parser(), Integer(lex.getValue()),
 			    (uint8_t*)buf+lex.getPointer()))
 				return false;
 		} else

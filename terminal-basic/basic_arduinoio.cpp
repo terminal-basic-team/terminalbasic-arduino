@@ -1,6 +1,9 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * 
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2019,2020 Terminal-BASIC team
+ *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,15 +60,18 @@ static const uint8_t arduinoIOCommands[] PROGMEM = {
 };
 
 const FunctionBlock::command ArduinoIO::_commands[] PROGMEM = {
-	ArduinoIO::comm_awrite,
+	ArduinoIO::comm_awrite
 #if CONF_BEEP
-	ArduinoIO::comm_beep,
+	, ArduinoIO::comm_beep,
 #endif
 #if CONF_MODULE_ARDUINOIO_TONE
-	ArduinoIO::comm_notone,
-	ArduinoIO::comm_tone,
+	, ArduinoIO::comm_notone,
+	, ArduinoIO::comm_tone,
 #endif
-	ArduinoIO::comm_dwrite
+	, ArduinoIO::comm_dwrite
+#if FAST_MODULE_CALL
+	, nullptr
+#endif
 };
 
 ArduinoIO::ArduinoIO()

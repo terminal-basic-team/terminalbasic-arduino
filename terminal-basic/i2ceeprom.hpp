@@ -1,6 +1,8 @@
 /*
  * ArduinoExt is a set of utility libraries for Arduino
- * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2019,2020 Terminal-BASIC team
+ *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
  * This program is free software: is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -187,4 +189,4 @@ typedef I2CEEPROM<16384ul, 64> AT28C128C;
 typedef I2CEEPROM<32768ul, 64> AT28C256C;
 typedef I2CEEPROM<65536ul, 128> AT28C512C;
 
-#endif
+#endif // I2CEEPROM_HPP

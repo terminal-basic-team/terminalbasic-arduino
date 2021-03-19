@@ -112,5 +112,5 @@ public:
 	};
 };
 
-#endif /* VT100_HPP */
+#endif // VT100_HPP
 

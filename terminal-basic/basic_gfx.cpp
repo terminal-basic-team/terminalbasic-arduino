@@ -1,6 +1,9 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2017-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * 
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2019,2020 Terminal-BASIC team
+ *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,38 +27,61 @@ namespace BASIC
 {
 
 static const uint8_t gfxTokens[] PROGMEM = {
+#if GFX_EXP_COLOR
 	'B','O','X','C', ASCII_NUL,
+#endif
 	'B','O','X', ASCII_NUL,
+#if GFX_EXP_COLOR
 	'C','I','R','C','L','E','C', ASCII_NUL,
+#endif
 	'C','I','R','C','L','E', ASCII_NUL,
 	'C','O','L','O','R', ASCII_NUL,
 	'C','U','R','S','O','R', ASCII_NUL,
+#if GFX_EXP_COLOR
 	'E','L','L','I','P','S','E','C',ASCII_NUL,
+#endif
 	'E','L','L','I','P','S','E',ASCII_NUL,
-	'L','I','N','E','T','O', ASCII_NUL,
+#if GFX_EXP_COLOR
 	'L','I','N','E','C', ASCII_NUL,
+#endif
+	'L','I','N','E','T','O', ASCII_NUL,
 	'L','I','N','E', ASCII_NUL,
+#if GFX_EXP_COLOR
 	'P','O','I','N','T','C', ASCII_NUL,
+#endif
 	'P','O','I','N','T', ASCII_NUL,
 	'S','C','R','E','E','N', ASCII_NUL,
 	ASCII_ETX
 };
 
-const FunctionBlock::function GFXModule::comms[] PROGMEM = {
-	GFXModule::command_boxc,
-	GFXModule::command_box,
-	GFXModule::command_circlec,
-	GFXModule::command_circle,
-	GFXModule::command_color,
-	GFXModule::command_cursor,
-	GFXModule::command_ellipsec,
-	GFXModule::command_ellipse,
-	GFXModule::command_lineto,
-	GFXModule::command_linec,
-	GFXModule::command_line,
-	GFXModule::command_pointc,
-	GFXModule::command_point,
-	GFXModule::command_screen,
+const FunctionBlock::command GFXModule::comms[] PROGMEM = {
+#if GFX_EXP_COLOR
+	  GFXModule::command_boxc,
+#endif
+	  GFXModule::command_box
+#if GFX_EXP_COLOR
+	, GFXModule::command_circlec
+#endif
+	, GFXModule::command_circle
+	, GFXModule::command_color
+	, GFXModule::command_cursor
+#if GFX_EXP_COLOR
+	, GFXModule::command_ellipsec
+#endif
+	, GFXModule::command_ellipse
+#if GFX_EXP_COLOR
+	, GFXModule::command_linec
+#endif
+	, GFXModule::command_lineto
+	, GFXModule::command_line
+#if GFX_EXP_COLOR
+	, GFXModule::command_pointc
+#endif
+	, GFXModule::command_point
+	, GFXModule::command_screen
+#if FAST_MODULE_CALL
+	, nullptr
+#endif
 };
 
 GFXModule::GFXModule()

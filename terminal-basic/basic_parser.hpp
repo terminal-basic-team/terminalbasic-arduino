@@ -1,6 +1,9 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * 
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2019,2020 Terminal-BASIC team
+ *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +27,7 @@
 
 #include "arduinoext.hpp"
 #include "basic.hpp"
+#include "basic_parser.h"
 #include "basic_internalfuncs.hpp"
 
 namespace BASIC
@@ -57,7 +61,7 @@ public:
 		MISSING_RPAREN = 10
 	};
 
-	class EXT_PACKED Value;
+	class PACKED Value;
 	/**
 	 * @brief constructor
 	 * @param lexer Lexical analyzer object refertence
@@ -85,6 +89,10 @@ public:
 	}
 
 	void init();
+	
+	FunctionBlock::command getCommand(const char*);
+	
+	void getCommandName(FunctionBlock::command, uint8_t*);
 
 	void addModule(FunctionBlock*);
 #if CONF_ERROR_STRINGS
@@ -98,15 +106,23 @@ private:
 	 */
 	enum Mode : uint8_t
 	{
-		SCAN = 0,
-		EXECUTE = 1
+		SCAN = BASIC_PARSER_SCAN,
+		EXECUTE = BASIC_PARSER_EXECUTE
 	};
+	
+	void setMode(Mode);
+	Mode getMode() const;
+	
+	void setStopParse(bool);
+	bool getSTopParse() const;
 	
 	bool testExpression(Value&);
 	
 	bool fOperators(bool&);
 	bool fOperator();
+#if CONF_USE_ON_GOTO
 	bool fOnStatement(uint8_t);
+#endif
 #if USE_DATA
 	bool fDataStatement();
 	bool fReadStatement();
@@ -130,6 +146,7 @@ private:
 	bool fFinal(Value&);
 	bool fIfStatement();
 	bool fCommand();
+	void fCommandArguments(FunctionBlock::command);
 	bool fGotoStatement();
 	bool fForConds();
 	bool fIdentifier(char*);
@@ -149,12 +166,11 @@ private:
 	Lexer &_lexer;
 	// interpreter context object reference
 	Interpreter &_interpreter;
-	// current mode
-	Mode _mode;
-	// stop parsing string flag
-	bool _stopParse;
+
 	// first module in chain
 	InternalFunctions _internal;
+	
+	basic_parser_context_t m_context;
 };
 
 } // namespace BASIC

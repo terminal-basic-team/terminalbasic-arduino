@@ -1,6 +1,9 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * 
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2019,2020 Terminal-BASIC team
+ *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,18 +33,28 @@ class GFXModule : public FunctionBlock
 public:
 	explicit GFXModule();
 
+#if GFX_EXP_COLOR
 	static bool command_boxc(Interpreter&);
+#endif
 	static bool command_box(Interpreter&);
+#if GFX_EXP_COLOR
 	static bool command_circlec(Interpreter&);
+#endif
 	static bool command_circle(Interpreter&);
 	static bool command_color(Interpreter&);
 	static bool command_cursor(Interpreter&);
+#if GFX_EXP_COLOR
 	static bool command_ellipsec(Interpreter&);
+#endif
 	static bool command_ellipse(Interpreter&);
+#if GFX_EXP_COLOR
 	static bool command_linec(Interpreter&);
-	static bool command_line(Interpreter&);
+#endif
 	static bool command_lineto(Interpreter&);
+	static bool command_line(Interpreter&);
+#if GFX_EXP_COLOR
 	static bool command_pointc(Interpreter&);
+#endif
 	static bool command_point(Interpreter&);
 	static bool command_screen(Interpreter&);
 	

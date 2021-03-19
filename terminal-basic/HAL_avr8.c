@@ -19,34 +19,36 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file basic_exteeprom.hpp
- * @brief I2C/SPI external eeprom functions and commands
- */
+#ifdef ARDUINO_ARCH_AVR
 
-#ifndef BASIC_EXTEEPROM_HPP
-#define BASIC_EXTEEPROM_HPP
+#include <avr/io.h>
+#include <avr/eeprom.h>
 
-#include "basic_functionblock.hpp"
+#include "HAL.h"
 
-namespace BASIC
+void
+HAL_initialize()
 {
+}
 
-class ExtEEPROM : public FunctionBlock
+void
+HAL_finalize()
 {
-public:
-	explicit ExtEEPROM();
-private:
-	static bool com_echain(Interpreter&);
-	static bool com_eload(Interpreter&);
-	static bool com_esave(Interpreter&);
-	
-	static const FunctionBlock::command _commands[] PROGMEM;
-// FunctionBlock interface
-protected:
-	void _init() override;
-};
+}
 
-} // namespace BASIC
+HAL_nvram_address_t HAL_nvram_getsize()
+{
+	return (HAL_nvram_address_t)(E2END+1);
+}
 
-#endif // BASIC_EXTEEPROM_HPP
+uint8_t HAL_nvram_read(HAL_nvram_address_t addr)
+{
+	return eeprom_read_byte((uint8_t*)addr);
+}
+
+void HAL_nvram_write(HAL_nvram_address_t addr, uint8_t byte)
+{
+	return eeprom_update_byte((uint8_t*)addr, byte);
+}
+
+#endif /* ARDUINO_ARCH_AVR */

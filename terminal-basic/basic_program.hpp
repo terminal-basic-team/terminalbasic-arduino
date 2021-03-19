@@ -1,6 +1,9 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * 
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2019,2020 Terminal-BASIC team
+ *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +32,7 @@ namespace BASIC
 class VariableFrame;
 class ArrayFrame;
 class Interpreter;
+class Parser;
 
 /**
  * @brief BASIC program in memory
@@ -41,7 +45,7 @@ public:
 	/**
 	 * @brief BASIC program string object
 	 */
-	struct EXT_PACKED Line
+	struct PACKED Line
 	{
 		// string decimal number (label)
 		uint16_t number;
@@ -54,7 +58,7 @@ public:
 	/**
 	 * @brief BASIC program position marker
 	 */
-	struct EXT_PACKED Position
+	struct PACKED Position
 	{
 		// line index in program memory
 		Pointer index;
@@ -65,7 +69,7 @@ public:
 	/**
 	 * @program stack frame object
 	 */
-	struct EXT_PACKED StackFrame
+	struct PACKED StackFrame
 	{
 		/**
 		 * @brief Stack frame type
@@ -91,10 +95,10 @@ public:
 		/**
 		 * @brief FOR-loop state frame body
 		 */
-		struct EXT_PACKED ForBody
+		struct PACKED ForBody
 		{
 			// Program counter on loop begin
-			uint16_t	calleeIndex;
+			Pointer 	calleeIndex;
 			// Loop begin position in the program string
 			uint8_t		textPosition;
 			// Loop variable name
@@ -109,10 +113,10 @@ public:
 		/**
 		 * @brief Subprogram return address frame body
 		 */
-		struct EXT_PACKED GosubReturn
+		struct PACKED GosubReturn
 		{
 			// Program counter of the colee string
-			uint16_t calleeIndex;
+			Pointer calleeIndex;
 			// Position in the program string
 			uint8_t	textPosition;
 		};
@@ -120,7 +124,7 @@ public:
 		/**
 		 * @brief Input object frame body
 		 */
-		struct EXT_PACKED VariableBody
+		struct PACKED VariableBody
 		{
 			enum Type : uint8_t
 			{
@@ -136,7 +140,7 @@ public:
 
 		Type _type;
 
-		union EXT_PACKED Body
+		union PACKED Body
 		{
 			GosubReturn	gosubReturn;
 			uint8_t		arrayDimensions;
@@ -149,7 +153,7 @@ public:
 		Body body;
 	};
 
-	Program(uint16_t = SINGLE_PROGSIZE);
+	Program(Pointer = SINGLE_PROGSIZE);
 	/**
 	 * @brief Clear program text, but not vars and arrays
 	 */
@@ -211,7 +215,9 @@ public:
 	 * @param address start of the search
 	 * @return Line pointer or NULL if not found
 	 */
-	Line *lineByNumber(uint16_t, Pointer = 0);
+	Line *lineByNumber(
+	    uint16_t,
+	    Pointer = 0);
 	/**
 	 * @brief get variable frame at a given index
 	 * @param index basic memory address
@@ -249,7 +255,10 @@ public:
 	 * @param text
 	 * @return flag of success
 	 */
-	bool addLine(uint16_t, const uint8_t*);
+	bool addLine(
+	    Parser&,
+	    uint16_t,
+	    const uint8_t*);
 	/**
 	 * @brief Remove program line
 	 * @param num line number
@@ -261,7 +270,24 @@ public:
 	 * @param text line text
 	 * @param len line length
 	 */
-	bool insert(uint16_t, const uint8_t*, uint8_t);
+	bool insert(
+	    uint16_t,
+	    const uint8_t*,
+	    uint8_t);
+	
+#if CONF_USE_ALIGN
+	/**
+	 * @brief Align variables
+	 * @param index address of the first variable frame to align from
+	 */
+	bool alignVars(Pointer);
+	
+	bool alignArrays(Pointer);
+	
+	int8_t alignPointer(
+	    Pointer,
+	    Parser::Value::Type);
+#endif
 	
 #if USE_EXTMEM
 	char *_text;

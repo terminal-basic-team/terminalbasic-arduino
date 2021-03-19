@@ -62,3 +62,19 @@ scanTable(const uint8_t *token, const uint8_t table[], uint8_t *index)
 	}
 	return NULL;
 }
+
+void getToken(const uint8_t* table, uint8_t index, uint8_t* buf)
+{
+	uint8_t byte = 0xFF;
+	while (byte != ASCII_ETX) {
+		if (byte == ASCII_NUL)
+			--index;
+		if (index == 0) {
+			while ((byte = pgm_read_byte(table++)) != ASCII_NUL)
+				*(buf++) = byte;
+			break;
+		}
+		byte = pgm_read_byte(table++);
+	}
+	*buf = '\0';
+}

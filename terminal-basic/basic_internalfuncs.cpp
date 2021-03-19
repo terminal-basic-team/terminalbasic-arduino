@@ -1,6 +1,9 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * 
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2019,2020 Terminal-BASIC team
+ *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -202,8 +205,9 @@ const FunctionBlock::function InternalFunctions::funcs[] PROGMEM = {
 #if USE_MID
 	InternalFunctions::func_mid,
 #endif
-	InternalFunctions::func_str
+	InternalFunctions::func_str,
 #endif // CONF_LANG
+	nullptr
 };
 
 InternalFunctions::InternalFunctions(FunctionBlock *first) :
@@ -526,7 +530,7 @@ InternalFunctions::func_tim(Interpreter &i)
 #else
 #define TYP Integer
 #endif
-	return i.pushValue(TYP(TYP(millis()) / TYP(1000)));
+	return i.pushValue(TYP(TYP(HAL_time_gettime_ms()) / TYP(1000)));
 }
 
 } // namespace BASIC

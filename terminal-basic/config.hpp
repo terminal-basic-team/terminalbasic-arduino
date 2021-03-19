@@ -1,6 +1,9 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2017-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * 
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2019,2020 Terminal-BASIC team
+ *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,7 +53,7 @@ namespace BASIC
 		/*
 		 * ACS ASN ATN
 		 */
-		#define M_REVERSE_TRIGONOMETRIC 0
+		#define M_REVERSE_TRIGONOMETRIC 1
 		/*
 		 * CBR (cubic root) ...
 		 */
@@ -70,7 +73,7 @@ namespace BASIC
 	// LEN function, returns length of the string
 	#define USE_LEN     1
 	// LEFT$ function, return leftmost part of the string
-	#define USE_LEFT    0
+	#define USE_LEFT    1
 	// RIGHT$ function, return rightmost part of the string
 	#define USE_RIGHT   1
 	// MID$ function, return middle part of the string
@@ -78,7 +81,7 @@ namespace BASIC
 	// A variant of MID$ equivalent
 	#define USE_SEG     1
 	// HEX$ function, return string with hexsadecimal representation of the expression value
-	#define USE_HEX     0
+	#define USE_HEX     1
 #endif // USE_STRINGOPS
 /*
  * Clear program memory on NEW command
@@ -164,6 +167,8 @@ namespace BASIC
  * Indention of the line numbers in LIST output
  */
 #define LINE_NUM_INDENT  1
+
+#define CONF_USE_ALIGN 0
 /*
  * GFX module
  */

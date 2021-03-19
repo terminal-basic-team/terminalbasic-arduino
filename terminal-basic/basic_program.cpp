@@ -1,6 +1,9 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * 
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2019,2020 Terminal-BASIC team
+ *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,11 +26,12 @@
 #include <string.h>
 
 #include "basic_interpreter.hpp"
+#include "basic_parser.hpp"
 
 namespace BASIC
 {
 
-Program::Program(uint16_t progsize) :
+Program::Program(Pointer progsize) :
 #if USE_EXTMEM
 _text(reinterpret_cast<char*> (EXTMEM_ADDRESS)),
 #endif
@@ -96,7 +100,9 @@ Program::lineByIndex(Pointer address) const
 }
 
 Program::Line*
-Program::lineByNumber(uint16_t number, Pointer address)
+Program::lineByNumber(
+    uint16_t number,
+    Pointer address)
 {
 	Program::Line *result = nullptr;
 
@@ -104,7 +110,7 @@ Program::lineByNumber(uint16_t number, Pointer address)
 		_current.index = address;
 		for (Line *cur = getNextLine(); cur != nullptr;
 		    cur = getNextLine()) {
-			if (cur->number == number) {
+			if (READ_VALUE(cur->number) == number) {
 				result = cur;
 				break;
 			}
@@ -116,40 +122,41 @@ Program::lineByNumber(uint16_t number, Pointer address)
 uint8_t
 Program::StackFrame::size(Type t)
 {
+	static const constexpr uint8_t minSize = sizeof(StackFrame) - sizeof(Body);
 #if OPT == OPT_SPEED
 	switch (t) {
 	case SUBPROGRAM_RETURN:
-		return sizeof (Type) + sizeof (GosubReturn);
+		return minSize + sizeof (GosubReturn);
 	case FOR_NEXT:
-		return sizeof (Type) + sizeof (ForBody);
+		return minSize + sizeof (ForBody);
 	case STRING:
-		return sizeof (Type) + STRING_SIZE;
+		return minSize + STRING_SIZE;
 	case ARRAY_DIMENSION:
-		return sizeof (Type) + sizeof (uint16_t);
+		return minSize + sizeof (uint16_t);
 	case ARRAY_DIMENSIONS:
-		return sizeof (Type) + sizeof (uint8_t);
+		return minSize + sizeof (uint8_t);
 	case VALUE:
-		return sizeof (Type) + sizeof (Parser::Value);
+		return minSize + sizeof (Parser::Value);
 	case INPUT_OBJECT:
-		return sizeof (Type) + sizeof (VariableBody);
+		return minSize + sizeof (VariableBody);
 	default:
 		return 0;
 	}
 #else
 	if (t == SUBPROGRAM_RETURN)
-		return (sizeof (Type) + sizeof (GosubReturn));
+		return (minSize + sizeof (GosubReturn));
 	else if (t == FOR_NEXT)
-		return (sizeof (Type) + sizeof (ForBody));
+		return (minSize + sizeof (ForBody));
 	else if (t == STRING)
-		return (sizeof (Type) + STRING_SIZE);
+		return (minSize + STRING_SIZE);
 	else if (t == ARRAY_DIMENSION)
-		return (sizeof (Type) + sizeof (uint16_t));
+		return (minSize + sizeof (uint16_t));
 	else if (t == ARRAY_DIMENSIONS)
-		return (sizeof (Type) + sizeof (uint8_t));
+		return (minSize + sizeof (uint8_t));
 	else if (t == VALUE)
-		return (sizeof (Type) + sizeof (Parser::Value));
+		return (minSize + sizeof (Parser::Value));
 	else if (t == INPUT_OBJECT)
-		return (sizeof (Type) + sizeof (VariableBody));
+		return (minSize + sizeof (VariableBody));
 	else
 		return 0;
 #endif
@@ -189,6 +196,12 @@ Program::variableByName(const char *name)
 
 	VariableFrame* f;
 	while ((f = variableByIndex(index)) != nullptr) {
+#if CONF_USE_ALIGN
+		if (_text[index] == 0) {
+			++index;
+			continue;
+		}
+#endif
 #if USE_DEFFN
 		if (!(f->type & TYPE_DEFFN)) {
 #endif
@@ -239,7 +252,7 @@ Program::push(StackFrame::Type t)
 	if ((_sp - s) < _arraysEnd)
 		return nullptr;
 
-	_sp -= StackFrame::size(t);
+	_sp -= s;
 	StackFrame *f = stackFrameByIndex(_sp);
 	if (f != nullptr)
 		f->_type = t;
@@ -311,6 +324,12 @@ Program::arrayByName(const char *name)
 
 	ArrayFrame* f;
 	while ((f = arrayByIndex(index)) != nullptr) {
+#if CONF_USE_ALIGN
+		if (_text[index] == 0) {
+			++index;
+			continue;
+		}
+#endif
 		const int8_t res = strcmp(name, f->name);
 		if (res == 0) {
 			return f;
@@ -340,15 +359,94 @@ Program::arrayByIndex(Pointer index)
 }
 
 bool
-Program::addLine(uint16_t num, const uint8_t *line)
+Program::addLine(
+    Parser& parser,
+    uint16_t num,
+    const uint8_t *line)
 {
 	uint8_t size;
 	uint8_t tempBuffer[2*PROGSTRINGSIZE];
 
 	Lexer lexer;
+	// 1-st pass tokenization: lexer do what it can by itself
 	size = lexer.tokenize(tempBuffer, 2*PROGSTRINGSIZE, line);
+        
+	// 2-nd pass tokenization: command calls translated into command
+	//  implementation asddress
+#if FAST_MODULE_CALL
+	lexer.init(tempBuffer, true);
+	while (lexer.getNext()) {
+		const auto token = lexer.getToken();
+		if (token >= Token::INTEGER_IDENT &&
+		    token <= Token::BOOL_IDENT) {
+			auto c = parser.getCommand(lexer.id());
+			if (c != nullptr) {
+				const int8_t tokLen = strlen(lexer.id());
+				const int8_t dist = tokLen-2-sizeof(uintptr_t);
+				const uint8_t pos = lexer.getPointer() - tokLen;
+				
+				size -= dist;
+				tempBuffer[pos] = ASCII_DLE;
+				tempBuffer[pos+1] = BASIC_TOKEN_COMMAND;
+				memmove(tempBuffer+pos+2+sizeof(uintptr_t),
+				    tempBuffer+lexer.getPointer(), size-2);
+				writeValue(uintptr_t(c), &tempBuffer[pos+2]);
+				lexer.setPointer(lexer.getPointer()-dist);
+			}
+		}
+	}
+#endif // FAST_MODULE_CALL
 
 	return addLine(num, tempBuffer, size);
+}
+
+bool
+Program::addLine(
+    uint16_t num,
+    const uint8_t *text,
+    uint8_t len)
+{
+	reset();
+
+	if (_textEnd == 0) // First string insertion
+		return insert(num, text, len);
+
+	const uint8_t strLen = sizeof(Line) + len;
+	// Iterate over lines
+	Line *cur;
+	for (cur = current(_current); _current.index < _textEnd;
+	    cur = current(_current)) {
+		const auto curnumber = READ_VALUE(cur->number);
+		if (num < curnumber) {
+			// Current line has number greater then new one,
+			// point of insertion
+			break;
+		} else if (num == curnumber) {
+			// Current line has number equals to new one,
+			// replace string
+			const uint8_t newSize = strLen;
+			const uint8_t curSize = cur->size;
+			const int8_t dist = newSize - curSize;
+			const Pointer bytes2copy = _arraysEnd -
+			    (_current.index + curSize);
+			if ((_arraysEnd + dist) >= _sp)
+				return false;
+			memmove(_text + _current.index + newSize,
+			    _text + _current.index + curSize, bytes2copy);
+			WRITE_VALUE(cur->number, num);
+			cur->size = strLen;
+			memcpy(cur->text, text, len);
+			_textEnd += dist, _variablesEnd += dist,
+			    _arraysEnd += dist;
+#if CONF_USE_ALIGN
+			return alignVars(_textEnd);
+#else
+			return true;
+#endif
+		}
+		_current.index += cur->size;
+	}
+	return insert(num, text, len);
 }
 
 void
@@ -356,56 +454,25 @@ Program::removeLine(uint16_t num)
 {
 	const Line *line = this->lineByNumber(num, 0);
 	if (line != nullptr) {
-		const uint16_t index = objectIndex(line);
+		const Pointer index = objectIndex(line);
 		assert(index < _textEnd);
-		const uint16_t next = index+line->size;
-		const uint16_t len = _arraysEnd-next;
+		const Pointer next = index+line->size;
+		const Pointer len = _arraysEnd-next;
 		_textEnd -= line->size;
 		_variablesEnd -= line->size;
 		_arraysEnd -= line->size;
 		memmove(_text+index, _text+next, len);
+#if CONF_USE_ALIGN
+		alignVars(_textEnd);
+#endif
 	}
 }
 
 bool
-Program::addLine(uint16_t num, const uint8_t *text, uint8_t len)
-{
-	reset();
-
-	if (_textEnd == 0) // First string insertion
-		return insert(num, text, len);
-
-	const uint16_t strLen = sizeof(Line) + len;
-	// Iterate over
-	Line *cur;
-	for (cur = current(_current); _current.index < _textEnd;
-	    cur = current(_current)) {
-		if (num < cur->number) {
-			break;
-		} else if (num == cur->number) { // Replace string
-			const uint16_t newSize = strLen;
-			const uint16_t curSize = cur->size;
-			const int16_t dist = long(newSize) - curSize;
-			const uint16_t bytes2copy = _arraysEnd -
-			    (_current.index + curSize);
-			if ((_arraysEnd + dist) >= _sp)
-				return (false);
-			memmove(_text + _current.index + newSize,
-			    _text + _current.index + curSize, bytes2copy);
-			cur->number = num;
-			cur->size = strLen;
-			memcpy(cur->text, text, len);
-			_textEnd += dist, _variablesEnd += dist,
-			    _arraysEnd += dist;
-			return true;
-		}
-		_current.index += cur->size;
-	}
-	return insert(num, text, len);
-}
-
-bool
-Program::insert(uint16_t num, const uint8_t *text, uint8_t len)
+Program::insert(
+    uint16_t num,
+    const uint8_t *text,
+    uint8_t len)
 {
 	const uint8_t strLen = sizeof(Line) + len;
 
@@ -416,11 +483,15 @@ Program::insert(uint16_t num, const uint8_t *text, uint8_t len)
 	    _arraysEnd - _current.index);
 
 	Line *cur = lineByIndex(_current.index);
-	cur->number = num;
+	WRITE_VALUE(cur->number, num);
 	cur->size = strLen;
 	memcpy(cur->text, text, len);
 	_textEnd += strLen, _variablesEnd += strLen, _arraysEnd += strLen;
+#if CONF_USE_ALIGN
+	return alignVars(_textEnd);
+#else
 	return true;
+#endif
 }
 
 void
@@ -446,5 +517,121 @@ Program::_reset()
 #endif
 	_sp = programSize;
 }
+
+#if CONF_USE_ALIGN
+bool
+Program::alignVars(Pointer index)
+{
+	Pointer lastIndex = index;
+	VariableFrame *f;
+	while ((f = variableByIndex(index)) != nullptr) {
+		if (_text[index] == 0) {
+			++index;
+			continue;
+		}
+#if USE_DEFFN
+		if (f->type & TYPE_DEFFN) {
+			index += f->size();
+			continue;
+		}
+#endif
+		const Parser::Value::Type t = f->type;
+		Pointer i = lastIndex + sizeof(VariableFrame);
+		int8_t a = alignPointer(i, t);
+		int8_t dist = a - int8_t(index - lastIndex);
+		
+		if (_arraysEnd+dist >= _sp) {
+			return false;
+		}
+		const auto src = _text + index;
+		const auto dst = src + dist;
+		if (_arraysEnd > index)
+			memmove(dst, src, _arraysEnd - index);
+		for (i=lastIndex; i<lastIndex+a; ++i) {
+			_text[i] = 0;
+		}
+		_variablesEnd += dist;
+		_arraysEnd += dist;
+		
+		alignVars(_variablesEnd);
+		
+		lastIndex += a + VariableFrame::size(t);
+		index = lastIndex;
+	}
+	
+	return true;
+}
+
+bool
+Program::alignArrays(Pointer index)
+{
+	Pointer lastIndex = index;
+	ArrayFrame *f;
+	while ((f = arrayByIndex(index)) != nullptr) {
+		if (_text[index] == 0) {
+			++index;
+			continue;
+		}
+		
+		const Parser::Value::Type t = f->type;
+		const uint16_t fsize = f->size();
+		Pointer i = lastIndex + fsize - f->dataSize();
+		int8_t a = alignPointer(i, t);
+		int8_t dist = a - int8_t(index - lastIndex);
+		
+		if (_arraysEnd+dist >= _sp) {
+			return false;
+		}
+		const auto src = _text + index;
+		const auto dst = src + dist;
+		if (_arraysEnd > index)
+			memmove(dst, src, _arraysEnd - index);
+		for (i=lastIndex; i<lastIndex+a; ++i) {
+			_text[i] = 0;
+		}
+		_arraysEnd += dist;
+		
+		lastIndex += a + fsize;
+		index = lastIndex;
+	}
+	
+	return true;
+}
+
+int8_t
+Program::alignPointer(
+    Pointer i,
+    Parser::Value::Type t)
+{
+	int8_t a = 0;
+	
+	if (t == Parser::Value::Type::INTEGER) {
+		a = i % sizeof (Integer);
+	}
+#if USE_LONGINT
+	else if (t == Parser::Value::Type::LONG_INTEGER) {
+		a = i % sizeof (LongInteger);
+		if (a > 0)
+			a = sizeof (LongInteger) - a;
+	}
+#endif
+#if USE_REALS
+	else if (t == Parser::Value::Type::REAL) {
+		a = i % sizeof (Real);
+		if (a > 0)
+			a = sizeof (Real) - a;
+	}
+#if USE_LONG_REALS
+	else if (t == Parser::Value::Type::LONG_REAL) {
+		a = i % sizeof (LongReal);
+		if (a > 0)
+			a = sizeof (LongReal) - a;
+	}
+#endif
+#endif // USE_REALS
+	return a;
+}
+
+#endif // CONF_USE_ALIGN
 
 } // namespace BASIC

@@ -1,6 +1,9 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * 
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2019,2020 Terminal-BASIC team
+ *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +35,7 @@ namespace BASIC
 /**
  * @brief variable memory frame
  */
-struct EXT_PACKED VariableFrame
+struct PACKED VariableFrame
 {
 	/**
 	 * @brief size of the initialized frame
@@ -73,7 +76,7 @@ struct EXT_PACKED VariableFrame
 /**
  * Array memory frame
  */
-struct EXT_PACKED ArrayFrame
+struct PACKED ArrayFrame
 {
 	/**
 	 * @brief get frame size in bytes
@@ -148,7 +151,7 @@ struct EXT_PACKED ArrayFrame
 /**
  * Array memory frame
  */
-struct EXT_PACKED FunctionFrame
+struct PACKED FunctionFrame
 {
 	uint16_t lineNumber;
 	uint8_t linePosition;
@@ -439,7 +442,11 @@ public:
 	 * @param var name of the variable
 	 */
 	void valueFromVar(Parser::Value&, const char*);
-
+	/**
+	 * @brief Fill value object with the value of an array element
+	 * @param val value object
+	 * @param var name of the array
+	 */
 	bool valueFromArray(Parser::Value&, const char*);
 	/**
 	 * @brief push string constant on the stack
@@ -482,13 +489,24 @@ public:
 #endif // USE_DEFFN
 
 	Program _program;
+	
+	Parser& parser() { return _parser; }
 private:
 	
 	class AttrKeeper;
 #if USE_MATRIX
-	
+	/**
+	 * @Fill matrix elements with the value
+	 * @param array name for the matrix
+	 * @param value object to fill the matrix with
+	 */
 	void fillMatrix(const char*, const Parser::Value&);
-	
+	/**
+	 * 
+	 * @param frame
+	 * @param rows
+	 * @param columns
+	 */
 	void setMatrixSize(ArrayFrame&, uint16_t, uint16_t);
 	/**
 	 * @brief Get 2 dimensional array from stack
@@ -511,8 +529,7 @@ private:
 	 */
 	ArrayFrame *getSquareArray(const char*);
 #endif // USE_MATRIX
-	// Return Variable/Array/Function type based on it's name
-	static Parser::Value::Type typeFromName(const char*);
+	
 	// Get next input object from stack
 	bool nextInput();
 	// Place input values to objects
@@ -542,13 +559,13 @@ private:
 	 * @param len Length of the program
 	 * @return Flag of success
 	 */
-	bool checkText(uint16_t&);
+	bool checkText(Pointer&);
 	/**
 	 * @brief load program memory from eeprom
 	 * @param len Length of program
 	 * @param showPogress show loading progress
 	 */
-	void loadText(uint16_t, bool=true);
+	void loadText(Pointer, bool=true);
 #if SAVE_LOAD_CHECKSUM
 	uint16_t eepromProgramChecksum(uint16_t);
 #endif

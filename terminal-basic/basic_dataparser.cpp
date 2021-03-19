@@ -1,6 +1,9 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * 
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2019,2020 Terminal-BASIC team
+ *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,11 +56,10 @@ DataParser::read(const uint8_t *str, Parser::Value &value)
 bool
 DataParser::readValue(Parser::Value &value)
 {
-	bool minus = false;
-	if (_lexer.getToken() == Token::MINUS) {
+	bool minus = _lexer.getToken() == Token::MINUS;
+	if (minus || _lexer.getToken() == Token::PLUS) {
 		if (!_lexer.getNext())
 			return false;
-		minus = true;
 	}
 	if ((_lexer.getToken() >= Token::C_INTEGER)
 	 && (_lexer.getToken() <= Token::C_STRING)) {
