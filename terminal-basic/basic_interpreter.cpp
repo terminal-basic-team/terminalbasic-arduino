@@ -237,7 +237,7 @@ Interpreter::step()
 			if (c == char(ASCII::EOT))
 				_state = SHELL;
 		}
-		if (millis() >= _delayTimeout)
+		if (HAL_time_gettime_ms() >= _delayTimeout)
 			_state = _lastState;
 		break;
 #endif // USE_DELAY
@@ -863,7 +863,7 @@ Interpreter::popString(const char *&str)
 void
 Interpreter::randomize()
 {
-	::randomSeed(millis());
+	::randomSeed(HAL_time_gettime_ms());
 }
 
 #if USE_DEFFN
@@ -1621,7 +1621,8 @@ bool
 Interpreter::arrayElementIndex(ArrayFrame *f, uint16_t &index)
 {
 	index = 0;
-	uint8_t dim = f->numDimensions, mul = 1;
+	uint8_t dim = f->numDimensions;
+	uint16_t mul = 1;
 	while (dim-- > 0) {
 		Program::StackFrame *sf = _program.currentStackFrame();
 		if (sf == nullptr ||

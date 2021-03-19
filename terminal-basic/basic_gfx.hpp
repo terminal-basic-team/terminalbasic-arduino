@@ -33,18 +33,28 @@ class GFXModule : public FunctionBlock
 public:
 	explicit GFXModule();
 
+#if GFX_EXP_COLOR
 	static bool command_boxc(Interpreter&);
+#endif
 	static bool command_box(Interpreter&);
+#if GFX_EXP_COLOR
 	static bool command_circlec(Interpreter&);
+#endif
 	static bool command_circle(Interpreter&);
 	static bool command_color(Interpreter&);
 	static bool command_cursor(Interpreter&);
+#if GFX_EXP_COLOR
 	static bool command_ellipsec(Interpreter&);
+#endif
 	static bool command_ellipse(Interpreter&);
+#if GFX_EXP_COLOR
 	static bool command_linec(Interpreter&);
+#endif
 	static bool command_line(Interpreter&);
 	static bool command_lineto(Interpreter&);
+#if GFX_EXP_COLOR
 	static bool command_pointc(Interpreter&);
+#endif
 	static bool command_point(Interpreter&);
 	static bool command_screen(Interpreter&);
 	

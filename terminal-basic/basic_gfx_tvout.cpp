@@ -32,27 +32,6 @@ namespace BASIC
 void GFXModule::_init() {}
 
 bool
-GFXModule::command_boxc(Interpreter &i)
-{
-	INT x,y,w,h,c;
-	
-	if (getIntegerFromStack(i, c)) {
-		if (getIntegerFromStack(i, h)) {
-			if (getIntegerFromStack(i, w)) {
-				if (getIntegerFromStack(i, y)) {
-					if (getIntegerFromStack(i, x)) {
-						TVoutEx::instance()->drawRect(x, y,
-						    w, h, Color_t(c));
-						return true;
-					}
-				}
-			}
-		}
-	}
-	return false;
-}
-
-bool
 GFXModule::command_box(Interpreter &i)
 {
 	INT x,y,w,h;
@@ -85,24 +64,6 @@ GFXModule::command_cursor(Interpreter &i)
 }
 
 bool
-GFXModule::command_circlec(Interpreter &i)
-{
-	INT x,y,r,z;
-	
-	if (getIntegerFromStack(i, z)) {
-		if (getIntegerFromStack(i, r)) {
-			if (getIntegerFromStack(i, y)) {
-				if (getIntegerFromStack(i, x)) {
-					TVoutEx::instance()->drawCircle(x,y,r,Color_t(z));
-					return true;
-				}
-			}
-		}
-	}
-	return false;
-}
-
-bool
 GFXModule::command_circle(Interpreter &i)
 {
 	INT x,y,r;
@@ -112,27 +73,6 @@ GFXModule::command_circle(Interpreter &i)
 			if (getIntegerFromStack(i, x)) {
 				TVoutEx::instance()->drawCircle(x,y,r);
 				return true;
-			}
-		}
-	}
-	return false;
-}
-
-bool
-GFXModule::command_ellipsec(Interpreter& i)
-{
-	INT x,y,w,h,c;
-	
-	if (getIntegerFromStack(i, c)) {
-		if (getIntegerFromStack(i, h)) {
-			if (getIntegerFromStack(i, w)) {
-				if (getIntegerFromStack(i, y)) {
-					if (getIntegerFromStack(i, x)) {
-						TVoutEx::instance()->drawEllipse(
-						    x, y, w, h, Color_t(c));
-						return true;
-					}
-				}
 			}
 		}
 	}
@@ -167,27 +107,6 @@ GFXModule::command_color(Interpreter &i)
 		if (getIntegerFromStack(i, c)) {
 			TVoutEx::instance()->setColor(Color_t(c), Color_t(b));
 			return true;
-		}
-	}
-	return false;
-}
-
-bool
-GFXModule::command_linec(Interpreter &i)
-{
-	INT x1,y1,x2,y2,z;
-	
-	if (getIntegerFromStack(i, z)) {
-		if (getIntegerFromStack(i, y2)) {
-			if (getIntegerFromStack(i, x2)) {
-				if (getIntegerFromStack(i, y1)) {
-					if (getIntegerFromStack(i, x1)) {
-						TVoutEx::instance()->drawLine(x1, y1,
-						    x2, y2, Color_t(z));
-						return true;
-					}
-				}
-			}
 		}
 	}
 	return false;
@@ -241,6 +160,88 @@ GFXModule::command_point(Interpreter &i)
 	return false;
 }
 
+#if GFX_EXP_COLOR
+bool
+GFXModule::command_boxc(Interpreter &i)
+{
+	INT x,y,w,h,c;
+	
+	if (getIntegerFromStack(i, c)) {
+		if (getIntegerFromStack(i, h)) {
+			if (getIntegerFromStack(i, w)) {
+				if (getIntegerFromStack(i, y)) {
+					if (getIntegerFromStack(i, x)) {
+						TVoutEx::instance()->drawRect(x, y,
+						    w, h, Color_t(c));
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool
+GFXModule::command_circlec(Interpreter &i)
+{
+	INT x,y,r,z;
+	
+	if (getIntegerFromStack(i, z)) {
+		if (getIntegerFromStack(i, r)) {
+			if (getIntegerFromStack(i, y)) {
+				if (getIntegerFromStack(i, x)) {
+					TVoutEx::instance()->drawCircle(x,y,r,Color_t(z));
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool
+GFXModule::command_ellipsec(Interpreter& i)
+{
+	INT x,y,w,h,c;
+	
+	if (getIntegerFromStack(i, c)) {
+		if (getIntegerFromStack(i, h)) {
+			if (getIntegerFromStack(i, w)) {
+				if (getIntegerFromStack(i, y)) {
+					if (getIntegerFromStack(i, x)) {
+						TVoutEx::instance()->drawEllipse(
+						    x, y, w, h, Color_t(c));
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool
+GFXModule::command_linec(Interpreter &i)
+{
+	INT x1,y1,x2,y2,z;
+	
+	if (getIntegerFromStack(i, z)) {
+		if (getIntegerFromStack(i, y2)) {
+			if (getIntegerFromStack(i, x2)) {
+				if (getIntegerFromStack(i, y1)) {
+					if (getIntegerFromStack(i, x1)) {
+						TVoutEx::instance()->drawLine(x1, y1,
+						    x2, y2, Color_t(z));
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
 bool
 GFXModule::command_pointc(Interpreter &i)
 {
@@ -256,6 +257,7 @@ GFXModule::command_pointc(Interpreter &i)
 	}
 	return false;
 }
+#endif // GFX_EXP_COLOR
 
 bool
 GFXModule::command_screen(Interpreter &i)

@@ -60,31 +60,6 @@ GFXModule::command_box(Interpreter &i)
 }
 
 bool
-GFXModule::command_boxc(Interpreter &i)
-{
-	INT x,y,w,h,z;
-	if (getIntegerFromStack(i, z)) {
-		if (getIntegerFromStack(i, h)) {
-			if (getIntegerFromStack(i, w)) {
-				if (getIntegerFromStack(i, y)) {
-					if (getIntegerFromStack(i, x)) {
-						i.print(char(ASCII::DLE));
-						i.print(char(GFXTERM::Command::BOXC));
-						write16(i, x);
-						write16(i, y);
-						write16(i, w);
-						write16(i, h);
-						i.print(char(z));
-						return true;
-					}
-				}
-			}
-		}
-	}
-	return false;
-}
-
-bool
 GFXModule::command_ellipse(Interpreter &i)
 {
 	INT x,y,w,h;
@@ -101,51 +76,6 @@ GFXModule::command_ellipse(Interpreter &i)
 					write16(i, h);
 					return true;
 				}
-			}
-		}
-	}
-	return false;
-}
-
-bool
-GFXModule::command_ellipsec(Interpreter &i)
-{
-	INT x,y,w,h,z;
-	if (getIntegerFromStack(i, z)) {
-		if (getIntegerFromStack(i, h)) {
-			if (getIntegerFromStack(i, w)) {
-				if (getIntegerFromStack(i, y)) {
-					if (getIntegerFromStack(i, x)) {
-						i.print(char(ASCII::DLE));
-						i.print(char(GFXTERM::Command::ELLIPSEC));
-						write16(i, x);
-						write16(i, y);
-						write16(i, w);
-						write16(i, h);
-						i.print(char(z));
-						return true;
-					}
-				}
-			}
-		}
-	}
-	return false;
-}
-
-bool
-GFXModule::command_circle(Interpreter &i)
-{
-	INT x,y,r;
-	
-	if (getIntegerFromStack(i, r)) {
-		if (getIntegerFromStack(i, y)) {
-			if (getIntegerFromStack(i, x)) {
-				i.print(char(ASCII::DLE));
-				i.print(char(GFXTERM::Command::CIRCLE));
-				write16(i, x);
-				write16(i, y);
-				write16(i, r);
-				return true;
 			}
 		}
 	}
@@ -256,6 +186,61 @@ GFXModule::command_screen(Interpreter &i)
 	return false;
 }
 
+#if GFX_EXP_COLOR
+bool
+GFXModule::command_boxc(Interpreter &i)
+{
+	INT z;
+	if (getIntegerFromStack(i, z)) {
+		INT h;
+		if (getIntegerFromStack(i, h)) {
+			INT w;
+			if (getIntegerFromStack(i, w)) {
+				INT y;
+				if (getIntegerFromStack(i, y)) {
+					INT x;
+					if (getIntegerFromStack(i, x)) {
+						i.print(char(ASCII::DLE));
+						i.print(char(GFXTERM::Command::BOXC));
+						write16(i, x);
+						write16(i, y);
+						write16(i, w);
+						write16(i, h);
+						i.print(char(z));
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool
+GFXModule::command_ellipsec(Interpreter &i)
+{
+	INT x,y,w,h,z;
+	if (getIntegerFromStack(i, z)) {
+		if (getIntegerFromStack(i, h)) {
+			if (getIntegerFromStack(i, w)) {
+				if (getIntegerFromStack(i, y)) {
+					if (getIntegerFromStack(i, x)) {
+						i.print(char(ASCII::DLE));
+						i.print(char(GFXTERM::Command::ELLIPSEC));
+						write16(i, x);
+						write16(i, y);
+						write16(i, w);
+						write16(i, h);
+						i.print(char(z));
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
 bool
 GFXModule::command_pointc(Interpreter &i)
 {
@@ -323,6 +308,8 @@ GFXModule::command_linec(Interpreter &i)
 	}
 	return false;
 }
+#endif
+
 } // namespace BASIC
 
 #endif // USE_GFX && SERIAL_GFX

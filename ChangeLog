@@ -1,3 +1,8 @@
+r2.2-rc1 (18.02.2020)
+
+  * Fix bug with multidimentional arrays with one of the dimensions >= 255
+  * Implement optional compilation of the GFX commands with explicit color setting
+
 r2.2-beta3 (16.02.2020)
 
   * Add parameters to DIRECTORY command (optional 1st and last file numbers

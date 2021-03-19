@@ -62,28 +62,6 @@ GFXModule::command_box(Interpreter &i)
 }
 
 bool
-GFXModule::command_boxc(Interpreter &i)
-{
-	INT x,y,w,h,z;
-	
-	if (getIntegerFromStack(i, z)) {
-		if (getIntegerFromStack(i, h)) {
-			if (getIntegerFromStack(i, w)) {
-				if (getIntegerFromStack(i, y)) {
-					if (getIntegerFromStack(i, x)) {
-						UTFT::instance().setColor(
-						    pgm_read_word(colors+z));
-						UTFT::instance().drawRect(x,y,x+w,y+h);
-						return true;
-					}
-				}
-			}
-		}
-	}
-	return false;
-}
-
-bool
 GFXModule::command_ellipse(Interpreter& i)
 {
 	INT x,y,w,h;
@@ -93,27 +71,6 @@ GFXModule::command_ellipse(Interpreter& i)
 			if (getIntegerFromStack(i, y)) {
 				if (getIntegerFromStack(i, x)) {
 					return true;
-				}
-			}
-		}
-	}
-	return false;
-}
-
-bool
-GFXModule::command_ellipsec(Interpreter& i)
-{
-	INT x,y,w,h,z;
-	
-	if (getIntegerFromStack(i, z)) {
-		if (getIntegerFromStack(i, h)) {
-			if (getIntegerFromStack(i, w)) {
-				if (getIntegerFromStack(i, y)) {
-					if (getIntegerFromStack(i, x)) {
-						UTFT::instance().setColor(
-						    pgm_read_word(colors+z));
-						return true;
-					}
 				}
 			}
 		}
@@ -143,26 +100,6 @@ GFXModule::command_circle(Interpreter &i)
 			if (getIntegerFromStack(i, x)) {
 				UTFT::instance().drawCircle(x,y,r);
 				return true;
-			}
-		}
-	}
-	return false;
-}
-
-bool
-GFXModule::command_circlec(Interpreter& i)
-{
-	INT x,y,r,z;
-	
-	if (getIntegerFromStack(i, z)) {
-		if (getIntegerFromStack(i, r)) {
-			if (getIntegerFromStack(i, y)) {
-				if (getIntegerFromStack(i, x)) {
-					UTFT::instance().setColor(
-					    pgm_read_word(colors+z));
-					UTFT::instance().drawCircle(x,y,r);
-					return true;
-				}
 			}
 		}
 	}
@@ -204,29 +141,6 @@ GFXModule::command_line(Interpreter &i)
 }
 
 bool
-GFXModule::command_linec(Interpreter& i)
-{
-	INT x1,y1,x2,y2,z;
-	
-	if (getIntegerFromStack(i, z)) {
-		if (getIntegerFromStack(i, y2)) {
-			if (getIntegerFromStack(i, x2)) {
-				if (getIntegerFromStack(i, y1)) {
-					if (getIntegerFromStack(i, x1)) {
-						UTFT::instance().setColor(
-						    pgm_read_word(colors+z));
-						UTFT::instance().drawLine(x1, y1,
-						    x2, y2);
-						return true;
-					}
-				}
-			}
-		}
-	}
-	return false;
-}
-
-bool
 GFXModule::command_lineto(Interpreter &i)
 {
 	INT x1,y1;
@@ -255,6 +169,93 @@ GFXModule::command_point(Interpreter &i)
 	return false;
 }
 
+#if GFX_EXP_COLOR
+bool
+GFXModule::command_boxc(Interpreter &i)
+{
+	INT x,y,w,h,z;
+	
+	if (getIntegerFromStack(i, z)) {
+		if (getIntegerFromStack(i, h)) {
+			if (getIntegerFromStack(i, w)) {
+				if (getIntegerFromStack(i, y)) {
+					if (getIntegerFromStack(i, x)) {
+						UTFT::instance().setColor(
+						    pgm_read_word(colors+z));
+						UTFT::instance().drawRect(x,y,x+w,y+h);
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool
+GFXModule::command_ellipsec(Interpreter& i)
+{
+	INT x,y,w,h,z;
+	
+	if (getIntegerFromStack(i, z)) {
+		if (getIntegerFromStack(i, h)) {
+			if (getIntegerFromStack(i, w)) {
+				if (getIntegerFromStack(i, y)) {
+					if (getIntegerFromStack(i, x)) {
+						UTFT::instance().setColor(
+						    pgm_read_word(colors+z));
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool
+GFXModule::command_circlec(Interpreter& i)
+{
+	INT x,y,r,z;
+	
+	if (getIntegerFromStack(i, z)) {
+		if (getIntegerFromStack(i, r)) {
+			if (getIntegerFromStack(i, y)) {
+				if (getIntegerFromStack(i, x)) {
+					UTFT::instance().setColor(
+					    pgm_read_word(colors+z));
+					UTFT::instance().drawCircle(x,y,r);
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool
+GFXModule::command_linec(Interpreter& i)
+{
+	INT x1,y1,x2,y2,z;
+	
+	if (getIntegerFromStack(i, z)) {
+		if (getIntegerFromStack(i, y2)) {
+			if (getIntegerFromStack(i, x2)) {
+				if (getIntegerFromStack(i, y1)) {
+					if (getIntegerFromStack(i, x1)) {
+						UTFT::instance().setColor(
+						    pgm_read_word(colors+z));
+						UTFT::instance().drawLine(x1, y1,
+						    x2, y2);
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
 bool
 GFXModule::command_pointc(Interpreter& i)
 {
@@ -272,6 +273,7 @@ GFXModule::command_pointc(Interpreter& i)
 	}
 	return false;
 }
+#endif // GFX_EXP_COLOR
 
 bool
 GFXModule::command_screen(Interpreter &i)

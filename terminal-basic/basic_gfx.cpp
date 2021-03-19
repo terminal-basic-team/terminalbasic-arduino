@@ -27,36 +27,56 @@ namespace BASIC
 {
 
 static const uint8_t gfxTokens[] PROGMEM = {
+#if GFX_EXP_COLOR
 	'B','O','X','C', ASCII_NUL,
+#endif
 	'B','O','X', ASCII_NUL,
+#if GFX_EXP_COLOR
 	'C','I','R','C','L','E','C', ASCII_NUL,
+#endif
 	'C','I','R','C','L','E', ASCII_NUL,
 	'C','O','L','O','R', ASCII_NUL,
 	'C','U','R','S','O','R', ASCII_NUL,
+#if GFX_EXP_COLOR
 	'E','L','L','I','P','S','E','C',ASCII_NUL,
+#endif
 	'E','L','L','I','P','S','E',ASCII_NUL,
 	'L','I','N','E','T','O', ASCII_NUL,
+#if GFX_EXP_COLOR
 	'L','I','N','E','C', ASCII_NUL,
+#endif
 	'L','I','N','E', ASCII_NUL,
+#if GFX_EXP_COLOR
 	'P','O','I','N','T','C', ASCII_NUL,
+#endif
 	'P','O','I','N','T', ASCII_NUL,
 	'S','C','R','E','E','N', ASCII_NUL,
 	ASCII_ETX
 };
 
 const FunctionBlock::command GFXModule::comms[] PROGMEM = {
-	  GFXModule::command_boxc
-	, GFXModule::command_box
+#if GFX_EXP_COLOR
+	  GFXModule::command_boxc,
+#endif
+	  GFXModule::command_box
+#if GFX_EXP_COLOR
 	, GFXModule::command_circlec
+#endif
 	, GFXModule::command_circle
 	, GFXModule::command_color
 	, GFXModule::command_cursor
+#if GFX_EXP_COLOR
 	, GFXModule::command_ellipsec
+#endif
 	, GFXModule::command_ellipse
 	, GFXModule::command_lineto
+#if GFX_EXP_COLOR
 	, GFXModule::command_linec
+#endif
 	, GFXModule::command_line
+#if GFX_EXP_COLOR
 	, GFXModule::command_pointc
+#endif
 	, GFXModule::command_point
 	, GFXModule::command_screen
 #if FAST_MODULE_CALL

@@ -530,7 +530,7 @@ InternalFunctions::func_tim(Interpreter &i)
 #else
 #define TYP Integer
 #endif
-	return i.pushValue(TYP(TYP(millis()) / TYP(1000)));
+	return i.pushValue(TYP(TYP(HAL_time_gettime_ms()) / TYP(1000)));
 }
 
 } // namespace BASIC
