@@ -300,7 +300,7 @@ _basic_lexer_stringConst(basic_lexer_context_t *self)
 static void
 _basic_lexer_ident(basic_lexer_context_t *self)
 {
-	while (isalnum(SYM)
+	while (tools_isAlphaNum(SYM)
 #if ALLOW_UNDERSCORE_ID
 	    || (SYM == '_')
 #endif

@@ -55,6 +55,22 @@ SDFSModule::SDFSModule()
 }
 
 void
+SDFSModule::loadAutorun(Interpreter& i)
+{
+	static const char ar[] PROGMEM = "/AUTORUN.BAS";
+	char ss[13];
+	strcpy_P(ss, ar);
+	SDCard::File f = SDCard::SDFS.open(ss);
+	if (!f)
+		return;
+	
+	if (!_loadText(f, i))
+		return;
+	
+	i.run();
+}
+
+void
 SDFSModule::_init()
 {
 	if (!SDCard::SDFS.begin())
@@ -149,23 +165,23 @@ SDFSModule::dsave(Interpreter &i)
 	for (Program::Line *s = i._program.getNextLine(); s != nullptr;
 	    s = i._program.getNextLine()) {
 		f.print(s->number);
-		lex.init(s->text, false);
+		lex.init(s->text, true);
 		while (lex.getNext()) {
 			f.write(' ');
 			Token t = lex.getToken();
-			if (t < Token::STAR) {
+			if (t < Token::INTEGER_IDENT) {
 				uint8_t buf[16];
 				const bool res = Lexer::getTokenString(t,
 				    reinterpret_cast<uint8_t*>(buf));
 				if (res)
-					f.print((char*)buf);
+					f.print((const char*)buf);
 				else {
 					f.close();
 					return false;
 				}
-			} else if (t <= Token::BOOL_IDENT) {
+			} else if (t < Token::C_INTEGER) {
 				f.print(lex.id());
-			} else if (t <= Token::C_BOOLEAN) {
+			} else if (t < Token::C_STRING) {
 				lex.getValue().printTo(f);
 			} else if (t == Token::C_STRING) {
 				f.write('"');

@@ -89,7 +89,7 @@ static LiquidCrystalVt100 lsvt100(lCrystal, 20, 4, lCrBuf);
 #endif
 
 #if USESD
-static BASIC::SDFSModule sdfs;
+BASIC::SDFSModule sdfs;
 #endif
 
 #if USEMATH

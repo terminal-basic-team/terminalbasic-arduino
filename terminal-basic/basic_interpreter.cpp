@@ -45,6 +45,11 @@
 #include "basic_dataparser.hpp"
 #endif
 
+#if USESD
+#include "basic_sdfs.hpp"
+extern BASIC::SDFSModule sdfs;
+#endif
+
 namespace BASIC
 {
 
@@ -205,6 +210,9 @@ Interpreter::init()
 	print(long(_program.programSize - _program._arraysEnd), VT100::BRIGHT);
 	print(ProgMemStrings::S_BYTES), print(ProgMemStrings::AVAILABLE), newline();
 	_state = SHELL;
+#if USESD
+	sdfs.loadAutorun(*this);
+#endif
 }
 
 void

@@ -342,17 +342,17 @@ Interpreter::assignMatrix(const char *name, const char *first, const char *secon
 		break;
 	case MO_MUL: {
 		assert(second != nullptr);
-		ArrayFrame *arraySecond = getSquareArray(second);
+		ArrayFrame *arraySecond = get2DArray(second);
 		if (arraySecond == nullptr)
 			return;
 		if (arraySecond->type != arrayFirst->type) {
 			raiseError(DYNAMIC_ERROR, NO_SUCH_ARRAY); //@TODO type mismatch
 			return;
 		}
-		if (arraySecond->dimension[0] != arrayFirst->dimension[1]) {
+		/*if (arraySecond->dimension[0] != arrayFirst->dimension[1]) {
 			raiseError(DYNAMIC_ERROR, DIMENSIONS_MISMATCH);
 			return;
-		}
+		}*/
 		const uint16_t r = arrayFirst->dimension[0]+1;
 		const uint16_t c = arraySecond->dimension[1]+1;
 		

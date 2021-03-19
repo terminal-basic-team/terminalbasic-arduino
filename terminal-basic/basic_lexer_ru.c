@@ -26,7 +26,6 @@ const uint8_t _basic_lexer_symbolsShift PROGMEM = (uint8_t)('Ä')-'A';
 
 const uint8_t _basic_lexer_tokenTable[] PROGMEM = {
 	ASCII_NUL,
-	'A', 'N', 'D',ASCII_NUL,                // 1
 #if USE_DUMP
 	'A', 'R', 'R', 'A', 'Y', 'S',ASCII_NUL, // 2
 #endif
@@ -41,9 +40,6 @@ const uint8_t _basic_lexer_tokenTable[] PROGMEM = {
 #endif
 #if USE_MATRIX
 	'C', 'O', 'N', ASCII_NUL,                // 7
-#endif
-#if USE_DEFFN
-	'D', 'E', 'F', ASCII_NUL,                // 9
 #endif
 #if USE_DELAY
 	'D', 'E', 'L', 'A', 'Y', ASCII_NUL,      // 10
@@ -61,11 +57,7 @@ const uint8_t _basic_lexer_tokenTable[] PROGMEM = {
 	'D', 'U', 'M', 'P', ASCII_NUL,           // 15
 #endif
 	'F', 'A', 'L', 'S', 'E', ASCII_NUL,
-#if USE_DEFFN
-	'F', 'N', ASCII_NUL,                     // 18
-#endif
 	'G', 'O', 'S', 'U', 'B', ASCII_NUL,      // 20
-	'G', 'O', 'T', 'O', ASCII_NUL,           // 11
 #if CONF_SEPARATE_GO_TO
 	'G', 'O', ASCII_NUL,                     // 12
 #endif
@@ -89,8 +81,6 @@ const uint8_t _basic_lexer_tokenTable[] PROGMEM = {
 	'M', 'O', 'D', ASCII_NUL,                // 24
 #endif
 	'N', 'E', 'W', ASCII_NUL,                // 21
-	'N', 'O', 'T', ASCII_NUL,
-	'O', 'N', ASCII_NUL,                     // 23
 #if USE_PEEK_POKE
 	'P', 'O', 'K', 'E', ASCII_NUL,
 #endif
@@ -130,9 +120,16 @@ const uint8_t _basic_lexer_tokenTable[] PROGMEM = {
 	'Ñ', 'é', ASCII_NUL,
 	'Ö', 'ë', 'ã', 'à', ASCII_NUL,
 	'à', 'ã', 'à', ASCII_NUL,
+        'à', ASCII_NUL,
 	'ä', 'é', 'å', ASCII_NUL,
 	'ä', 'é', 'ç', 'Ö', 'ñ', ASCII_NUL,
 	'ã', 'à', 'ë', 'í', 'Ä', 'í', 'ú',  ASCII_NUL,
+	'ç', 'Ä', ASCII_NUL,
+	'ç', 'Ö', ASCII_NUL,
+#if USE_DEFFN
+	'é', 'è', 'ê', ASCII_NUL,
+#endif
+	'è', 'ê', 'à', ASCII_NUL,
 	'è', 'ì', 'ë', 'ä', ASCII_NUL,
 	'è', 'ì', 'ë', 'í', 'ú', ASCII_NUL,
 	'ê', 'Ä', 'á', 'å', 'Ö', 'ê', ASCII_NUL,
@@ -143,6 +140,9 @@ const uint8_t _basic_lexer_tokenTable[] PROGMEM = {
 	'ë', 'í', 'é', 'è', ASCII_NUL,
 #endif
 	'í', 'é', ASCII_NUL,
+#if USE_DEFFN
+	'î', 'ì', 'ç', 'ä', ASCII_NUL,
+#endif
 	'ñ', 'à', 'ä', 'ã', ASCII_NUL,
 	'ò', 'Ä', 'É', ASCII_NUL,
 	ASCII_ETX

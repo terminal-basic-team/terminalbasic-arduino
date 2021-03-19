@@ -37,6 +37,9 @@ class SDFSModule : public FunctionBlock
 	// Function block interface
 public:
 	SDFSModule();
+	
+	void loadAutorun(Interpreter&);
+	
 protected:
 	void _init() override;
 private:
@@ -54,7 +57,7 @@ private:
 	static const FunctionBlock::function _commands[] PROGMEM;
 };
 
-}
+} // namespace BASIC
 
 #endif // USESD
 

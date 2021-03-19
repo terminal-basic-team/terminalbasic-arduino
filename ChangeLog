@@ -1,3 +1,10 @@
+r2.0-beta-1 (8.03.2019) Release, dedicated to the international women day
+
+  * Add autostart of the AUTORUN.BAS program if SD support is enabled
+  * Fix SD module DSAVE regression
+  * Fix incorrect matrix multiplication restriction
+  * Fix scanning of identifiers with char codes greater then 127
+
 r2.0-alpha-3 (23.02.2019) Release, dedicated to the Defender of the Fatherlad Day
 
   * Fix commands and functions parameters passing

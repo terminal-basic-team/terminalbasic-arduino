@@ -18,6 +18,8 @@ typedef uint8_t BOOLEAN;
 
 BOOLEAN tools_isAlpha(uint8_t);
 
+BOOLEAN tools_isAlphaNum(uint8_t);
+
 void _ftoa(float, char*);
 
 void _dtoa(double, char*);

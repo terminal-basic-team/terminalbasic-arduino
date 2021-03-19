@@ -38,7 +38,7 @@ public:
 		// Set text cursor visible
 		// param bool (uint8_t) visible
 		CURSOR = 0x21,
-		// Set color
+		// Set colors (ink and paper)
 		// param uint8_t ink, uint8_t paper
 		COLOR = 0x22,
 		// Set active font
@@ -55,10 +55,22 @@ public:
 		LINE = 0x26,
 		// Draw line from current position
 		// param int16_t x,y
-		LINETO = 0x26,
+		LINETO = 0x27,
 		// Draw point
 		// param int16_t x,y
-		POINT = 0x27
+		POINT = 0x28,
+		// Set ink color and draw point
+		// param int16_t x,y, uint8_t ink
+		POINTC = 0x29,
+		// Draw circle
+		// param int16_t cx, cy, r, uint8_t ink
+		CIRCLEC = 0x30,
+		// Draw color box (rectangle)
+		// param int16_t x,y, w,h, uint8_t ink
+		BOXC = 0x31,
+		// Draw color line
+		// param int16_t x1,y1, x2,y2, uint8_t ink
+		LINEC = 0x32
 	};
 };
 

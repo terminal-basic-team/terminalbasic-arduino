@@ -18,6 +18,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "tools.h"
 
@@ -31,6 +32,12 @@ tools_isAlpha(uint8_t c)
 	       (c >= 128 && c <= 175) ||
 	       (c >= 65 && c <= 90) ||
 	       (c >= 97 && c <= 122);
+}
+
+BOOLEAN
+tools_isAlphaNum(uint8_t c)
+{
+	return isdigit(c) || tools_isAlpha(c);
 }
 
 void
