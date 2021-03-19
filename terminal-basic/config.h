@@ -59,17 +59,17 @@
 /*
  * Support of Darthmouth BASIX-style matrix operations
  */
-#define USE_MATRIX           0
+#define USE_MATRIX           1
 
 /**
  * Support of DATA/READ statements
  */
-#define USE_DATA             0
+#define USE_DATA             1
 
 /*
  * Support of DEF FN construct
  */
-#define USE_DEFFN            0
+#define USE_DEFFN            1
 
 /*
  * DELAY command, suspends execution for N ms

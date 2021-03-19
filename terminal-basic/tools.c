@@ -43,10 +43,10 @@ tools_isAlphaNum(uint8_t c)
 void
 _ftoa(float f, char *buf)
 {
-	if (f != f) {
+	if (f != f) { // NaN - comparision invalid
 		strcpy(buf, "NAN");
 		return;
-	} else if (f + f == f) {
+	} else if (f + f == f) { // machine zero
 		if (1.f / f < 0.f)
 			strcpy(buf, "-0.0");
 		else if (f == 0.0f)
@@ -58,23 +58,24 @@ _ftoa(float f, char *buf)
 		return;
 	}
 
-	if (f < 0.f) {
+	if (f < 0.f) { // Add "-" for negative ordinar values
 		f = -f;
 		*(buf++) = '-';
 	}
 
 	int32_t n = 0;
-
-	if (f < 1e6f)
+	// Move to set 1st significant decimal digit before decimal point
+	if (f < 1e6f) {
 		do {
 			f *= 10.f;
 			--n;
 		} while (f < (1e6f - 0.5f));
-	else if (f >= 1e7f)
+	} else if (f >= 1e7f) {
 		do {
 			f /= 10.f;
 			++n;
-		} while (f >= 1e7f);
+		} while (f >= 1e7f + 0.5f);
+	}
 	n += FLOAT_DIGITS10 - 1;
 	uint32_t fi = f + 0.5f;
 

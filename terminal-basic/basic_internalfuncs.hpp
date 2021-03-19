@@ -37,6 +37,9 @@ private:
 #if USE_CHR
 	static bool func_chr(Interpreter&);
 #endif
+#if USE_HEX
+	static bool func_hex(Interpreter&);
+#endif
 #if USE_GET
 	static bool func_get(Interpreter&);
 #endif

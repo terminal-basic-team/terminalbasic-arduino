@@ -73,6 +73,8 @@ namespace BASIC
 	#define USE_LEFT           0
 	// RIGHT$ function, return rightmost part of the string
 	#define USE_RIGHT          0
+	// HEX$ function, return sting with hexsadecimal representation of the expression value
+	#define USE_HEX     0
 #endif // USE_STRINGOPS
 /*
  * Clear program memory on NEW command
@@ -114,6 +116,10 @@ namespace BASIC
  * SDcard module
  */
 #define USESD         0
+#if USESD
+	// Unix-like file operations
+	#define USE_FILEOP 1
+#endif
 
 // Use text error strings
 #define CONF_ERROR_STRINGS 0

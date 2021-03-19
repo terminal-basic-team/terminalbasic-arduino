@@ -36,6 +36,9 @@ static const uint8_t intFuncs[] PROGMEM = {
 #if USE_CHR
 	'C', 'H', 'R', '$', ASCII_NUL,
 #endif
+#if USE_HEX
+	'H', 'E', 'X', '$', ASCII_NUL,
+#endif
 #if USE_GET
 	'G', 'E', 'T', '$', ASCII_NUL,
 #endif
@@ -71,6 +74,9 @@ const FunctionBlock::function InternalFunctions::funcs[] PROGMEM = {
 #endif
 #if USE_CHR
 	InternalFunctions::func_chr,
+#endif
+#if USE_HEX
+	InternalFunctions::func_hex,
 #endif
 #if USE_GET
 	InternalFunctions::func_get,
@@ -158,6 +164,31 @@ InternalFunctions::func_chr(Interpreter &i)
 	return false;
 }
 #endif
+
+#if USE_HEX
+bool
+InternalFunctions::func_hex(Interpreter &i)
+{
+	INT iv;
+	if (getIntegerFromStack(i, iv)) {
+		char buf[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		uint8_t k = 8;
+		uint32_t vv = iv;
+		do {
+			--k;
+			uint8_t d = vv%16;
+			vv >>= 4;
+			buf[k] = d<10 ? d+'0' : d+'A'-10;
+		} while (k > 0 && vv > 0);
+		Parser::Value v;
+		v.setType(Parser::Value::STRING);
+		i.pushString(buf+k);
+		if (i.pushValue(v))
+			return true;
+	}
+	return false;
+}
+#endif // USE_HEX
 
 #if USE_GET
 bool
