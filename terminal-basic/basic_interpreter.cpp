@@ -1744,7 +1744,8 @@ Interpreter::confirm()
 		char c = _input.read();
 		_output.print(c);
 		while (_input.available() <= 0);
-		if (_input.read() != int(ASCII::CR)) {
+		if (_input.read() != int(ASCII::CR) &&
+		    _input.read() != int(ASCII::LF)) {
 			newline();
 			continue;
 		}

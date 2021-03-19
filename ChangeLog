@@ -1,3 +1,9 @@
+r2.0.3 (9.05.2019 Release, dedicated to the USSR Victory Day
+
+  * Fix error in confirmation of the file operations
+  * Fix regression in SD functions while reading the files with "CR LF" line endings
+  * Output reals with 6 significant decimal digits
+
 r2.0.2 (24.04.2019)
 
   * Fix bugs in building with ArduinoIDE, using TVOUT output

@@ -346,7 +346,7 @@ SDFSModule::_loadText(SDCard::File &f, Interpreter &i)
 		while (f.available() > 0) {
 			c = f.read();
 			if (c == '\r') {
-			    c = f.read();
+			    continue;
 			} else if (c == '\n') {
 			    buf[res] = '\0';
 			    break;
