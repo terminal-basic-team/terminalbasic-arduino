@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,28 +43,36 @@ private:
 #if USE_REALS
 	static bool func_int(Interpreter&);
 #endif
+#if USE_LEFT
+	static bool func_left(Interpreter&);
+#endif
+#if USE_RIGHT
+	static bool func_right(Interpreter&);
+#endif
 #if USE_LEN
 	static bool func_len(Interpreter&);
+#endif
+#if USE_PEEK_POKE
+	static bool func_peek(Interpreter&);
 #endif
 	static bool func_result(Interpreter&);
 #if USE_RANDOM
 	static bool func_rnd(Interpreter&);
 #endif
 	static bool func_sgn(Interpreter&);
+        static bool func_str(Interpreter&);
 	static bool func_tim(Interpreter&);
 #if USE_REALS
 #define ___TYP Real
-#elif USE_LONGINT
-#define ___TYP LongInteger
 #else
-#define ___TYP Integer
-#endif // USE_LONGINT
+#define ___TYP INT
+#endif // USE_REALS
 	static ___TYP sgn(___TYP);
 #undef ___TYP
 	
 	static const FunctionBlock::function funcs[] PROGMEM;
 };
 
-}
+} // namespace BASIC
 
-#endif
+#endif // BASIC_INTERNALFUNCS_HPP

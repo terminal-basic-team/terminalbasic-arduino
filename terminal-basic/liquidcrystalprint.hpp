@@ -16,7 +16,7 @@
  * License along with Posixcpp library. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-
+	
 #ifndef LIQUIDCRYSTALPRINT_HPP
 #define LIQUIDCRYSTALPRINT_HPP
 

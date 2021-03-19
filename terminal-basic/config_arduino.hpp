@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,10 +34,23 @@
 // Use multiterminal mode
 #define BASIC_MULTITERMINAL       0
 #if BASIC_MULTITERMINAL
+#define NUM_TERMINALS 1
+#ifdef HAVE_HWSERIAL1
 #define SERIAL_PORT1 SerialL1
-#define SERIAL_PORT2 SerialL2
-#define SERIAL_PORT3 SerialL3
+#undef NUM_TERMINALS
+#define NUM_TERMINALS 2
 #endif
+#ifdef HAVE_HWSERIAL2
+#define SERIAL_PORT2 SerialL2
+#undef NUM_TERMINALS
+#define NUM_TERMINALS 3
+#endif
+#ifdef HAVE_HWSERIAL3
+#define SERIAL_PORT3 SerialL3
+#undef NUM_TERMINALS
+#define NUM_TERMINALS 4
+#endif
+#endif // BASIC_MULTITERMINAL
 
 // Use external memory
 #define USE_EXTMEM                0
@@ -48,12 +61,15 @@
 
 namespace BASIC
 {
-
 // Number of bytes for program text, variables and stack
 #if USE_EXTMEM
 const uint16_t PROGRAMSIZE = EXTMEM_SIZE;
 #elif defined (__AVR_ATmega1284__) || defined (__AVR_ATmega1284P__)
+#if (S_OUTPUT != TVOUT_O)
+const uint16_t PROGRAMSIZE = 14336;
+#else
 const uint16_t PROGRAMSIZE = 8192;
+#endif
 #elif defined (__AVR_ATmega2560__)
 #if (S_OUTPUT != TVOUT_O) && (USE_EXTMEM == 0)
 const uint16_t PROGRAMSIZE = 6144;
@@ -71,6 +87,12 @@ const uint16_t PROGRAMSIZE = 65535;
 #else
 const uint16_t PROGRAMSIZE = 1024;
 #endif // USE_EXTMEM
+
+#if BASIC_MULTITERMINAL
+const uint16_t SINGLE_PROGSIZE = PROGRAMSIZE / (NUM_TERMINALS+1);
+#else
+const uint16_t SINGLE_PROGSIZE = PROGRAMSIZE;
+#endif
 
 // BEGIN PRIVATE
 

@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,17 +54,17 @@ FunctionBlock::getFunction(const char *name) const
 	if (((result = _getFunction(name)) == NULL) &&
 	    _next != nullptr)
 		result = _next->getFunction(name);
-	return (result);
+	return result;
 }
 
 FunctionBlock::command
 FunctionBlock::getCommand(const char *name) const
 {
 	command result;
-	if (((result = _getCommand(name)) == NULL) &&
+	if (((result = _getCommand(name)) == nullptr) &&
 	    _next != nullptr)
 		result = _next->getCommand(name);
-	return (result);
+	return result;
 }
 
 FunctionBlock::function
@@ -80,7 +80,7 @@ FunctionBlock::_getFunction(const char *name) const
 		}
 	}
 
-	return (result);
+	return result;
 }
 
 FunctionBlock::command
@@ -110,9 +110,9 @@ FunctionBlock::general_func(Interpreter &i, _funcReal f)
 	    v.type == Parser::Value::REAL) {
 		v = (*f)(Real(v));
 		i.pushValue(v);
-		return (true);
+		return true;
 	} else
-		return (false);
+		return false;
 }
 #endif
 
@@ -149,4 +149,4 @@ FunctionBlock::getIntegerFromStack(Interpreter &i, INT &num)
 
 #undef _Integer
 
-}
+} // namespace BASIC

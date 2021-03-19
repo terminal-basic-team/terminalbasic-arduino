@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,14 +42,24 @@ static const uint8_t intFuncs[] PROGMEM = {
 #if USE_REALS
 	'I', 'N', 'T'+0x80,
 #endif
+#if USE_LEFT
+	'L', 'E', 'F', 'T', '$'+0x80,
+#endif	
 #if USE_LEN
 	'L', 'E', 'N'+0x80,
 #endif
+#if USE_PEEK_POKE
+	'P', 'E', 'E', 'K'+0x80,
+#endif
 	'R', 'E', 'S'+0x80,
+#if USE_RIGHT
+	'R', 'I', 'G', 'H', 'T', '$'+0x80,
+#endif
 #if USE_RANDOM
 	'R', 'N', 'D'+0x80,
 #endif
 	'S', 'G', 'N'+0x80,
+        'S', 'T', 'R', '$'+0x80,
 	'T', 'I', 'M', 'E'+0x80,
 	0
 };
@@ -68,14 +78,24 @@ const FunctionBlock::function InternalFunctions::funcs[] PROGMEM = {
 #if USE_REALS
 	InternalFunctions::func_int,
 #endif
+#if USE_LEFT
+	InternalFunctions::func_left,
+#endif
 #if USE_LEN
 	InternalFunctions::func_len,
 #endif
+#if USE_PEEK_POKE
+	InternalFunctions::func_peek,
+#endif
 	InternalFunctions::func_result,
+#if USE_RIGHT
+	InternalFunctions::func_right,
+#endif
 #if USE_RANDOM
 	InternalFunctions::func_rnd,
 #endif
 	InternalFunctions::func_sgn,
+	InternalFunctions::func_str,
 	InternalFunctions::func_tim
 };
 
@@ -130,21 +150,21 @@ InternalFunctions::func_chr(Interpreter &i)
 {
 	Parser::Value v;
 	i.popValue(v);
-	char buf[2] = {0,};
+	char buf[2] = {0,0};
 	buf[0] = Integer(v);
 	v.type = Parser::Value::STRING;
 	i.pushString(buf);
 	i.pushValue(v);
 	return true;
 }
-#endif
+#endif // USE_CHR
 
 #if USE_GET
 bool
 InternalFunctions::func_get(Interpreter &i)
 {
 	Parser::Value v;
-	char buf[2] = {0,};
+	char buf[2] = {0,0};
 	buf[0] = i.lastKey();
 	v.type = Parser::Value::STRING;
 	i.pushString(buf);
@@ -152,6 +172,20 @@ InternalFunctions::func_get(Interpreter &i)
 	return true;
 }
 #endif // USE_GET
+
+#if USE_PEEK_POKE
+bool
+InternalFunctions::func_peek(Interpreter &i)
+{
+	INT addr;
+	if (getIntegerFromStack(i, addr)) {
+		Parser::Value v(Integer(*((volatile uint8_t*)(addr))));
+		i.pushValue(v);
+		return true;
+	}
+	return false;
+}
+#endif // USE_PEEK_POKE
 
 bool
 InternalFunctions::func_result(Interpreter &i)
@@ -179,10 +213,61 @@ InternalFunctions::func_int(Interpreter &i)
 #endif
 		i.pushValue(v);
 		return true;
-	} else
-		return false;
+	}
+	return false;
 }
 #endif // USE_REALS
+
+
+#if USE_LEFT
+bool
+InternalFunctions::func_left(Interpreter &i)
+{
+	INT len;
+	if (getIntegerFromStack(i, len)) {
+		Parser::Value v;
+		i.popValue(v);
+		if (v.type == Parser::Value::STRING) {
+			const char *str;
+			if (i.popString(str)) {
+				char buf[STRINGSIZE];
+				strncpy(buf, str, STRINGSIZE);
+				const uint8_t pos = min(len, strlen(str));
+				buf[pos] = char(0);
+				i.pushString(buf);
+				i.pushValue(v);
+				return true;
+			}
+		}
+	}
+	return false;
+}
+#endif // USE_LEFT
+
+#if USE_RIGHT
+bool
+InternalFunctions::func_right(Interpreter &i)
+{
+	INT len;
+	if (getIntegerFromStack(i, len)) {
+		Parser::Value v;
+		i.popValue(v);
+		if (v.type == Parser::Value::STRING) {
+			const char *str;
+			if (i.popString(str)) {
+				char buf[STRINGSIZE];
+				strncpy(buf, str, STRINGSIZE);
+				const uint8_t strl = strlen(str);
+				len = min(len, strl);
+				i.pushString(buf+strl-len);
+				i.pushValue(v);
+				return true;
+			}
+		}
+	}
+	return false;
+}
+#endif // USE_RIGHT
 
 #if USE_LEN
 bool
@@ -196,20 +281,17 @@ InternalFunctions::func_len(Interpreter &i)
 			v = Integer(strnlen(str, STRINGSIZE));
 			i.pushValue(v);
 			return true;
-		} else
-			return false;
-	} else
-		return false;
+		}
+	}
+	return false;
 }
 #endif
 
 #if USE_REALS
 #define TYP Real
-#elif USE_LONGINT
-#define TYP LongInteger
 #else
-#define TYP Integer
-#endif // USE_LONGINT
+#define TYP INT
+#endif // USE_REALS
 TYP
 InternalFunctions::sgn(TYP v)
 {
@@ -228,10 +310,46 @@ InternalFunctions::func_sgn(Interpreter &i)
 	return general_func(i, sgn);
 }
 
+class BufferPrint : public Print
+{
+public:
+	BufferPrint() : pointer(0) {}
+	
+	size_t write(uint8_t c) override
+	{
+		if (pointer < sizeof(buf)) {
+			buf[pointer++] = c;
+			return 1;
+		} else
+			return -1;
+	}
+
+	char buf[STRINGSIZE];
+	uint8_t pointer;
+};
+
+bool
+InternalFunctions::func_str(Interpreter &i)
+{
+	BufferPrint p;
+	Parser::Value v;
+	i.popValue(v);
+	size_t res = p.print(v);
+	if (res >= sizeof(p.buf))
+		res = sizeof(p.buf)-1;
+	p.buf[res] = '\0';
+	v.type = Parser::Value::STRING;
+	i.pushString(p.buf);
+	i.pushValue(v);
+	return true;
+}
+
 #if USE_RANDOM
 bool
 InternalFunctions::func_rnd(Interpreter &i)
 {
+	INT val;
+	getIntegerFromStack(i, val);
 #if USE_REALS
 	Parser::Value v(Real(random(0x7FFFFFFF)) / Real(0x7FFFFFFF));
 #else

@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2017-2018 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ static const uint8_t gfxTokens[] PROGMEM = {
 	'B','O','X'+0x80,
 	'C','I','R','C','L','E'+0x80,
 	'C','O','L','O','R'+0x80,
+	'C','U','R','S','O','R'+0x80,
 	'L','I','N','E','T','O'+0x80,
 	'L','I','N','E'+0x80,
 	'P','O','I','N','T'+0x80,
@@ -38,6 +39,7 @@ const FunctionBlock::function GFXModule::comms[] PROGMEM = {
 	GFXModule::command_box,
 	GFXModule::command_circle,
 	GFXModule::command_color,
+	GFXModule::command_cursor,
 	GFXModule::command_lineto,
 	GFXModule::command_line,
 	GFXModule::command_point,
@@ -50,6 +52,6 @@ GFXModule::GFXModule()
 	commandTokens = gfxTokens;
 }
 
-}
+} // namespace BASIC
 
 #endif // USE_GFX

@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +47,18 @@ GFXModule::command_box(Interpreter &i)
 					return true;
 				}
 			}
+		}
+	}
+	return false;
+}
+
+bool
+GFXModule::command_cursor(Interpreter &i)
+{
+	Parser::Value v(false);
+	if (i.popValue(v)) {
+		if (v.type == Parser::Value::BOOLEAN) {
+			return true;
 		}
 	}
 	return false;

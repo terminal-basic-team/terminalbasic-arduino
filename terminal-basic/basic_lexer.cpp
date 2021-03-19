@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -231,52 +231,55 @@ PGM_P const Lexer::tokenStrings[] PROGMEM = {
 
 static const uint8_t tokenTable[] PROGMEM = {
 	0x80,
-	'A', 'N', 'D'+0x80,
+	'A', 'N', 'D'+0x80,                // 1
 #if USE_DUMP
-	'A', 'R', 'R', 'A', 'Y', 'S'+0x80, // 1
+	'A', 'R', 'R', 'A', 'Y', 'S'+0x80, // 2
 #endif
-//	'B', 'A', 'S', 'E'+0x80,           // 2
+//	'B', 'A', 'S', 'E'+0x80,           // 3
 #if USE_SAVE_LOAD
-	'C', 'H', 'A', 'I', 'N'+0x80,      // 3
+	'C', 'H', 'A', 'I', 'N'+0x80,      // 4
 #endif
 #if USE_TEXTATTRIBUTES
-	'C', 'L', 'S'+0x80,                // 4
+	'C', 'L', 'S'+0x80,                // 5
 #endif
 #if USESTOPCONT
-	'C', 'O', 'N', 'T'+0x80,
+	'C', 'O', 'N', 'T'+0x80,           // 6
 #endif
 #if USE_MATRIX
-	'C', 'O', 'N'+0x80,
+	'C', 'O', 'N'+0x80,                // 7
 #endif
 #if USE_DATA
-	'D', 'A', 'T', 'A'+0x80,           // 5
+	'D', 'A', 'T', 'A'+0x80,           // 8
 #endif
 #if USE_DEFFN
-	'D', 'E', 'F'+0x80,                // 6
+	'D', 'E', 'F'+0x80,                // 9
 #endif
 #if USE_DELAY
-	'D', 'E', 'L', 'A', 'Y'+0x80,      // 7
+	'D', 'E', 'L', 'A', 'Y'+0x80,      // 10
 #endif
 #if USE_MATRIX
-	'D', 'E', 'T'+0x80,
+	'D', 'E', 'T'+0x80,                // 11
 #endif
-	'D', 'I', 'M'+0x80,                // 8
+	'D', 'I', 'M'+0x80,                // 12
 #if USE_DIV_KW
-	'D', 'I', 'V'+0x80,
+	'D', 'I', 'V'+0x80,                // 13
 #endif
 #if USE_DOLOOP
-	'D', 'O'+0x80,
+	'D', 'O'+0x80,                     // 14
 #endif
 #if USE_DUMP
-	'D', 'U', 'M', 'P'+0x80,           // 9
+	'D', 'U', 'M', 'P'+0x80,           // 15
 #endif
-	'E', 'N', 'D'+0x80,                // 10
-	'F', 'A', 'L', 'S', 'E'+0x80,      // 11
-	'F', 'O', 'R'+0x80,                // 12
-	'G', 'O', 'S', 'U', 'B'+0x80,      // 13
-	'G', 'O', 'T', 'O'+0x80,           // 14
+	'E', 'N', 'D'+0x80,                // 16
+	'F', 'A', 'L', 'S', 'E'+0x80,      // 17
+#if USE_DEFFN
+	'F', 'N'+0x80,                     // 18
+#endif
+	'F', 'O', 'R'+0x80,                // 19
+	'G', 'O', 'S', 'U', 'B'+0x80,      // 20
+	'G', 'O', 'T', 'O'+0x80,           // 11
 #if CONF_SEPARATE_GO_TO
-	'G', 'O'+0x80,                     // 15
+	'G', 'O'+0x80,                     // 12
 #endif
 #if USE_MATRIX
 	'I', 'D', 'N'+0x80,
@@ -295,13 +298,13 @@ static const uint8_t tokenTable[] PROGMEM = {
 	'L', 'O', 'C', 'A', 'T', 'E'+0x80, // 21
 #endif
 #if USE_DOLOOP
-	'L', 'O', 'O', 'P'+0x80,
+	'L', 'O', 'O', 'P'+0x80,           // 22
 #endif
 #if USE_MATRIX
-	'M', 'A', 'T'+0x80,
+	'M', 'A', 'T'+0x80,                // 23
 #endif
 #if USE_INTEGER_DIV
-	'M', 'O', 'D'+0x80,
+	'M', 'O', 'D'+0x80,                // 24
 #endif
 	'N', 'E', 'W'+0x80,                // 21
 	'N', 'E', 'X', 'T'+0x80,           // 22
@@ -309,6 +312,9 @@ static const uint8_t tokenTable[] PROGMEM = {
 	'O', 'N'+0x80,                     // 23
 //	'O', 'P', 'T', 'I', 'O', 'N'+0x80, // 24
 	'O', 'R'+0x80,
+#if USE_PEEK_POKE
+	'P', 'O', 'K', 'E'+0x80,
+#endif
 	'P', 'R', 'I', 'N', 'T'+0x80,      // 25
 #if USE_RANDOM
 	'R', 'A', 'N', 'D', 'O', 'M', 'I', 'Z', 'E'+0x80, //26
@@ -443,71 +449,61 @@ Lexer::getNext()
 		switch (SYM) {
 		case '=':
 			_token = Token::EQUALS;
-			next();
-			return true;
+			goto token_ready;
 		case ';':
 			_token = Token::SEMI;
-			next();
-			return true;
+			goto token_ready;
+#if USE_REALS
 		case '.':
 			decimalNumber();
-			return (true);
+			return true;
+#endif
 		case ',':
 			_token = Token::COMMA;
-			next();
-			return true;
+			goto token_ready;
 		case ':':
 			_token = Token::COLON;
-			next();
-			return true;
+			goto token_ready;
 		case '<':
+			next();
 			fitst_LT();
 			return true;
 		case '>':
+			next();
 			fitst_GT();
 			return true;
 		case '(':
 			_token = Token::LPAREN;
-			next();
-			return true;
+			goto token_ready;
 		case ')':
 			_token = Token::RPAREN;
-			next();
-			return true;
+			goto token_ready;
 		case '+':
 			_token = Token::PLUS;
-			next();
-			return true;
+			goto token_ready;
 		case '-':
 			_token = Token::MINUS;
-			next();
-			return true;
+			goto token_ready;
 		case '*':
 			_token = Token::STAR;
-			next();
-			return true;
+			goto token_ready;
 		case '/':
 			_token = Token::SLASH;
-			next();
-			return true;
+			goto token_ready;
 #if USE_REALS && USE_INTEGER_DIV
 		case '\\':
 			_token = Token::BACK_SLASH;
-			next();
-			return true;
+			goto token_ready;
 #endif
 		case '^':
 			_token = Token::POW;
-			next();
-			return true;
+			goto token_ready;
 		case '"':
 			next();
 			stringConst();
 			return true;
 		case ' ':
 		case '\t':
-		case '\r':
-		case '\n':
 			next();
 			break;
 		default:
@@ -516,6 +512,9 @@ Lexer::getNext()
 		}
 	}
 	return false;
+token_ready:
+	next();
+	return true;
 }
 
 void
@@ -537,7 +536,6 @@ Lexer::next()
 void
 Lexer::fitst_LT()
 {
-	next();
 #if OPT == OPT_SPEED
 	switch (SYM) {
 	case '=':
@@ -566,7 +564,6 @@ Lexer::fitst_LT()
 void
 Lexer::fitst_GT()
 {
-	next();
 #if OPT == OPT_SPEED
 	switch (SYM) {
 	case '=':
@@ -718,15 +715,18 @@ Lexer::binaryInteger()
 #else
 	_value.type = Parser::Value::INTEGER;
 #endif
-	char buf[sizeof(INT)];
+	union {
+		char buf[sizeof(INT)];
+		INT intVal;
+	} v;
 	for (uint8_t i=0; i<sizeof(INT); ++i) {
-		buf[i] = SYM;
+		v.buf[i] = SYM;
 		next();
 	}
 #if USE_LONGINT
-	_value.value.longInteger = *reinterpret_cast<const LongInteger*>(buf);
+	_value.value.longInteger = v.intVal;
 #else
-	_value.value.integer = *reinterpret_cast<const Integer*>(buf);
+	_value.value.integer = v.intVal;
 #endif
 }
 
@@ -735,12 +735,15 @@ void
 Lexer::binaryReal()
 {
 	_value.type = Parser::Value::REAL;
-	char buf[sizeof(Real)];
+	union {
+		char buf[sizeof(Real)];
+		Real realVal;
+	} v;
 	for (uint8_t i=0; i<sizeof(Real); ++i) {
-		buf[i] = SYM;
+		v.buf[i] = SYM;
 		next();
 	}
-	_value.value.real = *reinterpret_cast<const Real*>(buf);
+	_value.value.real = v.realVal;
 }
 
 bool
@@ -824,4 +827,4 @@ Lexer::stringConst()
 	}
 }
 
-}
+} // namespace BASIC

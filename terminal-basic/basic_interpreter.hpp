@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #ifndef INTERPRETER_HPP
 #define INTERPRETER_HPP
 
-#include "basic.hpp"
+#include "basic_common.hpp"
 #include "basic_lexer.hpp"
 #include "basic_parser.hpp"
 #include "basic_program.hpp"
@@ -39,6 +39,8 @@ struct EXT_PACKED VariableFrame
 	 * @return size in bytes
 	 */
 	uint8_t size() const;
+	
+	static uint8_t size(Parser::Value::Type);
 
 	/**
 	 * @brief getValue from Variable frame
@@ -64,6 +66,9 @@ struct EXT_PACKED VariableFrame
 	// Frame body
 	char bytes[];
 };
+#if USE_DEFFN
+#define TYPE_DEFFN 0x80
+#endif
 
 /**
  * Array memory frame
@@ -139,6 +144,17 @@ struct EXT_PACKED ArrayFrame
 	uint16_t dimension[];
 };
 
+#if USE_DEFFN
+/**
+ * Array memory frame
+ */
+struct EXT_PACKED FunctionFrame
+{
+	uint16_t lineNumber;
+	uint8_t linePosition;
+};
+#endif // USE_DEFFN
+
 /**
  * @brief Interpreter context object
  */
@@ -163,12 +179,21 @@ public:
 		INVALID_VALUE_TYPE = 9,
 		NO_SUCH_ARRAY = 10,
 		INTEGER_EXPRESSION_EXPECTED = 11,// Integer expression expected
+#if SAVE_LOAD_CHECKSUM
 		BAD_CHECKSUM = 12,		// Bad program checksum
+#endif
 		INVALID_TAB_VALUE = 13,
 		INVALID_ELEMENT_INDEX = 14,
+#if USE_MATRIX
 		SQUARE_MATRIX_EXPECTED = 15,
+#endif
 		DIMENSIONS_MISMATCH = 16,
 		COMMAND_FAILED = 17,
+#if USE_DEFFN
+		VAR_DUPLICATE = 18,
+		FUNCTION_DUPLICATE = 19,
+		NO_SUCH_FUNCION = 20,
+#endif
 		INTERNAL_ERROR = 255
 	};
 
@@ -181,15 +206,15 @@ public:
 		DYNAMIC_ERROR // runtime
 	};
 
-	
-	// Interpreter FSM state
+	/**
+	 * Interpreter FSM state
+	 */
 	enum State : uint8_t
 	{
-		SHELL,		// Wait for user input of line or command
+		SHELL = 0,		// Wait for user input of line or command
 		PROGRAM_INPUT,	// Inputting of the program lines
 #if BASIC_MULTITERMINAL
 		COLLECT_INPUT,	//
-		EXEC_INT,	// Interactive execute
 		GET_VAR_VALUE,
 #endif // BASIC_MULTITERMINAL
 		EXECUTE,	// Runniong the program
@@ -214,7 +239,6 @@ public:
 	 * @param program Program size
 	 */
 	explicit Interpreter(Stream&, Print&, Pointer);
-	
 	/**
 	 * [re]initialize interpreter object
 	 */
@@ -227,8 +251,8 @@ public:
 	// Restore data pointer
 	void restore();
 #endif
-	// Clear screen
 #if USE_TEXTATTRIBUTES
+	// Clear screen
 	void cls();
 #endif
 #if USESTOPCONT
@@ -261,6 +285,10 @@ public:
 	void print(char);
 	// Execute command by function pointer
 	void execCommand(FunctionBlock::command);
+	
+#if USE_PEEK_POKE
+	void poke(Pointer, Integer);
+#endif
 
 #if USE_MATRIX
 	/**
@@ -311,7 +339,8 @@ public:
 #endif
 	void print(long, VT100::TextAttr = VT100::NO_ATTR);
 	void print(ProgMemStrings, VT100::TextAttr = VT100::NO_ATTR);
-        void write(ProgMemStrings);
+	void writePgm(ProgMemStrings);
+	void writePgm(PGM_P);
 	void print(Token);
 	void print(const char *, VT100::TextAttr = VT100::NO_ATTR);
 	// print value
@@ -328,9 +357,8 @@ public:
 	void newProgram();
 	/**
 	 * save current line on stack
-	 * @param text position
 	 */
-	void pushReturnAddress(uint8_t);
+	void pushReturnAddress();
 	// return from subprogram
 	void returnFromSub();
 	// save for loop
@@ -345,6 +373,11 @@ public:
 	bool popString(const char*&);
 	
 	void randomize();
+#if USE_DEFFN
+	void execFn(const char*);
+	void setFnVars();
+	void returnFromFn();
+#endif
 	/**
 	 * @brief iterate over loop
 	 * @param varName loop variable name
@@ -353,9 +386,8 @@ public:
 	bool next(const char*);
 	bool testFor(Program::StackFrame&);
 
-	// Internal EEPROM commands
 #if USE_SAVE_LOAD
-
+	// Internal EEPROM commands
 	struct EEpromHeader_t
 	{
 		Pointer len;
@@ -424,6 +456,8 @@ public:
 	 * @param num number of dimensions
 	 */
 	void pushDimensions(uint8_t);
+        
+	bool pushResult();
 
 #if USE_STRINGOPS
 	void strConcat();
@@ -440,15 +474,46 @@ public:
 		_parser.stop();
 	}
 	
-	bool pushResult();
+#if USE_DEFFN
+	/**
+	 * @brief Create new function frame
+	 * @param fname
+	 */
+	void newFunction(const char*, uint8_t pos);
+#endif // USE_DEFFN
 
 	Program _program;
 private:
+	
 	class AttrKeeper;
 #if USE_MATRIX
+	
 	void fillMatrix(const char*, const Parser::Value&);
+	
 	void setMatrixSize(ArrayFrame&, uint16_t, uint16_t);
-#endif
+	/**
+	 * @brief Get 2 dimensional array from stack
+	 * 
+	 * Returns nullptr if there is no such array or if that array is not
+	 * 2 dimensional. Raises corresponding error.
+	 * 
+	 * @param array name
+	 * @return frame pointer
+	 */
+	ArrayFrame *get2DArray(const char*);
+	/**
+	 * @brief Get 2 dimensional square array from stack
+	 * 
+	 * Returns nullptr if there is no such array or if that array is not
+	 * 2 dimensional or if it's not square. Raises corresponding error.
+	 * 
+	 * @param array name
+	 * @return frame pointer
+	 */
+	ArrayFrame *getSquareArray(const char*);
+#endif // USE_MATRIX
+	// Return Variable/Array/Function type based on it's name
+	static Parser::Value::Type typeFromName(const char*);
 	// Get next input object from stack
 	bool nextInput();
 	// Place input values to objects
@@ -491,6 +556,7 @@ private:
 #endif // USE_SAVE_LOAD
 	// Interpreter FSM state
 	State			 _state;
+	State			 _lastState;
 	// Input oject
 	Stream			&_input;
 	// Output object
@@ -527,4 +593,4 @@ private:
 
 } // namespace BASIC
 
-#endif
+#endif // INTERPRETER_HPP

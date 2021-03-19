@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ _text(reinterpret_cast<char*> (EXTMEM_ADDRESS)),
 programSize(progsize)
 {
 	assert(_text != nullptr);
-	assert(progsize <= PROGRAMSIZE);
+	assert(progsize <= SINGLE_PROGSIZE);
 }
 
 Program::Line*
@@ -131,7 +131,7 @@ Program::StackFrame::size(Type t)
 	case VALUE:
 		return sizeof (Type) + sizeof (Parser::Value);
 	case INPUT_OBJECT:
-		return sizeof (Type) + sizeof (InputBody);
+		return sizeof (Type) + sizeof (VariableBody);
 	default:
 		return 0;
 	}
@@ -149,7 +149,7 @@ Program::StackFrame::size(Type t)
 	else if (t == VALUE)
 		return (sizeof (Type) + sizeof (Parser::Value));
 	else if (t == INPUT_OBJECT)
-		return (sizeof (Type) + sizeof (InputBody));
+		return (sizeof (Type) + sizeof (VariableBody));
 	else
 		return 0;
 #endif
@@ -165,7 +165,7 @@ Program::clearProg()
 void
 Program::moveData(Pointer dest)
 {
-	int32_t diff = _textEnd-dest;
+	const int32_t diff = _textEnd-dest;
 	memmove(_text+dest, _text+_textEnd, _arraysEnd-_textEnd);
 	_variablesEnd -= diff;
 	_arraysEnd -= diff;
@@ -189,33 +189,42 @@ Program::variableByName(const char *name)
 
 	for (auto f = variableByIndex(index); f != nullptr;
 	    f = variableByIndex(index)) {
-		int8_t res = strncmp(name, f->name, VARSIZE);
-		if (res == 0) {
-			return f;
-		} else if (res < 0)
-			break;
+#if USE_DEFFN
+		if (!(f->type & TYPE_DEFFN)) {
+#endif
+			const int8_t res = strncmp(name, f->name, VARSIZE);
+			if (res == 0)
+				return f;
+			else if (res < 0)
+				break;
+#if USE_DEFFN
+		}
+#endif
 		index += f->size();
 	}
 	return nullptr;
 }
 
-//Pointer
-//Program::lineIndex(const Line *s) const
-//{
-//	return ((char*) s) - _text;
-//}
+#if USE_DEFFN
+VariableFrame*
+Program::functionByName(const char *name)
+{
+	auto index = _textEnd;
 
-//Pointer
-//Program::variableIndex(VariableFrame *f) const
-//{
-//	return ((char*) f) - _text;
-//}
-
-//Pointer
-//Program::arrayIndex(ArrayFrame *f) const
-//{
-//	return ((char*) f) - _text;
-//}
+	for (auto f = variableByIndex(index); f != nullptr;
+	    f = variableByIndex(index)) {
+		if (f->type & TYPE_DEFFN) {
+			const int8_t res = strncmp(name, f->name, VARSIZE);
+			if (res == 0)
+				return f;
+			else if (res < 0)
+				break;
+		}
+		index += f->size();
+	}
+	return nullptr;
+}
+#endif // DEF_FN
 
 Pointer
 Program::objectIndex(const void *obj) const
@@ -335,16 +344,19 @@ Program::addLine(uint16_t num, const char *line)
 
 	Lexer _lexer;
 	_lexer.init(line);
-	uint8_t position = 0, lexerPosition = _lexer.getPointer();
+	uint8_t position = 0;
+	uint8_t lexerPosition = _lexer.getPointer();
 
 	while (_lexer.getNext()) {
 		if (position >= (PROGSTRINGSIZE-1))
 			return false;
-		const uint8_t t = uint8_t(0x80) + uint8_t(_lexer.getToken());
-		if (_lexer.getToken() < Token::STAR) { // One byte tokens
+		
+		const Token tok = _lexer.getToken();
+		const uint8_t t = uint8_t(0x80) + uint8_t(tok);
+		if (tok < Token::RPAREN) { // One byte tokens
 			tempBuffer[position++] = t;
 			lexerPosition = _lexer.getPointer();
-			if (_lexer.getToken() == Token::KW_REM) { // Save rem text as is
+			if (tok == Token::KW_REM) { // Save rem text as is
 				while (line[lexerPosition] == ' ' ||
 				    line[lexerPosition] == '\t')
 					++lexerPosition;
@@ -354,7 +366,7 @@ Program::addLine(uint16_t num, const char *line)
 				position += remaining;
 				break;
 			}
-		} else if (_lexer.getToken() == Token::C_INTEGER) {
+		} else if (tok == Token::C_INTEGER) {
 			tempBuffer[position++] = t;
 			if ((position + sizeof(INT)) >= PROGSTRINGSIZE-1)
 				return false;
@@ -364,7 +376,7 @@ Program::addLine(uint16_t num, const char *line)
 			lexerPosition = _lexer.getPointer();
 		}
 #if USE_REALS
-		 else if (_lexer.getToken() == Token::C_REAL) {
+		 else if (tok == Token::C_REAL) {
 			tempBuffer[position++] = t;
 			if ((position + sizeof(Real)) >= PROGSTRINGSIZE-1)
 				return false;
@@ -375,6 +387,7 @@ Program::addLine(uint16_t num, const char *line)
 		}
 #endif // USE_REALS
 		else { // Other tokens
+			tempBuffer[position++] = ' ';
 			while (line[lexerPosition] == ' ' ||
 			    line[lexerPosition] == '\t')
 				++lexerPosition;

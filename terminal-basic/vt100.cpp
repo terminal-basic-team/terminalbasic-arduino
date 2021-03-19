@@ -33,14 +33,17 @@ VT100::Print::writeIdle(uint8_t c)
 {
 	switch (c) {
 	case uint8_t(ASCII::ESC) :
+		// ESC symbol - begin ANSI sequance
 		_state = ESCAPE;
 		break;
 	case uint8_t('\t') : {
+		// TAB symbol, deal with print zones
 		const uint8_t pZone = this->getCursorX() / this->_pZoneWidth;
 		this->setCursorX((pZone+1)*this->_pZoneWidth);
 		break;
 	}
 	default:
+		// Simply write symbol
 		this->writeChar(c);
 	}
 }
@@ -80,12 +83,33 @@ void
 VT100::Print::writeFirstNum(uint8_t c)
 {
 	switch (c) {
-	case 'J':
+	case 'J': // \x1B2J clear screen
 		if (_value == 2)
 			this->clear();
 		break;
 	case 'm':
-		// Text attributes
+		switch (_value) {
+			case 0 :
+				resetAttributes(); break;
+			case 1 :
+				addAttribute(BRIGHT); break;
+			case 30 :
+				addAttribute(C_BLACK); break;
+			case 31 :
+				addAttribute(C_RED); break;
+			case 32 :
+				addAttribute(C_GREEN); break;
+			case 33 :
+				addAttribute(C_YELLOW); break;
+			case 34 :
+				addAttribute(C_BLUE); break;
+			case 35 :
+				addAttribute(C_MAGENTA); break;
+			case 36 :
+				addAttribute(C_CYAN); break;
+			case 37 :
+				addAttribute(C_WHITE); break;
+		}
 		break;
 	case 'C': {
 		const auto x = this->getCursorX() + 1;

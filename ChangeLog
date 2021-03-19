@@ -1,3 +1,61 @@
+r1.2 (16.02.2019)
+
+  * Add CURSOR gfx command (switch blinking cursor on and off)
+  * Add PEEK function and POKE command
+
+r1.2-rc2 (13.12.2018)
+
+  * User defined functions may have the names of existing variables
+  * Code size was slightly optimized
+  * AVR 8-bit: Fix usage of the SerialL I/O on ports, other then USART0
+
+r1.2-rc1 (20.11.2018) Release, dedicated to the World Children's Day
+
+  Complete functionality for the 1.2 release.
+  Current limitations:
+    - DATA ... READ statements do not support string variables and constants
+    - DEF FN x functions can not use the name of the existing scalar variables
+  Such limitations will be removed in the release 2.0
+
+  * Complete implementation of the 1-line user defined functions with arbitrary parameters number
+  * One byte tokens saved as indexed ones to save some RAM
+
+r1.2-beta4 (22.10.2018)
+
+  * Add RIGHT$ function
+  * Default configuration suitable to run on tiny Arduino boards (Atmega328). Sorry, but it seems TB becomes
+    too fat to run on Atmega168
+
+r1.2-beta3 (13.09.2018) Release, dedicated to my birthday
+
+  * Add BEEP command
+  * Add configurable real numbers precision
+  * Add LEFT$ function
+  * RND function has optional parameter
+  * Fix bug with concatenation of sequential identifiers
+  * Fix bug with unnecessary output
+  * Fix bug with INPUT command in multioperator lines
+
+r1.2-beta2 (21.06.2018)
+
+  * Add ON .. GOTO control structure
+  * FOR .. NEXT implementation update: loop body can modify control variable,
+      it's possible to GOTO from nested FOR loop body to outer loop
+  * Logical operators presedence become lower then arithmetic ones.
+  * Add INPUT with printed text feature (INPUT "Message"; VAR1, VAR2..)
+  * Add gfx_serial implementation: graphics drawing protocol over serial VT100/ANSI connection
+  * Fix bug with multioperator strings with FOR ..  TO .. STEP operator
+  * Add parameterless user defined functions DEF FNx
+  * Add hyperbolic functions to math module
+
+r1.2-beta1 (06.06.2018)
+
+  * Add STR$ function
+  * Add optional errror message strings
+  * Add rudimentary localisation support (currently English, Russian)
+  * Fix AUTOCAPITALIZE option
+  * Some code size optimizations in matrix handling routines
+
 r1.1 (14.12.2017) Release, dedicated to the Russian Constitution Day
 
   * Fix multiterminal mode

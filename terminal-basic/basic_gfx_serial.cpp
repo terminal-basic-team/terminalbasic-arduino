@@ -18,15 +18,20 @@
 
 #include "basic_gfx.hpp"
 
-#if USE_GFX
-#if USETVOUT
+#if USE_GFX && SERIAL_GFX
 
-#include "TVoutEx.h"
+#include "gfxterm.hpp"
 
 namespace BASIC
 {
 
 void GFXModule::_init() {}
+
+static void
+write16(Interpreter &i, int16_t v)
+{
+    i.print(char(v>>8)); i.print(char(v&0xFF));
+}
 
 bool
 GFXModule::command_box(Interpreter &i)
@@ -37,24 +42,15 @@ GFXModule::command_box(Interpreter &i)
 		if (getIntegerFromStack(i, w)) {
 			if (getIntegerFromStack(i, y)) {
 				if (getIntegerFromStack(i, x)) {
-					TVoutEx::instance()->drawRect(x, y,
-					    w, h);
+					i.print(char(ASCII::DLE));
+					i.print(char(GFXTERM::Command::BOX));
+					write16(i, x);
+					write16(i, y);
+					write16(i, w);
+					write16(i, h);
 					return true;
 				}
 			}
-		}
-	}
-	return false;
-}
-
-bool
-GFXModule::command_cursor(Interpreter &i)
-{
-	Parser::Value v(false);
-	if (i.popValue(v)) {
-		if (v.type == Parser::Value::BOOLEAN) {
-			TVoutEx::instance()->setCursorVisible(bool(v));
-			return true;
 		}
 	}
 	return false;
@@ -68,7 +64,11 @@ GFXModule::command_circle(Interpreter &i)
 	if (getIntegerFromStack(i, r)) {
 		if (getIntegerFromStack(i, y)) {
 			if (getIntegerFromStack(i, x)) {
-				TVoutEx::instance()->drawCircle(x,y,r);
+				i.print(char(ASCII::DLE));
+				i.print(char(GFXTERM::Command::CIRCLE));
+				write16(i, x);
+				write16(i, y);
+				write16(i, r);
 				return true;
 			}
 		}
@@ -83,7 +83,25 @@ GFXModule::command_color(Interpreter &i)
 	
 	if (getIntegerFromStack(i, b)) {
 		if (getIntegerFromStack(i, c)) {
-			TVoutEx::instance()->setColor(Color_t(c), Color_t(b));
+			i.print(char(ASCII::DLE));
+			i.print(char(GFXTERM::Command::COLOR));
+			i.print(char(c));
+			i.print(char(b));
+			return true;
+		}
+	}
+	return false;
+}
+
+bool
+GFXModule::command_cursor(Interpreter &i)
+{
+	Parser::Value v(false);
+	if (i.popValue(v)) {
+		if (v.type == Parser::Value::BOOLEAN) {
+			i.print(char(ASCII::DLE));
+			i.print(char(GFXTERM::Command::CURSOR));
+			i.print(bool(v) ? char(1) : char(0));
 			return true;
 		}
 	}
@@ -99,8 +117,12 @@ GFXModule::command_line(Interpreter &i)
 		if (getIntegerFromStack(i, x2)) {
 			if (getIntegerFromStack(i, y1)) {
 				if (getIntegerFromStack(i, x1)) {
-					TVoutEx::instance()->drawLine(x1, y1,
-					    x2, y2);
+					i.print(char(ASCII::DLE));
+					i.print(char(GFXTERM::Command::LINE));
+					write16(i, x1);
+					write16(i, y1);
+					write16(i, x2);
+					write16(i, y2);
 					return true;
 				}
 			}
@@ -112,11 +134,14 @@ GFXModule::command_line(Interpreter &i)
 bool
 GFXModule::command_lineto(Interpreter &i)
 {
-	INT x1,y1;
+	INT x,y;
 	
-	if (getIntegerFromStack(i, y1)) {
-		if (getIntegerFromStack(i, x1)) {
-			TVoutEx::instance()->drawLineTo(x1, y1);
+	if (getIntegerFromStack(i, y)) {
+		if (getIntegerFromStack(i, x)) {
+			i.print(char(ASCII::DLE));
+			i.print(char(GFXTERM::Command::LINETO));
+			write16(i, x);
+			write16(i, y);
 			return true;
 		}
 	}
@@ -131,7 +156,10 @@ GFXModule::command_point(Interpreter &i)
 	
 	if (getIntegerFromStack(i, y)) {
 		if (getIntegerFromStack(i, x)) {
-			TVoutEx::instance()->setPixel(x, y);
+			i.print(char(ASCII::DLE));
+			i.print(char(GFXTERM::Command::POINT));
+			write16(i, x);
+			write16(i, y);
 			return true;
 		}
 	}
@@ -144,13 +172,9 @@ GFXModule::command_screen(Interpreter &i)
 	INT x;
 	
 	if (getIntegerFromStack(i, x)) {
-		if (x == 1) {
-			TVoutEx::instance()->clearScreen();
-			TVoutEx::instance()->setCursorVisible(false);
-		} else if (x == 0) {
-			TVoutEx::instance()->clearScreen();
-			TVoutEx::instance()->setCursorVisible(true);
-		}
+		i.print(char(ASCII::DLE));
+		i.print(char(GFXTERM::Command::MODE));
+		i.print(char(x));
 		return true;
 	}
 	return false;
@@ -158,5 +182,4 @@ GFXModule::command_screen(Interpreter &i)
 
 } // namespace BASIC
 
-#endif // USETVOUT
-#endif // USE_GFX
+#endif // USE_GFX && SERIAL_GFX

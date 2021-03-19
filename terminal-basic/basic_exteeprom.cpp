@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "basic.hpp"
+#include "basic_common.hpp"
 
 #if USE_EXTEEPROM
 
@@ -52,7 +52,7 @@ struct EXT_PACKED ZoneHeader
 	uint16_t textEnd, varsEnd, arraysEnd, sp;
 };
 
-static constexpr const uint16_t zoneSize = PROGRAMSIZE+sizeof(ZoneHeader);
+static constexpr const uint16_t zoneSize = SINGLE_PROGSIZE+sizeof(ZoneHeader);
 
 class ZoneInfo
 {

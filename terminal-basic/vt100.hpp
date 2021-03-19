@@ -20,12 +20,13 @@
 #ifndef VT100_HPP
 #define VT100_HPP
 
-#include "arduinoext.hpp"
 #include <Print.h>
 #include <stdint.h>
 
+#include "arduinoext.hpp"
+
 /**
- * @package VT100\
+ * @package VT100
  * @brief Package, implementing some vt100/ANSI terminal functions
  */
 Package(VT100)
@@ -65,11 +66,6 @@ public:
 	{
 		EXT_NOTCOPYABLE(Print)
 	public:
-		/**
-		 * @brief default constructor
-		 * @param tv TVoutEx object instance to wrap
-		 */
-		explicit Print();
 
 		virtual ~Print() = default;
 		
@@ -88,10 +84,21 @@ public:
 			SECOND_NUM // reading second number code
 		};
 		
+		Print()	;
+		
 		virtual void writeChar(uint8_t) = 0;
 		virtual uint8_t getCursorX() = 0;
 		virtual void setCursorX(uint8_t) = 0;
 		virtual void setCursor(uint8_t, uint8_t) = 0;
+		virtual void addAttribute(TextAttr) = 0;
+		virtual void resetAttributes() = 0;
+		
+	private:
+		void writeIdle(uint8_t);
+		void writeESC(uint8_t);
+		void writeLbracket(uint8_t);
+		void writeFirstNum(uint8_t);
+		void writeSecondNum(uint8_t);
 
 		State_t _state;
 		uint16_t _value, _value2;
@@ -100,12 +107,6 @@ public:
 	// Print interface
 	public:
 		size_t write(uint8_t) override;
-	private:
-		void writeIdle(uint8_t);
-		void writeESC(uint8_t);
-		void writeLbracket(uint8_t);
-		void writeFirstNum(uint8_t);
-		void writeSecondNum(uint8_t);
 	};
 };
 

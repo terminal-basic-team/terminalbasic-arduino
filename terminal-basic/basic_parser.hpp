@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #include <inttypes.h>
 
 #include "arduinoext.hpp"
-#include "basic.hpp"
+#include "basic_common.hpp"
 #include "basic_internalfuncs.hpp"
 
 namespace BASIC
@@ -38,22 +38,24 @@ class Interpreter;
 class Parser
 {
 public:
+
 	/**
-	 * @brief Static semantic errors
+	 * @brief Syntax errors
 	 */
 	enum ErrorCodes : uint8_t
 	{
-		NO_ERROR = 0,
-		OPERATOR_EXPECTED = 1,
+		NO_ERROR = 0,                 // Not an error
+		OPERATOR_EXPECTED = 1,        // Operator expected
 		EXPRESSION_EXPECTED = 2,
 		INTEGER_CONSTANT_EXPECTED = 3,
 		THEN_OR_GOTO_EXPECTED = 4,
 		INVALID_DATA_EXPR = 5,
 		INVALID_READ_EXPR = 6,
 		VARIABLES_LIST_EXPECTED = 7,
-		STRING_OVERFLOW = 8
+		STRING_OVERFLOW = 8,
+		MISSING_RPAREN = 9
 	};
-	
+
 	class EXT_PACKED Value;
 	/**
 	 * @brief constructor
@@ -69,37 +71,58 @@ public:
 	 * @return end of parsed string
 	 */
 	bool parse(const char*, bool&);
-	
+
 	void stop();
+
 	/**
 	 * @brief get last static error code
 	 * @return error code
 	 */
-	ErrorCodes getError() const { return _error; }
-	
+	ErrorCodes getError() const
+	{
+		return _error;
+	}
+
 	void init();
-	
+
 	void addModule(FunctionBlock*);
+#if CONF_ERROR_STRINGS
+	static PGM_P const errorStrings[] PROGMEM;
+#endif
 private:
+
 	/**
 	 * Parser mode: syntax check or execute commands of the interpreter
 	 * context
 	 */
 	enum Mode : uint8_t
 	{
-		SCAN = 0
-		, EXECUTE
+		SCAN = 0,
+		EXECUTE = 1
 	};
+	
+	bool testExpression(Value&);
+	
 	bool fOperators(bool&);
 	bool fOperator();
+	bool fOnStatement(uint8_t);
 #if USE_DATA
 	bool fDataStatement();
 	bool fReadStatement();
 #endif // USE_DATA
+#if USE_DEFFN
+	bool fDefStatement();
+	bool fFnexec(Value&);
+#endif
 	bool fImplicitAssignment(char*);
+#if USE_PEEK_POKE
+	bool fPoke();
+#endif
 	bool fPrintList();
 	bool fPrintItem();
 	bool fExpression(Value&);
+	bool fLogicalAdd(Value&);
+	bool fLogicalFinal(Value&);
 	bool fSimpleExpression(Value&);
 	bool fTerm(Value&);
 	bool fFactor(Value&);
@@ -119,7 +142,6 @@ private:
 	bool fMatrixPrint();
 	bool fMatrixExpression(const char*);
 #endif
-	
 	// last static semantic error
 	ErrorCodes _error;
 	// lexical analyser object reference
@@ -127,9 +149,9 @@ private:
 	// interpreter context object reference
 	Interpreter &_interpreter;
 	// current mode
-	Mode	_mode;
+	Mode _mode;
 	// stop parsing string flag
-	bool	_stopParse;
+	bool _stopParse;
 	// first module in chain reference
 	InternalFunctions _internal;
 };

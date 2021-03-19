@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,12 +20,12 @@
 #define BASIC_INTERPRETER_PROGRAM_HPP
 
 #include "arduinoext.hpp"
-#include "basic.hpp"
+#include "basic_common.hpp"
 #include "basic_parser_value.hpp"
 
 namespace BASIC
 {
-	
+
 class VariableFrame;
 class ArrayFrame;
 class Interpreter;
@@ -99,8 +99,6 @@ public:
 			uint8_t		textPosition;
 			// Loop variable name
 			char		varName[VARSIZE];
-			// Current value of the loop variable
-			Parser::Value	currentValue;
 			// Loop step value
 			Parser::Value	stepValue;
 			// Loop final value
@@ -122,13 +120,12 @@ public:
 		/**
 		 * @brief Input object frame body
 		 */
-		struct EXT_PACKED InputBody
+		struct EXT_PACKED VariableBody
 		{
 			enum Type : uint8_t
 			{
 				INPUT_VAR, INPUT_ARR_ELM
 			};
-			// Program counter of the colee string
 			Type	type;
 			char	name[VARSIZE];
 		};
@@ -145,14 +142,14 @@ public:
 			uint8_t		arrayDimensions;
 			uint16_t	arrayDimension;
 			ForBody		forFrame;
-			InputBody	inputObject;
+			VariableBody	inputObject;
 			char		string[STRINGSIZE];
 			Parser::Value	value;
 		};
 		Body body;
 	};
 
-	Program(uint16_t = PROGRAMSIZE);
+	Program(uint16_t = SINGLE_PROGSIZE);
 	/**
 	 * @brief Clear program text, but not vars and arrays
 	 */
@@ -222,6 +219,9 @@ public:
 	 */
 	VariableFrame *variableByIndex(Pointer);
 	VariableFrame *variableByName(const char*);
+#if USE_DEFFN
+	VariableFrame *functionByName(const char*);
+#endif
 	
 	ArrayFrame *arrayByIndex(Pointer);
 	ArrayFrame *arrayByName(const char*);
@@ -266,7 +266,7 @@ public:
 #if USE_EXTMEM
 	char *_text;
 #else
-	char _text[PROGRAMSIZE];
+	char _text[SINGLE_PROGSIZE];
 #endif
 	const Pointer programSize;
 private:
@@ -305,4 +305,4 @@ private:
 
 } // namespace BASIC
 
-#endif
+#endif // BASIC_INTERPRETER_PROGRAM_HPP

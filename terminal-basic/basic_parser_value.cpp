@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -376,7 +376,6 @@ Parser::Value::modEquals(const Value &rhs)
 	return *this;
 }
 
-
 void
 Parser::Value::powerMatchValue(const Value &rhs)
 {
@@ -490,7 +489,7 @@ Parser::Value::size(Type t)
 	}
 }
 
-Parser::Value &
+Parser::Value&
 Parser::Value::operator|=(const Value &v)
 {
 	switch (type) {
@@ -512,7 +511,7 @@ Parser::Value::operator|=(const Value &v)
 	return *this;
 }
 
-Parser::Value &
+Parser::Value&
 Parser::Value::operator&=(const Value &v)
 {
 	switch (type) {
@@ -577,8 +576,10 @@ Parser::Value::printTo(Print& p) const
 		else
 			::dtostre(value.real, buf, 7, DTOSTR_ALWAYS_SIGN);
 #else
-		::sprintf(buf, "%- 10.7G", value.real);
+		::sprintf(buf, "%- 12.9G", value.real);
 #endif // ARDUINO
+		if (buf[1] == '0' && buf[2] == '.')
+			memmove(buf+1, buf+2, 15-2);
 		return p.print(buf);
 	}
 		break;
