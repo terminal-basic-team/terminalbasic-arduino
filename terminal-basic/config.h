@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2017-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2017-2020 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@
 
 #ifndef BASIC_CONFIG_H
 #define BASIC_CONFIG_H
+
+#include <stdint.h>
 
 /*
  * Real arithmetics
@@ -77,6 +79,11 @@
  * Allow GO TO OPERATOR in addition to GOTO
  */
 #define CONF_SEPARATE_GO_TO     0
+
+/*
+ * Fast command call using function address
+ */
+#define FAST_MODULE_CALL 1
 
 /*
  * Support of integer division and modulo operation
@@ -143,5 +150,7 @@
 #define OPT_SPEED     1 // Extensive use of switch/case constructs
 #define OPT_SIZE      2 // Use cascade of if/else if instead of switch/case
 #define OPT           OPT_SIZE // Selected mode
+
+typedef uintptr_t pointer_t;
 
 #endif /* BASIC_CONFIG_H */

@@ -41,21 +41,24 @@ static const uint8_t gfxTokens[] PROGMEM = {
 	ASCII_ETX
 };
 
-const FunctionBlock::function GFXModule::comms[] PROGMEM = {
-	GFXModule::command_boxc,
-	GFXModule::command_box,
-	GFXModule::command_circlec,
-	GFXModule::command_circle,
-	GFXModule::command_color,
-	GFXModule::command_cursor,
-	GFXModule::command_ellipsec,
-	GFXModule::command_ellipse,
-	GFXModule::command_lineto,
-	GFXModule::command_linec,
-	GFXModule::command_line,
-	GFXModule::command_pointc,
-	GFXModule::command_point,
-	GFXModule::command_screen,
+const FunctionBlock::command GFXModule::comms[] PROGMEM = {
+	  GFXModule::command_boxc
+	, GFXModule::command_box
+	, GFXModule::command_circlec
+	, GFXModule::command_circle
+	, GFXModule::command_color
+	, GFXModule::command_cursor
+	, GFXModule::command_ellipsec
+	, GFXModule::command_ellipse
+	, GFXModule::command_lineto
+	, GFXModule::command_linec
+	, GFXModule::command_line
+	, GFXModule::command_pointc
+	, GFXModule::command_point
+	, GFXModule::command_screen
+#if FAST_MODULE_CALL
+	, nullptr
+#endif
 };
 
 GFXModule::GFXModule()

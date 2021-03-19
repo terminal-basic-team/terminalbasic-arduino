@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2020 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,6 +65,25 @@ FunctionBlock::getCommand(const char *name) const
 	    _next != nullptr)
 		result = _next->getCommand(name);
 	return result;
+}
+
+void
+FunctionBlock::getCommandName(command c, uint8_t* buf) const
+{
+	uint8_t index = 0;
+	command wc;
+	if (commands != nullptr) {
+		while ((wc = reinterpret_cast<command>(
+		    pgm_read_ptr(&commands[index]))) != nullptr) {
+			if (wc == c) {
+				getToken(commandTokens, index, buf);
+				return;
+			}
+			++index;
+		}
+	}
+	if (_next != nullptr)
+		_next->getCommandName(c, buf);
 }
 
 FunctionBlock::function

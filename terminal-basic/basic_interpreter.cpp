@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2017-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2017-2020 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -335,7 +335,7 @@ Interpreter::exec()
 		uint8_t position = _lexer.getPointer();
 		_lexer.getNext();
 		if (_lexer.getToken() != Token::NOTOKENS) {
-			if (!_program.addLine(pLine, _inputBuffer + position)) {
+			if (!_program.addLine(_parser, pLine, _inputBuffer + position)) {
 				raiseError(DYNAMIC_ERROR, OUTTA_MEMORY);
 				_state = SHELL;
 			} else
@@ -446,7 +446,7 @@ Interpreter::list(uint16_t start, uint16_t stop)
 		
 		Lexer lex;
 #if LOOP_INDENT
-                lex.init(s->text, true);
+		lex.init(s->text, true);
 		int8_t diff = 0;
                 while (lex.getNext()) {
 			if (lex.getToken() == Token::KW_REM)
@@ -694,6 +694,16 @@ Interpreter::print(Lexer &l)
                         _output.print(char(ASCII::SPACE));
 		} else if (t >= Token::INTEGER_IDENT && t <= Token::BOOL_IDENT)
 			print(l.id(), VT100::C_BLUE);
+#if FAST_MODULE_CALL
+		else if (t == Token::COMMAND) {
+			uint8_t buf[16];
+			FunctionBlock::command com =
+			    reinterpret_cast<FunctionBlock::command>(
+			    readValue<uintptr_t>((const uint8_t*)l.id()));
+			_parser.getCommandName(com, buf);
+			print((const char*)buf, VT100::C_BLUE);
+		}
+#endif
 		else
 			_output.print(char(ASCII::QMARK));
 #endif
@@ -1092,7 +1102,7 @@ Interpreter::eepromProgramChecksum(uint16_t len)
 #endif // SAVE_LOAD_CHECKSUM
 
 bool
-Interpreter::checkText(uint16_t &len)
+Interpreter::checkText(Pointer &len)
 {
 	EEpromHeader_t h;
 
@@ -1118,7 +1128,7 @@ Interpreter::checkText(uint16_t &len)
 }
 
 void
-Interpreter::loadText(uint16_t len, bool showProgress)
+Interpreter::loadText(Pointer len, bool showProgress)
 {
 	EEPROMClass e;
 

@@ -39,6 +39,8 @@ public:
 	
 	command getCommand(const char*) const;
 	
+	void getCommandName(command, uint8_t*) const;
+	
 	void init();
 	
 	FunctionBlock *next() { return _next; }

@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2017-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2017-2020 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -462,7 +462,7 @@ _basic_lexer_tokenizedNext(basic_lexer_context_t *self)
 		case BASIC_TOKEN_KW_TRUE:
 		case BASIC_TOKEN_KW_FALSE:
 			basic_value_setFromLogical(&self->value,
-						self->token == BASIC_TOKEN_KW_TRUE);
+			    self->token == BASIC_TOKEN_KW_TRUE);
 			self->token = BASIC_TOKEN_C_BOOLEAN;
 			break;
 		case BASIC_TOKEN_C_INTEGER:
@@ -487,6 +487,13 @@ _basic_lexer_tokenizedNext(basic_lexer_context_t *self)
 			self->string_pointer += sizeof (real_t);
 			break;
 #endif
+#if FAST_MODULE_CALL
+		case BASIC_TOKEN_COMMAND:
+			memcpy(&self->_id, self->string_to_parse + self->string_pointer,
+			    sizeof (uintptr_t));
+			self->string_pointer += sizeof (uintptr_t);
+			break;
+#endif
 		default:
 			break;
 		}
@@ -499,7 +506,6 @@ BOOLEAN
 basic_lexer_getnextTokenized(basic_lexer_context_t *self)
 {
 	self->token = BASIC_TOKEN_NOTOKEN;
-	/*_error = NO_ERROR;*/
 	self->_value_pointer = 0;
 	/* Iterate until end of input string */
 	while (SYM > ASCII_NUL) {
@@ -543,8 +549,7 @@ basic_lexer_tokenString(basic_token_t t, uint8_t *buf)
 	if (t < BASIC_TOKEN_STAR) {
 		const uint8_t *result = _basic_lexer_tokenTable,
 		    *pointer = result;
-		uint8_t c;
-		uint8_t index = 0;
+		uint8_t c, index = 0;
 
 		do {
 			c = pgm_read_byte(pointer++);

@@ -29,6 +29,7 @@ namespace BASIC
 class VariableFrame;
 class ArrayFrame;
 class Interpreter;
+class Parser;
 
 /**
  * @brief BASIC program in memory
@@ -94,7 +95,7 @@ public:
 		struct EXT_PACKED ForBody
 		{
 			// Program counter on loop begin
-			uint16_t	calleeIndex;
+			Pointer 	calleeIndex;
 			// Loop begin position in the program string
 			uint8_t		textPosition;
 			// Loop variable name
@@ -112,7 +113,7 @@ public:
 		struct EXT_PACKED GosubReturn
 		{
 			// Program counter of the colee string
-			uint16_t calleeIndex;
+			Pointer calleeIndex;
 			// Position in the program string
 			uint8_t	textPosition;
 		};
@@ -149,7 +150,7 @@ public:
 		Body body;
 	};
 
-	Program(uint16_t = SINGLE_PROGSIZE);
+	Program(Pointer = SINGLE_PROGSIZE);
 	/**
 	 * @brief Clear program text, but not vars and arrays
 	 */
@@ -249,7 +250,7 @@ public:
 	 * @param text
 	 * @return flag of success
 	 */
-	bool addLine(uint16_t, const uint8_t*);
+	bool addLine(Parser&, uint16_t, const uint8_t*);
 	/**
 	 * @brief Remove program line
 	 * @param num line number

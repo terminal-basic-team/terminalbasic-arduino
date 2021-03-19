@@ -53,6 +53,7 @@ public:
 	/**
 	 * @brief initialize lexer session
 	 * @param str null-terminating string to extract tokens from
+	 * @param tok tokenized text flag
 	 */
 	void init(const uint8_t*, bool);
 	/**
@@ -88,6 +89,10 @@ public:
 	 * @return string position index
 	 */
 	uint8_t getPointer() const { return m_context.string_pointer; }
+	
+	void setPointer(uint8_t newVal) { m_context.string_pointer = newVal; }
+	
+	const uint8_t* getString() const { return m_context.string_to_parse; }
 	/**
 	 * @brief Get null-terminated token string representation
 	 * @param token Token code

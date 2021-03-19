@@ -37,4 +37,4 @@
 #define STR_SYNTAX     "‘ˆ’€Š‘ˆ—…‘Š€Ÿ"
 #define STR_SEMANTIC   "‘…Œ€’ˆ—…‘Š€Ÿ"
 
-#endif
+#endif // STRINGS_RU_KOI8R_HPP

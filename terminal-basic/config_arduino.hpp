@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2020 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,43 +68,43 @@ namespace BASIC
 {
 // Number of bytes for program text, variables and stack
 #if USE_EXTMEM
-const uint16_t PROGRAMSIZE = EXTMEM_SIZE;
+const pointer_t PROGRAMSIZE = EXTMEM_SIZE;
 #elif defined (__AVR_ATmega1284__) || defined (__AVR_ATmega1284P__)
 #if (S_OUTPUT != TVOUT_O)
-const uint16_t PROGRAMSIZE = 14336;
+const pointer_t PROGRAMSIZE = 14336;
 #else
-const uint16_t PROGRAMSIZE = 8192;
+const pointer_t PROGRAMSIZE = 8192;
 #endif
 #elif defined (__AVR_ATmega2560__)
 #if (S_OUTPUT != TVOUT_O) && (!USE_EXTMEM) && (!USESD)
-const uint16_t PROGRAMSIZE = 6144;
+const pointer_t PROGRAMSIZE = 6144;
 #elif (!USE_EXTMEM) && (USESD)
-const uint16_t PROGRAMSIZE = 5900;
+const pointer_t PROGRAMSIZE = 5900;
 #else
-const uint16_t PROGRAMSIZE = 512;
+const pointer_t PROGRAMSIZE = 512;
 #endif
 #elif defined (__AVR_ATmega128__) || defined (__AVR_ATmega128A__)
-const uint16_t PROGRAMSIZE = 3072;
+const pointer_t PROGRAMSIZE = 3072;
 #elif defined (__AVR_ATmega328__) || defined (__AVR_ATmega328P__)
 #if USESD
-const uint16_t PROGRAMSIZE = 256;
+const pointer_t PROGRAMSIZE = 256;
 #else
-const uint16_t PROGRAMSIZE = 1024;
+const pointer_t PROGRAMSIZE = 1024;
 #endif
 #elif defined (__AVR_ATmega168__) || defined (__AVR_ATmega168P__)
-const uint16_t PROGRAMSIZE = 384;
-#elif defined ARDUIN_ARCH_SAM
-const uint16_t PROGRAMSIZE = 65535;
+const pointer_t PROGRAMSIZE = 384;
+#elif defined ARDUINO_ARCH_SAM
+const pointer_t PROGRAMSIZE = 65535;
 #elif defined ARDUINO_ARCH_ESP32
-const uint16_t PROGRAMSIZE = 65535;
+const pointer_t PROGRAMSIZE = 65535;
 #else
-const uint16_t PROGRAMSIZE = 1024;
+const pointer_t PROGRAMSIZE = 1024;
 #endif // USE_EXTMEM
 
 #if BASIC_MULTITERMINAL
-const uint16_t SINGLE_PROGSIZE = PROGRAMSIZE / (NUM_TERMINALS+1);
+const pointer_t SINGLE_PROGSIZE = PROGRAMSIZE / (NUM_TERMINALS+1);
 #else
-const uint16_t SINGLE_PROGSIZE = PROGRAMSIZE;
+const pointer_t SINGLE_PROGSIZE = PROGRAMSIZE;
 #endif
 
 // BEGIN PRIVATE

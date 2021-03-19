@@ -24,6 +24,8 @@
 
 #include <Arduino.h>
 
+#include "tools.h"
+
 #ifdef ARDUINO
 #include "config_arduino.hpp"
 #elif defined __linux__
@@ -341,7 +343,7 @@ enum class Token : uint8_t
 	INTEGER_IDENT = BASIC_TOKEN_INTEGER_IDENT, // 77
 	REAL_IDENT = BASIC_TOKEN_REAL_IDENT,    // 78
 #if USE_LONG_REALS
-	ONG_REAL_IDENT = BASIC_TOKEN_LONG_REAL_IDENT,
+	LONG_REAL_IDENT = BASIC_TOKEN_LONG_REAL_IDENT,
 #endif
 #if USE_LONGINT        // 79
 	LONGINT_IDENT = BASIC_TOKEN_LONGINT_IDENT, // 80
@@ -359,9 +361,64 @@ enum class Token : uint8_t
 #endif
 	C_BOOLEAN = BASIC_TOKEN_C_BOOLEAN,     // 85
 	C_STRING = BASIC_TOKEN_C_STRING,       // 86
-
-	NUM_TOKENS = BASIC_TOKEN_NUM_TOKENS    // 87
+#if FAST_MODULE_CALL
+	COMMAND = BASIC_TOKEN_COMMAND,         // 87
+#endif
+	NUM_TOKENS = BASIC_TOKEN_NUM_TOKENS    // 88
 };
+
+template <typename T>
+inline T readValue(const uint8_t*)
+{
+	return T(0);
+}
+
+template <typename T>
+inline void writeValue(T, uint8_t*)
+{
+}
+
+template <>
+inline uint64_t readValue<uint64_t>(const uint8_t* str)
+{
+	uint64_t result;
+	readU64(&result, str);
+	return result;
+}
+
+template <>
+inline void writeValue<uint64_t>(uint64_t val, uint8_t* str)
+{
+	writeU64(val, str);
+}
+
+template <>
+inline uint32_t readValue<uint32_t>(const uint8_t* str)
+{
+	uint32_t result;
+	readU32(&result, str);
+	return result;
+}
+
+template <>
+inline void writeValue<uint32_t>(uint32_t val, uint8_t* str)
+{
+	writeU32(val, str);
+}
+
+template <>
+inline uint16_t readValue<uint16_t>(const uint8_t* str)
+{
+	uint16_t result;
+	readU16(&result, str);
+	return result;
+}
+
+template <>
+inline void writeValue<uint16_t>(uint16_t val, uint8_t* str)
+{
+	writeU16(val, str);
+}
 
 } // namespace BASIC
 

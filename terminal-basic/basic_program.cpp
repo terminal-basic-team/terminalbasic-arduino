@@ -23,11 +23,12 @@
 #include <string.h>
 
 #include "basic_interpreter.hpp"
+#include "basic_parser.hpp"
 
 namespace BASIC
 {
 
-Program::Program(uint16_t progsize) :
+Program::Program(Pointer progsize) :
 #if USE_EXTMEM
 _text(reinterpret_cast<char*> (EXTMEM_ADDRESS)),
 #endif
@@ -340,31 +341,42 @@ Program::arrayByIndex(Pointer index)
 }
 
 bool
-Program::addLine(uint16_t num, const uint8_t *line)
+Program::addLine(Parser& parser, uint16_t num, const uint8_t *line)
 {
 	uint8_t size;
 	uint8_t tempBuffer[2*PROGSTRINGSIZE];
 
 	Lexer lexer;
+	// 1-st pass tokenization: lexer do what it can by itself
 	size = lexer.tokenize(tempBuffer, 2*PROGSTRINGSIZE, line);
+        
+	// 2-nd pass tokenization: command calls translated into command
+	//  implementation asddress
+#if FAST_MODULE_CALL
+	lexer.init(tempBuffer, true);
+	while (lexer.getNext()) {
+		const auto token = lexer.getToken();
+		if (token >= Token::INTEGER_IDENT &&
+		    token <= Token::BOOL_IDENT) {
+			auto c = parser.getCommand(lexer.id());
+			if (c != nullptr) {
+				const int8_t tokLen = strlen(lexer.id());
+				const int8_t dist = tokLen-2-sizeof(uintptr_t);
+				const uint8_t pos = lexer.getPointer() - tokLen;
+				
+				size -= dist;
+				tempBuffer[pos] = ASCII_DLE;
+				tempBuffer[pos+1] = BASIC_TOKEN_COMMAND;
+				memmove(tempBuffer+pos+2+sizeof(uintptr_t),
+				    tempBuffer+lexer.getPointer(), size-2);
+				writeValue(uintptr_t(c), &tempBuffer[pos+2]);
+				lexer.setPointer(lexer.getPointer()-dist);
+			}
+		}
+	}
+#endif // FAST_MODULE_CALL
 
 	return addLine(num, tempBuffer, size);
-}
-
-void
-Program::removeLine(uint16_t num)
-{
-	const Line *line = this->lineByNumber(num, 0);
-	if (line != nullptr) {
-		const uint16_t index = objectIndex(line);
-		assert(index < _textEnd);
-		const uint16_t next = index+line->size;
-		const uint16_t len = _arraysEnd-next;
-		_textEnd -= line->size;
-		_variablesEnd -= line->size;
-		_arraysEnd -= line->size;
-		memmove(_text+index, _text+next, len);
-	}
 }
 
 bool
@@ -375,21 +387,25 @@ Program::addLine(uint16_t num, const uint8_t *text, uint8_t len)
 	if (_textEnd == 0) // First string insertion
 		return insert(num, text, len);
 
-	const uint16_t strLen = sizeof(Line) + len;
-	// Iterate over
+	const uint8_t strLen = sizeof(Line) + len;
+	// Iterate over lines
 	Line *cur;
 	for (cur = current(_current); _current.index < _textEnd;
 	    cur = current(_current)) {
 		if (num < cur->number) {
+			// Current line has number greater then new one,
+			// point of insertion
 			break;
-		} else if (num == cur->number) { // Replace string
-			const uint16_t newSize = strLen;
-			const uint16_t curSize = cur->size;
-			const int16_t dist = long(newSize) - curSize;
-			const uint16_t bytes2copy = _arraysEnd -
+		} else if (num == cur->number) {
+			// Current line has number equals to new one,
+			// replace string
+			const uint8_t newSize = strLen;
+			const uint8_t curSize = cur->size;
+			const int8_t dist = newSize - curSize;
+			const Pointer bytes2copy = _arraysEnd -
 			    (_current.index + curSize);
 			if ((_arraysEnd + dist) >= _sp)
-				return (false);
+				return false;
 			memmove(_text + _current.index + newSize,
 			    _text + _current.index + curSize, bytes2copy);
 			cur->number = num;
@@ -402,6 +418,22 @@ Program::addLine(uint16_t num, const uint8_t *text, uint8_t len)
 		_current.index += cur->size;
 	}
 	return insert(num, text, len);
+}
+
+void
+Program::removeLine(uint16_t num)
+{
+	const Line *line = this->lineByNumber(num, 0);
+	if (line != nullptr) {
+		const Pointer index = objectIndex(line);
+		assert(index < _textEnd);
+		const Pointer next = index+line->size;
+		const Pointer len = _arraysEnd-next;
+		_textEnd -= line->size;
+		_variablesEnd -= line->size;
+		_arraysEnd -= line->size;
+		memmove(_text+index, _text+next, len);
+	}
 }
 
 bool

@@ -202,8 +202,9 @@ const FunctionBlock::function InternalFunctions::funcs[] PROGMEM = {
 #if USE_MID
 	InternalFunctions::func_mid,
 #endif
-	InternalFunctions::func_str
+	InternalFunctions::func_str,
 #endif // CONF_LANG
+	nullptr
 };
 
 InternalFunctions::InternalFunctions(FunctionBlock *first) :

@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2017-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2017-2020 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,14 +92,14 @@ typedef enum basic_token
 #if USE_INTEGER_DIV
 	BASIC_TOKEN_KW_MOD,        // 33
 #endif
-	BASIC_TOKEN_COM_NEW,
-	BASIC_TOKEN_KW_NEXT,
-	BASIC_TOKEN_OP_NOT,
-	BASIC_TOKEN_KW_ON,
+	BASIC_TOKEN_COM_NEW,       // 34
+	BASIC_TOKEN_KW_NEXT,       // 35
+	BASIC_TOKEN_OP_NOT,        // 36
+	BASIC_TOKEN_KW_ON,         // 37
 //	KW_OPTION,
-	BASIC_TOKEN_OP_OR,
+	BASIC_TOKEN_OP_OR,         // 38
 #if USE_PEEK_POKE
-	BASIC_TOKEN_KW_POKE,
+	BASIC_TOKEN_KW_POKE,       // 39
 #endif
 	BASIC_TOKEN_KW_PRINT,      // 40
 #if USE_RANDOM
@@ -132,11 +132,11 @@ typedef enum basic_token
 #if USE_MATRIX
 	BASIC_TOKEN_KW_TRN,        // 54
 #endif
-	BASIC_TOKEN_KW_TRUE,       // 55
+	BASIC_TOKEN_KW_TRUE,        // 55
 #if USE_DUMP
-	BASIC_TOKEN_KW_VARS,       // 56
+	BASIC_TOKEN_KW_VARS,        // 56
 #endif
-	BASIC_TOKEN_OP_XOR,        // 57
+	BASIC_TOKEN_OP_XOR,         // 57
 #if USE_MATRIX
 	BASIC_TOKEN_KW_ZER,        // 58
 #endif
@@ -183,9 +183,9 @@ typedef enum basic_token
 	BASIC_TOKEN_INTEGER_IDENT, // 77
 	BASIC_TOKEN_REAL_IDENT,    // 78
 #if USE_LONG_REALS
-	BASIC_TOKEN_LONG_REAL_IDENT,// 85
+	BASIC_TOKEN_LONG_REAL_IDENT,// 79
 #endif
-#if USE_LONGINT        // 79
+#if USE_LONGINT
 	BASIC_TOKEN_LONGINT_IDENT, // 80
 #endif
 	BASIC_TOKEN_STRING_IDENT,  // 81
@@ -201,6 +201,8 @@ typedef enum basic_token
 #endif
 	BASIC_TOKEN_C_BOOLEAN,     // 86
 	BASIC_TOKEN_C_STRING,      // 87
-
-	BASIC_TOKEN_NUM_TOKENS     // 88
+#if FAST_MODULE_CALL
+	BASIC_TOKEN_COMMAND,       // 88
+#endif
+	BASIC_TOKEN_NUM_TOKENS     // 89
 } basic_token_t;

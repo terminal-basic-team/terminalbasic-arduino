@@ -57,15 +57,18 @@ static const uint8_t arduinoIOCommands[] PROGMEM = {
 };
 
 const FunctionBlock::command ArduinoIO::_commands[] PROGMEM = {
-	ArduinoIO::comm_awrite,
+	ArduinoIO::comm_awrite
 #if CONF_BEEP
-	ArduinoIO::comm_beep,
+	, ArduinoIO::comm_beep,
 #endif
 #if CONF_MODULE_ARDUINOIO_TONE
-	ArduinoIO::comm_notone,
-	ArduinoIO::comm_tone,
+	, ArduinoIO::comm_notone,
+	, ArduinoIO::comm_tone,
 #endif
-	ArduinoIO::comm_dwrite
+	, ArduinoIO::comm_dwrite
+#if FAST_MODULE_CALL
+	, nullptr
+#endif
 };
 
 ArduinoIO::ArduinoIO()

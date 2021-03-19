@@ -32,6 +32,10 @@ void readU32(uint32_t*, const uint8_t*);
 
 void writeU32(uint32_t, uint8_t*);
 
+void readU64(uint64_t*, const uint8_t*);
+
+void writeU64(uint64_t, uint8_t*);
+
 void readR32(float*, const uint8_t*);
 
 void writeR32(float, uint8_t*);

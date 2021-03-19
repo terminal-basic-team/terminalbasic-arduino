@@ -24,6 +24,7 @@
 
 #include "arduinoext.hpp"
 #include "basic.hpp"
+#include "basic_parser.h"
 #include "basic_internalfuncs.hpp"
 
 namespace BASIC
@@ -85,6 +86,10 @@ public:
 	}
 
 	void init();
+	
+	FunctionBlock::command getCommand(const char*);
+	
+	void getCommandName(FunctionBlock::command, uint8_t*);
 
 	void addModule(FunctionBlock*);
 #if CONF_ERROR_STRINGS
@@ -98,9 +103,15 @@ private:
 	 */
 	enum Mode : uint8_t
 	{
-		SCAN = 0,
-		EXECUTE = 1
+		SCAN = BASIC_PARSER_SCAN,
+		EXECUTE = BASIC_PARSER_EXECUTE
 	};
+	
+	void setMode(Mode);
+	Mode getMode() const;
+	
+	void setStopParse(bool);
+	bool getSTopParse() const;
 	
 	bool testExpression(Value&);
 	
@@ -130,6 +141,7 @@ private:
 	bool fFinal(Value&);
 	bool fIfStatement();
 	bool fCommand();
+	void fCommandArguments(FunctionBlock::command);
 	bool fGotoStatement();
 	bool fForConds();
 	bool fIdentifier(char*);
@@ -149,12 +161,11 @@ private:
 	Lexer &_lexer;
 	// interpreter context object reference
 	Interpreter &_interpreter;
-	// current mode
-	Mode _mode;
-	// stop parsing string flag
-	bool _stopParse;
+
 	// first module in chain
 	InternalFunctions _internal;
+	
+	basic_parser_context_t m_context;
 };
 
 } // namespace BASIC

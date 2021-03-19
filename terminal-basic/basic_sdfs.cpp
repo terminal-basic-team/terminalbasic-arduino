@@ -343,6 +343,16 @@ SDFSModule::dsave(Interpreter &i)
 				f.print(lex.id());
 				f.write('"');
 			}
+#if FAST_MODULE_CALL
+			else if (t == Token::COMMAND) {
+				uint8_t buf[16];
+				FunctionBlock::command com =
+				    reinterpret_cast<FunctionBlock::command>(
+				    readValue<uintptr_t>((const uint8_t*)lex.id()));
+				i.parser().getCommandName(com, buf);
+				f.print((const char*)buf);
+			}
+#endif
 		}
 		f.print('\n');
 	}
@@ -377,7 +387,7 @@ SDFSModule::_loadText(SDCard::File &f, Interpreter &i)
 			if (!lex.getNext() || lex.getToken() !=
 			    Token::C_INTEGER)
 				return false;
-			if (!i._program.addLine(Integer(lex.getValue()),
+			if (!i._program.addLine(i.parser(), Integer(lex.getValue()),
 			    (uint8_t*)buf+lex.getPointer()))
 				return false;
 		} else

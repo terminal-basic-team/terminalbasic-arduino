@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2017-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2017-2020 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -198,6 +198,8 @@ typedef enum basic_token
 #endif
 	BASIC_TOKEN_C_BOOLEAN,     // 85
 	BASIC_TOKEN_C_STRING,      // 86
-
+#if FAST_MODULE_CALL
+	BASIC_TOKEN_COMMAND,       // 88
+#endif
 	BASIC_TOKEN_NUM_TOKENS     // 87
 } basic_token_t;

@@ -1,3 +1,12 @@
+r2.2-alpha1 (24.01.2020)
+
+  * Fix multiple regressions
+
+r2.2-alpha1 (22.01.2020)
+
+  * Speedup of the commands from modules calling (ArduinoIO, GFX ...), using translation
+      of the calling construct into buinary optimized format
+
 r2.1.1 (15.10.2019)
 
   * Fix error in configuratyion parameters on tiny systems

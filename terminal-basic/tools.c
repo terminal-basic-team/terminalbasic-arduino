@@ -111,6 +111,11 @@ union U32 {
 	char bytes[sizeof(uint32_t)];
 };
 
+union U64 {
+	uint64_t num;
+	char bytes[sizeof(uint64_t)];
+};
+
 union R32 {
 	float num;
 	char bytes[sizeof(float)];
@@ -164,6 +169,39 @@ writeU32(uint32_t num, uint8_t *buf)
 	*buf = s.bytes[0];
 }
 
+void
+readU64(uint64_t *num, const uint8_t *buf)
+{
+	union U64 s;
+	
+	s.bytes[7] = *(buf++);
+	s.bytes[6] = *(buf++);
+	s.bytes[5] = *(buf++);
+	s.bytes[4] = *(buf++);
+	s.bytes[3] = *(buf++);
+	s.bytes[2] = *(buf++);
+	s.bytes[1] = *(buf++);
+	s.bytes[0] = *buf;
+	
+	*num = s.num;
+}
+
+void
+writeU64(uint64_t num, uint8_t *buf)
+{
+	union U64 s;
+	
+	s.num = num;
+	
+	*(buf++) = s.bytes[7];
+	*(buf++) = s.bytes[6];
+	*(buf++) = s.bytes[5];
+	*(buf++) = s.bytes[4];
+	*(buf++) = s.bytes[3];
+	*(buf++) = s.bytes[2];
+	*(buf++) = s.bytes[1];
+	*buf = s.bytes[0];
+}
 
 void
 readR32(float *num, const const uint8_t *buf)
