@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2020 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ namespace BASIC
 /**
  * @brief variable memory frame
  */
-struct EXT_PACKED VariableFrame
+struct PACKED VariableFrame
 {
 	/**
 	 * @brief size of the initialized frame
@@ -73,7 +73,7 @@ struct EXT_PACKED VariableFrame
 /**
  * Array memory frame
  */
-struct EXT_PACKED ArrayFrame
+struct PACKED ArrayFrame
 {
 	/**
 	 * @brief get frame size in bytes
@@ -148,7 +148,7 @@ struct EXT_PACKED ArrayFrame
 /**
  * Array memory frame
  */
-struct EXT_PACKED FunctionFrame
+struct PACKED FunctionFrame
 {
 	uint16_t lineNumber;
 	uint8_t linePosition;
@@ -439,7 +439,11 @@ public:
 	 * @param var name of the variable
 	 */
 	void valueFromVar(Parser::Value&, const char*);
-
+	/**
+	 * @brief Fill value object with the value of an array element
+	 * @param val value object
+	 * @param var name of the array
+	 */
 	bool valueFromArray(Parser::Value&, const char*);
 	/**
 	 * @brief push string constant on the stack
@@ -488,9 +492,18 @@ private:
 	
 	class AttrKeeper;
 #if USE_MATRIX
-	
+	/**
+	 * @Fill matrix elements with the value
+	 * @param array name for the matrix
+	 * @param value object to fill the matrix with
+	 */
 	void fillMatrix(const char*, const Parser::Value&);
-	
+	/**
+	 * 
+	 * @param frame
+	 * @param rows
+	 * @param columns
+	 */
 	void setMatrixSize(ArrayFrame&, uint16_t, uint16_t);
 	/**
 	 * @brief Get 2 dimensional array from stack
@@ -513,8 +526,7 @@ private:
 	 */
 	ArrayFrame *getSquareArray(const char*);
 #endif // USE_MATRIX
-	// Return Variable/Array/Function type based on it's name
-	static Parser::Value::Type typeFromName(const char*);
+	
 	// Get next input object from stack
 	bool nextInput();
 	// Place input values to objects

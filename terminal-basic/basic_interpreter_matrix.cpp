@@ -179,6 +179,18 @@ Interpreter::matrixDet(const char *name)
 			_result = r;
 		}
 		break;
+#if USE_LONG_REALS
+		case Parser::Value::LONG_REAL: {
+			LongReal r;
+			if (!Matricies<LongReal>::determinant(
+			    reinterpret_cast<const LongReal*>(array->data()),
+			    array->dimension[0]+1, r,
+			    reinterpret_cast<LongReal*>(tbuf)))
+				_result = false;
+			_result = r;
+		}
+		break;
+#endif
 #endif // USE_REALS
 		default:
 			_result = false;
@@ -304,6 +316,13 @@ Interpreter::assignMatrix(const char *name, const char *first, const char *secon
 			    reinterpret_cast<Real*>(array->data()),
 			    array->dimension[0]+1, array->dimension[1]+1);
 			break;
+#if USE_LONG_REALS
+		case Parser::Value::LONG_REAL:
+			Matricies<LongReal>::transpose(
+			    reinterpret_cast<LongReal*>(array->data()),
+			    array->dimension[0]+1, array->dimension[1]+1);
+			break;
+#endif
 #endif // USE_REALS
 		default:
 			break;
@@ -391,6 +410,16 @@ Interpreter::assignMatrix(const char *name, const char *first, const char *secon
 			    arraySecond->dimension[0]+1, arraySecond->dimension[1]+1,
 			    reinterpret_cast<Real*>(tbuf));
 			break;
+#if USE_LONG_REALS
+		case Parser::Value::LONG_REAL:
+			Matricies<LongReal>::mul(
+			    reinterpret_cast<LongReal*>(arrayFirst->data()),
+			    arrayFirst->dimension[0]+1, arrayFirst->dimension[1]+1,
+			    reinterpret_cast<LongReal*>(arraySecond->data()),
+			    arraySecond->dimension[0]+1, arraySecond->dimension[1]+1,
+			    reinterpret_cast<LongReal*>(tbuf));
+			break;
+#endif
 #endif // USE_REALS
 		default:
 			return;
@@ -432,6 +461,13 @@ Interpreter::assignMatrix(const char *name, const char *first, const char *secon
 			    reinterpret_cast<Real*>(array->data()),
 			    r, reinterpret_cast<Real*>(tbuf));
 			break;
+#if USE_LONG_REALS
+		case Parser::Value::LONG_REAL:
+			res = Matricies<LongReal>::invert(
+			    reinterpret_cast<LongReal*>(array->data()),
+			    r, reinterpret_cast<LongReal*>(tbuf));
+			break;
+#endif
 #endif // USE_REALS
 		default:
 			break;

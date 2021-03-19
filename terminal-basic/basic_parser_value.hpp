@@ -27,7 +27,7 @@
 namespace BASIC
 {
 
-class EXT_PACKED Parser::Value
+class PACKED Parser::Value
 {
 public:
 	/**
@@ -108,6 +108,9 @@ public:
 	void switchSign();
 	
 	static size_t size(Type);
+	
+	// Return Variable/Array/Function type based on it's name
+	static Type typeFromName(const char*);
 	
 	Type type() const
 	{

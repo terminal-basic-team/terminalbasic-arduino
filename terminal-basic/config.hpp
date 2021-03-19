@@ -164,6 +164,8 @@ namespace BASIC
  * Indention of the line numbers in LIST output
  */
 #define LINE_NUM_INDENT  1
+
+#define CONF_USE_ALIGN 1
 /*
  * GFX module
  */

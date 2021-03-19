@@ -114,6 +114,12 @@ using LongReal = long_real_t;
 #endif
 #endif // USE_REALS
 
+#if USE_PACKED_STRUCT
+#define PACKED EXT_PACKED
+#else
+#define PACKED
+#endif
+
 // Number of characters in command/function identifier
 const uint8_t IDSIZE = 8;
 

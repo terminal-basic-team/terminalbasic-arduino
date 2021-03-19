@@ -237,7 +237,7 @@ setup()
 #ifdef HAVE_HWSERIAL3
 	basic3.init();
 #endif
-#endif
+#endif // BASIC_MULTITERMINAL
 }
 
 void

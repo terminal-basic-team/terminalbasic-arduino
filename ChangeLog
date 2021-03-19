@@ -1,4 +1,11 @@
-r2.2-alpha1 (24.01.2020)
+r2.2-alpha3 (5.02.2020)
+
+  * Add optional feature of aligned variable and array frames (step
+    towards optional removal of unaligned memory access)
+  * Basic support of esp8266
+  * Add support of long real datatype in matrix operations
+
+r2.2-alpha2 (24.01.2020)
 
   * Fix multiple regressions
 

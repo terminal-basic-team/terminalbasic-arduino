@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2020 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -296,6 +296,38 @@ Parser::Value::printTo(Print& p) const
 	default:
 		return p.print(char(ASCII::QMARK));
 	}
+}
+
+Parser::Value::Type
+Parser::Value::typeFromName(const char *fname)
+{
+	Parser::Value::Type t;
+#if USE_LONGINT
+	if (endsWith(fname, "%!")) {
+		t = Parser::Value::LONG_INTEGER;
+	} else
+#endif // USE_LONGINT
+		if (endsWith(fname, '%')) {
+		t = Parser::Value::INTEGER;
+	} else if (endsWith(fname, '@')) {
+		t = Parser::Value::LOGICAL;
+	} else if (endsWith(fname, '$')) {
+		t = Parser::Value::STRING;
+	}
+#if USE_REALS
+#if USE_LONG_REALS
+         else if (endsWith(fname, '!')) {
+		t = Parser::Value::LONG_REAL;
+	}
+#endif // USE_LONG_REALS
+         else {
+		t = Parser::Value::REAL;
+#else
+	 else {
+		t = Parser::Value::INTEGER;
+#endif // USE_REALS
+	}
+	return t;
 }
 
 } // namespace BASIC

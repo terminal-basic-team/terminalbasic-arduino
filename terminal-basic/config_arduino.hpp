@@ -95,6 +95,8 @@ const pointer_t PROGRAMSIZE = 1024;
 const pointer_t PROGRAMSIZE = 384;
 #elif defined ARDUINO_ARCH_SAM
 const pointer_t PROGRAMSIZE = 65535;
+#elif defined ARDUINO_ARCH_ESP8266
+const pointer_t PROGRAMSIZE = 32768;
 #elif defined ARDUINO_ARCH_ESP32
 const pointer_t PROGRAMSIZE = 65535;
 #else

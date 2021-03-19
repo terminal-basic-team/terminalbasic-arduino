@@ -40,6 +40,10 @@ void readR32(float*, const uint8_t*);
 
 void writeR32(float, uint8_t*);
 
+void writeR64(double, uint8_t*);
+
+void readR64(double*, const uint8_t*);
+
 #define ARRAY_SIZE(a) (sizeof(a)/sizeof(a[0]))
 
 #define LOW_BYTE_U16(w) ((uint8_t)w)

@@ -144,6 +144,8 @@
 /* Size of the string identifiers */
 #define STRING_SIZE 72
 
+#define USE_PACKED_STRUCT 1
+
 /*
  * High-level code optimisation mode
  */

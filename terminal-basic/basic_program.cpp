@@ -1,6 +1,7 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2019,2020 Terminal-BASIC team
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -190,6 +191,12 @@ Program::variableByName(const char *name)
 
 	VariableFrame* f;
 	while ((f = variableByIndex(index)) != nullptr) {
+#if CONF_USE_ALIGN
+		if (_text[index] == 0) {
+			++index;
+			continue;
+		}
+#endif
 #if USE_DEFFN
 		if (!(f->type & TYPE_DEFFN)) {
 #endif
@@ -312,6 +319,12 @@ Program::arrayByName(const char *name)
 
 	ArrayFrame* f;
 	while ((f = arrayByIndex(index)) != nullptr) {
+#if CONF_USE_ALIGN
+		if (_text[index] == 0) {
+			++index;
+			continue;
+		}
+#endif
 		const int8_t res = strcmp(name, f->name);
 		if (res == 0) {
 			return f;
@@ -413,7 +426,11 @@ Program::addLine(uint16_t num, const uint8_t *text, uint8_t len)
 			memcpy(cur->text, text, len);
 			_textEnd += dist, _variablesEnd += dist,
 			    _arraysEnd += dist;
+#if CONF_USE_ALIGN
+			return alignVars(_textEnd);
+#else
 			return true;
+#endif
 		}
 		_current.index += cur->size;
 	}
@@ -433,6 +450,9 @@ Program::removeLine(uint16_t num)
 		_variablesEnd -= line->size;
 		_arraysEnd -= line->size;
 		memmove(_text+index, _text+next, len);
+#if CONF_USE_ALIGN
+		alignVars(_textEnd);
+#endif
 	}
 }
 
@@ -452,7 +472,11 @@ Program::insert(uint16_t num, const uint8_t *text, uint8_t len)
 	cur->size = strLen;
 	memcpy(cur->text, text, len);
 	_textEnd += strLen, _variablesEnd += strLen, _arraysEnd += strLen;
+#if CONF_USE_ALIGN
+	return alignVars(_textEnd);
+#else
 	return true;
+#endif
 }
 
 void
@@ -478,5 +502,121 @@ Program::_reset()
 #endif
 	_sp = programSize;
 }
+
+#if CONF_USE_ALIGN
+bool
+Program::alignVars(Pointer index)
+{
+	Pointer lastIndex = index;
+	VariableFrame *f;
+	while ((f = variableByIndex(index)) != nullptr) {
+		if (_text[index] == 0) {
+			++index;
+			continue;
+		}
+#if USE_DEFFN
+		if (f->type & TYPE_DEFFN) {
+			index += f->size();
+			continue;
+		}
+#endif
+		const Parser::Value::Type t = f->type;
+		Pointer i = lastIndex + sizeof(VariableFrame);
+		int8_t a = alignPointer(i, t);
+		int8_t dist = a - int8_t(index - lastIndex);
+		
+		if (_arraysEnd+dist >= _sp) {
+			return false;
+		}
+		const auto src = _text + index;
+		const auto dst = src + dist;
+		if (_arraysEnd > index)
+			memmove(dst, src, _arraysEnd - index);
+		for (i=lastIndex; i<lastIndex+a; ++i) {
+			_text[i] = 0;
+		}
+		_variablesEnd += dist;
+		_arraysEnd += dist;
+		
+		alignVars(_variablesEnd);
+		
+		lastIndex += a + VariableFrame::size(t);
+		index = lastIndex;
+	}
+	
+	return true;
+}
+
+bool
+Program::alignArrays(Pointer index)
+{
+	Pointer lastIndex = index;
+	ArrayFrame *f;
+	while ((f = arrayByIndex(index)) != nullptr) {
+		if (_text[index] == 0) {
+			++index;
+			continue;
+		}
+		
+		const Parser::Value::Type t = f->type;
+		const uint16_t fsize = f->size();
+		Pointer i = lastIndex + fsize - f->dataSize();
+		int8_t a = alignPointer(i, t);
+		int8_t dist = a - int8_t(index - lastIndex);
+		
+		if (_arraysEnd+dist >= _sp) {
+			return false;
+		}
+		const auto src = _text + index;
+		const auto dst = src + dist;
+		if (_arraysEnd > index)
+			memmove(dst, src, _arraysEnd - index);
+		for (i=lastIndex; i<lastIndex+a; ++i) {
+			_text[i] = 0;
+		}
+		_arraysEnd += dist;
+		
+		lastIndex += a + fsize;
+		index = lastIndex;
+	}
+	
+	return true;
+}
+
+int8_t
+Program::alignPointer(
+    Pointer i,
+    Parser::Value::Type t)
+{
+	int8_t a = 0;
+	
+	if (t == Parser::Value::Type::INTEGER) {
+		a = i % sizeof (Integer);
+	}
+#if USE_LONGINT
+	else if (t == Parser::Value::Type::LONG_INTEGER) {
+		a = i % sizeof (LongInteger);
+		if (a > 0)
+			a = sizeof (LongInteger) - a;
+	}
+#endif
+#if USE_REALS
+	else if (t == Parser::Value::Type::REAL) {
+		a = i % sizeof (Real);
+		if (a > 0)
+			a = sizeof (Real) - a;
+	}
+#if USE_LONG_REALS
+	else if (t == Parser::Value::Type::LONG_REAL) {
+		a = i % sizeof (LongReal);
+		if (a > 0)
+			a = sizeof (LongReal) - a;
+	}
+#endif
+#endif // USE_REALS
+	return a;
+}
+
+#endif // CONF_USE_ALIGN
 
 } // namespace BASIC

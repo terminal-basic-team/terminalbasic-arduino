@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2020 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ public:
 	/**
 	 * @brief BASIC program string object
 	 */
-	struct EXT_PACKED Line
+	struct PACKED Line
 	{
 		// string decimal number (label)
 		uint16_t number;
@@ -55,7 +55,7 @@ public:
 	/**
 	 * @brief BASIC program position marker
 	 */
-	struct EXT_PACKED Position
+	struct PACKED Position
 	{
 		// line index in program memory
 		Pointer index;
@@ -66,7 +66,7 @@ public:
 	/**
 	 * @program stack frame object
 	 */
-	struct EXT_PACKED StackFrame
+	struct PACKED StackFrame
 	{
 		/**
 		 * @brief Stack frame type
@@ -92,7 +92,7 @@ public:
 		/**
 		 * @brief FOR-loop state frame body
 		 */
-		struct EXT_PACKED ForBody
+		struct PACKED ForBody
 		{
 			// Program counter on loop begin
 			Pointer 	calleeIndex;
@@ -110,7 +110,7 @@ public:
 		/**
 		 * @brief Subprogram return address frame body
 		 */
-		struct EXT_PACKED GosubReturn
+		struct PACKED GosubReturn
 		{
 			// Program counter of the colee string
 			Pointer calleeIndex;
@@ -121,7 +121,7 @@ public:
 		/**
 		 * @brief Input object frame body
 		 */
-		struct EXT_PACKED VariableBody
+		struct PACKED VariableBody
 		{
 			enum Type : uint8_t
 			{
@@ -137,7 +137,7 @@ public:
 
 		Type _type;
 
-		union EXT_PACKED Body
+		union PACKED Body
 		{
 			GosubReturn	gosubReturn;
 			uint8_t		arrayDimensions;
@@ -263,6 +263,20 @@ public:
 	 * @param len line length
 	 */
 	bool insert(uint16_t, const uint8_t*, uint8_t);
+	
+#if CONF_USE_ALIGN
+	/**
+	 * @brief Align variables
+	 * @param index address of the first variable frame to align from
+	 */
+	bool alignVars(Pointer);
+	
+	bool alignArrays(Pointer);
+	
+	int8_t alignPointer(
+	    Pointer,
+	    Parser::Value::Type);
+#endif
 	
 #if USE_EXTMEM
 	char *_text;

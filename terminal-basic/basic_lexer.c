@@ -486,7 +486,15 @@ _basic_lexer_tokenizedNext(basic_lexer_context_t *self)
 				self->string_to_parse + self->string_pointer);
 			self->string_pointer += sizeof (real_t);
 			break;
-#endif
+#if USE_LONG_REALS
+		case BASIC_TOKEN_C_LONG_REAL:
+			self->value.type = BASIC_VALUE_TYPE_LONG_REAL;
+			readR64(&self->value.body.long_real,
+				self->string_to_parse + self->string_pointer);
+			self->string_pointer += sizeof (long_real_t);
+			break;
+#endif // USE_LONG_REALS
+#endif // USE_REALS
 #if FAST_MODULE_CALL
 		case BASIC_TOKEN_COMMAND:
 			memcpy(&self->_id, self->string_to_parse + self->string_pointer,
@@ -635,7 +643,7 @@ basic_lexer_tokenize(basic_lexer_context_t *self, uint8_t *dst, uint8_t dstlen,
 			dst[position++] = ASCII_DLE;
 			dst[position++] = tok;
 			const long_integer_t v = self->value.body.long_integer;
-			writeU32((uint32_t) v, dst + position);
+			writeU32((uint32_t)v, dst + position);
 			position += sizeof (long_integer_t);
 		}
 #endif // USE_LONGINT
@@ -647,10 +655,22 @@ basic_lexer_tokenize(basic_lexer_context_t *self, uint8_t *dst, uint8_t dstlen,
 			dst[position++] = tok;
 
 			const real_t v = self->value.body.real;
-			writeR32((real_t) v, dst + position);
+			writeR32((float)v, dst + position);
 			position += sizeof (real_t);
 		}
-#endif // USE_REALS
+#if USE_LONG_REALS
+		else if (tok == BASIC_TOKEN_C_LONG_REAL) {
+			if (position + 2 + sizeof (long_real_t) >= dstlen)
+				break;
+			dst[position++] = ASCII_DLE;
+			dst[position++] = tok;
+
+			const long_real_t v = self->value.body.long_real;
+			writeR64((double)v, dst + position);
+			position += sizeof (long_real_t);
+		}
+#endif // USE_LONG_REALS
+#endif // USE_REALS     
 		else if (tok == BASIC_TOKEN_C_BOOLEAN) {
 			/* One byte tokens need space of 2 bytes - DLE and token */
 			if (position + 2 >= dstlen)
