@@ -294,9 +294,14 @@ SDFSModule::dsave(Interpreter &i)
 	    s = i._program.getNextLine()) {
 		f.print(s->number);
 		lex.init(s->text, true);
+		Token tPrev = Token::NOTOKENS;
 		while (lex.getNext()) {
-			f.write(' ');
 			Token t = lex.getToken();
+			if (t != Token::COMMA &&
+			    t != Token::RPAREN &&
+			    tPrev != Token::LPAREN)
+			    f.write(' ');
+			tPrev = t;
 			if (t < Token::INTEGER_IDENT) {
 				uint8_t buf[16];
 				const bool res = Lexer::getTokenString(t,
@@ -329,8 +334,19 @@ SDFSModule::_loadText(SDCard::File &f, Interpreter &i)
 {
 	while (true) {
 		char buf[PROGSTRINGSIZE] = {0, };
-		f.setTimeout(10);
-		size_t res = f.readBytesUntil('\n', buf, PROGSTRINGSIZE-1);
+		// f.setTimeout(10);
+		size_t res = 0;
+		int c;
+		while (f.available() > 0) {
+			c = f.read();
+			if (c == '\r') {
+			    c = f.read();
+			} else if (c == '\n') {
+			    buf[res] = '\0';
+			    break;
+			} else if (res < (PROGSTRINGSIZE-1))
+				buf[res++] = c;
+		}
 		if (res > 0) {
                 	if (buf[res-1] == '\r')
                         	buf[res-1] = 0;

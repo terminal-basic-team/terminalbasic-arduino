@@ -31,6 +31,13 @@
  * Parameters
  */
 
+#ifdef ARDUINO_ARCH_SAM
+#define HAVE_HWSERIAL1
+#define HAVE_HWSERIAL2
+#define HAVE_HWSERIAL3
+#define HAVE_HWSERIAL4
+#endif
+
 #if BASIC_MULTITERMINAL
 #define NUM_TERMINALS 1
 #ifdef HAVE_HWSERIAL1
