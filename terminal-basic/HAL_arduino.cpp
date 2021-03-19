@@ -19,34 +19,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file basic_exteeprom.hpp
- * @brief I2C/SPI external eeprom functions and commands
- */
+#ifdef ARDUINO
 
-#ifndef BASIC_EXTEEPROM_HPP
-#define BASIC_EXTEEPROM_HPP
+#include "HAL.h"
 
-#include "basic_functionblock.hpp"
+#include "Arduino.h"
 
-namespace BASIC
+void HAL_time_sleep_ms(uint32_t ms)
 {
+	delay(ms);
+}
 
-class ExtEEPROM : public FunctionBlock
+uint32_t HAL_time_gettime_ms()
 {
-public:
-	explicit ExtEEPROM();
-private:
-	static bool com_echain(Interpreter&);
-	static bool com_eload(Interpreter&);
-	static bool com_esave(Interpreter&);
-	
-	static const FunctionBlock::command _commands[] PROGMEM;
-// FunctionBlock interface
-protected:
-	void _init() override;
-};
+	return millis();
+}
 
-} // namespace BASIC
-
-#endif // BASIC_EXTEEPROM_HPP
+#endif // ARDUINO

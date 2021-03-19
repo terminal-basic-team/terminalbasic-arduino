@@ -1,3 +1,8 @@
+r2.2-beta2 (12.02.2020)
+
+  * ESP8266 and ESP32 supports SAVE/LOAD commands in SPIFFS
+  * improved optional alignment of values and function parameters
+
 r2.2-beta1 (7.02.2020) Release, dedicated to my sisters Birthday
 
   * Fix error with fast modules calling on some 32-bit platforms

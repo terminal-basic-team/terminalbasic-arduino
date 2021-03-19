@@ -1,7 +1,9 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
+ * 
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  * Copyright (C) 2019,2020 Terminal-BASIC team
+ *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -106,7 +108,7 @@ Program::lineByNumber(uint16_t number, Pointer address)
 		_current.index = address;
 		for (Line *cur = getNextLine(); cur != nullptr;
 		    cur = getNextLine()) {
-			if (cur->number == number) {
+			if (READ_VALUE(cur->number) == number) {
 				result = cur;
 				break;
 			}
@@ -405,11 +407,12 @@ Program::addLine(uint16_t num, const uint8_t *text, uint8_t len)
 	Line *cur;
 	for (cur = current(_current); _current.index < _textEnd;
 	    cur = current(_current)) {
-		if (num < cur->number) {
+		const auto curnumber = READ_VALUE(cur->number);
+		if (num < curnumber) {
 			// Current line has number greater then new one,
 			// point of insertion
 			break;
-		} else if (num == cur->number) {
+		} else if (num == curnumber) {
 			// Current line has number equals to new one,
 			// replace string
 			const uint8_t newSize = strLen;
@@ -421,7 +424,7 @@ Program::addLine(uint16_t num, const uint8_t *text, uint8_t len)
 				return false;
 			memmove(_text + _current.index + newSize,
 			    _text + _current.index + curSize, bytes2copy);
-			cur->number = num;
+			WRITE_VALUE(cur->number, num);
 			cur->size = strLen;
 			memcpy(cur->text, text, len);
 			_textEnd += dist, _variablesEnd += dist,
@@ -468,7 +471,7 @@ Program::insert(uint16_t num, const uint8_t *text, uint8_t len)
 	    _arraysEnd - _current.index);
 
 	Line *cur = lineByIndex(_current.index);
-	cur->number = num;
+	WRITE_VALUE(cur->number, num);
 	cur->size = strLen;
 	memcpy(cur->text, text, len);
 	_textEnd += strLen, _variablesEnd += strLen, _arraysEnd += strLen;

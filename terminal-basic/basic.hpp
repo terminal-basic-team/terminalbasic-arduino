@@ -1,6 +1,9 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * 
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2019,2020 Terminal-BASIC team
+ *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +26,7 @@
 #include <inttypes.h>
 
 #include <Arduino.h>
+#include "HAL.h"
 
 #include "tools.h"
 #include "types.hpp"
@@ -405,7 +409,7 @@ inline uint16_t readValueOfSize<2>(const uint8_t* str)
 }
 
 template <typename T>
-inline typename type_factory<sizeof(T)>::unsigned_type readValue(const uint8_t* str)
+inline T readValue(const uint8_t* str)
 {
 	return readValueOfSize<sizeof(T)>(str);
 }
@@ -438,6 +442,14 @@ inline void writeValue(T v, uint8_t* str)
 {
 	writeValueOfSize<sizeof(T)>(v, str);
 }
+
+#if CONF_USE_ALIGN
+#define READ_VALUE(V) readValue<decltype(V)>(reinterpret_cast<const uint8_t*>(&(V)))
+#define WRITE_VALUE(D, V) writeValue(V, reinterpret_cast<uint8_t*>(&D))
+#else
+#define READ_VALUE(V) (V)
+#define WRITE_VALUE(D, V) D = (V)
+#endif // CONF_USE_ALIGN
 
 } // namespace BASIC
 

@@ -1,6 +1,9 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2017-2020 Andrey V. Skvortsov <starling13@mail.ru>
+ * 
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2019,2020 Terminal-BASIC team
+ *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -110,7 +113,7 @@ namespace BASIC
 
 #if USE_SAVE_LOAD
 	// Compute checksums while SAVE, LOAD and CHAIN
-	#define SAVE_LOAD_CHECKSUM   1
+	#define SAVE_LOAD_CHECKSUM   0
 #endif // USE_SAVE_LOAD
 
 // Convert all input to upper register
@@ -235,10 +238,10 @@ namespace BASIC
 	#define LIQCR_D3 2
 
 // Input select
-#define S_INPUT SERIAL_I
+#define S_INPUT SERIALL_I
 
 // Output select
-#define S_OUTPUT SERIAL_O
+#define S_OUTPUT SERIALL_O
 
 #if USE_EXTEEPROM
 	#define USE_WIRE 1

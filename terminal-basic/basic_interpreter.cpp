@@ -1,7 +1,9 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2017-2019 Andrey V. Skvortsov <starling13@mail.ru>
+ * 
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  * Copyright (C) 2019,2020 Terminal-BASIC team
+ *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,13 +27,10 @@
 
 #include "basic.hpp"
 
-#if USE_SAVE_LOAD
-#include <EEPROM.h>
 #if SAVE_LOAD_CHECKSUM
 #include <util/crc16.h>
 #include <stdint.h>
 #endif
-#endif // USE_SAVE_LOAD
 
 #include "helper.hpp"
 #include "math.hpp"
@@ -398,18 +397,19 @@ Interpreter::list(uint16_t start, uint16_t stop)
 	for (auto s = _program.getNextLine(); s != nullptr;
 	    s = _program.getNextLine()) {
 		// Output onlyselected lines subrange
-		if (s->number < start)
+		const auto snumber = READ_VALUE(s->number);
+		if (snumber < start)
 			continue;
-		if (stop > 0 && s->number > stop)
+		if (stop > 0 && snumber > stop)
 			break;
 
-		if (s->number > 9999)
+		if (snumber > 9999)
 			order = 4;
-		else if (s->number > 999)
+		else if (snumber > 999)
 			order = 3;
-		else if (s->number > 99)
+		else if (snumber > 99)
 			order = 2;
-		else if (s->number > 9)
+		else if (snumber > 9)
 			order = 1;
 	}
 #endif // LINE_NUM_INDENT
@@ -420,22 +420,23 @@ Interpreter::list(uint16_t start, uint16_t stop)
 #endif
 	for (auto s = _program.getNextLine(); s != nullptr;
 	    s = _program.getNextLine()) {
-		// Output onlyselected lines subrange
-		if (s->number < start)
+		const auto snumber = READ_VALUE(s->number);
+		// Output only selected lines subrange
+		if (snumber < start)
 			continue;
-		if (stop > 0 && s->number > stop)
+		if ((stop > 0) && (snumber > stop))
 			break;
 
 		// Output line number
 #if LINE_NUM_INDENT
 		uint8_t indent;
-		if (s->number > 9999)
+		if (snumber > 9999)
 			indent = order - 4;
-		else if (s->number > 999)
+		else if (snumber > 999)
 			indent = order - 3;
-		else if (s->number > 99)
+		else if (snumber > 99)
 			indent = order - 2;
-		else if (s->number > 9)
+		else if (snumber > 9)
 			indent = order - 1;
 		else
 			indent = order;
@@ -443,7 +444,7 @@ Interpreter::list(uint16_t start, uint16_t stop)
 		while (indent-- > 0)
 			_output.print(char(ASCII::SPACE));
 #endif // LINE_NUM_INDENT
-		print(long(s->number), VT100::C_YELLOW);
+		print(long(snumber), VT100::C_YELLOW);
 		
 		Lexer lex;
 #if LOOP_INDENT
@@ -617,7 +618,7 @@ Interpreter::print(const Parser::Value &v, VT100::TextAttr attr)
 void
 Interpreter::delay(uint16_t ms)
 {
-	_delayTimeout = millis() + ms;
+	_delayTimeout = HAL_time_gettime_ms() + ms;
 	_lastState = _state == EXECUTE ? EXECUTE : SHELL;
 	_state = DELAY;
 }
@@ -765,7 +766,7 @@ Interpreter::pushReturnAddress()
 	const uint8_t textPosition = _lexer.getPointer();
 	auto f = _program.push(Program::StackFrame::SUBPROGRAM_RETURN);
 	if (f != nullptr) {
-		f->body.gosubReturn.calleeIndex = _program._current.index;
+		WRITE_VALUE(f->body.gosubReturn.calleeIndex, _program._current.index);
 		f->body.gosubReturn.textPosition = _program._current.position +
 		    textPosition;
 	} else
@@ -780,7 +781,7 @@ Interpreter::returnFromSub()
 		if (f == nullptr)
 			break;
 		if (f->_type == Program::StackFrame::SUBPROGRAM_RETURN) {
-			_program.jump(f->body.gosubReturn.calleeIndex);
+			_program.jump(READ_VALUE(f->body.gosubReturn.calleeIndex));
 			_program._current.position = f->body.gosubReturn.textPosition;
 			_program.pop();
 			return;
@@ -798,7 +799,7 @@ Interpreter::pushForLoop(const char *varName, uint8_t textPosition,
 	auto f = _program.push(Program::StackFrame::FOR_NEXT);
 	if (f != nullptr) {
 	    	auto &fBody = f->body.forFrame;
-		fBody.calleeIndex = _program._current.index;
+		WRITE_VALUE(fBody.calleeIndex, _program._current.index);
 		fBody.textPosition = _program._current.position +
 		    textPosition;
 		fBody.finalvalue = v;
@@ -815,7 +816,7 @@ Interpreter::pushValue(const Parser::Value &v)
 {
 	auto f = _program.push(Program::StackFrame::VALUE);
 	if (f != nullptr) {
-		f->body.value = v;
+		WRITE_VALUE(f->body.value, v);
 		return true;
 	} else {
 		raiseError(DYNAMIC_ERROR, STACK_FRAME_ALLOCATION);
@@ -838,7 +839,7 @@ Interpreter::popValue(Parser::Value &v)
 {
 	const auto f = _program.currentStackFrame();
 	if ((f != nullptr) && (f->_type == Program::StackFrame::VALUE)) {
-		v = f->body.value;
+		v = READ_VALUE(f->body.value);
 		_program.pop();
 		return true;
 	} else {
@@ -960,7 +961,7 @@ Interpreter::returnFromFn()
 	
 	const auto f = _program.currentStackFrame();
 	if ((f != nullptr) && (f->_type == Program::StackFrame::SUBPROGRAM_RETURN)) {
-		_program._current.index = f->body.gosubReturn.calleeIndex;
+		_program._current.index = READ_VALUE(f->body.gosubReturn.calleeIndex);
 		_program._current.position = f->body.gosubReturn.textPosition;
 		_program.pop();
 	} else {
@@ -1024,7 +1025,7 @@ Interpreter::testFor(Program::StackFrame &f)
 		_program.pop();
 		return true;
 	}
-	_program.jump(fBody.calleeIndex);
+	_program.jump(READ_VALUE(fBody.calleeIndex));
 	_program._current.position = fBody.textPosition;
 	return false;
 }
@@ -1040,18 +1041,15 @@ Interpreter::save()
 		// Checksum
 		.crc16 = 0
 	};
+	// Write program to EEPROM
+	for (Pointer p = 0; p < _program._textEnd; ++p) {
+		const uint8_t pb = _program._text[p];
+		HAL_nvram_write(p+sizeof(EEpromHeader_t), pb);
 #if SAVE_LOAD_CHECKSUM
-	// Compute program checksum
-	for (Pointer p = 0; p < _program._textEnd; ++p)
-		h.crc16 = _crc16_update(h.crc16, _program._text[p]);
+		// Compute program checksum
+		h.crc16 = _crc16_update(h.crc16, pb);
 #endif
-	{
-		EEPROMClass e;
-		// Write program to EEPROM
-		for (Pointer p = 0; p < _program._textEnd; ++p) {
-			e.update(p + sizeof (EEpromHeader_t), _program._text[p]);
-			_output.print('.');
-		}
+		_output.print('.');
 	}
 	newline();
 #if SAVE_LOAD_CHECKSUM
@@ -1060,8 +1058,7 @@ Interpreter::save()
 
 	if (crc == h.crc16) {
 #endif
-		EEPROMClass e;
-		e.put(0, h);
+		HAL_nvram_write_buf(0, &h, sizeof(h));
 #if SAVE_LOAD_CHECKSUM
 	} else
 		raiseError(DYNAMIC_ERROR, BAD_CHECKSUM);
@@ -1099,12 +1096,11 @@ Interpreter::chain()
 uint16_t
 Interpreter::eepromProgramChecksum(uint16_t len)
 {
-	EEPROMClass e;
 	// Compute checksum
 	uint16_t crc = 0, p;
 	for (p = sizeof (EEpromHeader_t); p < len + sizeof (EEpromHeader_t);
 	    ++p) {
-		uint8_t b = e.read(p);
+		uint8_t b = HAL_nvram_read(p);
 		crc = _crc16_update(crc, b);
 		_output.print('.');
 	}
@@ -1117,11 +1113,7 @@ bool
 Interpreter::checkText(Pointer &len)
 {
 	EEpromHeader_t h;
-
-	{
-		EEPROMClass e;
-		e.get(0, h);
-	}
+	HAL_nvram_read_buf(0, &h, sizeof(h));
 
 	if ((h.len > SINGLE_PROGSIZE) ||
 	    (h.magic_FFFFminuslen != uint16_t(0xFFFF) - h.len)) {
@@ -1142,10 +1134,8 @@ Interpreter::checkText(Pointer &len)
 void
 Interpreter::loadText(Pointer len, bool showProgress)
 {
-	EEPROMClass e;
-
 	for (Pointer p = 0; p < len; ++p) {
-		_program._text[p] = e.read(p + sizeof (EEpromHeader_t));
+		_program._text[p] = HAL_nvram_read(p + sizeof (EEpromHeader_t));
 		if (showProgress)
 			_output.print('.');
 	}
@@ -1604,7 +1594,7 @@ Interpreter::raiseError(ErrorType type, ErrorCodes errorCode, bool fatal)
 	// Output Program line number if running program
 	const Program::Line *l = _program.current(_program._current);
 	if ((_state == EXECUTE) && (l != nullptr)) {
-		print(long(l->number), VT100::C_YELLOW);
+		print(long(READ_VALUE(l->number)), VT100::C_YELLOW);
 		_output.print(':');
 	}
 	if (type == DYNAMIC_ERROR)

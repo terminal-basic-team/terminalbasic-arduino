@@ -1,5 +1,6 @@
 /*
  * ArduinoExt is a set of utility libraries for Arduino
+ * 
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  * Copyright (C) 2019 Terminal-BASIC team
  *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
@@ -111,6 +112,18 @@ public:
 		size_t write(uint8_t) override;
 	};
 };
+
+inline VT100::TextAttr& operator |= (VT100::TextAttr& left, VT100::TextAttr right)
+{
+	reinterpret_cast<uint8_t&>(left) |= uint8_t(right);
+	return left;
+}
+
+inline VT100::TextAttr& operator &= (VT100::TextAttr& left, VT100::TextAttr right)
+{
+	reinterpret_cast<uint8_t&>(left) &= uint8_t(right);
+	return left;
+}
 
 #endif // VT100_HPP
 

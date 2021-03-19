@@ -1,6 +1,9 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2020 Andrey V. Skvortsov <starling13@mail.ru>
+ * 
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2019,2020 Terminal-BASIC team
+ *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -127,6 +130,20 @@ public:
 	// Printable interface
 	size_t printTo(Print& p) const;
 };
+
+template <>
+inline void writeValue<Parser::Value>(Parser::Value v, uint8_t* str)
+{
+	memcpy(str, &v, sizeof(v));
+}
+
+template <>
+inline typename Parser::Value readValue<Parser::Value>(const uint8_t* str)
+{
+	Parser::Value result;
+	memcpy(&result, str, sizeof(result));
+	return result;
+}
 
 } // namespace BASIC
 

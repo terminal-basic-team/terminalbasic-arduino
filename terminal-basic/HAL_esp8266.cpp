@@ -19,34 +19,65 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file basic_exteeprom.hpp
- * @brief I2C/SPI external eeprom functions and commands
- */
+#ifdef ARDUINO_ARCH_ESP8266
 
-#ifndef BASIC_EXTEEPROM_HPP
-#define BASIC_EXTEEPROM_HPP
+#include "HAL.h"
+#include "FS.h"
 
-#include "basic_functionblock.hpp"
+#define NVRAMSIZE 32768
 
-namespace BASIC
+static File f;
+
+void
+HAL_initialize()
 {
+	if (!SPIFFS.begin())
+		exit(1);
+}
 
-class ExtEEPROM : public FunctionBlock
+void
+HAL_finalize()
 {
-public:
-	explicit ExtEEPROM();
-private:
-	static bool com_echain(Interpreter&);
-	static bool com_eload(Interpreter&);
-	static bool com_esave(Interpreter&);
-	
-	static const FunctionBlock::command _commands[] PROGMEM;
-// FunctionBlock interface
-protected:
-	void _init() override;
-};
+}
 
-} // namespace BASIC
+HAL_nvram_address_t
+HAL_nvram_getsize()
+{
+	return NVRAMSIZE;
+}
 
-#endif // BASIC_EXTEEPROM_HPP
+uint8_t
+HAL_nvram_read(HAL_nvram_address_t addr)
+{
+	f = SPIFFS.open("/nvram.bin", "r");
+	if (!f)
+		exit(2);
+	if (!f.seek(uint32_t(addr)))
+		exit(3);
+	uint8_t r = f.read();
+	f.close();
+	return r;
+}
+
+void
+HAL_nvram_write(HAL_nvram_address_t addr, uint8_t b)
+{
+	f = SPIFFS.open("/nvram.bin", "r+");
+	if (!f)
+		exit(2);
+
+	if (f.size() > uint32_t(addr)) {
+		if (!f.seek(uint32_t(addr)))
+			exit(3);
+	} else {
+		if (!f.seek(f.size()))
+			exit(3);
+		while (f.size() < uint32_t(addr)) {
+			f.write(0xFF);
+		}
+	}
+	f.write(b);
+	f.close();
+}
+
+#endif // ARDUINO_ARCH_ESP8266
