@@ -87,7 +87,21 @@ GFXModule::command_color(Interpreter &i)
 			i.print(char(GFXTERM::Command::COLOR));
 			i.print(char(c));
 			i.print(char(b));
-			
+			return true;
+		}
+	}
+	return false;
+}
+
+bool
+GFXModule::command_cursor(Interpreter &i)
+{
+	Parser::Value v(false);
+	if (i.popValue(v)) {
+		if (v.type == Parser::Value::BOOLEAN) {
+			i.print(char(ASCII::DLE));
+			i.print(char(GFXTERM::Command::CURSOR));
+			i.print(bool(v) ? char(1) : char(0));
 			return true;
 		}
 	}

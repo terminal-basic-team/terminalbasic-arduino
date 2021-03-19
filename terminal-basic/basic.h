@@ -112,6 +112,9 @@ typedef enum _basic_token_t
 	BASIC_TOKEN_KW_ON,         // 37
 //	KW_OPTION,     // 38
 	BASIC_TOKEN_OP_OR,         // 39
+#if USE_PEEK_POKE
+	BASIC_TOKEN_KW_POKE,
+#endif
 	BASIC_TOKEN_KW_PRINT,      // 40
 #if USE_RANDOM
 	BASIC_TOKEN_KW_RANDOMIZE,  // 41

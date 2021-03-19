@@ -48,6 +48,9 @@ static const uint8_t intFuncs[] PROGMEM = {
 #if USE_LEN
 	'L', 'E', 'N'+0x80,
 #endif
+#if USE_PEEK_POKE
+	'P', 'E', 'E', 'K'+0x80,
+#endif
 	'R', 'E', 'S'+0x80,
 #if USE_RIGHT
 	'R', 'I', 'G', 'H', 'T', '$'+0x80,
@@ -80,6 +83,9 @@ const FunctionBlock::function InternalFunctions::funcs[] PROGMEM = {
 #endif
 #if USE_LEN
 	InternalFunctions::func_len,
+#endif
+#if USE_PEEK_POKE
+	InternalFunctions::func_peek,
 #endif
 	InternalFunctions::func_result,
 #if USE_RIGHT
@@ -151,7 +157,7 @@ InternalFunctions::func_chr(Interpreter &i)
 	i.pushValue(v);
 	return true;
 }
-#endif
+#endif // USE_CHR
 
 #if USE_GET
 bool
@@ -166,6 +172,20 @@ InternalFunctions::func_get(Interpreter &i)
 	return true;
 }
 #endif // USE_GET
+
+#if USE_PEEK_POKE
+bool
+InternalFunctions::func_peek(Interpreter &i)
+{
+	INT addr;
+	if (getIntegerFromStack(i, addr)) {
+		Parser::Value v(Integer(*((volatile uint8_t*)(addr))));
+		i.pushValue(v);
+		return true;
+	}
+	return false;
+}
+#endif // USE_PEEK_POKE
 
 bool
 InternalFunctions::func_result(Interpreter &i)
@@ -193,8 +213,8 @@ InternalFunctions::func_int(Interpreter &i)
 #endif
 		i.pushValue(v);
 		return true;
-	} else
-		return false;
+	}
+	return false;
 }
 #endif // USE_REALS
 

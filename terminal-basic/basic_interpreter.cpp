@@ -621,6 +621,14 @@ Interpreter::execCommand(FunctionBlock::command c)
 		raiseError(DYNAMIC_ERROR, COMMAND_FAILED);
 }
 
+#if USE_PEEK_POKE
+void
+Interpreter::poke(Pointer a, Integer d)
+{
+	*((volatile uint8_t*)(a)) = d;
+}
+#endif
+
 void
 Interpreter::print(Lexer &l)
 {

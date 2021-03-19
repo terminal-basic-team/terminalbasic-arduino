@@ -312,6 +312,9 @@ static const uint8_t tokenTable[] PROGMEM = {
 	'O', 'N'+0x80,                     // 23
 //	'O', 'P', 'T', 'I', 'O', 'N'+0x80, // 24
 	'O', 'R'+0x80,
+#if USE_PEEK_POKE
+	'P', 'O', 'K', 'E'+0x80,
+#endif
 	'P', 'R', 'I', 'N', 'T'+0x80,      // 25
 #if USE_RANDOM
 	'R', 'A', 'N', 'D', 'O', 'M', 'I', 'Z', 'E'+0x80, //26

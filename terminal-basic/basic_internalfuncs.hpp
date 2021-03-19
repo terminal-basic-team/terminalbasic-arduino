@@ -52,6 +52,9 @@ private:
 #if USE_LEN
 	static bool func_len(Interpreter&);
 #endif
+#if USE_PEEK_POKE
+	static bool func_peek(Interpreter&);
+#endif
 	static bool func_result(Interpreter&);
 #if USE_RANDOM
 	static bool func_rnd(Interpreter&);

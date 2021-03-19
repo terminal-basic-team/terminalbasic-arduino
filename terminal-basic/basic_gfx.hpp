@@ -33,6 +33,7 @@ public:
 	static bool command_box(Interpreter&);
 	static bool command_circle(Interpreter&);
 	static bool command_color(Interpreter&);
+	static bool command_cursor(Interpreter&);
 	static bool command_line(Interpreter&);
 	static bool command_lineto(Interpreter&);
 	static bool command_point(Interpreter&);
@@ -46,6 +47,6 @@ private:
 	static const FunctionBlock::command comms[] PROGMEM;
 };
 
-}
+} // namespace BASIC
 
 #endif

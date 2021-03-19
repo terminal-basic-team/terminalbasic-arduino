@@ -576,7 +576,7 @@ Parser::Value::printTo(Print& p) const
 		else
 			::dtostre(value.real, buf, 7, DTOSTR_ALWAYS_SIGN);
 #else
-		::sprintf(buf, "%- 012.9G", value.real);
+		::sprintf(buf, "%- 12.9G", value.real);
 #endif // ARDUINO
 		if (buf[1] == '0' && buf[2] == '.')
 			memmove(buf+1, buf+2, 15-2);

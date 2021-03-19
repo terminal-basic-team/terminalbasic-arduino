@@ -285,6 +285,10 @@ public:
 	void print(char);
 	// Execute command by function pointer
 	void execCommand(FunctionBlock::command);
+	
+#if USE_PEEK_POKE
+	void poke(Pointer, Integer);
+#endif
 
 #if USE_MATRIX
 	/**

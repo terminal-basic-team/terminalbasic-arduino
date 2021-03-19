@@ -19,22 +19,22 @@
 #ifndef STRINGS_RU_KOI8R_HPP
 #define STRINGS_RU_KOI8R_HPP
 
-#define STR_NO_ERROR                  "ξετ οϋιβολ"
-#define STR_OPERATOR_EXPECTED         "οφιδαμσρ οπεςατος"
-#define STR_EXPRESSION_EXPECTED       "οφιδαμοσψ χωςαφεξιε"
-#define STR_INTEGER_CONSTANT_EXPECTED "οφιδαμοσψ γεμοε"
-#define STR_THEN_OR_GOTO_EXPECTED     "οφιδαμοσψ THEN ιμι GOTO"
-#define STR_INVALID_DATA_EXPRESSION   "ξεχεςξοε χωςαφεξιε DATA"
-#define STR_INVALID_READ_EXPRESSION   "ξεχεςξοε χωςαφεξιε READ"
-#define STR_VARIABLES_LIST_EXPECTED   "οφιδαετσρ σπισολ πεςενεξξωθ"
-#define STR_STRING_OVERFLOW           "πεςεπομξεξιε στςολι"
+#define STR_NO_ERROR                  "…’ "
+#define STR_OPERATOR_EXPECTED         "†„€‹‘ …€’"
+#define STR_EXPRESSION_EXPECTED       "†„€‹‘ ‚›€†……"
+#define STR_INTEGER_CONSTANT_EXPECTED "†„€‹‘ –…‹…"
+#define STR_THEN_OR_GOTO_EXPECTED     "†„€‹‘ THEN ‹ GOTO"
+#define STR_INVALID_DATA_EXPRESSION   "…‚…… ‚›€†…… DATA"
+#define STR_INVALID_READ_EXPRESSION   "…‚…… ‚›€†…… READ"
+#define STR_VARIABLES_LIST_EXPECTED   "†„€…’‘ ‘‘ ………›•"
+#define STR_STRING_OVERFLOW           "……‹…… ‘’"
 
-#define STR_ERROR      "οϋιβλα"
-#define STR_BYTES      "βακτ"
-#define STR_VERSION    "χεςσιρ"
-#define STR_AVAILABLE  "δοστυπξο"
-#define STR_CLI_PROMPT "ηοτοχ"
-#define STR_SYNTAX     "σιξταλσιώεσλαρ"
-#define STR_SEMANTIC   "σεναξτιώεσλαρ"
+#define STR_ERROR      "€"
+#define STR_BYTES      "€‰’"
+#define STR_VERSION    "‚…‘"
+#define STR_AVAILABLE  "„‘’“"
+#define STR_CLI_PROMPT "ƒ’‚"
+#define STR_SYNTAX     "‘’€‘—…‘€"
+#define STR_SEMANTIC   "‘…€’—…‘€"
 
 #endif

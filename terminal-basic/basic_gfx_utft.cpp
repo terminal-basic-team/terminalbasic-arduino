@@ -53,6 +53,18 @@ GFXModule::command_box(Interpreter &i)
 }
 
 bool
+GFXModule::command_cursor(Interpreter &i)
+{
+	Parser::Value v(false);
+	if (i.popValue(v)) {
+		if (v.type == Parser::Value::BOOLEAN) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool
 GFXModule::command_circle(Interpreter &i)
 {
 	INT x,y,r;

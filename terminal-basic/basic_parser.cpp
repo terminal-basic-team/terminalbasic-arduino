@@ -80,7 +80,7 @@ namespace BASIC
 #if CONF_ERROR_STRINGS
 
 #if (LANG == LANG_RU)
-#include "strings_ru_koi8r.hpp"
+#include "strings_ru_cp866.hpp"
 #elif (LANG == LANG_EN)
 #include "strings_en.hpp"
 #endif
@@ -337,6 +337,12 @@ Parser::fOperator()
 			_lexer.getNext();
 	}
 		break;
+#if USE_PEEK_POKE
+	case Token::KW_POKE:
+		if (!_lexer.getNext() || !fPoke())
+			return false;
+		break;
+#endif
 	case Token::KW_PRINT:
 		if (_lexer.getNext()) {
 			if (!fPrintList())
@@ -717,6 +723,21 @@ Parser::fFnexec(Value &v)
 }
 
 #endif // USE_DEFFN
+
+#if USE_PEEK_POKE
+bool
+Parser::fPoke()
+{
+	Parser::Value v, v2;
+	if (fExpression(v) && (_lexer.getToken() == Token::COMMA) &&
+	 _lexer.getNext() && fExpression(v2)) {
+		if (_mode == EXECUTE)
+			_interpreter.poke(Integer(v), Integer(v2));
+		return true;
+	}
+	return false;
+}
+#endif
 
 /*
  * IMPLICIT_ASSIGNMENT =

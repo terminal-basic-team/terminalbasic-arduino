@@ -123,5 +123,6 @@
  */
 #define USESTOPCONT       1
 
-#endif /* BASIC_CONFIG_H */
+#define USE_PEEK_POKE 1
 
+#endif /* BASIC_CONFIG_H */
