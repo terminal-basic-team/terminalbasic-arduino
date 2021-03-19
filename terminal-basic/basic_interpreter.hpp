@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #ifndef INTERPRETER_HPP
 #define INTERPRETER_HPP
 
-#include "basic_common.hpp"
+#include "basic.hpp"
 #include "basic_lexer.hpp"
 #include "basic_parser.hpp"
 #include "basic_program.hpp"
@@ -230,7 +230,7 @@ public:
 	{
 		MEMORY, VARS, ARRAYS
 	};
-#endif
+#endif //USE_DUMP
 	
 	/**
 	 * @brief constructor
@@ -566,7 +566,7 @@ private:
 	// Syntactical analyzer object
 	Parser			 _parser;
 	//Input buffer
-	char			 _inputBuffer[PROGSTRINGSIZE];
+	uint8_t			 _inputBuffer[PROGSTRINGSIZE];
 	// Position in the input buffer
 	uint8_t			 _inputPosition;
 	// Input variable name string;

@@ -16,31 +16,48 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file	basic_dataparser.hpp
- */
+#include "tvoutprint.hpp"
 
-#ifndef BASIC_DATAPARSER_HPP
-#define BASIC_DATAPARSER_HPP
+#if USETVOUT
 
-#include "basic_interpreter.hpp"
+#include "ascii.hpp"
 
-namespace BASIC
-{
-
-class DataParser
-{
-public:
-	DataParser(Interpreter&);
-	bool searchData(const uint8_t*, Parser::Value&);
-	bool read(const uint8_t*, Parser::Value&);
-	const Lexer &lexer() const { return _lexer; }
-private:
-	bool readValue(Parser::Value&);
-	Lexer	     _lexer;
-	Interpreter &_interpreter;
-};
-
-} // namespace BASIC
-
+#if TVOUT_DEBUG
+#include "seriallight.hpp"
 #endif
+
+TVoutPrint::TVoutPrint()
+{
+}
+
+void
+TVoutPrint::writeChar(uint8_t c)
+{
+	TVoutEx::instance()->write(c);
+}
+
+uint8_t
+TVoutPrint::getCursorX()
+{
+	return TVoutEx::instance()->getCursorX();
+}
+
+void
+TVoutPrint::setCursorX(uint8_t x)
+{
+	TVoutEx::instance()->setCursorX(x);
+}
+
+void
+TVoutPrint::setCursor(uint8_t x, uint8_t y)
+{
+	TVoutEx::instance()->setCursorCharPosition(x, y);
+}
+
+void
+TVoutPrint::clear()
+{
+	TVoutEx::instance()->clearScreen();
+}
+
+#endif USETVOUT

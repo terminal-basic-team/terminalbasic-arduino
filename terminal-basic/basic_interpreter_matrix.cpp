@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -146,7 +146,7 @@ Interpreter::matrixDet(const char *name)
 		}
 		uint8_t *tbuf = reinterpret_cast<uint8_t*>(_program._text+
 		    _program._arraysEnd);
-		_result.type = array->type;
+		_result.setType(array->type);
 		switch (array->type) {
 		case Parser::Value::INTEGER: {
 			Integer r;
@@ -155,7 +155,7 @@ Interpreter::matrixDet(const char *name)
 			    array->dimension[0]+1, r,
 			    reinterpret_cast<Integer*>(tbuf)))
 				_result = false;
-			_result.value.integer = r;
+			_result = r;
 		}
 		break;
 #if USE_LONGINT
@@ -166,7 +166,7 @@ Interpreter::matrixDet(const char *name)
 			    array->dimension[0]+1, r,
 			    reinterpret_cast<LongInteger*>(tbuf)))
 				_result = false;
-			_result.value.longInteger = r;
+			_result = r;
 #endif // USE_LONGINT
 #if USE_REALS
 		case Parser::Value::REAL: {
@@ -176,7 +176,7 @@ Interpreter::matrixDet(const char *name)
 			    array->dimension[0]+1, r,
 			    reinterpret_cast<Real*>(tbuf)))
 				_result = false;
-			_result.value.real = r;
+			_result = r;
 		}
 		break;
 #endif // USE_REALS
@@ -342,7 +342,7 @@ Interpreter::assignMatrix(const char *name, const char *first, const char *secon
 		break;
 	case MO_MUL: {
 		assert(second != nullptr);
-		ArrayFrame *arraySecond = getSquareArray(second);
+		ArrayFrame *arraySecond = get2DArray(second);
 		if (arraySecond == nullptr)
 			return;
 		if (arraySecond->type != arrayFirst->type) {

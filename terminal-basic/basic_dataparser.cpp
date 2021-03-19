@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,9 +29,9 @@ _interpreter(interpreter)
 }
 
 bool
-DataParser::searchData(const char *str, Parser::Value &value)
+DataParser::searchData(const uint8_t *str, Parser::Value &value)
 {
-	_lexer.init(str);
+	_lexer.init(str, true);
 	while (_lexer.getNext()) {
 		if ((_lexer.getToken() == Token::KW_DATA) &&
 		    _lexer.getNext())
@@ -41,9 +41,9 @@ DataParser::searchData(const char *str, Parser::Value &value)
 }
 
 bool
-DataParser::read(const char *str, Parser::Value &value)
+DataParser::read(const uint8_t *str, Parser::Value &value)
 {
-	_lexer.init(str);
+	_lexer.init(str, true);
 	if (_lexer.getNext() && (_lexer.getToken() == Token::COMMA)
 	    && _lexer.getNext())
 		return readValue(value);

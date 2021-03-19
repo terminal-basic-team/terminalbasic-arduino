@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,27 @@ namespace BASIC
 void GFXModule::_init() {}
 
 bool
+GFXModule::command_boxc(Interpreter &i)
+{
+	INT x,y,w,h,c;
+	
+	if (getIntegerFromStack(i, c)) {
+		if (getIntegerFromStack(i, h)) {
+			if (getIntegerFromStack(i, w)) {
+				if (getIntegerFromStack(i, y)) {
+					if (getIntegerFromStack(i, x)) {
+						TVoutEx::instance()->drawRect(x, y,
+						    w, h, Color_t(c));
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool
 GFXModule::command_box(Interpreter &i)
 {
 	INT x,y,w,h;
@@ -52,9 +73,27 @@ GFXModule::command_cursor(Interpreter &i)
 {
 	Parser::Value v(false);
 	if (i.popValue(v)) {
-		if (v.type == Parser::Value::BOOLEAN) {
+		if (v.type() == Parser::Value::LOGICAL) {
 			TVoutEx::instance()->setCursorVisible(bool(v));
 			return true;
+		}
+	}
+	return false;
+}
+
+bool
+GFXModule::command_circlec(Interpreter &i)
+{
+	INT x,y,r,z;
+	
+	if (getIntegerFromStack(i, z)) {
+		if (getIntegerFromStack(i, r)) {
+			if (getIntegerFromStack(i, y)) {
+				if (getIntegerFromStack(i, x)) {
+					TVoutEx::instance()->drawCircle(x,y,r,Color_t(z));
+					return true;
+				}
+			}
 		}
 	}
 	return false;
@@ -85,6 +124,27 @@ GFXModule::command_color(Interpreter &i)
 		if (getIntegerFromStack(i, c)) {
 			TVoutEx::instance()->setColor(Color_t(c), Color_t(b));
 			return true;
+		}
+	}
+	return false;
+}
+
+bool
+GFXModule::command_linec(Interpreter &i)
+{
+	INT x1,y1,x2,y2,z;
+	
+	if (getIntegerFromStack(i, z)) {
+		if (getIntegerFromStack(i, y2)) {
+			if (getIntegerFromStack(i, x2)) {
+				if (getIntegerFromStack(i, y1)) {
+					if (getIntegerFromStack(i, x1)) {
+						TVoutEx::instance()->drawLine(x1, y1,
+						    x2, y2, Color_t(z));
+						return true;
+					}
+				}
+			}
 		}
 	}
 	return false;
@@ -133,6 +193,22 @@ GFXModule::command_point(Interpreter &i)
 		if (getIntegerFromStack(i, x)) {
 			TVoutEx::instance()->setPixel(x, y);
 			return true;
+		}
+	}
+	return false;
+}
+
+bool
+GFXModule::command_pointc(Interpreter &i)
+{
+	INT x,y,z;
+	
+	if (getIntegerFromStack(i, z)) {
+		if (getIntegerFromStack(i, y)) {
+			if (getIntegerFromStack(i, x)) {
+				TVoutEx::instance()->setPixel(x, y, Color_t(z));
+				return true;
+			}
 		}
 	}
 	return false;

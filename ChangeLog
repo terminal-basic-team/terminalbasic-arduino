@@ -1,4 +1,61 @@
-r1.2 (16.02.2019)
+r2.0.3 (9.05.2019 Release, dedicated to the USSR Victory Day
+
+  * Fix error in confirmation of the file operations
+  * Fix regression in SD functions while reading the files with "CR LF" line endings
+  * Output reals with 6 significant decimal digits
+
+r2.0.2 (24.04.2019)
+
+  * Fix bugs in building with ArduinoIDE, using TVOUT output
+
+r2.0.1 (21.04.2019)
+
+  * Fix bug with parsing real constants with E/e and w/o decimal point
+  * Fix bug wirh saving program by DSAVE with REM lines
+
+r2.0 (11.04.2019)
+
+  * Reduce unnecessary spaces, generated in source file with DSAVE
+  * Fix undefined behaviour when load from file with long lines
+
+r2.0-rc1 (24.03.2019)
+
+  * Add binary file operations to SD module
+  * Add HEX$ function
+  * Update libsdcard (No more dependency on arduino SD lib)
+
+r2.0-beta-3 (15.03.2019)
+
+  * Fix 2.0 regression in parsing reals with E and e exponent chars
+
+r2.0-beta-2 (9.03.2019)
+
+  * Fix lexer bug with input errors handling
+
+r2.0-beta-1 (8.03.2019) Release, dedicated to the international women day
+
+  * Add autostart of the AUTORUN.BAS program if SD support is enabled
+  * Fix SD module DSAVE regression
+  * Fix incorrect matrix multiplication restriction
+  * Fix scanning of identifiers with char codes greater then 127
+
+r2.0-alpha-3 (23.02.2019) Release, dedicated to the Defender of the Fatherlad Day
+
+  * Fix commands and functions parameters passing
+  * Fix a conflict of GET$() FUNCTION and DELAY command
+  * Fix some lexer regressions
+  * Add more russian keywords from BASIC-6 system for BESM-6 computer
+
+r2.0-alpha-2 (19.02.2019)
+
+  * Fix some lexer-related regressions
+
+r2.0-alpha-1 (17.02.2019)
+
+  * New lexical analyzer, written in pure C. Ability to localize keywords.
+    Currently English and Russian keywords  available.
+
+r1.2 (16.02.2019) Release, dedicated to 43 anniversary of the first built KAMAZ truck
 
   * Add CURSOR gfx command (switch blinking cursor on and off)
   * Add PEEK function and POKE command

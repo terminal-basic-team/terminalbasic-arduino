@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "basic_common.hpp"
+#include "basic.hpp"
 #include "basic_interpreter.hpp"
 
 #include "arduino_logger.hpp"
@@ -50,7 +50,7 @@
 #endif
 
 #if USETVOUT
-#include "TVoutPrint.hpp"
+#include "tvoutprint.hpp"
 #include "utility/Font6x8.h"
 #include "utility/Font8x8.h"
 #include "utility/Font6x8_cyr_koe13.hpp"
@@ -89,7 +89,7 @@ static LiquidCrystalVt100 lsvt100(lCrystal, 20, 4, lCrBuf);
 #endif
 
 #if USESD
-static BASIC::SDFSModule sdfs;
+BASIC::SDFSModule sdfs;
 #endif
 
 #if USEMATH

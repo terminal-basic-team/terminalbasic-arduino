@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016, 2017 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,12 +27,12 @@ namespace BASIC
 {
 
 static const uint8_t arduinoIOFuncs[] PROGMEM = {
-	'A', 'R', 'E', 'A', 'D', '%' + 0x80,
+	'A', 'R', 'E', 'A', 'D', '%', ASCII_NUL,
 #if USE_REALS
-	'A', 'R', 'E', 'A', 'D' + 0x80,
+	'A', 'R', 'E', 'A', 'D', ASCII_NUL,
 #endif
-	'D', 'R', 'E', 'A', 'D' + 0x80,
-	0
+	'D', 'R', 'E', 'A', 'D', ASCII_NUL,
+	ASCII_ETX
 };
 
 const FunctionBlock::function ArduinoIO::_funcs[] PROGMEM = {
@@ -44,16 +44,16 @@ const FunctionBlock::function ArduinoIO::_funcs[] PROGMEM = {
 };
 
 static const uint8_t arduinoIOCommands[] PROGMEM = {
-	'A', 'W', 'R', 'I', 'T', 'E' + 0x80,
+	'A', 'W', 'R', 'I', 'T', 'E', ASCII_NUL,
 #if CONF_BEEP
-	'B', 'E', 'E', 'P' + 0x80,
+	'B', 'E', 'E', 'P', ASCII_NUL,
 #endif
 #if CONF_MODULE_ARDUINOIO_TONE
-	'D', 'N', 'O', 'T', 'O', 'N', 'E' + 0x80,
-	'D', 'T', 'O', 'N', 'E' + 0x80,
+	'D', 'N', 'O', 'T', 'O', 'N', 'E', ASCII_NUL,
+	'D', 'T', 'O', 'N', 'E', ASCII_NUL,
 #endif
-	'D', 'W', 'R', 'I', 'T', 'E' + 0x80,
-	0
+	'D', 'W', 'R', 'I', 'T', 'E', ASCII_NUL,
+	ASCII_ETX
 };
 
 const FunctionBlock::command ArduinoIO::_commands[] PROGMEM = {
@@ -97,10 +97,10 @@ ArduinoIO::func_dread(Interpreter &i)
 	INT v;
 	if (getIntegerFromStack(i, v)) {
 		pinMode(v, INPUT);
-		i.pushValue(bool(digitalRead(v)));
-		return true;
-	} else
-		return false;
+		if (i.pushValue(bool(digitalRead(v))))
+			return true;
+	}
+	return false;
 }
 
 bool
@@ -115,7 +115,6 @@ ArduinoIO::comm_awrite(Interpreter &i)
 			return true;
 		}
 	}
-
 	return false;
 }
 
@@ -124,7 +123,7 @@ ArduinoIO::comm_dwrite(Interpreter &i)
 {
 	Parser::Value v(false);
 	if (i.popValue(v)) {
-		if (v.type == Parser::Value::BOOLEAN) {
+		if (v.type() == Parser::Value::LOGICAL) {
 			INT v2;
 			if (getIntegerFromStack(i, v2)) {
 				pinMode(v2, OUTPUT);
@@ -169,7 +168,6 @@ ArduinoIO::comm_notone(Interpreter &i)
 #endif
 
 #if USE_REALS
-
 Real
 ArduinoIO::aread_r(Real v)
 {

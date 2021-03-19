@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2017-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2017-2019 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 
 /**
  * @file config.hpp
- * @brief Configuration parameters
+ * @brief Configuration parameters, specific to Terminal-BASIC
  */
 
 #ifndef CONFIG_HPP
@@ -26,7 +26,7 @@
 
 #include <stdint.h>
 
-#include "basic_config.h"
+#include "config.h"
 
 namespace BASIC
 {
@@ -70,9 +70,11 @@ namespace BASIC
 	// LEN function, returns length of the string
 	#define USE_LEN            1
 	// LEFT$ function, return leftmost part of the string
-	#define USE_LEFT           1
+	#define USE_LEFT           0
 	// RIGHT$ function, return rightmost part of the string
-	#define USE_RIGHT          1
+	#define USE_RIGHT          0
+	// HEX$ function, return sting with hexsadecimal representation of the expression value
+	#define USE_HEX     0
 #endif // USE_STRINGOPS
 /*
  * Clear program memory on NEW command
@@ -81,13 +83,17 @@ namespace BASIC
 /**
  * Allow INPUT command with text message e.g. INPUT "A:";A
  */
-#define INPUT_WITH_TEXT      1
+#define INPUT_WITH_TEXT      0
 
 #if USE_TEXTATTRIBUTES
 	/*
 	 * Use ANSI color attributes
 	 */
 	#define USE_COLORATTRIBUTES       1
+	/*
+	 * Support of SPC(N) print command
+	 */
+	#define CONF_USE_SPC_PRINT_COM    1
 	/*
 	 * Set print zones width (tab spacing)
 	 */
@@ -107,23 +113,13 @@ namespace BASIC
 #define AUTOCAPITALIZE    0
 
 /*
- * C++ level code optimisation mode
- */
-#define OPT_SPEED     1 // Extensive use of switch/case constructs
-#define OPT_SIZE      2 // Use cascade of if/else if instead of switch/case
-#define OPT           OPT_SIZE // Selected mode
-
-/*
  * SDcard module
  */
 #define USESD         0
-
-/*
- * Localization
- */
-#define LANG_EN 0
-#define LANG_RU 1
-#define LANG LANG_EN
+#if USESD
+	// Unix-like file operations
+	#define USE_FILEOP 1
+#endif
 
 // Use text error strings
 #define CONF_ERROR_STRINGS 0
@@ -238,13 +234,13 @@ namespace BASIC
 	#define USE_WIRE 0
 #endif
 
+// Use multiterminal mode
+#define BASIC_MULTITERMINAL       0
+
 /*
  * Max size of the program line
  */
-const uint8_t PROGSTRINGSIZE = 72;
-
-// Max size of the string constants/variables
-const uint8_t STRINGSIZE = 72;
+const uint8_t PROGSTRINGSIZE = 80;
 
 // Number of characters in variable name
 const uint8_t VARSIZE = 5;

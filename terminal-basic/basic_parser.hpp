@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #include <inttypes.h>
 
 #include "arduinoext.hpp"
-#include "basic_common.hpp"
+#include "basic.hpp"
 #include "basic_internalfuncs.hpp"
 
 namespace BASIC
@@ -68,9 +68,10 @@ public:
 	 * @brief Parse a text string
 	 * @param str string to parse
 	 * @param ok successfull parsing flag
+	 * @param tok
 	 * @return end of parsed string
 	 */
-	bool parse(const char*, bool&);
+	bool parse(const uint8_t*, bool&, bool);
 
 	void stop();
 
@@ -158,4 +159,4 @@ private:
 
 } // namespace BASIC
 
-#endif
+#endif // PARSER_HPP

@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,22 +31,27 @@
  * Parameters
  */
 
-// Use multiterminal mode
-#define BASIC_MULTITERMINAL       0
+#ifdef ARDUINO_ARCH_SAM
+#define HAVE_HWSERIAL1
+#define HAVE_HWSERIAL2
+#define HAVE_HWSERIAL3
+#define HAVE_HWSERIAL4
+#endif
+
 #if BASIC_MULTITERMINAL
 #define NUM_TERMINALS 1
 #ifdef HAVE_HWSERIAL1
-#define SERIAL_PORT1 SerialL1
+#define SERIAL_PORT1 Serial1
 #undef NUM_TERMINALS
 #define NUM_TERMINALS 2
 #endif
 #ifdef HAVE_HWSERIAL2
-#define SERIAL_PORT2 SerialL2
+#define SERIAL_PORT2 Serial2
 #undef NUM_TERMINALS
 #define NUM_TERMINALS 3
 #endif
 #ifdef HAVE_HWSERIAL3
-#define SERIAL_PORT3 SerialL3
+#define SERIAL_PORT3 Serial3
 #undef NUM_TERMINALS
 #define NUM_TERMINALS 4
 #endif
@@ -71,15 +76,21 @@ const uint16_t PROGRAMSIZE = 14336;
 const uint16_t PROGRAMSIZE = 8192;
 #endif
 #elif defined (__AVR_ATmega2560__)
-#if (S_OUTPUT != TVOUT_O) && (USE_EXTMEM == 0)
+#if (S_OUTPUT != TVOUT_O) && (!USE_EXTMEM) && (!USESD)
 const uint16_t PROGRAMSIZE = 6144;
+#elif (!USE_EXTMEM) && (USESD)
+const uint16_t PROGRAMSIZE = 5900;
 #else
-const uint16_t PROGRAMSIZE = 900;
+const uint16_t PROGRAMSIZE = 512;
 #endif
 #elif defined (__AVR_ATmega128__) || defined (__AVR_ATmega128A__)
 const uint16_t PROGRAMSIZE = 3072;
 #elif defined (__AVR_ATmega328__) || defined (__AVR_ATmega328P__)
+#if USESD
+const uint16_t PROGRAMSIZE = 256;
+#else
 const uint16_t PROGRAMSIZE = 1024;
+#endif
 #elif defined (__AVR_ATmega168__) || defined (__AVR_ATmega168P__)
 const uint16_t PROGRAMSIZE = 384;
 #elif defined __SAM3X8E__

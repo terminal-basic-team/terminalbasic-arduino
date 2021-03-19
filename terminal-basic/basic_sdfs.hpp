@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@
 
 #if USESD
 
-#include <SD.h>
 #include <sd.hpp>
 
 namespace BASIC
@@ -37,6 +36,9 @@ class SDFSModule : public FunctionBlock
 	// Function block interface
 public:
 	SDFSModule();
+	
+	void loadAutorun(Interpreter&);
+	
 protected:
 	void _init() override;
 private:
@@ -46,15 +48,26 @@ private:
 	static bool scratch(Interpreter&);
 	static bool dload(Interpreter&);
 	static bool header(Interpreter&);
+#if USE_FILEOP
+	static bool com_fclose(Interpreter&);
+	static bool com_fwrite(Interpreter&);
+	
+	static bool func_fopen(Interpreter&);
+	static bool func_fsize(Interpreter&);
+	static bool func_fread(Interpreter&);
+#endif
 	
 	static bool getFileName(Interpreter&, char[]);
 	static bool _loadText(SDCard::File&, Interpreter&);
 	
 	static SDCard::File	_root;
 	static const FunctionBlock::function _commands[] PROGMEM;
+#if USE_FILEOP
+	static const FunctionBlock::function _functions[] PROGMEM;
+#endif
 };
 
-}
+} // namespace BASIC
 
 #endif // USESD
 

@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,9 @@ private:
 #endif
 #if USE_CHR
 	static bool func_chr(Interpreter&);
+#endif
+#if USE_HEX
+	static bool func_hex(Interpreter&);
 #endif
 #if USE_GET
 	static bool func_get(Interpreter&);

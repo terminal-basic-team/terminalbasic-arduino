@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,31 +27,81 @@
 namespace BASIC
 {
 
+#if USE_FILEOP
+static SDCard::File userFiles[5];
+#endif // USE_FILEOP
+
 SDCard::File SDFSModule::_root;
 
 static const uint8_t sdfsCommands[] PROGMEM = {
-	'D', 'C', 'H', 'A', 'I', 'N'+0x80,
-	'D', 'I', 'R', 'E', 'C', 'T', 'O', 'R', 'Y'+0x80,
-	'D', 'L', 'O', 'A', 'D'+0x80,
-	'D', 'S', 'A', 'V', 'E'+0x80,
-	'H', 'E', 'A', 'D', 'E', 'R'+0x80,
-	'S', 'C', 'R', 'A', 'T', 'C', 'H'+0x80,
-	0
+	'D', 'C', 'H', 'A', 'I', 'N', ASCII_NUL,
+	'D', 'I', 'R', 'E', 'C', 'T', 'O', 'R', 'Y', ASCII_NUL,
+	'D', 'L', 'O', 'A', 'D', ASCII_NUL,
+	'D', 'S', 'A', 'V', 'E', ASCII_NUL,
+#if USE_FILEOP
+	'F', 'C', 'L', 'O', 'S', 'E', ASCII_NUL,
+	'F', 'W', 'R', 'I', 'T', 'E', ASCII_NUL,
+#endif
+	'H', 'E', 'A', 'D', 'E', 'R', ASCII_NUL,
+	'S', 'C', 'R', 'A', 'T', 'C', 'H', ASCII_NUL,
+	ASCII_ETX
 };
+
+#if USE_FILEOP
+static const uint8_t sdfsFunctions[] PROGMEM = {
+	'F', 'O', 'P', 'E', 'N', ASCII_NUL,
+	'F', 'R', 'E', 'A', 'D', ASCII_NUL,
+	'F', 'S', 'I', 'Z', 'E', ASCII_NUL,
+	ASCII_ETX
+};
+
+#endif // USE_FILEOP
 
 const FunctionBlock::function  SDFSModule::_commands[] PROGMEM = {
 	SDFSModule::dchain,
 	SDFSModule::directory,
 	SDFSModule::dload,
 	SDFSModule::dsave,
+#if USE_FILEOP
+	SDFSModule::com_fclose,
+	SDFSModule::com_fwrite,
+#endif
 	SDFSModule::header,
 	SDFSModule::scratch
 };
+
+#if USE_FILEOP
+const FunctionBlock::function SDFSModule::_functions[] PROGMEM = {
+	SDFSModule::func_fopen,
+	SDFSModule::func_fread,
+	SDFSModule::func_fsize
+};
+#endif // USE_FILEOP
 
 SDFSModule::SDFSModule()
 {
 	commands = _commands;
 	commandTokens = sdfsCommands;
+#if USE_FILEOP
+	functions = _functions;
+	functionTokens = sdfsFunctions;
+#endif
+}
+
+void
+SDFSModule::loadAutorun(Interpreter& i)
+{
+	static const char ar[] PROGMEM = "/AUTORUN.BAS";
+	char ss[13];
+	strcpy_P(ss, ar);
+	SDCard::File f = SDCard::SDFS.open(ss);
+	if (!f)
+		return;
+	
+	if (!_loadText(f, i))
+		return;
+	
+	i.run();
 }
 
 void
@@ -65,6 +115,100 @@ SDFSModule::_init()
 	if (!_root || !_root.isDirectory())
 		abort();
 }
+
+#if USE_FILEOP
+
+bool
+SDFSModule::com_fclose(Interpreter& i)
+{
+	INT iv;
+	if (getIntegerFromStack(i, iv)) {
+		if (iv >= 0 && iv < 5) {
+			if (userFiles[iv]) {
+				userFiles[iv].close();
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool
+SDFSModule::com_fwrite(Interpreter& i)
+{
+	INT iv;
+	if (getIntegerFromStack(i, iv)) {
+		if (iv >= 0 && iv < 5) {
+			if (userFiles[iv]) {
+				INT bv;
+				if (getIntegerFromStack(i, bv)) {
+					userFiles[iv].write(bv);
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool
+SDFSModule::func_fopen(Interpreter& i)
+{
+	uint8_t currentFile;
+	for (currentFile = 0; currentFile<5; ++currentFile)
+		if (!userFiles[currentFile])
+			break;
+	if (currentFile < 5) {
+		const char* s;
+		if (i.popString(s)) {
+			userFiles[currentFile] = SDCard::SDFS.open(s,
+			    SDCard::Mode::WRITE |
+			    SDCard::Mode::READ |
+			    SDCard::Mode::CREAT);
+			if (userFiles[currentFile]) {
+				userFiles[currentFile].seek(0);
+				if (i.pushValue(Integer(currentFile))) {
+					return true;
+				}
+				// Can't push fileno, close file
+				userFiles[currentFile].close();
+			}
+		}
+	}
+	return false;
+}
+
+bool
+SDFSModule::func_fread(Interpreter& i)
+{
+	INT iv;
+	if (getIntegerFromStack(i, iv)) {
+		if (iv >= 0 && iv < 5) {
+			if (userFiles[iv]) {
+				if (i.pushValue(INT(userFiles[iv].read())))
+					return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool
+SDFSModule::func_fsize(Interpreter& i)
+{
+	INT iv;
+	if (getIntegerFromStack(i, iv)) {
+		if (iv >= 0 && iv < 5) {
+			if (userFiles[iv]) {
+				if (i.pushValue(INT(userFiles[iv].size())))
+					return true;
+			}
+		}
+	}
+	return false;
+}
+
+#endif // USE_FILEOP
 
 bool
 SDFSModule::directory(Interpreter &i)
@@ -149,35 +293,35 @@ SDFSModule::dsave(Interpreter &i)
 	for (Program::Line *s = i._program.getNextLine(); s != nullptr;
 	    s = i._program.getNextLine()) {
 		f.print(s->number);
-		lex.init(s->text);
+		lex.init(s->text, true);
+		Token tPrev = Token::NOTOKENS;
 		while (lex.getNext()) {
-			f.write(' ');
 			Token t = lex.getToken();
-			if (t < Token::STAR) {
-				char buf[16];
-				const uint8_t *res = Lexer::getTokenString(t,
+			if (t != Token::COMMA &&
+			    t != Token::RPAREN &&
+			    tPrev != Token::LPAREN)
+			    f.write(' ');
+			tPrev = t;
+			if (t < Token::INTEGER_IDENT) {
+				uint8_t buf[16];
+				const bool res = Lexer::getTokenString(t,
 				    reinterpret_cast<uint8_t*>(buf));
-				if (res != nullptr)
-					f.print(buf);
+				if (res)
+					f.print((const char*)buf);
 				else {
 					f.close();
 					return false;
 				}
-			} else if (t <= Token::RPAREN) {
-				char buf[16];
-				strcpy_P(buf, (PGM_P)pgm_read_ptr(
-				    &(Lexer::tokenStrings[uint8_t(t)-
-				    uint8_t(Token::STAR)])));
-				f.print(buf);
 				if (t == Token::KW_REM) {
 					f.write(' ');
-					f.print(s->text+lex.getPointer());
+					f.print((const char*)s->text + 
+					    lex.getPointer());
 					break;
 				}
-			} else if (t <= Token::BOOL_IDENT) {
+			} else if (t < Token::C_INTEGER) {
 				f.print(lex.id());
-			} else if (t <= Token::C_BOOLEAN) {
-				f.print(lex.getValue());
+			} else if (t < Token::C_STRING) {
+				lex.getValue().printTo(f);
 			} else if (t == Token::C_STRING) {
 				f.write('"');
 				f.print(lex.id());
@@ -196,18 +340,29 @@ SDFSModule::_loadText(SDCard::File &f, Interpreter &i)
 {
 	while (true) {
 		char buf[PROGSTRINGSIZE] = {0, };
-		f.setTimeout(10);
-		size_t res = f.readBytesUntil('\n', buf, PROGSTRINGSIZE-1);
+		// f.setTimeout(10);
+		size_t res = 0;
+		int c;
+		while (f.available() > 0) {
+			c = f.read();
+			if (c == '\r') {
+			    continue;
+			} else if (c == '\n') {
+			    buf[res] = '\0';
+			    break;
+			} else if (res < (PROGSTRINGSIZE-1))
+				buf[res++] = c;
+		}
 		if (res > 0) {
                 	if (buf[res-1] == '\r')
                         	buf[res-1] = 0;
 			Lexer lex;
-			lex.init(buf);
+			lex.init((uint8_t*)buf, false);
 			if (!lex.getNext() || lex.getToken() !=
 			    Token::C_INTEGER)
 				return false;
 			if (!i._program.addLine(Integer(lex.getValue()),
-			    buf+lex.getPointer()))
+			    (uint8_t*)buf+lex.getPointer()))
 				return false;
 		} else
 			break;

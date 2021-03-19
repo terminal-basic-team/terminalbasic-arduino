@@ -29,15 +29,15 @@
 
 typedef HardwareSerial SerialLight;
 
-#define SerialL Serial;
+#define SerialL Serial
 #ifdef HAVE_HWSERIAL1
-#define SerialL1 Serial1;
+#define SerialL1 Serial1
 #endif
 #ifdef HAVE_HWSERIAL2
-#define SerialL2 Serial2;
+#define SerialL2 Serial2
 #endif
 #ifdef HAVE_HWSERIAL3
-#define SerialL3 Serial3;
+#define SerialL3 Serial3
 #endif
 
 #elif ARDUINO_ARCH_AVR

@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2016-2019 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,12 +30,16 @@ class GFXModule : public FunctionBlock
 public:
 	explicit GFXModule();
 
+	static bool command_boxc(Interpreter&);
 	static bool command_box(Interpreter&);
+	static bool command_circlec(Interpreter&);
 	static bool command_circle(Interpreter&);
 	static bool command_color(Interpreter&);
 	static bool command_cursor(Interpreter&);
+	static bool command_linec(Interpreter&);
 	static bool command_line(Interpreter&);
 	static bool command_lineto(Interpreter&);
+	static bool command_pointc(Interpreter&);
 	static bool command_point(Interpreter&);
 	static bool command_screen(Interpreter&);
 	
@@ -49,4 +53,4 @@ private:
 
 } // namespace BASIC
 
-#endif
+#endif // BASIC_GFX_HPP
