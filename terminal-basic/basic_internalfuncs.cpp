@@ -49,6 +49,9 @@ static const uint8_t intFuncs[] PROGMEM = {
 	'L', 'E', 'N'+0x80,
 #endif
 	'R', 'E', 'S'+0x80,
+#if USE_RIGHT
+	'R', 'I', 'G', 'H', 'T', '$'+0x80,
+#endif
 #if USE_RANDOM
 	'R', 'N', 'D'+0x80,
 #endif
@@ -79,6 +82,9 @@ const FunctionBlock::function InternalFunctions::funcs[] PROGMEM = {
 	InternalFunctions::func_len,
 #endif
 	InternalFunctions::func_result,
+#if USE_RIGHT
+	InternalFunctions::func_right,
+#endif
 #if USE_RANDOM
 	InternalFunctions::func_rnd,
 #endif
@@ -206,7 +212,7 @@ InternalFunctions::func_left(Interpreter &i)
 			if (i.popString(str)) {
 				char buf[STRINGSIZE];
 				strncpy(buf, str, STRINGSIZE);
-				uint8_t pos = min(len, strlen(str));
+				const uint8_t pos = min(len, strlen(str));
 				buf[pos] = char(0);
 				i.pushString(buf);
 				i.pushValue(v);
@@ -217,6 +223,31 @@ InternalFunctions::func_left(Interpreter &i)
 	return false;
 }
 #endif // USE_LEFT
+
+#if USE_RIGHT
+bool
+InternalFunctions::func_right(Interpreter &i)
+{
+	INT len;
+	if (getIntegerFromStack(i, len)) {
+		Parser::Value v;
+		i.popValue(v);
+		if (v.type == Parser::Value::STRING) {
+			const char *str;
+			if (i.popString(str)) {
+				char buf[STRINGSIZE];
+				strncpy(buf, str, STRINGSIZE);
+				const uint8_t strl = strlen(str);
+				len = min(len, strl);
+				i.pushString(buf+strl-len);
+				i.pushValue(v);
+				return true;
+			}
+		}
+	}
+	return false;
+}
+#endif // USE_RIGHT
 
 #if USE_LEN
 bool
@@ -238,11 +269,9 @@ InternalFunctions::func_len(Interpreter &i)
 
 #if USE_REALS
 #define TYP Real
-#elif USE_LONGINT
-#define TYP LongInteger
 #else
-#define TYP Integer
-#endif // USE_LONGINT
+#define TYP INT
+#endif // USE_REALS
 TYP
 InternalFunctions::sgn(TYP v)
 {

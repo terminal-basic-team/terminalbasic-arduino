@@ -291,6 +291,6 @@ Math::cbr_r(Real v)
 }
 #endif
 
-}
+} // namespace BASIC
 
 #endif // USEMATH

@@ -1,3 +1,9 @@
+r1.2-beta4 (22.10.2018)
+
+  * Add RIGHT$ function
+  * Default configuration suitable to run on tiny Arduino boards (Atmega328). Sorry, but it seems TB becomes
+    too fat to run on Atmega168
+
 r1.2-beta3 (13.09.2018) Release, dedicated to my birthday
 
   * Add BEEP command

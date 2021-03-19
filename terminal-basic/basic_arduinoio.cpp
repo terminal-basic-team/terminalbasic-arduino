@@ -27,11 +27,11 @@ namespace BASIC
 {
 
 static const uint8_t arduinoIOFuncs[] PROGMEM = {
-	'A', 'R', 'E', 'A', 'D', '%'+0x80,
+	'A', 'R', 'E', 'A', 'D', '%' + 0x80,
 #if USE_REALS
-	'A', 'R', 'E', 'A', 'D'+0x80,
+	'A', 'R', 'E', 'A', 'D' + 0x80,
 #endif
-	'D', 'R', 'E', 'A', 'D'+0x80,
+	'D', 'R', 'E', 'A', 'D' + 0x80,
 	0
 };
 
@@ -44,19 +44,19 @@ const FunctionBlock::function ArduinoIO::_funcs[] PROGMEM = {
 };
 
 static const uint8_t arduinoIOCommands[] PROGMEM = {
-	'A', 'W', 'R', 'I', 'T', 'E'+0x80,
+	'A', 'W', 'R', 'I', 'T', 'E' + 0x80,
 #if CONF_BEEP
-	'B', 'E', 'E', 'P'+0x80,
+	'B', 'E', 'E', 'P' + 0x80,
 #endif
 #if CONF_MODULE_ARDUINOIO_TONE
-	'D', 'N', 'O', 'T', 'O', 'N', 'E'+0x80,
-	'D', 'T', 'O', 'N', 'E'+0x80,
+	'D', 'N', 'O', 'T', 'O', 'N', 'E' + 0x80,
+	'D', 'T', 'O', 'N', 'E' + 0x80,
 #endif
-	'D', 'W', 'R', 'I', 'T', 'E'+0x80,
+	'D', 'W', 'R', 'I', 'T', 'E' + 0x80,
 	0
 };
 
-const FunctionBlock::command  ArduinoIO::_commands[] PROGMEM = {
+const FunctionBlock::command ArduinoIO::_commands[] PROGMEM = {
 	ArduinoIO::comm_awrite,
 #if CONF_BEEP
 	ArduinoIO::comm_beep,
@@ -77,6 +77,7 @@ ArduinoIO::ArduinoIO()
 }
 
 #if USE_REALS
+
 bool
 ArduinoIO::func_aread(Interpreter &i)
 {
@@ -137,6 +138,7 @@ ArduinoIO::comm_dwrite(Interpreter &i)
 }
 
 #if CONF_MODULE_ARDUINOIO_TONE
+
 bool
 ArduinoIO::comm_tone(Interpreter &i)
 {
@@ -167,6 +169,7 @@ ArduinoIO::comm_notone(Interpreter &i)
 #endif
 
 #if USE_REALS
+
 Real
 ArduinoIO::aread_r(Real v)
 {
@@ -184,12 +187,13 @@ ArduinoIO::aread_i(INT v)
 
 
 #if CONF_BEEP
+
 bool
 ArduinoIO::comm_beep(Interpreter &i)
 {
-    pinMode(BEEP_PIN, OUTPUT);
-    tone(BEEP_PIN, 440, 333);
-    return true;
+	pinMode(BEEP_PIN, OUTPUT);
+	tone(BEEP_PIN, BEEP_FREQ, 333);
+	return true;
 }
 #endif // CONF_BEEP
 

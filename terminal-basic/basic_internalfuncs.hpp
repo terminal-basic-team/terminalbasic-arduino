@@ -46,6 +46,9 @@ private:
 #if USE_LEFT
 	static bool func_left(Interpreter&);
 #endif
+#if USE_RIGHT
+	static bool func_right(Interpreter&);
+#endif
 #if USE_LEN
 	static bool func_len(Interpreter&);
 #endif
@@ -58,11 +61,9 @@ private:
 	static bool func_tim(Interpreter&);
 #if USE_REALS
 #define ___TYP Real
-#elif USE_LONGINT
-#define ___TYP LongInteger
 #else
-#define ___TYP Integer
-#endif // USE_LONGINT
+#define ___TYP INT
+#endif // USE_REALS
 	static ___TYP sgn(___TYP);
 #undef ___TYP
 	
@@ -71,4 +72,4 @@ private:
 
 } // namespace BASIC
 
-#endif
+#endif // BASIC_INTERNALFUNCS_HPP

@@ -63,15 +63,15 @@ namespace BASIC
 		 * SIN COS TAN COT
 		 */
 		#define M_TRIGONOMETRIC         1
-		#define M_HYPERBOLIC            1
+		#define M_HYPERBOLIC            0
 		/*
 		 * ACS ASN ATN
 		 */
-		#define M_REVERSE_TRIGONOMETRIC 1
+		#define M_REVERSE_TRIGONOMETRIC 0
 		/*
 		 * CBR (cubic root) ...
 		 */
-		#define M_ADDITIONAL            1
+		#define M_ADDITIONAL            0
 	#endif // USEMATH
 #endif // USE_REALS
 
@@ -112,13 +112,13 @@ namespace BASIC
 	/*
 	 * Use DIV keyword for integer division in addition to \ operation
 	 */
-	#define USE_DIV_KW   1
+	#define USE_DIV_KW   0
 #endif // USE_INTEGER_DIV
 /**
  * DUMP command support
  * This command can be used to see BASIC memory image, variables and arrays list
  */
-#define USE_DUMP             1
+#define USE_DUMP             0
 /*
  * Clear program memory on NEW command
  */
@@ -130,15 +130,15 @@ namespace BASIC
 /*
  * Support of Darthmouth BASIX-style matrix operations
  */
-#define USE_MATRIX           1
+#define USE_MATRIX           0
 /**
  * Support of DATA/READ statements
  */
-#define USE_DATA             1
+#define USE_DATA             0
 /*
  * Support of DEF FN construct
  */
-#define USE_DEFFN            1
+#define USE_DEFFN            0
 /**
  * Allow INPUT command with text message e.g. INPUT "A:";A
  */
@@ -151,7 +151,7 @@ namespace BASIC
 	/*
 	 * Use ANSI color attributes
 	 */
-	#define USE_COLORATTRIBUTES  0
+	#define USE_COLORATTRIBUTES  1
 	/*
 	 * Support of SPC(N) print command
 	 */
@@ -190,7 +190,7 @@ namespace BASIC
 /*
  * SDcard module
  */
-#define USESD         1
+#define USESD         0
 
 /*
  * Localization
@@ -200,7 +200,7 @@ namespace BASIC
 #define LANG LANG_EN
 
 // Use text error strings
-#define CONF_ERROR_STRINGS 1
+#define CONF_ERROR_STRINGS 0
 
 // Arduino IO module
 #define CONF_MODULE_ARDUINOIO      1
@@ -241,7 +241,7 @@ namespace BASIC
 /*
  * GFX module
  */
-#define USE_GFX          1
+#define USE_GFX          0
 #if USE_GFX
 #define SERIAL_GFX       0
 #endif
@@ -304,10 +304,10 @@ namespace BASIC
 	#define LIQCR_D3 2
 
 // Input select
-#define S_INPUT SDL_I
+#define S_INPUT SERIALL_I
 
 // Output select
-#define S_OUTPUT TVOUT_O
+#define S_OUTPUT SERIALL_O
 
 #if USE_EXTEEPROM
 	#define USE_WIRE 1
@@ -318,7 +318,7 @@ namespace BASIC
 /*
  * Max size of the program line
  */
-const uint8_t PROGSTRINGSIZE = 80;
+const uint8_t PROGSTRINGSIZE = 72;
 
 // Max size of the string constants/variables
 const uint8_t STRINGSIZE = 80;

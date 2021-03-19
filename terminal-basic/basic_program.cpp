@@ -165,7 +165,7 @@ Program::clearProg()
 void
 Program::moveData(Pointer dest)
 {
-	int32_t diff = _textEnd-dest;
+	const int32_t diff = _textEnd-dest;
 	memmove(_text+dest, _text+_textEnd, _arraysEnd-_textEnd);
 	_variablesEnd -= diff;
 	_arraysEnd -= diff;
@@ -323,11 +323,13 @@ Program::addLine(uint16_t num, const char *line)
 	while (_lexer.getNext()) {
 		if (position >= (PROGSTRINGSIZE-1))
 			return false;
-		const uint8_t t = uint8_t(0x80) + uint8_t(_lexer.getToken());
-		if (_lexer.getToken() < Token::STAR) { // One byte tokens
+		
+		const Token tok = _lexer.getToken();
+		const uint8_t t = uint8_t(0x80) + uint8_t(tok);
+		if (tok < Token::STAR) { // One byte tokens
 			tempBuffer[position++] = t;
 			lexerPosition = _lexer.getPointer();
-			if (_lexer.getToken() == Token::KW_REM) { // Save rem text as is
+			if (tok == Token::KW_REM) { // Save rem text as is
 				while (line[lexerPosition] == ' ' ||
 				    line[lexerPosition] == '\t')
 					++lexerPosition;
@@ -337,7 +339,7 @@ Program::addLine(uint16_t num, const char *line)
 				position += remaining;
 				break;
 			}
-		} else if (_lexer.getToken() == Token::C_INTEGER) {
+		} else if (tok == Token::C_INTEGER) {
 			tempBuffer[position++] = t;
 			if ((position + sizeof(INT)) >= PROGSTRINGSIZE-1)
 				return false;
@@ -347,7 +349,7 @@ Program::addLine(uint16_t num, const char *line)
 			lexerPosition = _lexer.getPointer();
 		}
 #if USE_REALS
-		 else if (_lexer.getToken() == Token::C_REAL) {
+		 else if (tok == Token::C_REAL) {
 			tempBuffer[position++] = t;
 			if ((position + sizeof(Real)) >= PROGSTRINGSIZE-1)
 				return false;
