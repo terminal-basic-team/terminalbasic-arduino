@@ -753,13 +753,19 @@ Interpreter::pushReturnAddress()
 void
 Interpreter::returnFromSub()
 {
-	const auto f = _program.currentStackFrame();
-	if ((f != nullptr) && (f->_type == Program::StackFrame::SUBPROGRAM_RETURN)) {
-		_program.jump(f->body.gosubReturn.calleeIndex);
-		_program._current.position = f->body.gosubReturn.textPosition;
+	while (true) {
+		const auto f = _program.currentStackFrame();
+		if (f == nullptr)
+			break;
+		if (f->_type == Program::StackFrame::SUBPROGRAM_RETURN) {
+			_program.jump(f->body.gosubReturn.calleeIndex);
+			_program._current.position = f->body.gosubReturn.textPosition;
+			_program.pop();
+			return;
+		}
 		_program.pop();
-	} else
-		raiseError(DYNAMIC_ERROR, RETURN_WO_GOSUB);
+	}
+	raiseError(DYNAMIC_ERROR, RETURN_WO_GOSUB);
 }
 
 Program::StackFrame*

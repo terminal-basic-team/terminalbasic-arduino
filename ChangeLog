@@ -1,3 +1,9 @@
+r2.1 (23.09.2019)
+
+  * Add rudimentary support of french keywords
+  * Fix RETURN, called from FOR LOOP
+  * Add ELLIPSE and ELLIPSEC commands to gfx module
+
 r2.1-beta1 (29.05.2019)
 
   * Add support for implicit arrays with indexes from 0 to 10

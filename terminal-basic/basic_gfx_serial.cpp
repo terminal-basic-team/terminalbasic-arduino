@@ -57,6 +57,79 @@ GFXModule::command_box(Interpreter &i)
 }
 
 bool
+GFXModule::command_boxc(Interpreter &i)
+{
+	INT x,y,w,h,z;
+	if (getIntegerFromStack(i, z)) {
+		if (getIntegerFromStack(i, h)) {
+			if (getIntegerFromStack(i, w)) {
+				if (getIntegerFromStack(i, y)) {
+					if (getIntegerFromStack(i, x)) {
+						i.print(char(ASCII::DLE));
+						i.print(char(GFXTERM::Command::BOXC));
+						write16(i, x);
+						write16(i, y);
+						write16(i, w);
+						write16(i, h);
+						i.print(char(z));
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool
+GFXModule::command_ellipse(Interpreter &i)
+{
+	INT x,y,w,h;
+	
+	if (getIntegerFromStack(i, h)) {
+		if (getIntegerFromStack(i, w)) {
+			if (getIntegerFromStack(i, y)) {
+				if (getIntegerFromStack(i, x)) {
+					i.print(char(ASCII::DLE));
+					i.print(char(GFXTERM::Command::ELLIPSE));
+					write16(i, x);
+					write16(i, y);
+					write16(i, w);
+					write16(i, h);
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool
+GFXModule::command_ellipsec(Interpreter &i)
+{
+	INT x,y,w,h,z;
+	if (getIntegerFromStack(i, z)) {
+		if (getIntegerFromStack(i, h)) {
+			if (getIntegerFromStack(i, w)) {
+				if (getIntegerFromStack(i, y)) {
+					if (getIntegerFromStack(i, x)) {
+						i.print(char(ASCII::DLE));
+						i.print(char(GFXTERM::Command::ELLIPSEC));
+						write16(i, x);
+						write16(i, y);
+						write16(i, w);
+						write16(i, h);
+						i.print(char(z));
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool
 GFXModule::command_circle(Interpreter &i)
 {
 	INT x,y,r;
@@ -215,31 +288,6 @@ GFXModule::command_circlec(Interpreter &i)
 					write16(i, r);
 					i.print(char(z));
 					return true;
-				}
-			}
-		}
-	}
-	return false;
-}
-
-bool
-GFXModule::command_boxc(Interpreter &i)
-{
-	INT x,y,w,h,z;
-	if (getIntegerFromStack(i, z)) {
-		if (getIntegerFromStack(i, h)) {
-			if (getIntegerFromStack(i, w)) {
-				if (getIntegerFromStack(i, y)) {
-					if (getIntegerFromStack(i, x)) {
-						i.print(char(ASCII::DLE));
-						i.print(char(GFXTERM::Command::BOXC));
-						write16(i, x);
-						write16(i, y);
-						write16(i, w);
-						write16(i, h);
-						i.print(char(z));
-						return true;
-					}
 				}
 			}
 		}

@@ -62,23 +62,23 @@ namespace BASIC
 #define USE_STRINGOPS      1
 #if USE_STRINGOPS
 	// GET$ function, returns string from last pressed key symbol
-	#define USE_INKEY    1
+	#define USE_INKEY            1
 	// CHR$ function, returns string from the parameter ASCII code
-	#define USE_CHR      1
+	#define USE_CHR            1
 	// ASC function, returns code of the first symbol in a string
-	#define USE_ASC      1
+	#define USE_ASC            1
 	// LEN function, returns length of the string
-	#define USE_LEN      1
+	#define USE_LEN            1
 	// LEFT$ function, return leftmost part of the string
-	#define USE_LEFT     0
+	#define USE_LEFT           0
 	// RIGHT$ function, return rightmost part of the string
-	#define USE_RIGHT    1
+	#define USE_RIGHT          1
 	// MID$ function, return middle part of the string
-	#define USE_MID      1
+	#define USE_MID            1
 	// A variant of MID$ equivalent
-	#define USE_SEG      1
+	#define USE_SEG            1
 	// HEX$ function, return sting with hexsadecimal representation of the expression value
-	#define USE_HEX      0
+	#define USE_HEX     0
 #endif // USE_STRINGOPS
 /*
  * Clear program memory on NEW command
@@ -87,11 +87,11 @@ namespace BASIC
 /**
  * Allow INPUT command with text message e.g. INPUT "A:";A
  */
-#define OPT_INPUT_WITH_TEXT  1
+#define OPT_INPUT_WITH_TEXT      1
 /**
  * Implicit arrays without DIM statement
  */
-#define OPT_IMPLICIT_ARRAYS  1
+#define OPT_IMPLICIT_ARRAYS 1
 
 #if USE_TEXTATTRIBUTES
 	/*
@@ -173,7 +173,10 @@ namespace BASIC
  */
 #define USE_GFX          0
 #if USE_GFX
-#define SERIAL_GFX       0
+// Use drawing functions with explisit color setting
+#define GFX_EXP_COLOR 1
+// Serial binary graphics protocol
+#define SERIAL_GFX    0
 #endif
 
 /*

@@ -236,7 +236,7 @@ public:
 	 */
 	StackFrame *push(StackFrame::Type);
 	/**
-	 * @brief pop top value
+	 * @brief pop top stack frame
 	 */
 	void pop();
 	/**

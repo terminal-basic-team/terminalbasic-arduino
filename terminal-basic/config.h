@@ -76,28 +76,23 @@
 /*
  * Allow GO TO OPERATOR in addition to GOTO
  */
-#define CONF_SEPARATE_GO_TO 0
+#define CONF_SEPARATE_GO_TO     0
 
 /*
  * Support of integer division and modulo operation
  */
-#define USE_INTEGER_DIV     1
+#define USE_INTEGER_DIV      1
 #if USE_INTEGER_DIV
 	/*
 	 * Use DIV keyword for integer division in addition to \ operation
 	 */
-	#define USE_DIV_KW  0
+	#define USE_DIV_KW   0
 #endif // USE_INTEGER_DIV
 
 /*
  * Use >< as not-equals operator (with default <>)
  */
 #define CONF_USE_ALTERNATIVE_NE 0
-
-/*
- * Structured loop support
- */
-#define USE_DOLOOP           0
 
 /*
  * SAVE, LOAD and CHAIN commands support
@@ -118,7 +113,7 @@
 /*
  * STOP and CONTINUE commands support
  */
-#define USESTOPCONT   1
+#define USESTOPCONT       1
 
 /**
  * PEEK FUNCTION, POKE command support
@@ -127,6 +122,7 @@
 
 #define LANG_EN 0
 #define LANG_RU 1
+#define LANG_FR 3
 
 /*
  * Messages localization

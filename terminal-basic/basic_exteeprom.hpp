@@ -44,6 +44,6 @@ protected:
 	void _init() override;
 };
 
-}
+} // namespace BASIC
 
-#endif
+#endif // BASIC_EXTEEPROM_HPP

@@ -163,12 +163,12 @@ setup()
 #endif
 #ifdef SERIAL_PORT_O
 #ifdef SERIAL_PORT_I
-        if (&SERIAL_PORT_I != &SERIAL_PORT_O)
+	if (&SERIAL_PORT_I != &SERIAL_PORT_O)
 #endif // SERIAL_PORT_I
-            SERIAL_PORT_O.begin(SERIAL_O_BR);
+		SERIAL_PORT_O.begin(SERIAL_O_BR);
 #endif // SERIAL_PORT_O
 #if USEPS2USARTKB
-        ps2usartStream.begin();
+	ps2usartStream.begin();
 #endif
 #if USETVOUT
 	tvOut.selectFont(Font6x8);
@@ -176,10 +176,10 @@ setup()
 #elif USEUTFT
 	utftPrint.begin();
 #elif USELIQUIDCRYSTAL
-        lCrystal.begin(LIQCR_HORIZ, LIQCR_VERT);
+	lCrystal.begin(LIQCR_HORIZ, LIQCR_VERT);
 	lCrystal.cursor();
 	lCrystal.blink();
-        lsvt100.clear();
+	lsvt100.clear();
 #endif
 #if USE_SDL_ISTREAM
 	sdlStream.init();

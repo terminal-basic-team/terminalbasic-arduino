@@ -63,6 +63,6 @@ private:
 	static const FunctionBlock::command _commands[] PROGMEM;
 };
 
-}
+} // namespace BASIC
 
 #endif // BASIC_ARDUINOIO_HPP

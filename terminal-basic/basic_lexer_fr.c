@@ -20,7 +20,7 @@
 #include "config.h"
 #include "basic.h"
 
-#if CONF_LEXER_LANG == LANG_EN
+#if CONF_LEXER_LANG == LANG_FR
 
 const uint8_t _basic_lexer_symbolsShift PROGMEM = 0;
 
@@ -61,12 +61,11 @@ const uint8_t _basic_lexer_tokenTable[] PROGMEM = {
 #if USE_DUMP
 	'D', 'U', 'M', 'P', ASCII_NUL,           // 15
 #endif
-	'E', 'N', 'D', ASCII_NUL,
 	'F', 'A', 'L', 'S', 'E', ASCII_NUL,
+        'F', 'I', 'N', ASCII_NUL,
 #if USE_DEFFN
 	'F', 'N', ASCII_NUL,                     // 18
 #endif
-	'F', 'O', 'R', ASCII_NUL,                // 19
 	'G', 'O', 'S', 'U', 'B', ASCII_NUL,      // 20
 	'G', 'O', 'T', 'O', ASCII_NUL,           // 11
 #if CONF_SEPARATE_GO_TO
@@ -80,8 +79,9 @@ const uint8_t _basic_lexer_tokenTable[] PROGMEM = {
 #if USE_MATRIX
 	'I', 'N', 'V', ASCII_NUL,
 #endif
+	'J', 'U', 'S', 'Q', 'U', 'A', ASCII_NUL,
 	'L', 'E', 'T', ASCII_NUL,
-	'L', 'I', 'S', 'T', ASCII_NUL,           // 19
+	'L', 'I', 'S', 'T', 'E', 'R', ASCII_NUL, // 19
 #if USE_SAVE_LOAD
 	'L', 'O', 'A', 'D', ASCII_NUL,           // 20
 #endif
@@ -102,6 +102,7 @@ const uint8_t _basic_lexer_tokenTable[] PROGMEM = {
 #if USE_PEEK_POKE
 	'P', 'O', 'K', 'E', ASCII_NUL,
 #endif
+	'P', 'O', 'U', 'R', ASCII_NUL,           // 19
 	'P', 'R', 'I', 'N', 'T', ASCII_NUL,
 #if USE_RANDOM
 	'R', 'A', 'N', 'D', 'O', 'M', 'I', 'Z', 'E', ASCII_NUL, //26
@@ -113,7 +114,7 @@ const uint8_t _basic_lexer_tokenTable[] PROGMEM = {
 #if USE_DATA
 	'R', 'E', 'S', 'T', 'O', 'R', 'E', ASCII_NUL,
 #endif
-	'R', 'E', 'T', 'U', 'R', 'N', ASCII_NUL,
+	'R', 'E', 'T', 'O', 'U', 'R', ASCII_NUL,
 	'R', 'U', 'N', ASCII_NUL,
 #if USE_SAVE_LOAD
 	'S', 'A', 'V', 'E', ASCII_NUL,
@@ -129,7 +130,6 @@ const uint8_t _basic_lexer_tokenTable[] PROGMEM = {
 	'T', 'A', 'B', ASCII_NUL,
 #endif
 	'T', 'H', 'E', 'N', ASCII_NUL,
-	'T', 'O', ASCII_NUL,
 #if USE_MATRIX
 	'T', 'R', 'N', ASCII_NUL,
 #endif

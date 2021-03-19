@@ -415,8 +415,7 @@ public:
 	 * @param name variable name
 	 * @param v value to assign
 	 */
-	VariableFrame *setVariable(const char*,
-	    const Parser::Value&);
+	VariableFrame *setVariable(const char*, const Parser::Value&);
 	/**
 	 * @brief setarray element a given value with indexes on the stack
 	 * @param name array name
