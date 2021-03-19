@@ -1,3 +1,8 @@
+r2.1.1 (15.10.2019)
+
+  * Fix error in configuratyion parameters on tiny systems
+  * Basic support of ESP32
+
 r2.1 (23.09.2019)
 
   * Add rudimentary support of french keywords

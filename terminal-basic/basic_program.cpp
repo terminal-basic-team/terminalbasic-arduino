@@ -310,7 +310,7 @@ Program::arrayByName(const char *name)
 	auto index = _variablesEnd;
 
 	ArrayFrame* f;
-	while (f = arrayByIndex(index)) {
+	while ((f = arrayByIndex(index)) != nullptr) {
 		const int8_t res = strcmp(name, f->name);
 		if (res == 0) {
 			return f;

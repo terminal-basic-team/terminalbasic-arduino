@@ -1349,7 +1349,7 @@ Interpreter::readInput()
 		return false;
 
 	const uint8_t availableSize = PROGSTRINGSIZE - 1 - _inputPosition;
-	a = min(a, availableSize);
+	a = min(uint8_t(a), availableSize);
 
 	const size_t read = _input.readBytes(_inputBuffer + _inputPosition, a);
 	assert(read <= availableSize);
@@ -1997,7 +1997,7 @@ Interpreter::addArray(const char *name, uint8_t dim, uint16_t num)
 {
 	Pointer index = _program._variablesEnd;
 	ArrayFrame *f;
-	while (f = _program.arrayByIndex(index)) {
+	while ((f = _program.arrayByIndex(index)) != nullptr) {
 		int res = strcmp(name, f->name);
 		if (res == 0) {
 			raiseError(DYNAMIC_ERROR, REDIMED_ARRAY);

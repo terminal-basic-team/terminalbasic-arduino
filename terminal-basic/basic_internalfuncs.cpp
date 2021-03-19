@@ -255,7 +255,7 @@ InternalFunctions::func_chr(Interpreter &i)
 {
 	INT iv;
 	if (getIntegerFromStack(i, iv)) {
-		char buf[2] = { iv ,0 };
+		char buf[2] = { char(iv) ,0 };
 		Parser::Value v;
 		v.setType(Parser::Value::STRING);
 		i.pushString(buf);
@@ -360,7 +360,7 @@ InternalFunctions::func_left(Interpreter &i)
 		if (i.popString(str)) {
 			char buf[STRING_SIZE];
 			strncpy(buf, str, STRING_SIZE);
-			const uint8_t pos = min(len, strlen(str));
+			const uint8_t pos = min(uint8_t(len), uint8_t(strlen(str)));
 			buf[pos] = char(0);
 			i.pushString(buf);
 			Parser::Value v;
@@ -384,7 +384,7 @@ InternalFunctions::func_right(Interpreter &i)
 			char buf[STRING_SIZE];
 			strncpy(buf, str, STRING_SIZE);
 			const uint8_t strl = strlen(str);
-			len = min(len, strl);
+			len = min(uint8_t(len), uint8_t(strl));
 			i.pushString(buf+strl-len);
 			Parser::Value v;
 			v.setType(Parser::Value::STRING);
@@ -413,8 +413,8 @@ InternalFunctions::func_mid(Interpreter& i)
 				if (start > strl)
 					buf[0] = 0;
 				else {
-					start = min(start, strl);
-					len = min(len, start-strl-1);
+					start = min(uint8_t(start), uint8_t(strl));
+					len = min(uint8_t(len), uint8_t(start-strl-1));
 					memcpy(buf, str+start-1, len);
 					buf[len] = 0;
 				}
