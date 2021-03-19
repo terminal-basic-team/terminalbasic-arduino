@@ -152,6 +152,7 @@ SDFSModule::com_fseek(Interpreter& i)
 			}
 		}
 	}
+	return false;
 }
 
 bool
@@ -233,6 +234,17 @@ bool
 SDFSModule::directory(Interpreter &i)
 {
 	static const char str[] PROGMEM = "SD CARD CONTENTS";
+	
+	uint16_t startFile = 0;
+	uint16_t endFile = 65535;
+	INT iv;
+	if (getIntegerFromStack(i, iv)) {
+		startFile = iv;
+		if (getIntegerFromStack(i, iv)) {
+			endFile = startFile;
+			startFile = iv;
+		}
+	}
 
 	_root.rewindDirectory();
 
@@ -242,7 +254,16 @@ SDFSModule::directory(Interpreter &i)
 	i.newline();
 	Integer index = 0;
 	for (SDCard::File ff = _root.openNextFile(); ff; ff = _root.openNextFile()) {
-		i.print(++index);
+		++index;
+		if (index < startFile) {
+			ff.close();
+			continue;
+		}
+		if (index > endFile) {
+			ff.close();
+			break;
+		}
+		i.print(index);
 		i.print('\t');
 		i.print(ff.name());
 		uint8_t len = min((uint8_t(13)-strlen(ff.name())),

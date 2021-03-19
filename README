@@ -2,23 +2,21 @@ Terminal-BASIC is a lightweight BASIC-like language interpreter for
 microcontroller-based systems.  It was inspired by the TinyBASIC port
 for popular 8-bit AVR uc boards.
 
-Arduino mega 2560-like boards are primary target for this project.
-However the source code is not an arduino-ide sketch, but the set
-of Netbeans C/C++ IDE projects. Moreover projects depend on the
-arduino-ide and uses its toolchain.
+This project aimed to create interpreter, partially compliant to the
+standards ISO/IEC 6373:1984 and USSR/Russian ГОСТ 27787-88.	
 
 1. Build from sources
 
-Full source code is available at https://bitbucket.org/starling13/ucbasic/
+Full source code is available at https://bitbucket.org/terminalbasicteam/terminal-basic
 and https://sourceforge.net/p/terminal-basic/ repositories.
 It depends on the libarduino, libarduinoext, libutft, libsdcard, tvoutex  and
 libarduinoemulator libraries, which are being hosted at
-    https://bitbucket.org/starling13/libarduino/
-    https://bitbucket.org/starling13/libarduinoext/
-    https://bitbucket.org/starling13/libutft/
-    https://bitbucket.org/starling13/libsdcard/
-    https://bitbucket.org/starling13/tvoutex/
-    https://bitbucket.org/starling13/libarduinoemulator/
+    https://bitbucket.org/terminalbasicteam/libarduino.git
+    https://bitbucket.org/terminalbasicte	am/libarduinoext.git
+    https://bitbucket.org/terminalbasicteam/libutft.git
+    https://bitbucket.org/terminalbasicteam/libsdcard.git
+    https://bitbucket.org/terminalbasicteam/libtvoutex.git
+    https://bitbucket.org/terminalbasicteam/libarduinoemulator.git
 respectively (libs should be placed at the same directory, where terminal-basic
 directory is placed i.e.
    .../REPO/-|
@@ -27,8 +25,8 @@ directory is placed i.e.
              |-libarduinoext from https://bitbucket.org/starling13/libarduinoext/
              |-libutft from https://bitbucket.org/starling13/libutft/
              |-libsdcard from https://bitbucket.org/starling13/libsdcard/
-             |-tvoutex from https://bitbucket.org/starling13/tvoutex/
-             |-libarduinoemulator from https://bitbucket.org/starling13/libarduinoemulator/ )
+             |-tvoutex from https://bitbucket.org/terminalbasicteam/libtvoutex.git
+             |-libarduinoemulator from https://bitbucket.org/terminalbasicteam/libarduinoemulator.git )
 
 The script ./make_sketch.sh makes an archive with arduino-ide sketch from source tree.
 
@@ -52,9 +50,6 @@ and TVoutEx library from https://starling13@bitbucket.org/starling13/tvoutex
 respectively also works.
 
 3. Terminal-BASIC language
-
-Primary goal for project is a support of ANSI/ECMA Minimal BASIC
-standards.
 
 A set of sources for test programs can be downloaded from
 https://cloud.mail.ru/public/45SG/gGc2kFpBk

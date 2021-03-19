@@ -100,7 +100,9 @@ Program::lineByIndex(Pointer address) const
 }
 
 Program::Line*
-Program::lineByNumber(uint16_t number, Pointer address)
+Program::lineByNumber(
+    uint16_t number,
+    Pointer address)
 {
 	Program::Line *result = nullptr;
 
@@ -120,40 +122,41 @@ Program::lineByNumber(uint16_t number, Pointer address)
 uint8_t
 Program::StackFrame::size(Type t)
 {
+	static const constexpr uint8_t minSize = sizeof(StackFrame) - sizeof(Body);
 #if OPT == OPT_SPEED
 	switch (t) {
 	case SUBPROGRAM_RETURN:
-		return sizeof (Type) + sizeof (GosubReturn);
+		return minSize + sizeof (GosubReturn);
 	case FOR_NEXT:
-		return sizeof (Type) + sizeof (ForBody);
+		return minSize + sizeof (ForBody);
 	case STRING:
-		return sizeof (Type) + STRING_SIZE;
+		return minSize + STRING_SIZE;
 	case ARRAY_DIMENSION:
-		return sizeof (Type) + sizeof (uint16_t);
+		return minSize + sizeof (uint16_t);
 	case ARRAY_DIMENSIONS:
-		return sizeof (Type) + sizeof (uint8_t);
+		return minSize + sizeof (uint8_t);
 	case VALUE:
-		return sizeof (Type) + sizeof (Parser::Value);
+		return minSize + sizeof (Parser::Value);
 	case INPUT_OBJECT:
-		return sizeof (Type) + sizeof (VariableBody);
+		return minSize + sizeof (VariableBody);
 	default:
 		return 0;
 	}
 #else
 	if (t == SUBPROGRAM_RETURN)
-		return (sizeof (Type) + sizeof (GosubReturn));
+		return (minSize + sizeof (GosubReturn));
 	else if (t == FOR_NEXT)
-		return (sizeof (Type) + sizeof (ForBody));
+		return (minSize + sizeof (ForBody));
 	else if (t == STRING)
-		return (sizeof (Type) + STRING_SIZE);
+		return (minSize + STRING_SIZE);
 	else if (t == ARRAY_DIMENSION)
-		return (sizeof (Type) + sizeof (uint16_t));
+		return (minSize + sizeof (uint16_t));
 	else if (t == ARRAY_DIMENSIONS)
-		return (sizeof (Type) + sizeof (uint8_t));
+		return (minSize + sizeof (uint8_t));
 	else if (t == VALUE)
-		return (sizeof (Type) + sizeof (Parser::Value));
+		return (minSize + sizeof (Parser::Value));
 	else if (t == INPUT_OBJECT)
-		return (sizeof (Type) + sizeof (VariableBody));
+		return (minSize + sizeof (VariableBody));
 	else
 		return 0;
 #endif
@@ -249,7 +252,7 @@ Program::push(StackFrame::Type t)
 	if ((_sp - s) < _arraysEnd)
 		return nullptr;
 
-	_sp -= StackFrame::size(t);
+	_sp -= s;
 	StackFrame *f = stackFrameByIndex(_sp);
 	if (f != nullptr)
 		f->_type = t;
@@ -356,7 +359,10 @@ Program::arrayByIndex(Pointer index)
 }
 
 bool
-Program::addLine(Parser& parser, uint16_t num, const uint8_t *line)
+Program::addLine(
+    Parser& parser,
+    uint16_t num,
+    const uint8_t *line)
 {
 	uint8_t size;
 	uint8_t tempBuffer[2*PROGSTRINGSIZE];
@@ -395,7 +401,10 @@ Program::addLine(Parser& parser, uint16_t num, const uint8_t *line)
 }
 
 bool
-Program::addLine(uint16_t num, const uint8_t *text, uint8_t len)
+Program::addLine(
+    uint16_t num,
+    const uint8_t *text,
+    uint8_t len)
 {
 	reset();
 
@@ -460,7 +469,10 @@ Program::removeLine(uint16_t num)
 }
 
 bool
-Program::insert(uint16_t num, const uint8_t *text, uint8_t len)
+Program::insert(
+    uint16_t num,
+    const uint8_t *text,
+    uint8_t len)
 {
 	const uint8_t strLen = sizeof(Line) + len;
 

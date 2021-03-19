@@ -95,7 +95,9 @@ typedef enum basic_token
 	BASIC_TOKEN_COM_NEW,       // 34
 	BASIC_TOKEN_KW_NEXT,       // 35
 	BASIC_TOKEN_OP_NOT,        // 36
+#if CONF_USE_ON_GOTO
 	BASIC_TOKEN_KW_ON,         // 37
+#endif
 //	KW_OPTION,
 	BASIC_TOKEN_OP_OR,         // 38
 #if USE_PEEK_POKE

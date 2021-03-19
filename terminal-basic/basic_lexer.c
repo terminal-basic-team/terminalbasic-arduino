@@ -467,15 +467,15 @@ _basic_lexer_tokenizedNext(basic_lexer_context_t *self)
 			break;
 		case BASIC_TOKEN_C_INTEGER:
 			self->value.type = BASIC_VALUE_TYPE_INTEGER;
-			readU16((uint16_t*) & self->value.body.integer,
-				self->string_to_parse + self->string_pointer);
+			readU16((uint16_t*)&self->value.body.integer,
+			    self->string_to_parse + self->string_pointer);
 			self->string_pointer += sizeof (integer_t);
 			break;
 #if USE_LONGINT
 		case BASIC_TOKEN_C_LONG_INTEGER:
 			self->value.type = BASIC_VALUE_TYPE_LONG_INTEGER;
 			readU32((uint32_t*) & self->value.body.long_integer,
-				self->string_to_parse + self->string_pointer);
+			    self->string_to_parse + self->string_pointer);
 			self->string_pointer += sizeof (long_integer_t);
 			break;
 #endif
@@ -576,7 +576,7 @@ basic_lexer_tokenString(basic_token_t t, uint8_t *buf)
 	} else if (t < BASIC_TOKEN_INTEGER_IDENT) {
 		strcpy_P((char*) buf,
 			(PGM_P) pgm_read_ptr(&(_basic_lexer_tokenStrings[
-					(uint8_t) (t)-(uint8_t) (BASIC_TOKEN_STAR)]))
+			    (uint8_t) (t)-(uint8_t) (BASIC_TOKEN_STAR)]))
 			);
 	} else {
 		*buf = '\0';

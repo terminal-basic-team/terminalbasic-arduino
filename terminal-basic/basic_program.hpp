@@ -215,7 +215,9 @@ public:
 	 * @param address start of the search
 	 * @return Line pointer or NULL if not found
 	 */
-	Line *lineByNumber(uint16_t, Pointer = 0);
+	Line *lineByNumber(
+	    uint16_t,
+	    Pointer = 0);
 	/**
 	 * @brief get variable frame at a given index
 	 * @param index basic memory address
@@ -253,7 +255,10 @@ public:
 	 * @param text
 	 * @return flag of success
 	 */
-	bool addLine(Parser&, uint16_t, const uint8_t*);
+	bool addLine(
+	    Parser&,
+	    uint16_t,
+	    const uint8_t*);
 	/**
 	 * @brief Remove program line
 	 * @param num line number
@@ -265,7 +270,10 @@ public:
 	 * @param text line text
 	 * @param len line length
 	 */
-	bool insert(uint16_t, const uint8_t*, uint8_t);
+	bool insert(
+	    uint16_t,
+	    const uint8_t*,
+	    uint8_t);
 	
 #if CONF_USE_ALIGN
 	/**

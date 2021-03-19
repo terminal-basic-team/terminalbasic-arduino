@@ -76,6 +76,11 @@
 #define USE_DELAY           1
 
 /*
+ * Allow ON ... GOTO ... statements
+ */
+#define CONF_USE_ON_GOTO    0
+
+/*
  * Allow GO TO OPERATOR in addition to GOTO
  */
 #define CONF_SEPARATE_GO_TO     0
@@ -144,7 +149,7 @@
 /* Size of the string identifiers */
 #define STRING_SIZE 72
 
-#define USE_PACKED_STRUCT 1
+#define USE_PACKED_STRUCT 0
 
 /*
  * High-level code optimisation mode

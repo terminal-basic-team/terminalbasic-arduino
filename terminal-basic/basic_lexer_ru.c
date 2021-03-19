@@ -123,7 +123,9 @@ const uint8_t _basic_lexer_tokenTable[] PROGMEM = {
 #if USE_DEFFN
 	'é', 'è', 'ê', ASCII_NUL,
 #endif
+#if CONF_USE_ON_GOTO
 	'è', 'ê', 'à', ASCII_NUL,
+#endif
 	'è', 'ì', 'ë', 'ä', ASCII_NUL,
 	'è', 'ì', 'ë', 'í', 'ú', ASCII_NUL,
 	'ê', 'Ä', 'á', 'å', 'Ö', 'ê', ASCII_NUL,

@@ -293,16 +293,29 @@ Parser::fOperator()
 		if (_lexer.getNext())
 			return fForConds();
 		return false;
+#if CONF_USE_ON_GOTO
 	case Token::KW_ON: {
 		Value v;
 		if (!_lexer.getNext() || !fExpression(v)) {
 			_error = EXPRESSION_EXPECTED;
 			return false;
 		}
-		bool res = fOnStatement(uint8_t(INT(v)));
+		uint8_t index;
+#if USE_REALS
+		if (v.type() == Value::REAL)
+			index = round(Real(v));
+#if USE_LONG_REALS
+		else if (v.type() == Value::LONG_REAL)
+			index = round(LongReal(v));
+#endif
+#endif // USE_REALS
+		else
+			index = INT(v);
+		bool res = fOnStatement(index);
 		m_context.stopParse = true;
 		return res;
 	}
+#endif
 	case Token::KW_GOSUB: {
 		Value v;
 		if (!_lexer.getNext() || !fExpression(v)) {
@@ -561,6 +574,7 @@ Parser::fOperator()
 	return true;
 }
 
+#if CONF_USE_ON_GOTO
 bool
 Parser::fOnStatement(uint8_t index)
 {
@@ -580,6 +594,7 @@ Parser::fOnStatement(uint8_t index)
 	}
 	return false;
 }
+#endif // CONF_USE_ON_GOTO
 
 #if USE_DATA
 bool

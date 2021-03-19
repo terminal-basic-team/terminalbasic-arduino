@@ -1,3 +1,9 @@
+r2.2-beta3 (16.02.2020)
+
+  * Add parameters to DIRECTORY command (optional 1st and last file numbers
+    to output)
+  * Fix bugs with alignmnent. ESP8266 platform has reasonable suppot.
+
 r2.2-beta2 (12.02.2020)
 
   * ESP8266 and ESP32 supports SAVE/LOAD commands in SPIFFS

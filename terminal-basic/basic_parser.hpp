@@ -120,7 +120,9 @@ private:
 	
 	bool fOperators(bool&);
 	bool fOperator();
+#if CONF_USE_ON_GOTO
 	bool fOnStatement(uint8_t);
+#endif
 #if USE_DATA
 	bool fDataStatement();
 	bool fReadStatement();

@@ -134,14 +134,14 @@ public:
 template <>
 inline void writeValue<Parser::Value>(Parser::Value v, uint8_t* str)
 {
-	memcpy(str, &v, sizeof(v));
+	memcpy(str, &v, sizeof(Parser::Value));
 }
 
 template <>
 inline typename Parser::Value readValue<Parser::Value>(const uint8_t* str)
 {
 	Parser::Value result;
-	memcpy(&result, str, sizeof(result));
+	memcpy(&result, str, sizeof(Parser::Value));
 	return result;
 }
 

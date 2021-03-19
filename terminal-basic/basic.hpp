@@ -266,7 +266,9 @@ enum class Token : uint8_t
 	COM_NEW = BASIC_TOKEN_COM_NEW,      // 34
 	KW_NEXT = BASIC_TOKEN_KW_NEXT,      // 35
 	OP_NOT = BASIC_TOKEN_OP_NOT,        // 36
+#if CONF_USE_ON_GOTO
 	KW_ON = BASIC_TOKEN_KW_ON,          // 37
+#endif
 //	KW_OPTION,     // 38
 	OP_OR = BASIC_TOKEN_OP_OR,
 #if USE_PEEK_POKE

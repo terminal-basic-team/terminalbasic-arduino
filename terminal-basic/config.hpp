@@ -122,7 +122,7 @@ namespace BASIC
 /*
  * SDcard module
  */
-#define USESD         0
+#define USESD         1
 #if USESD
 	// Unix-like file operations
 	#define USE_FILEOP 1
@@ -238,10 +238,10 @@ namespace BASIC
 	#define LIQCR_D3 2
 
 // Input select
-#define S_INPUT SERIALL_I
+#define S_INPUT SERIAL_I
 
 // Output select
-#define S_OUTPUT SERIALL_O
+#define S_OUTPUT SERIAL_O
 
 #if USE_EXTEEPROM
 	#define USE_WIRE 1

@@ -122,7 +122,9 @@ typedef enum basic_token
 #if USE_DEFFN
 	BASIC_TOKEN_KW_DEF,
 #endif
+#if CONF_USE_ON_GOTO
 	BASIC_TOKEN_KW_ON,
+#endif
 	BASIC_TOKEN_COM_RUN,
 	BASIC_TOKEN_KW_LET,
 	BASIC_TOKEN_KW_DIM,
