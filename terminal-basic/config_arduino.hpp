@@ -41,17 +41,17 @@
 #if BASIC_MULTITERMINAL
 #define NUM_TERMINALS 1
 #ifdef HAVE_HWSERIAL1
-#define SERIAL_PORT1 SerialL1
+#define SERIAL_PORT1 Serial1
 #undef NUM_TERMINALS
 #define NUM_TERMINALS 2
 #endif
 #ifdef HAVE_HWSERIAL2
-#define SERIAL_PORT2 SerialL2
+#define SERIAL_PORT2 Serial2
 #undef NUM_TERMINALS
 #define NUM_TERMINALS 3
 #endif
 #ifdef HAVE_HWSERIAL3
-#define SERIAL_PORT3 SerialL3
+#define SERIAL_PORT3 Serial3
 #undef NUM_TERMINALS
 #define NUM_TERMINALS 4
 #endif
@@ -81,7 +81,7 @@ const uint16_t PROGRAMSIZE = 6144;
 #elif (!USE_EXTMEM) && (USESD)
 const uint16_t PROGRAMSIZE = 5900;
 #else
-const uint16_t PROGRAMSIZE = 900;
+const uint16_t PROGRAMSIZE = 512;
 #endif
 #elif defined (__AVR_ATmega128__) || defined (__AVR_ATmega128A__)
 const uint16_t PROGRAMSIZE = 3072;

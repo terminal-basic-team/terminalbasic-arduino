@@ -50,7 +50,7 @@
 #endif
 
 #if USETVOUT
-#include "TVoutPrint.hpp"
+#include "tvoutprint.hpp"
 #include "utility/Font6x8.h"
 #include "utility/Font8x8.h"
 #include "utility/Font6x8_cyr_koe13.hpp"
