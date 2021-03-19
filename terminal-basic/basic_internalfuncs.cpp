@@ -39,8 +39,8 @@ static const uint8_t intFuncs[] PROGMEM = {
 #if USE_HEX
 	'H', 'E', 'X', '$', ASCII_NUL,
 #endif
-#if USE_GET
-	'G', 'E', 'T', '$', ASCII_NUL,
+#if USE_INKEY
+	'I', 'N', 'K', 'E', 'Y', '$', ASCII_NUL,
 #endif
 #if USE_REALS
 	'I', 'N', 'T', ASCII_NUL,
@@ -50,6 +50,9 @@ static const uint8_t intFuncs[] PROGMEM = {
 #endif	
 #if USE_LEN
 	'L', 'E', 'N', ASCII_NUL,
+#endif
+#if USE_MID
+	'M', 'I', 'D', '$', ASCII_NUL,
 #endif
 #if USE_PEEK_POKE
 	'P', 'E', 'E', 'K', ASCII_NUL,
@@ -61,8 +64,11 @@ static const uint8_t intFuncs[] PROGMEM = {
 #if USE_RANDOM
 	'R', 'N', 'D', ASCII_NUL,
 #endif
+#if USE_SEG
+	'S', 'E', 'G', '$', ASCII_NUL,
+#endif
 	'S', 'G', 'N', ASCII_NUL,
-        'S', 'T', 'R', '$', ASCII_NUL,
+	'S', 'T', 'R', '$', ASCII_NUL,
 	'T', 'I', 'M', 'E', ASCII_NUL,
 	ASCII_ETX
 };
@@ -78,8 +84,8 @@ const FunctionBlock::function InternalFunctions::funcs[] PROGMEM = {
 #if USE_HEX
 	InternalFunctions::func_hex,
 #endif
-#if USE_GET
-	InternalFunctions::func_get,
+#if USE_INKEY
+	InternalFunctions::func_inkey,
 #endif
 #if USE_REALS
 	InternalFunctions::func_int,
@@ -90,6 +96,9 @@ const FunctionBlock::function InternalFunctions::funcs[] PROGMEM = {
 #if USE_LEN
 	InternalFunctions::func_len,
 #endif
+#if USE_MID
+	InternalFunctions::func_mid,
+#endif
 #if USE_PEEK_POKE
 	InternalFunctions::func_peek,
 #endif
@@ -99,6 +108,9 @@ const FunctionBlock::function InternalFunctions::funcs[] PROGMEM = {
 #endif
 #if USE_RANDOM
 	InternalFunctions::func_rnd,
+#endif
+#if USE_SEG
+	InternalFunctions::func_mid,
 #endif
 	InternalFunctions::func_sgn,
 	InternalFunctions::func_str,
@@ -190,9 +202,9 @@ InternalFunctions::func_hex(Interpreter &i)
 }
 #endif // USE_HEX
 
-#if USE_GET
+#if USE_INKEY
 bool
-InternalFunctions::func_get(Interpreter &i)
+InternalFunctions::func_inkey(Interpreter &i)
 {
 	Parser::Value v;
 	char buf[2] = {0,0};
@@ -235,11 +247,11 @@ InternalFunctions::func_int(Interpreter &i)
 #endif
 	 || v.type() == Parser::Value::REAL
 	    ) {
-		v = math<Real>::floor(Real(v));
+		Real vv = math<Real>::floor(Real(v));
 #if USE_LONGINT
-		v = LongInteger(v);
+		v = LongInteger(vv);
 #else
-		v = Integer(v);
+		v = Integer(vv);
 #endif
 		if (i.pushValue(v))
                     return true;
@@ -294,6 +306,41 @@ InternalFunctions::func_right(Interpreter &i)
 	return false;
 }
 #endif // USE_RIGHT
+
+#if USE_MID || USE_SEG
+bool
+InternalFunctions::func_mid(Interpreter& i)
+{
+	INT len;
+	if (getIntegerFromStack(i, len)) {
+		INT start;
+		if (getIntegerFromStack(i, start)) {
+			if (start < 1)
+				return false;
+			const char *str;
+			if (i.popString(str)) {
+				char buf[STRING_SIZE];
+				const auto strl = strlen(str);
+				if (start > strl)
+					buf[0] = 0;
+				else {
+					start = min(start, strl);
+					len = min(len, start-strl-1);
+					memcpy(buf, str+start-1, len);
+					buf[len] = 0;
+				}
+				i.pushString(buf);
+				Parser::Value v;
+				v.setType(Parser::Value::STRING);
+				if (i.pushValue(v))
+					return true;
+			}
+		}
+	}
+	return false;
+}
+
+#endif // USE_MID
 
 #if USE_LEN
 bool

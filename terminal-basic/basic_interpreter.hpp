@@ -267,7 +267,7 @@ public:
 	// Add module on tail of the modules list
 	void addModule(FunctionBlock*);
 
-#if USE_GET
+#if USE_INKEY
 	uint8_t lastKey();
 #endif
 	

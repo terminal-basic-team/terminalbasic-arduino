@@ -41,7 +41,10 @@ public:
 #endif
 #if USE_REALS
 		REAL = BASIC_VALUE_TYPE_REAL,
+#if USE_LONG_REALS
+		LONG_REAL = BASIC_VALUE_TYPE_LONG_REAL,
 #endif
+#endif // USE_REALS
 		LOGICAL = BASIC_VALUE_TYPE_LOGICAL,
 		STRING = BASIC_VALUE_TYPE_STRING
 	};
@@ -69,12 +72,18 @@ public:
 	Value(Integer);
 #if USE_REALS
 	Value(Real);
+#if USE_LONG_REALS
+	Value(LongReal);
 #endif
+#endif // USE_REALS
 	Value(bool);
 
 #if USE_REALS
 	explicit operator Real() const;
+#if USE_LONG_REALS
+	explicit operator LongReal() const;
 #endif
+#endif // USE_REALS
 	explicit operator bool() const;
 	explicit operator Integer() const;
 #if USE_LONGINT

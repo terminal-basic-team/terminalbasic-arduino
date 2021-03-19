@@ -34,6 +34,9 @@ static const uint8_t mathTokens[] PROGMEM = {
 #if M_REVERSE_TRIGONOMETRIC
 	'A', 'C', 'S', ASCII_NUL,
 	'A', 'S', 'N', ASCII_NUL,
+#if M_ADDITIONAL
+	'A', 'T', 'N', '2', ASCII_NUL,
+#endif
 	'A', 'T', 'N', ASCII_NUL,
 #endif // M_REVERSE_TRIGONOMETRIC
 #if M_ADDITIONAL
@@ -47,6 +50,10 @@ static const uint8_t mathTokens[] PROGMEM = {
 	'C', 'O', 'T', ASCII_NUL,
 #endif // M_TRIGONOMETRIC
 	'E', 'X', 'P', ASCII_NUL,
+#if M_ADDITIONAL
+	'H', 'Y', 'P', ASCII_NUL,
+	'L', 'O', 'G', '1', '0', ASCII_NUL,
+#endif
 	'L', 'O', 'G', ASCII_NUL,
 	'P', 'I', ASCII_NUL,
 #if M_HYPERBOLIC
@@ -66,6 +73,9 @@ const FunctionBlock::function Math::funcs[] PROGMEM = {
 #if M_REVERSE_TRIGONOMETRIC
 	Math::func_acs,
 	Math::func_asn,
+#if M_ADDITIONAL
+	Math::func_atn2,
+#endif
 	Math::func_atn,
 #endif
 #if M_ADDITIONAL
@@ -79,6 +89,10 @@ const FunctionBlock::function Math::funcs[] PROGMEM = {
 	Math::func_cot,
 #endif
 	Math::func_exp,
+#if M_ADDITIONAL
+	Math::func_hyp,
+	Math::func_log10,
+#endif
 	Math::func_log,
 	Math::func_pi,
 #if M_HYPERBOLIC
@@ -115,6 +129,22 @@ Math::func_asn(Interpreter &i)
 {
 	return general_func(i, &asn_r);
 }
+
+#if M_ADDITIONAL
+bool
+Math::func_atn2(Interpreter &i)
+{
+	Parser::Value v, v2;
+	if (i.popValue(v2)) {
+		if (i.popValue(v)) {
+			v = Real(atan2(Real(v2), Real(v)));
+			if (i.pushValue(v))
+				return true;
+		}
+	}
+	return false;
+}
+#endif // M_ADDITIONAL
 
 bool
 Math::func_atn(Interpreter &i)
@@ -243,7 +273,27 @@ Math::func_cbr(Interpreter &i)
 {
 	return general_func(i, &cbr_r);
 }
-#endif
+
+bool
+Math::func_hyp(Interpreter& i)
+{
+	Parser::Value v, v2;
+	if (i.popValue(v2)) {
+		if (i.popValue(v)) {
+			v = Real(hypot(Real(v), Real(v2)));
+			if (i.pushValue(v))
+				return true;
+		}
+	}
+	return false;
+}
+
+bool
+Math::func_log10(Interpreter &i)
+{
+	return general_func(i, &log10_r);
+}
+#endif // M_ADDITIONAL
 
 #if M_REVERSE_TRIGONOMETRIC
 Real
@@ -288,6 +338,12 @@ Real
 Math::cbr_r(Real v)
 {
 	return cbrt(v);
+}
+
+Real
+Math::log10_r(Real v)
+{
+	return log10(v);
 }
 #endif
 

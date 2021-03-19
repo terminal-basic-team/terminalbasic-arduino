@@ -314,7 +314,7 @@ SDFSModule::dsave(Interpreter &i)
 				}
 				if (t == Token::KW_REM) {
 					f.write(' ');
-					f.print((const char*)s->text + 
+					f.print((const char*)s->text +
 					    lex.getPointer());
 					break;
 				}

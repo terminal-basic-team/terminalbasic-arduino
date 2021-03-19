@@ -105,11 +105,12 @@ constexpr const LongInteger MaxLongInteger = MAX_LONG_INTEGER;
 #endif // USE_LONGINT
 typedef ::INT INT;
 // floating point type
-#if USE_REALS == REAL_SINGLE
-typedef float Real;
-#elif USE_REALS == REAL_DOUBLE
-typedef double Real;
+#if USE_REALS
+using Real = real_t;
+#if USE_LONG_REALS
+using LongReal = long_real_t;
 #endif
+#endif // USE_REALS
 
 // Number of characters in command/function identifier
 const uint8_t IDSIZE = 8;
@@ -339,6 +340,9 @@ enum class Token : uint8_t
 
 	INTEGER_IDENT = BASIC_TOKEN_INTEGER_IDENT, // 77
 	REAL_IDENT = BASIC_TOKEN_REAL_IDENT,    // 78
+#if USE_LONG_REALS
+	ONG_REAL_IDENT = BASIC_TOKEN_LONG_REAL_IDENT,
+#endif
 #if USE_LONGINT        // 79
 	LONGINT_IDENT = BASIC_TOKEN_LONGINT_IDENT, // 80
 #endif
@@ -346,7 +350,13 @@ enum class Token : uint8_t
 	BOOL_IDENT = BASIC_TOKEN_BOOL_IDENT,    // 82
 
 	C_INTEGER = BASIC_TOKEN_C_INTEGER,     // 83
+#if USE_LONGINT
+	C_LONG_INTEGER = BASIC_TOKEN_C_LONG_INTEGER, // 83
+#endif
 	C_REAL = BASIC_TOKEN_C_REAL,           // 84
+#if USE_LONG_REALS
+	C_LONG_REAL = BASIC_TOKEN_C_LONG_REAL,
+#endif
 	C_BOOLEAN = BASIC_TOKEN_C_BOOLEAN,     // 85
 	C_STRING = BASIC_TOKEN_C_STRING,       // 86
 

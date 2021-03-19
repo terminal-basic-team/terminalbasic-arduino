@@ -95,13 +95,12 @@ typedef integer_t INT;
 #define MAXINT MAX_INTEGER
 #endif // USE_LONGINT
 // floating point type
-#if USE_REALS == REAL_SINGLE
+#if USE_REALS
 typedef float real_t;
-#define mf_pow powf
-#elif USE_REALS == REAL_DOUBLE
-typedef double real_t;
-#define mf_pow pow
+#if USE_LONG_REALS
+typedef double long_real_t;
 #endif
+#endif // USE_REALS
 
 /**
  * @brief Scan token table

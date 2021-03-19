@@ -24,12 +24,6 @@
 #ifndef BASIC_CONFIG_H
 #define BASIC_CONFIG_H
 
-#define REAL_NONE     0
-#define REAL_SINGLE   1
-#define REAL_DOUBLE   2
-#define REAL_EXTENDED 3
-#define REAL_QUAD     4
-
 /*
  * Real arithmetics
  * 
@@ -37,7 +31,10 @@
  * When enabled, all variables and arrays, which names are not ending with "$ ! %"
  * are treated as reals. Mathematical functions support depend on this option
  */
-#define USE_REALS               REAL_SINGLE
+#define USE_REALS            1
+#if USE_REALS
+#define USE_LONG_REALS       0
+#endif
 
 /*
  * Support of 4-byte integer datatype
