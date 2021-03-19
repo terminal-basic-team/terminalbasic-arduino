@@ -40,8 +40,8 @@ private:
 #if USE_HEX
 	static bool func_hex(Interpreter&);
 #endif
-#if USE_GET
-	static bool func_get(Interpreter&);
+#if USE_INKEY
+	static bool func_inkey(Interpreter&);
 #endif
 #if USE_REALS
 	static bool func_int(Interpreter&);
@@ -54,6 +54,9 @@ private:
 #endif
 #if USE_LEN
 	static bool func_len(Interpreter&);
+#endif
+#if USE_MID || USE_SEG
+	static bool func_mid(Interpreter&);
 #endif
 #if USE_PEEK_POKE
 	static bool func_peek(Interpreter&);

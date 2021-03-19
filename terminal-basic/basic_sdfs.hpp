@@ -50,6 +50,7 @@ private:
 	static bool header(Interpreter&);
 #if USE_FILEOP
 	static bool com_fclose(Interpreter&);
+	static bool com_fseek(Interpreter&);
 	static bool com_fwrite(Interpreter&);
 	
 	static bool func_fopen(Interpreter&);

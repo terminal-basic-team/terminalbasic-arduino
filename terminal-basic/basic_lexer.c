@@ -260,7 +260,7 @@ _basic_lexer_decimalint(basic_lexer_context_t *self)
 			const integer_t v = val * (integer_t) 10;
 #if USE_LONGINT
 			if ((val > MAX_INTEGER / (integer_t) (10)) ||
-			(v > MAX_INTEGER - d)) {
+			    (v > MAX_INTEGER - d)) {
 				self->value.body.long_integer = val;
 				_basic_lexer_decimallongint(self);
 				return;
@@ -318,7 +318,7 @@ _basic_lexer_ident(basic_lexer_context_t *self)
 	if (SYM == '%') {
 		_basic_lexer_pushSym(self);
 #if USE_LONGINT
-		if (SYM == '%') {
+		if (SYM == '!') {
 			_basic_lexer_pushSym(self);
 			self->token = BASIC_TOKEN_LONGINT_IDENT;
 		} else
@@ -327,10 +327,17 @@ _basic_lexer_ident(basic_lexer_context_t *self)
 	} else if (SYM == '$') {
 		_basic_lexer_pushSym(self);
 		self->token = BASIC_TOKEN_STRING_IDENT;
-	} else if (SYM == '!') {
+	} else if (SYM == '@') {
 		_basic_lexer_pushSym(self);
 		self->token = BASIC_TOKEN_BOOL_IDENT;
-	} else
+	}
+#if USE_LONG_REALS
+	else if  (SYM == '!') {
+		_basic_lexer_pushSym(self);
+		self->token = BASIC_TOKEN_LONG_REAL_IDENT;
+	}
+#endif
+	 else
 		self->token = BASIC_TOKEN_REAL_IDENT;
 	self->value.type = BASIC_VALUE_TYPE_STRING;
 	self->_id[self->_value_pointer] = 0;

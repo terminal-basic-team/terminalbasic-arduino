@@ -56,9 +56,6 @@ typedef enum basic_token
 #if USE_DIV_KW
 	BASIC_TOKEN_KW_DIV,        // 13
 #endif
-#if USE_DOLOOP
-	BASIC_TOKEN_KW_DO,         // 14
-#endif
 #if USE_DUMP
 	BASIC_TOKEN_COM_DUMP,      // 15
 #endif
@@ -88,9 +85,6 @@ typedef enum basic_token
 #endif
 #if USE_TEXTATTRIBUTES
 	BASIC_TOKEN_COM_LOCATE,    // 30
-#endif
-#if USE_DOLOOP
-	BASIC_TOKEN_KW_LOOP,       // 31
 #endif
 #if USE_MATRIX
 	BASIC_TOKEN_KW_MAT,        // 32
@@ -188,6 +182,9 @@ typedef enum basic_token
 
 	BASIC_TOKEN_INTEGER_IDENT, // 77
 	BASIC_TOKEN_REAL_IDENT,    // 78
+#if USE_LONG_REALS
+	BASIC_TOKEN_LONG_REAL_IDENT,// 85
+#endif
 #if USE_LONGINT        // 79
 	BASIC_TOKEN_LONGINT_IDENT, // 80
 #endif
@@ -195,10 +192,15 @@ typedef enum basic_token
 	BASIC_TOKEN_BOOL_IDENT,    // 82
 
 	BASIC_TOKEN_C_INTEGER,     // 83
+#if USE_LONGINT
 	BASIC_TOKEN_C_LONG_INTEGER,// 83
+#endif
 	BASIC_TOKEN_C_REAL,        // 84
-	BASIC_TOKEN_C_BOOLEAN,     // 85
-	BASIC_TOKEN_C_STRING,      // 86
+#if USE_LONG_REALS
+	BASIC_TOKEN_C_LONG_REAL,   // 85
+#endif
+	BASIC_TOKEN_C_BOOLEAN,     // 86
+	BASIC_TOKEN_C_STRING,      // 87
 
-	BASIC_TOKEN_NUM_TOKENS     // 87
+	BASIC_TOKEN_NUM_TOKENS     // 88
 } basic_token_t;

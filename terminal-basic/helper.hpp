@@ -60,29 +60,27 @@ negativeLedBlink(size_t num = 1)
 inline bool
 endsWith(const char *str, const char end)
 {
-	if (str == NULL || strlen(str)==0)
+	size_t l = strlen(str);
+	if (str == NULL || l==0)
 		return false;
 	if (end == 0)
 		return true;
-	if (str[strlen(str)-1] == end)
+	if (str[l-1] == end)
 		return true;
-	else
-		return false;
+	return false;
 }
 
 inline bool
 endsWith(const char *str, const char *end)
 {
-	size_t l1, l2;
-	
-	l1 = strlen(str); l2 = strlen(end);
+	const size_t l1 = strlen(str);
+	const size_t l2 = strlen(end);
 	
 	if (str == NULL || l1 == 0 || l2 == 0 || l1 < l2)
 		return false;
 	else if (strcmp(str+l1-l2, end) == 0)
 		return true;
-	else
-		return false;
+	return false;
 }
 
 #endif /* HELPER_HPP */

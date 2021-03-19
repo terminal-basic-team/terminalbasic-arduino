@@ -296,7 +296,7 @@ Parser::fOperator()
 	}
 	case Token::KW_INPUT:
 		_lexer.getNext();
-#if INPUT_WITH_TEXT
+#if OPT_INPUT_WITH_TEXT
 		if (_lexer.getToken() == Token::C_STRING) {
 		    _interpreter.print(_lexer.id());
 			if (!_lexer.getNext() || _lexer.getToken() !=
@@ -305,7 +305,7 @@ Parser::fOperator()
 				return false;
 			}
 		}
-#endif // INPUT_WITH_TEXT
+#endif // OPT_INPUT_WITH_TEXT
 		if (!fVarList()) {
 			_error = VARIABLES_LIST_EXPECTED;
 			return false;
@@ -454,7 +454,7 @@ Parser::fOperator()
 //		return res;
 //	} else if (t == Token::KW_INPUT) {
 //		_lexer.getNext();
-//#if INPUT_WITH_TEXT
+//#if OPT_INPUT_WITH_TEXT
 //		if (_lexer.getToken() == Token::C_STRING) {
 //		    _interpreter.print(_lexer.id());
 //			if (!_lexer.getNext() || _lexer.getToken() !=
@@ -463,7 +463,7 @@ Parser::fOperator()
 //				return false;
 //			}
 //		}
-//#endif // INPUT_WITH_TEXT
+//#endif // OPT_INPUT_WITH_TEXT
 //		if (!fVarList()) {
 //			_error = VARIABLES_LIST_EXPECTED;
 //			return false;
@@ -1305,8 +1305,7 @@ Parser::fFinal(Value &v)
 			return false;
 		}
 #else
-		if (t == Token::C_INTEGER || t == Token::C_REAL ||
-		    t == Token::C_BOOLEAN) {
+		if ((t >= Token::C_INTEGER) && (t <= Token::C_BOOLEAN)) {
 			if (_mode == EXECUTE)
 				v = _lexer.getValue();
 			_lexer.getNext();
@@ -1554,21 +1553,38 @@ Parser::fCommand()
 bool
 Parser::fForConds()
 {
-	Value v;
+	// 1. Get FOR loop variable name
 	char vName[IDSIZE];
-	if (!fImplicitAssignment(vName) ||
-	    _lexer.getToken()!=Token::KW_TO || !_lexer.getNext() ||
-		    !fExpression(v))
-			return false;
+	if (!fIdentifier(vName)) {
+		_error = IDENTIFIER_EXPECTED;
+		return false;
+	}
+	
+	Value v;
+	if (!_lexer.getNext() || (_lexer.getToken() != Token::EQUALS) || 
+	    !_lexer.getNext() || !fExpression(v)) {
+		_error = EXPRESSION_EXPECTED;
+		return false;
+	}
+	
+	Value vFinal;
+	if (_lexer.getToken() !=Token::KW_TO || !_lexer.getNext() ||
+	     !fExpression(vFinal)) {
+		_error = EXPRESSION_EXPECTED;
+		return false;
+	}
 	
 	Value vStep(Integer(1));
 	if (_lexer.getToken() == Token::KW_STEP && (!_lexer.getNext() ||
-	    !fExpression(vStep)))
+	    !fExpression(vStep))) {
+		_error = EXPRESSION_EXPECTED;
 		return false;
+	}
 	
 	if (_mode == EXECUTE) {
 		Program::StackFrame *f = _interpreter.pushForLoop(vName,
-		    _lexer.getPointer(), v, vStep);
+		    _lexer.getPointer(), vFinal, vStep);
+		_interpreter.setVariable(vName, v);
 		if (f != nullptr) {
 			if (_interpreter.testFor(*f))
 				_mode = SCAN;

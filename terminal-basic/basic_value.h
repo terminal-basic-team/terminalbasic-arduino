@@ -37,7 +37,10 @@ typedef enum basic_value_type
 #endif
 #if USE_REALS
 	BASIC_VALUE_TYPE_REAL,
+#if USE_LONG_REALS
+	BASIC_VALUE_TYPE_LONG_REAL,
 #endif
+#endif // USE_REALS
 	BASIC_VALUE_TYPE_LOGICAL,
 	BASIC_VALUE_TYPE_STRING
 } basic_value_type_t;
@@ -53,7 +56,10 @@ typedef union basic_univalue
 #endif
 #if USE_REALS
 	real_t real;
+#if USE_LONG_REALS
+	long_real_t long_real;
 #endif
+#endif // USE_REALS
 	BOOLEAN logical;
 } basic_univalue_t;
 
@@ -69,7 +75,16 @@ real_t basic_value_toReal(const basic_value_t*);
 basic_value_t basic_value_from_real(real_t);
 
 void basic_value_setFromReal(basic_value_t*, real_t);
-#endif
+
+#if USE_LONG_REALS
+long_real_t basic_value_toLongReal(const basic_value_t*);
+
+basic_value_t basic_value_from_longReal(long_real_t);
+
+void basic_value_setFromLongReal(basic_value_t*, long_real_t);
+
+#endif // v
+#endif // USE_REALS
 
 #if USE_LONGINT
 long_integer_t basic_value_toLongInteger(const basic_value_t*);

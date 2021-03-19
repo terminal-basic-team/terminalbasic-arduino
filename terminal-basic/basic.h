@@ -95,13 +95,12 @@ typedef integer_t INT;
 #define MAXINT MAX_INTEGER
 #endif // USE_LONGINT
 // floating point type
-#if USE_REALS == REAL_SINGLE
+#if USE_REALS
 typedef float real_t;
-#define mf_pow powf
-#elif USE_REALS == REAL_DOUBLE
-typedef double real_t;
-#define mf_pow pow
+#if USE_LONG_REALS
+typedef double long_real_t;
 #endif
+#endif // USE_REALS
 
 /**
  * @brief Scan token table
@@ -125,6 +124,8 @@ uint8_t *scan(const uint8_t*, const uint8_t[], uint8_t*);
 #include "_tokens_en.h"
 #elif CONF_LEXER_LANG == LANG_RU
 #include "_tokens_ru.h"
+#elif CONF_LEXER_LANG == LANG_FR
+#include "_tokens_fr.h"
 #else
 #error You should define CONF_LEXER_LANG to one of the supported languages
 #endif // CONF_LANG

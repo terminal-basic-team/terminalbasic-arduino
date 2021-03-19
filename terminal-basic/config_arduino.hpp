@@ -93,7 +93,9 @@ const uint16_t PROGRAMSIZE = 1024;
 #endif
 #elif defined (__AVR_ATmega168__) || defined (__AVR_ATmega168P__)
 const uint16_t PROGRAMSIZE = 384;
-#elif defined __SAM3X8E__
+#elif defined ARDUIN_ARCH_SAM
+const uint16_t PROGRAMSIZE = 65535;
+#elif defined ARDUINO_ARCH_ESP32
 const uint16_t PROGRAMSIZE = 65535;
 #else
 const uint16_t PROGRAMSIZE = 1024;

@@ -121,7 +121,12 @@ Interpreter::valueFromVar(Parser::Value &v, const char *varName)
 	case Parser::Value::REAL:
 		v = f->get<Real>();
 		break;
+#if USE_LONG_REALS
+	case Parser::Value::LONG_REAL:
+		v = f->get<LongReal>();
+		break;
 #endif
+#endif // USE_REALS
 	case Parser::Value::LOGICAL:
 		v = f->get<bool>();
 		break;
@@ -297,7 +302,7 @@ Interpreter::step()
 		c = char(ASCII::NUL);
 		if (_input.available() > 0) {
 			c = _input.read();
-#if USE_GET
+#if USE_INKEY
 			_inputBuffer[0] = c;
 #endif // USE_GET
 		}
@@ -483,7 +488,7 @@ Interpreter::addModule(FunctionBlock *module)
 	_parser.addModule(module);
 }
 
-#if USE_GET
+#if USE_INKEY
 uint8_t
 Interpreter::lastKey()
 {
@@ -538,9 +543,8 @@ Interpreter::dump(DumpMode mode)
 	case ARRAYS:
 	{
 		auto index = _program._variablesEnd;
-		for (auto f = _program.arrayByIndex(index);
-		    _program.objectIndex(f) < _program._arraysEnd;
-		    f = _program.arrayByIndex(_program.objectIndex(f) + f->size())) {
+		ArrayFrame* f;
+		while (f = _program.arrayByIndex(index)) {
 			_output.print(f->name);
 			_output.print('(');
 			_output.print(f->dimension[0]);
@@ -551,6 +555,8 @@ Interpreter::dump(DumpMode mode)
 			_output.print(')');
 			_output.print(":\t");
 			_output.println();
+			
+			index += f->size();
 		}
 	}
 		break;
@@ -567,7 +573,10 @@ Interpreter::print(const Parser::Value &v, VT100::TextAttr attr)
 	case Parser::Value::LOGICAL:
 #if USE_REALS
 	case Parser::Value::REAL:
+#if USE_LONG_REALS
+	case Parser::Value::LONG_REAL:
 #endif
+#endif // USE_REALS
 #if USE_LONGINT
 	case Parser::Value::LONG_INTEGER:
 #endif
@@ -696,7 +705,7 @@ Interpreter::run()
 {
 	_program.reset(_program._textEnd);
 	_state = EXECUTE;
-#if USE_GET
+#if USE_INKEY
 	_inputBuffer[0] = 0;
 #endif
 #if USE_DATA
@@ -744,13 +753,19 @@ Interpreter::pushReturnAddress()
 void
 Interpreter::returnFromSub()
 {
-	const auto f = _program.currentStackFrame();
-	if ((f != nullptr) && (f->_type == Program::StackFrame::SUBPROGRAM_RETURN)) {
-		_program.jump(f->body.gosubReturn.calleeIndex);
-		_program._current.position = f->body.gosubReturn.textPosition;
+	while (true) {
+		const auto f = _program.currentStackFrame();
+		if (f == nullptr)
+			break;
+		if (f->_type == Program::StackFrame::SUBPROGRAM_RETURN) {
+			_program.jump(f->body.gosubReturn.calleeIndex);
+			_program._current.position = f->body.gosubReturn.textPosition;
+			_program.pop();
+			return;
+		}
 		_program.pop();
-	} else
-		raiseError(DYNAMIC_ERROR, RETURN_WO_GOSUB);
+	}
+	raiseError(DYNAMIC_ERROR, RETURN_WO_GOSUB);
 }
 
 Program::StackFrame*
@@ -1231,6 +1246,10 @@ VariableFrame::size(Parser::Value::Type t)
 #if USE_REALS
 	else if (t == Parser::Value::REAL)
 		res += sizeof(Real);
+#if USE_LONG_REALS
+	else if (t == Parser::Value::LONG_REAL)
+		res += sizeof(LongReal);
+#endif
 #endif // USE_REALS
 	else if (t == Parser::Value::LOGICAL)
 		res += sizeof(bool);
@@ -1292,6 +1311,19 @@ Interpreter::set(VariableFrame &f, const Parser::Value &v)
 		*U.r = Real(v);
 	}
 		break;
+#if USE_LONG_REALS
+	case Parser::Value::LONG_REAL:
+	{
+		union
+		{
+			char *b;
+			LongReal *r;
+		} U;
+		U.b = f.bytes;
+		*U.r = LongReal(v);
+	}
+		break;	
+#endif
 #endif // USE_REALS
 	case Parser::Value::STRING:
 	{
@@ -1317,7 +1349,7 @@ Interpreter::readInput()
 		return false;
 
 	const uint8_t availableSize = PROGSTRINGSIZE - 1 - _inputPosition;
-	a = min(a, availableSize);
+	a = min(uint8_t(a), availableSize);
 
 	const size_t read = _input.readBytes(_inputBuffer + _inputPosition, a);
 	assert(read <= availableSize);
@@ -1638,8 +1670,26 @@ Interpreter::setArrayElement(const char *name, const Parser::Value &v)
 {
 	ArrayFrame *f = _program.arrayByName(name);
 	if (f == nullptr) {
-		raiseError(DYNAMIC_ERROR, NO_SUCH_ARRAY);
-		return;
+#if OPT_IMPLICIT_ARRAYS
+		uint8_t dims = 0;
+		Program::StackFrame* sf;
+		Pointer index = _program._sp;
+		while (((sf = _program.stackFrameByIndex(index)) != nullptr) &&
+		    (sf->_type == Program::StackFrame::ARRAY_DIMENSION)) {
+			++dims;
+			pushDimension(10);
+			index += sf->size();
+		}
+		pushDimensions(dims);
+		newArray(name);
+		f = _program.arrayByName(name);
+		if (f == nullptr) {
+#endif
+			raiseError(DYNAMIC_ERROR, NO_SUCH_ARRAY);
+			return;
+#if OPT_IMPLICIT_ARRAYS
+		}
+#endif
 	}
 
 	uint16_t index;
@@ -1658,7 +1708,7 @@ Interpreter::newArray(const char *name)
 		uint8_t dimensions = f->body.arrayDimensions;
 		_program.pop();
 		uint16_t size = 1;
-		auto sp = _program._sp; // go on stack frames, containong dimesions
+		auto sp = _program._sp; // go on stack frames, containing dimesions
 		for (uint8_t dim = 0; dim < dimensions; ++dim) {
 			f = _program.stackFrameByIndex(sp);
 			if (f != nullptr && f->_type ==
@@ -1674,7 +1724,7 @@ Interpreter::newArray(const char *name)
 		if (array != nullptr) { // go on stack frames, containong dimesions once more
 			// now popping
 			for (uint8_t dim = dimensions; dim-- > 0;) {
-				f = _program.stackFrameByIndex(_program._sp);
+				f = _program.currentStackFrame();
 				array->dimension[dim] = f->body.arrayDimension;
 				_program.pop();
 			}
@@ -1744,8 +1794,9 @@ Interpreter::confirm()
 		char c = _input.read();
 		_output.print(c);
 		while (_input.available() <= 0);
-		if (_input.read() != int(ASCII::CR) &&
-		    _input.read() != int(ASCII::LF)) {
+		const char eol = _input.read();
+		if (eol != char(ASCII::CR) &&
+		    eol != char(ASCII::LF)) {
 			newline();
 			continue;
 		}
@@ -1827,10 +1878,15 @@ ArrayFrame::dataSize() const
 		break;
 #endif
 #if USE_REALS
+#if USE_LONG_REALS
+	case Parser::Value::LONG_REAL:
+		mul *= sizeof (LongReal);
+		break;	
+#endif // USE_LONG_REALS
 	case Parser::Value::REAL:
 		mul *= sizeof (Real);
 		break;
-#endif
+#endif // USE_REALS
 	case Parser::Value::LOGICAL:
 	{
 		uint16_t s = mul / 8;
@@ -1860,6 +1916,11 @@ ArrayFrame::get(uint16_t index, Parser::Value& v) const
 			return true;
 #endif
 #if USE_REALS
+#if USE_LONG_REALS
+		case Parser::Value::LONG_REAL:
+			v = get<LongReal>(index);
+			return true;	
+#endif // USE_LONG_REALS
 		case Parser::Value::REAL:
 			v = get<Real>(index);
 			return true;
@@ -1892,10 +1953,15 @@ ArrayFrame::set(uint16_t index, const Parser::Value &v)
 			return true;
 #endif
 #if USE_REALS
+#if USE_LONG_REALS
+		case Parser::Value::LONG_REAL:
+			set(index, LongReal(v));
+			return true;	
+#endif
 		case Parser::Value::REAL:
 			set(index, Real(v));
 			return true;
-#endif
+#endif // USE_REALS
 		case Parser::Value::LOGICAL:
 		{
 			uint8_t &_byte = data()[index / uint8_t(8)];
@@ -1926,19 +1992,20 @@ ArrayFrame::numElements() const
 	return mul;
 }
 
-ArrayFrame *
+ArrayFrame*
 Interpreter::addArray(const char *name, uint8_t dim, uint16_t num)
 {
 	Pointer index = _program._variablesEnd;
 	ArrayFrame *f;
-	for (f = _program.arrayByIndex(index); index < _program._arraysEnd;
-	    index += f->size(), f = _program.arrayByIndex(index)) {
+	while ((f = _program.arrayByIndex(index)) != nullptr) {
 		int res = strcmp(name, f->name);
 		if (res == 0) {
 			raiseError(DYNAMIC_ERROR, REDIMED_ARRAY);
 			return nullptr;
 		} else if (res < 0)
 			break;
+		
+		index += f->size();
 	}
 
 	if (f == nullptr)
@@ -1946,15 +2013,15 @@ Interpreter::addArray(const char *name, uint8_t dim, uint16_t num)
 
 	Parser::Value::Type t;
 #if USE_LONGINT
-	if (endsWith(name, "%%")) {
+	if (endsWith(name, "%!")) {
 		t = Parser::Value::LONG_INTEGER;
 		num *= sizeof (LongInteger);
 	} else
-#endif      
-	    if (endsWith(name, '%')) {
+#endif  
+	if (endsWith(name, '%')) {
 		t = Parser::Value::INTEGER;
 		num *= sizeof (Integer);
-	} else if (endsWith(name, '!')) {
+	} else if (endsWith(name, '@')) {
 		uint16_t s = num / 8;
 		if ((num % 8) != 0)
 			++s;
@@ -1962,12 +2029,21 @@ Interpreter::addArray(const char *name, uint8_t dim, uint16_t num)
 		num = s;
 	} else { // real
 #if USE_REALS
-		t = Parser::Value::REAL;
-		num *= sizeof (Real);
-#else  // Integer
-		t = Parser::Value::INTEGER;
-		num *= sizeof (Integer);
+#if USE_LONG_REALS
+		if (endsWith(name, '!')) {
+			t = Parser::Value::LONG_REAL;
+			num *= sizeof (LongReal);
+		} else {
+#endif // USE_LONG_REALS
+			t = Parser::Value::REAL;
+			num *= sizeof (Real);
+#if USE_LONG_REALS
+		}
 #endif
+#else  // Integer
+			t = Parser::Value::INTEGER;
+			num *= sizeof (Integer);
+#endif // USE_REALS
 	}
 
 	const uint16_t dist = sizeof (ArrayFrame) + sizeof (uint16_t) * dim + num;
@@ -1991,20 +2067,27 @@ Interpreter::typeFromName(const char *fname)
 {
 	Parser::Value::Type t;
 #if USE_LONGINT
-	if (endsWith(fname, "%%")) {
+	if (endsWith(fname, "%!")) {
 		t = Parser::Value::LONG_INTEGER;
 	} else
 #endif // USE_LONGINT
 		if (endsWith(fname, '%')) {
 		t = Parser::Value::INTEGER;
-	} else if (endsWith(fname, '!')) {
+	} else if (endsWith(fname, '@')) {
 		t = Parser::Value::LOGICAL;
 	} else if (endsWith(fname, '$')) {
 		t = Parser::Value::STRING;
-	} else {
+	}
 #if USE_REALS
+#if USE_LONG_REALS
+         else if (endsWith(fname, '!')) {
+		t = Parser::Value::LONG_REAL;
+	}
+#endif // USE_LONG_REALS
+         else {
 		t = Parser::Value::REAL;
 #else
+	 else {
 		t = Parser::Value::INTEGER;
 #endif // USE_REALS
 	}

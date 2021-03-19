@@ -33,6 +33,10 @@ basic_value_toReal(const basic_value_t *self)
 		return (real_t)(self->body.integer);
 	case BASIC_VALUE_TYPE_REAL:
 		return self->body.real;
+#if USE_LONG_REALS
+	case BASIC_VALUE_TYPE_LONG_REAL:
+		return (real_t)self->body.long_real;
+#endif
 	case BASIC_VALUE_TYPE_LOGICAL:
 		return (real_t)(self->body.logical);
 	default:
@@ -56,6 +60,46 @@ basic_value_setFromReal(basic_value_t* self, real_t val)
 	self->type = BASIC_VALUE_TYPE_REAL;
 	self->body.real = val;
 }
+
+#if USE_LONG_REALS
+long_real_t
+basic_value_toLongReal(const basic_value_t *self)
+{
+	switch (self->type) {
+#if USE_LONGINT
+	case BASIC_VALUE_TYPE_LONG_INTEGER:
+		return (long_real_t)(self->body.long_integer);
+#endif // USE_LONGINT
+	case BASIC_VALUE_TYPE_INTEGER:
+		return (long_real_t)(self->body.integer);
+	case BASIC_VALUE_TYPE_REAL:
+		return (long_real_t)self->body.real;
+	case BASIC_VALUE_TYPE_LONG_REAL:
+		return self->body.long_real;
+	case BASIC_VALUE_TYPE_LOGICAL:
+		return (long_real_t)(self->body.logical);
+	default:
+		return (long_real_t)(NAN);
+	}
+}
+
+basic_value_t
+basic_value_from_longReal(long_real_t other)
+{
+	basic_value_t result;
+	
+	basic_value_setFromLongReal(&result, other);
+	
+	return result;
+}
+
+void
+basic_value_setFromLongReal(basic_value_t* self, long_real_t val)
+{
+	self->type = BASIC_VALUE_TYPE_LONG_REAL;
+	self->body.long_real = val;
+}
+#endif // USE_LONG_REALS
 #endif // USE_REALS
 
 #if USE_LONGINT
@@ -70,6 +114,10 @@ basic_value_toLongInteger(const basic_value_t* self)
 #if USE_REALS
 	case BASIC_VALUE_TYPE_REAL:
 		return (long_integer_t)self->body.real;
+#if USE_LONG_REALS
+	case BASIC_VALUE_TYPE_LONG_REAL:
+		return (long_integer_t)self->body.long_real;
+#endif
 #endif // USE_REALS
 	case BASIC_VALUE_TYPE_LOGICAL:
 		return (BOOLEAN)self->body.logical;
@@ -109,6 +157,10 @@ basic_value_toInteger(const basic_value_t* self)
 #if USE_REALS
 	case BASIC_VALUE_TYPE_REAL:
 		return (integer_t)(self->body.real);
+#if USE_LONG_REALS
+	case BASIC_VALUE_TYPE_LONG_REAL:
+		return (long_real_t)(self->body.long_real);	
+#endif
 #endif // USE_REALS
 	case BASIC_VALUE_TYPE_LOGICAL:
 		return (integer_t)(self->body.logical);
@@ -147,6 +199,10 @@ basic_value_toLogical(const basic_value_t* self)
 #if USE_REALS
 	case BASIC_VALUE_TYPE_REAL:
 		return (BOOLEAN)(self->body.real);
+#if USE_LONG_REALS
+	case BASIC_VALUE_TYPE_LONG_REAL:
+		return (BOOLEAN)(self->body.long_real);
+#endif
 #endif // USE_REALS
 	case BASIC_VALUE_TYPE_LOGICAL:
 		return self->body.logical;
@@ -178,15 +234,25 @@ basic_value_minuseq(basic_value_t *self, const basic_value_t *rhs)
 #if USE_REALS
 	if (rhs->type == BASIC_VALUE_TYPE_REAL)
 		basic_value_setFromReal(self, basic_value_toReal(self)-
-		    basic_value_toReal(rhs));
-	else
+		    rhs->body.real);
+#if USE_LONG_REALS
+	else if (rhs->type == BASIC_VALUE_TYPE_LONG_REAL)
+		basic_value_setFromLongReal(self, basic_value_toLongReal(self)-
+		    rhs->body.long_real);
 #endif
+	else
+#endif // USE_REALS
 	switch (self->type) {
 #if USE_REALS
 	case BASIC_VALUE_TYPE_REAL: self->body.real -=
 	    basic_value_toReal(rhs);
 		break;
+#if USE_LONG_REALS
+	case BASIC_VALUE_TYPE_LONG_REAL: self->body.long_real -=
+	    basic_value_toLongReal(rhs);
+		break;
 #endif
+#endif // USE_REALS
 #if USE_LONGINT
 	case BASIC_VALUE_TYPE_LONG_INTEGER: self->body.long_integer -=
 	     basic_value_toLongInteger(rhs);
@@ -198,24 +264,38 @@ basic_value_minuseq(basic_value_t *self, const basic_value_t *rhs)
 	default:
 		break;
 	}
-
 }
 
 void
 basic_value_pluseq(basic_value_t *self, const basic_value_t *rhs)
 {
 #if USE_REALS
-	if (rhs->type == BASIC_VALUE_TYPE_REAL)
+#if USE_LONG_REALS
+	if (rhs->type == BASIC_VALUE_TYPE_LONG_REAL)
+		basic_value_setFromLongReal(self, basic_value_toLongReal(self)+
+		    rhs->body.long_real);
+	else
+#endif
+	if (rhs->type == BASIC_VALUE_TYPE_REAL
+#if USE_LONG_REALS
+	    && self->type != BASIC_VALUE_TYPE_LONG_REAL
+#endif
+		)
 		basic_value_setFromReal(self, basic_value_toReal(self)+
 		    rhs->body.real);
 	else
-#endif
+#endif // USE_REALS
 	switch (self->type) {
 #if USE_REALS
 	case BASIC_VALUE_TYPE_REAL:
 		self->body.real += basic_value_toReal(rhs);
 		break;
+#if USE_LONG_REALS
+	case BASIC_VALUE_TYPE_LONG_REAL: self->body.long_real +=
+	    basic_value_toLongReal(rhs);
+		break;
 #endif
+#endif // USE_REALS
 #if USE_LONGINT
 	case BASIC_VALUE_TYPE_LONG_INTEGER:
 		self->body.long_integer += basic_value_toLongInteger(rhs);
@@ -233,17 +313,27 @@ void
 basic_value_multeq(basic_value_t *self, const basic_value_t *rhs)
 {
 #if USE_REALS
-	if (rhs->type == BASIC_VALUE_TYPE_REAL) {
+	if (rhs->type == BASIC_VALUE_TYPE_REAL)
 		basic_value_setFromReal(self, basic_value_toReal(self) *
 		    rhs->body.real);
-	} else
+#if USE_LONG_REALS
+	else if (rhs->type == BASIC_VALUE_TYPE_LONG_REAL)
+		basic_value_setFromLongReal(self, basic_value_toLongReal(self) *
+		    rhs->body.long_real);
 #endif
+	else
+#endif // USE_REALS
 	switch (self->type) {
 #if USE_REALS
+#if USE_LONG_REALS
+	case BASIC_VALUE_TYPE_LONG_REAL :
+		self->body.long_real *= basic_value_toLongReal(rhs);
+		break;
+#endif // USE_LONG_REALS
 	case BASIC_VALUE_TYPE_REAL :
 		self->body.real *= basic_value_toReal(rhs);
 		break;
-#endif
+#endif // USE_REALS
 #if USE_LONGINT
 	case BASIC_VALUE_TYPE_LONG_INTEGER :
 		self->body.long_integer *= basic_value_toInteger(rhs);
@@ -261,15 +351,20 @@ void
 basic_value_diveq(basic_value_t *self, const basic_value_t *rhs)
 {
 #if USE_REALS
+#if USE_LONG_REALS
+	basic_value_setFromLongReal(self, basic_value_toLongReal(self) /
+	    basic_value_toLongReal(rhs));
+#else
 	basic_value_setFromReal(self, basic_value_toReal(self) /
 	    basic_value_toReal(rhs));
+#endif // USE_LONG_REALS
 #elif USE_LONGINT
-	basic_value_setFromLongInteger(self, basic_value_toLongInteger(self) /
+    	basic_value_setFromLongInteger(self, basic_value_toLongInteger(self) /
 	    basic_value_toLongInteger(rhs));
 #else
 	basic_value_setFromInteger(self, basic_value_toInteger(self) /
 	    basic_value_toInteger(rhs));
-#endif
+#endif // USE_REALS
 }
 
 void
@@ -307,6 +402,10 @@ basic_value_switchSign(basic_value_t* self)
 #if USE_REALS
 	else if (self->type == BASIC_VALUE_TYPE_REAL)
 		self->body.real = -self->body.real;
+#if USE_LONG_REALS
+	else if (self->type == BASIC_VALUE_TYPE_LONG_REAL)
+		self->body.real = -self->body.long_real;
+#endif
 #endif // USE_REALS
 	else if (self->type == BASIC_VALUE_TYPE_LOGICAL)
 		self->body.logical = !self->body.logical;
@@ -319,13 +418,21 @@ basic_value_equals(const basic_value_t* lhs, const basic_value_t* rhs)
 #if USE_REALS
 	if (rhs->type == BASIC_VALUE_TYPE_REAL)
 		return basic_value_toReal(lhs) == rhs->body.real;
-	else
+#if USE_LONG_REALS
+	else if (rhs->type == BASIC_VALUE_TYPE_LONG_REAL)
+		return basic_value_toLongReal(lhs) == rhs->body.long_real;
 #endif
+	else
+#endif // USE_REALS
 	switch (lhs->type) {
 #if USE_REALS
 	case BASIC_VALUE_TYPE_REAL:
 		return lhs->body.real == basic_value_toReal(rhs);
+#if USE_LONG_REALS
+	case BASIC_VALUE_TYPE_LONG_REAL:
+		return lhs->body.long_real == basic_value_toLongReal(rhs);	
 #endif
+#endif // USE_REALS
 #if USE_LONGINT
 	case BASIC_VALUE_TYPE_LONG_INTEGER:
 		return lhs->body.long_integer == basic_value_toLongInteger(rhs);
@@ -376,13 +483,27 @@ _basic_value_powerMatch(basic_value_t *self, const basic_value_t *rhs)
 	    )
 		basic_value_setFromLongInteger(self,
 		    basic_value_toLongInteger(self));
-#endif
+#endif // USE_LONGINT
 #if USE_REALS
 	basic_value_t zer = basic_value_fromInteger(-1);
-	if (rhs->type == BASIC_VALUE_TYPE_REAL ||
-	    !basic_value_greater(rhs, &zer))
-		basic_value_setFromReal(self, basic_value_toReal(self));
+#if USE_LONG_REALS
+        if (rhs->type == BASIC_VALUE_TYPE_LONG_REAL)
+		basic_value_setFromLongReal(self, basic_value_toLongReal(self));
+	else
 #endif
+	if (rhs->type == BASIC_VALUE_TYPE_REAL
+#if USE_LONG_REALS
+         && self->type != BASIC_VALUE_TYPE_LONG_REAL
+#endif
+		)
+		basic_value_setFromReal(self, basic_value_toReal(self));
+	else if (!basic_value_greater(rhs, &zer) &&
+#if USE_LONG_REALS
+		self->type != BASIC_VALUE_TYPE_LONG_REAL &&
+#endif
+		self->type != BASIC_VALUE_TYPE_REAL)
+		basic_value_setFromReal(self, basic_value_toReal(self));
+#endif // USE_REALS
 }
 
 void
@@ -414,7 +535,13 @@ basic_value_poweq(basic_value_t *self, const basic_value_t *rhs)
 	case BASIC_VALUE_TYPE_REAL:
 		self->body.real = pow(self->body.real, basic_value_toReal(rhs));
 		break;
+#if USE_LONG_REALS
+	case BASIC_VALUE_TYPE_LONG_REAL:
+		self->body.long_real = pow(self->body.long_real,
+		    basic_value_toLongReal(rhs));
+		break;	
 #endif
+#endif // USE_REALS
 	default:
 		break;
 	}

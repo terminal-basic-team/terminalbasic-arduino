@@ -25,6 +25,8 @@ namespace BASIC
 #include "strings_ru.hpp"
 #elif (CONF_LANG == LANG_EN)
 #include "strings_en.hpp"
+#elif (CONF_LANG == LANG_FR)
+#include "strings_fr.hpp"
 #endif
 
 static const char strStatic[] PROGMEM = "STATIC";

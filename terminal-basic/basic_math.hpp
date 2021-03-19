@@ -50,8 +50,11 @@ private:
 #if M_REVERSE_TRIGONOMETRIC
 	static bool func_acs(Interpreter&);
 	static bool func_asn(Interpreter&);
+#if M_ADDITIONAL
+	static bool func_atn2(Interpreter&);
+#endif // M_ADDITIONAL
 	static bool func_atn(Interpreter&);
-#endif
+#endif // M_REVERSE_TRIGONOMETRIC
 #if M_HYPERBOLIC
 	static bool func_cosh(Interpreter&);
 	static bool func_sinh(Interpreter&);
@@ -67,6 +70,8 @@ private:
 	static bool func_pi(Interpreter&);
 #if M_ADDITIONAL
 	static bool func_cbr(Interpreter&);
+	static bool func_hyp(Interpreter&);
+	static bool func_log10(Interpreter&);
 #endif
 #if M_REVERSE_TRIGONOMETRIC
 	static Real acs_r(Real);
@@ -78,12 +83,16 @@ private:
 	static Real cot_r(Real);
 	static Real sin_r(Real);
 	static Real tan_r(Real);
+#if USE_LONG_REALS
+	static LongReal cot_lr(LongReal);
 #endif
+#endif // M_TRIGONOMETRIC
 	static Real exp_r(Real);
 	static Real log_r(Real);
 	static Real sqr_r(Real);
 #if M_ADDITIONAL
 	static Real cbr_r(Real);
+	static Real log10_r(Real);
 #endif
 	
 	static const FunctionBlock::function funcs[] PROGMEM;;

@@ -28,7 +28,8 @@
 namespace BASIC
 {
 
-static const uint8_t intFuncs[] PROGMEM = {
+static const char intFuncs[] PROGMEM = {
+#if CONF_LEXER_LANG == LANG_EN
 	'A', 'B', 'S', ASCII_NUL,
 #if USE_ASC
 	'A', 'S', 'C', ASCII_NUL,
@@ -39,8 +40,8 @@ static const uint8_t intFuncs[] PROGMEM = {
 #if USE_HEX
 	'H', 'E', 'X', '$', ASCII_NUL,
 #endif
-#if USE_GET
-	'G', 'E', 'T', '$', ASCII_NUL,
+#if USE_INKEY
+	'I', 'N', 'K', 'E', 'Y', '$', ASCII_NUL,
 #endif
 #if USE_REALS
 	'I', 'N', 'T', ASCII_NUL,
@@ -50,6 +51,9 @@ static const uint8_t intFuncs[] PROGMEM = {
 #endif	
 #if USE_LEN
 	'L', 'E', 'N', ASCII_NUL,
+#endif
+#if USE_MID
+	'M', 'I', 'D', '$', ASCII_NUL,
 #endif
 #if USE_PEEK_POKE
 	'P', 'E', 'E', 'K', ASCII_NUL,
@@ -61,13 +65,60 @@ static const uint8_t intFuncs[] PROGMEM = {
 #if USE_RANDOM
 	'R', 'N', 'D', ASCII_NUL,
 #endif
+#if USE_SEG
+	'S', 'E', 'G', '$', ASCII_NUL,
+#endif
 	'S', 'G', 'N', ASCII_NUL,
-        'S', 'T', 'R', '$', ASCII_NUL,
+	'S', 'T', 'R', '$', ASCII_NUL,
 	'T', 'I', 'M', 'E', ASCII_NUL,
+#elif CONF_LEXER_LANG == LANG_RU
+	'A', 'B', 'S', ASCII_NUL,
+#if USE_ASC
+	'A', 'S', 'C', ASCII_NUL,
+#endif
+#if USE_CHR
+	'C', 'H', 'R', '$', ASCII_NUL,
+#endif
+#if USE_HEX
+	'H', 'E', 'X', '$', ASCII_NUL,
+#endif
+#if USE_INKEY
+	'I', 'N', 'K', 'E', 'Y', '$', ASCII_NUL,
+#endif
+#if USE_REALS
+	'I', 'N', 'T', ASCII_NUL,
+#endif
+#if USE_PEEK_POKE
+	'P', 'E', 'E', 'K', ASCII_NUL,
+#endif
+	'R', 'E', 'S', ASCII_NUL,
+#if USE_RANDOM
+	'R', 'N', 'D', ASCII_NUL,
+#endif
+#if USE_SEG
+	'S', 'E', 'G', '$', ASCII_NUL,
+#endif
+	'S', 'G', 'N', ASCII_NUL,
+	'T', 'I', 'M', 'E', ASCII_NUL,
+#if USE_LEN
+	'Ñ', 'ã', 'à', 'ç', 'Ä', ASCII_NUL,
+#endif
+#if USE_LEFT
+	'ã', 'Ö', 'Ç', '$', ASCII_NUL,
+#endif
+#if USE_RIGHT
+	'è', 'ê', 'Ä', 'Ç', '$', ASCII_NUL,
+#endif
+#if USE_MID
+	'ë', 'ê', 'Ö', 'Ñ', '$', ASCII_NUL,
+#endif
+	'ë', 'í', 'ê', '$', ASCII_NUL,
+#endif // CONF_LANG
 	ASCII_ETX
 };
 
 const FunctionBlock::function InternalFunctions::funcs[] PROGMEM = {
+#if CONF_LEXER_LANG == LANG_EN
 	InternalFunctions::func_abs,
 #if USE_ASC
 	InternalFunctions::func_asc,
@@ -78,8 +129,8 @@ const FunctionBlock::function InternalFunctions::funcs[] PROGMEM = {
 #if USE_HEX
 	InternalFunctions::func_hex,
 #endif
-#if USE_GET
-	InternalFunctions::func_get,
+#if USE_INKEY
+	InternalFunctions::func_inkey,
 #endif
 #if USE_REALS
 	InternalFunctions::func_int,
@@ -89,6 +140,9 @@ const FunctionBlock::function InternalFunctions::funcs[] PROGMEM = {
 #endif
 #if USE_LEN
 	InternalFunctions::func_len,
+#endif
+#if USE_MID
+	InternalFunctions::func_mid,
 #endif
 #if USE_PEEK_POKE
 	InternalFunctions::func_peek,
@@ -100,16 +154,63 @@ const FunctionBlock::function InternalFunctions::funcs[] PROGMEM = {
 #if USE_RANDOM
 	InternalFunctions::func_rnd,
 #endif
+#if USE_SEG
+	InternalFunctions::func_mid,
+#endif
 	InternalFunctions::func_sgn,
 	InternalFunctions::func_str,
-	InternalFunctions::func_tim
+	InternalFunctions::func_tim,
+#elif CONF_LEXER_LANG == LANG_RU
+	InternalFunctions::func_abs,
+#if USE_ASC
+	InternalFunctions::func_asc,
+#endif
+#if USE_CHR
+	InternalFunctions::func_chr,
+#endif
+#if USE_HEX
+	InternalFunctions::func_hex,
+#endif
+#if USE_INKEY
+	InternalFunctions::func_inkey,
+#endif
+#if USE_REALS
+	InternalFunctions::func_int,
+#endif
+#if USE_PEEK_POKE
+	InternalFunctions::func_peek,
+#endif
+	InternalFunctions::func_result,
+#if USE_RANDOM
+	InternalFunctions::func_rnd,
+#endif
+#if USE_SEG
+	InternalFunctions::func_mid,
+#endif
+	InternalFunctions::func_sgn,
+	InternalFunctions::func_tim,
+	
+#if USE_LEN
+	InternalFunctions::func_len,
+#endif
+#if USE_LEFT
+	InternalFunctions::func_left,
+#endif
+#if USE_RIGHT
+	InternalFunctions::func_right,
+#endif
+#if USE_MID
+	InternalFunctions::func_mid,
+#endif
+	InternalFunctions::func_str
+#endif // CONF_LANG
 };
 
 InternalFunctions::InternalFunctions(FunctionBlock *first) :
 FunctionBlock(first)
 {
 	functions = funcs;
-	functionTokens = intFuncs;
+	functionTokens = reinterpret_cast<const uint8_t*>(intFuncs);
 }
 
 bool
@@ -154,7 +255,7 @@ InternalFunctions::func_chr(Interpreter &i)
 {
 	INT iv;
 	if (getIntegerFromStack(i, iv)) {
-		char buf[2] = { iv ,0 };
+		char buf[2] = { char(iv) ,0 };
 		Parser::Value v;
 		v.setType(Parser::Value::STRING);
 		i.pushString(buf);
@@ -190,9 +291,9 @@ InternalFunctions::func_hex(Interpreter &i)
 }
 #endif // USE_HEX
 
-#if USE_GET
+#if USE_INKEY
 bool
-InternalFunctions::func_get(Interpreter &i)
+InternalFunctions::func_inkey(Interpreter &i)
 {
 	Parser::Value v;
 	char buf[2] = {0,0};
@@ -235,11 +336,11 @@ InternalFunctions::func_int(Interpreter &i)
 #endif
 	 || v.type() == Parser::Value::REAL
 	    ) {
-		v = math<Real>::floor(Real(v));
+		Real vv = math<Real>::floor(Real(v));
 #if USE_LONGINT
-		v = LongInteger(v);
+		v = LongInteger(vv);
 #else
-		v = Integer(v);
+		v = Integer(vv);
 #endif
 		if (i.pushValue(v))
                     return true;
@@ -259,7 +360,7 @@ InternalFunctions::func_left(Interpreter &i)
 		if (i.popString(str)) {
 			char buf[STRING_SIZE];
 			strncpy(buf, str, STRING_SIZE);
-			const uint8_t pos = min(len, strlen(str));
+			const uint8_t pos = min(uint8_t(len), uint8_t(strlen(str)));
 			buf[pos] = char(0);
 			i.pushString(buf);
 			Parser::Value v;
@@ -283,7 +384,7 @@ InternalFunctions::func_right(Interpreter &i)
 			char buf[STRING_SIZE];
 			strncpy(buf, str, STRING_SIZE);
 			const uint8_t strl = strlen(str);
-			len = min(len, strl);
+			len = min(uint8_t(len), uint8_t(strl));
 			i.pushString(buf+strl-len);
 			Parser::Value v;
 			v.setType(Parser::Value::STRING);
@@ -294,6 +395,41 @@ InternalFunctions::func_right(Interpreter &i)
 	return false;
 }
 #endif // USE_RIGHT
+
+#if USE_MID || USE_SEG
+bool
+InternalFunctions::func_mid(Interpreter& i)
+{
+	INT len;
+	if (getIntegerFromStack(i, len)) {
+		INT start;
+		if (getIntegerFromStack(i, start)) {
+			if (start < 1)
+				return false;
+			const char *str;
+			if (i.popString(str)) {
+				char buf[STRING_SIZE];
+				const auto strl = strlen(str);
+				if (start > strl)
+					buf[0] = 0;
+				else {
+					start = min(uint8_t(start), uint8_t(strl));
+					len = min(uint8_t(len), uint8_t(start-strl-1));
+					memcpy(buf, str+start-1, len);
+					buf[len] = 0;
+				}
+				i.pushString(buf);
+				Parser::Value v;
+				v.setType(Parser::Value::STRING);
+				if (i.pushValue(v))
+					return true;
+			}
+		}
+	}
+	return false;
+}
+
+#endif // USE_MID
 
 #if USE_LEN
 bool

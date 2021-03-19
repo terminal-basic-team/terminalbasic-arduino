@@ -107,6 +107,9 @@ FunctionBlock::general_func(Interpreter &i, _funcReal f)
 #if USE_LONGINT
 	    v.type() == Parser::Value::LONG_INTEGER ||
 #endif
+#if USE_LONG_REALS
+	    v.type() == Parser::Value::LONG_REAL ||
+#endif
 	    v.type() == Parser::Value::REAL) {
 		v = (*f)(Real(v));
 		if (i.pushValue(v))

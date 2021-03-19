@@ -46,14 +46,15 @@ public:
 	{
 		NO_ERROR = 0,                 // Not an error
 		OPERATOR_EXPECTED = 1,        // Operator expected
-		EXPRESSION_EXPECTED = 2,
-		INTEGER_CONSTANT_EXPECTED = 3,
-		THEN_OR_GOTO_EXPECTED = 4,
-		INVALID_DATA_EXPR = 5,
-		INVALID_READ_EXPR = 6,
-		VARIABLES_LIST_EXPECTED = 7,
-		STRING_OVERFLOW = 8,
-		MISSING_RPAREN = 9
+		IDENTIFIER_EXPECTED = 2,
+		EXPRESSION_EXPECTED = 3,
+		INTEGER_CONSTANT_EXPECTED = 4,
+		THEN_OR_GOTO_EXPECTED = 5,
+		INVALID_DATA_EXPR = 6,
+		INVALID_READ_EXPR = 7,
+		VARIABLES_LIST_EXPECTED = 8,
+		STRING_OVERFLOW = 9,
+		MISSING_RPAREN = 10
 	};
 
 	class EXT_PACKED Value;
@@ -61,14 +62,13 @@ public:
 	 * @brief constructor
 	 * @param lexer Lexical analyzer object refertence
 	 * @param interpreter Interpreter context object reference
-	 * @param module Pointer to the first module in chain
 	 */
 	Parser(Lexer&, Interpreter&);
 	/**
 	 * @brief Parse a text string
 	 * @param str string to parse
 	 * @param ok successfull parsing flag
-	 * @param tok
+	 * @param tok flag of the tokenized program text
 	 * @return end of parsed string
 	 */
 	bool parse(const uint8_t*, bool&, bool);
@@ -153,7 +153,7 @@ private:
 	Mode _mode;
 	// stop parsing string flag
 	bool _stopParse;
-	// first module in chain reference
+	// first module in chain
 	InternalFunctions _internal;
 };
 

@@ -95,6 +95,6 @@ private:
 	FunctionBlock *_next;
 };
 
-}
+} // namespace BASIC
 
-#endif
+#endif // BASIC_FUNCTIONBLOCK_HPP

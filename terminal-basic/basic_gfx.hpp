@@ -36,6 +36,8 @@ public:
 	static bool command_circle(Interpreter&);
 	static bool command_color(Interpreter&);
 	static bool command_cursor(Interpreter&);
+	static bool command_ellipsec(Interpreter&);
+	static bool command_ellipse(Interpreter&);
 	static bool command_linec(Interpreter&);
 	static bool command_line(Interpreter&);
 	static bool command_lineto(Interpreter&);
