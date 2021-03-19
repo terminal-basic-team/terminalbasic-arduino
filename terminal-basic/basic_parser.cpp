@@ -79,9 +79,9 @@ namespace BASIC
 
 #if CONF_ERROR_STRINGS
 
-#if (LANG == LANG_RU)
-#include "strings_ru_cp866.hpp"
-#elif (LANG == LANG_EN)
+#if (CONF_LANG == LANG_RU)
+#include "strings_ru.hpp"
+#elif (CONF_LANG == LANG_EN)
 #include "strings_en.hpp"
 #endif
 
@@ -131,11 +131,11 @@ Parser::stop()
 }
 
 bool
-Parser::parse(const char *s, bool &ok)
+Parser::parse(const uint8_t *s, bool &ok, bool tok)
 {
 	LOG_TRACE;
 
-	_lexer.init(s);
+	_lexer.init(s, tok);
 	_stopParse = false;
 	_error = NO_ERROR;
 	
@@ -876,7 +876,7 @@ Parser::fExpression(Value &v)
 		if (!_lexer.getNext() || !fExpression(v))
 			return false;
 		if (_mode == EXECUTE)
-			v.notOp();
+			v.switchSign();
 		return true;
 	}
 	
@@ -976,8 +976,8 @@ Parser::fLogicalFinal(Value &v)
 			if (_lexer.getNext() && fSimpleExpression(v2)) {
 				if (_mode == Mode::EXECUTE) {
 #if USE_STRINGOPS
-					if (v.type == Value::STRING &&
-					   v2.type == Value::STRING)
+					if (v.type() == Value::STRING &&
+					   v2.type() == Value::STRING)
 						v = _interpreter.strCmp();
 					else
 #endif
@@ -1022,8 +1022,8 @@ Parser::fLogicalFinal(Value &v)
 				v = (v > v2) || (v == v2);
 			else if (t == Token::EQUALS) {
 #if USE_STRINGOPS
-				if (v.type == Value::STRING &&
-				    v2.type == Value::STRING)
+				if (v.type() == Value::STRING &&
+				    v2.type() == Value::STRING)
 					v = _interpreter.strCmp();
 				else
 #endif // USE_STRINGOPS
@@ -1034,8 +1034,8 @@ Parser::fLogicalFinal(Value &v)
 #endif
 			    ) {
 #if USE_STRINGOPS
-				if (v.type == Value::STRING &&
-				    v2.type == Value::STRING)
+				if (v.type() == Value::STRING &&
+				    v2.type() == Value::STRING)
 					v = !_interpreter.strCmp();
 				else
 #endif // USE_STRINGOPS
@@ -1070,8 +1070,8 @@ Parser::fSimpleExpression(Value &v)
 			if (_lexer.getNext() && fTerm(v2)) {
 				if (_mode == Mode::EXECUTE) {
 #if USE_STRINGOPS
-					if (v.type == Value::STRING &&
-						v2.type == Value::STRING)
+					if (v.type() == Value::STRING &&
+						v2.type() == Value::STRING)
 						_interpreter.strConcat();
 					else
 #endif // USE_STRINGOPS
@@ -1098,8 +1098,8 @@ Parser::fSimpleExpression(Value &v)
 				continue;
 			if ((t == Token::PLUS)) {
 #if USE_STRINGOPS
-				if (v.type == Value::STRING &&
-				    v2.type == Value::STRING)
+				if (v.type() == Value::STRING &&
+				    v2.type() == Value::STRING)
 					_interpreter.strConcat();
 				else
 #endif // USE_STRINGOPS
@@ -1319,7 +1319,7 @@ Parser::fFinal(Value &v)
 			}
 			if (_mode == EXECUTE) {
 				_interpreter.pushString(_lexer.id());
-				v.type = Value::Type::STRING;
+				v.setType(Value::Type::STRING);
 			}
 			_lexer.getNext();
 			return true;
@@ -1401,7 +1401,7 @@ Parser::fGotoStatement()
 			return false;
 		}
 		if (_mode == EXECUTE)
-			_interpreter.gotoLine(v.value.integer);
+			_interpreter.gotoLine(v);
 		return true;
 	} else
 		return false;
@@ -1518,7 +1518,7 @@ Parser::fCommand()
 				Value v;
 				// String value already on stack after fExpression
 				if (fExpression(v)) {
-					if (v.type != Value::STRING)
+					if (v.type() != Value::STRING)
 						_interpreter.pushValue(v);
 				} else
 					break;
@@ -1555,8 +1555,8 @@ Parser::fForConds()
 	char vName[IDSIZE];
 	if (!fImplicitAssignment(vName) ||
 	    _lexer.getToken()!=Token::KW_TO || !_lexer.getNext() ||
-	    !fExpression(v))
-		return false;
+		    !fExpression(v))
+			return false;
 	
 	Value vStep(Integer(1));
 	if (_lexer.getToken() == Token::KW_STEP && (!_lexer.getNext() ||

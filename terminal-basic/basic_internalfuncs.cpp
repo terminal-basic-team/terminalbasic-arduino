@@ -29,39 +29,39 @@ namespace BASIC
 {
 
 static const uint8_t intFuncs[] PROGMEM = {
-	'A', 'B', 'S'+0x80,
+	'A', 'B', 'S', ASCII_NUL,
 #if USE_ASC
-	'A', 'S', 'C'+0x80,
+	'A', 'S', 'C', ASCII_NUL,
 #endif
 #if USE_CHR
-	'C', 'H', 'R', '$'+0x80,
+	'C', 'H', 'R', '$', ASCII_NUL,
 #endif
 #if USE_GET
-	'G', 'E', 'T', '$'+0x80,
+	'G', 'E', 'T', '$', ASCII_NUL,
 #endif
 #if USE_REALS
-	'I', 'N', 'T'+0x80,
+	'I', 'N', 'T', ASCII_NUL,
 #endif
 #if USE_LEFT
-	'L', 'E', 'F', 'T', '$'+0x80,
+	'L', 'E', 'F', 'T', '$', ASCII_NUL,
 #endif	
 #if USE_LEN
-	'L', 'E', 'N'+0x80,
+	'L', 'E', 'N', ASCII_NUL,
 #endif
 #if USE_PEEK_POKE
-	'P', 'E', 'E', 'K'+0x80,
+	'P', 'E', 'E', 'K', ASCII_NUL,
 #endif
-	'R', 'E', 'S'+0x80,
+	'R', 'E', 'S', ASCII_NUL,
 #if USE_RIGHT
-	'R', 'I', 'G', 'H', 'T', '$'+0x80,
+	'R', 'I', 'G', 'H', 'T', '$', ASCII_NUL,
 #endif
 #if USE_RANDOM
-	'R', 'N', 'D'+0x80,
+	'R', 'N', 'D', ASCII_NUL,
 #endif
-	'S', 'G', 'N'+0x80,
-        'S', 'T', 'R', '$'+0x80,
-	'T', 'I', 'M', 'E'+0x80,
-	0
+	'S', 'G', 'N', ASCII_NUL,
+        'S', 'T', 'R', '$', ASCII_NUL,
+	'T', 'I', 'M', 'E', ASCII_NUL,
+	ASCII_ETX
 };
 
 const FunctionBlock::function InternalFunctions::funcs[] PROGMEM = {
@@ -111,12 +111,12 @@ InternalFunctions::func_abs(Interpreter &i)
 {
 	Parser::Value v(Integer(0));
 	i.popValue(v);
-	if (v.type == Parser::Value::INTEGER
+	if (v.type() == Parser::Value::INTEGER
 #if USE_LONGINT
-	 || v.type == Parser::Value::LONG_INTEGER
+	 || v.type() == Parser::Value::LONG_INTEGER
 #endif
 #if USE_REALS
-	 || v.type == Parser::Value::REAL
+	 || v.type() == Parser::Value::REAL
 #endif
 	    ) {
 		if (v < Parser::Value(Integer(0)))
@@ -133,7 +133,7 @@ InternalFunctions::func_asc(Interpreter &i)
 {
 	Parser::Value v;
 	i.popValue(v);
-	if (v.type == Parser::Value::STRING) {
+	if (v.type() == Parser::Value::STRING) {
 		const char *str;
 		i.popString(str);
 		v = Integer(str[0]);
@@ -152,12 +152,12 @@ InternalFunctions::func_chr(Interpreter &i)
 	i.popValue(v);
 	char buf[2] = {0,0};
 	buf[0] = Integer(v);
-	v.type = Parser::Value::STRING;
+	v.setType(Parser::Value::STRING);
 	i.pushString(buf);
 	i.pushValue(v);
 	return true;
 }
-#endif // USE_CHR
+#endif
 
 #if USE_GET
 bool
@@ -166,26 +166,12 @@ InternalFunctions::func_get(Interpreter &i)
 	Parser::Value v;
 	char buf[2] = {0,0};
 	buf[0] = i.lastKey();
-	v.type = Parser::Value::STRING;
+	v.setType(Parser::Value::STRING);
 	i.pushString(buf);
 	i.pushValue(v);
 	return true;
 }
 #endif // USE_GET
-
-#if USE_PEEK_POKE
-bool
-InternalFunctions::func_peek(Interpreter &i)
-{
-	INT addr;
-	if (getIntegerFromStack(i, addr)) {
-		Parser::Value v(Integer(*((volatile uint8_t*)(addr))));
-		i.pushValue(v);
-		return true;
-	}
-	return false;
-}
-#endif // USE_PEEK_POKE
 
 bool
 InternalFunctions::func_result(Interpreter &i)
@@ -199,11 +185,11 @@ InternalFunctions::func_int(Interpreter &i)
 {
 	Parser::Value v(Integer(0));
 	i.popValue(v);
-	if (v.type == Parser::Value::INTEGER
+	if (v.type() == Parser::Value::INTEGER
 #if USE_LONGINT
-	 || v.type == Parser::Value::LONG_INTEGER
+	 || v.type() == Parser::Value::LONG_INTEGER
 #endif
-	 || v.type == Parser::Value::REAL
+	 || v.type() == Parser::Value::REAL
 	    ) {
 		v = math<Real>::floor(Real(v));
 #if USE_LONGINT
@@ -213,8 +199,8 @@ InternalFunctions::func_int(Interpreter &i)
 #endif
 		i.pushValue(v);
 		return true;
-	}
-	return false;
+	} else
+		return false;
 }
 #endif // USE_REALS
 
@@ -227,11 +213,11 @@ InternalFunctions::func_left(Interpreter &i)
 	if (getIntegerFromStack(i, len)) {
 		Parser::Value v;
 		i.popValue(v);
-		if (v.type == Parser::Value::STRING) {
+		if (v.type() == Parser::Value::STRING) {
 			const char *str;
 			if (i.popString(str)) {
-				char buf[STRINGSIZE];
-				strncpy(buf, str, STRINGSIZE);
+				char buf[STRING_SIZE];
+				strncpy(buf, str, STRING_SIZE);
 				const uint8_t pos = min(len, strlen(str));
 				buf[pos] = char(0);
 				i.pushString(buf);
@@ -252,11 +238,11 @@ InternalFunctions::func_right(Interpreter &i)
 	if (getIntegerFromStack(i, len)) {
 		Parser::Value v;
 		i.popValue(v);
-		if (v.type == Parser::Value::STRING) {
+		if (v.type() == Parser::Value::STRING) {
 			const char *str;
 			if (i.popString(str)) {
-				char buf[STRINGSIZE];
-				strncpy(buf, str, STRINGSIZE);
+				char buf[STRING_SIZE];
+				strncpy(buf, str, STRING_SIZE);
 				const uint8_t strl = strlen(str);
 				len = min(len, strl);
 				i.pushString(buf+strl-len);
@@ -275,10 +261,10 @@ InternalFunctions::func_len(Interpreter &i)
 {
 	Parser::Value v;
 	i.popValue(v);
-	if (v.type == Parser::Value::STRING) {
+	if (v.type() == Parser::Value::STRING) {
 		const char *str;
 		if (i.popString(str)) {
-			v = Integer(strnlen(str, STRINGSIZE));
+			v = Integer(strnlen(str, STRING_SIZE));
 			i.pushValue(v);
 			return true;
 		}
@@ -324,7 +310,7 @@ public:
 			return -1;
 	}
 
-	char buf[STRINGSIZE];
+	char buf[STRING_SIZE];
 	uint8_t pointer;
 };
 
@@ -334,11 +320,11 @@ InternalFunctions::func_str(Interpreter &i)
 	BufferPrint p;
 	Parser::Value v;
 	i.popValue(v);
-	size_t res = p.print(v);
+	size_t res = v.printTo(p);
 	if (res >= sizeof(p.buf))
 		res = sizeof(p.buf)-1;
 	p.buf[res] = '\0';
-	v.type = Parser::Value::STRING;
+	v.setType(Parser::Value::STRING);
 	i.pushString(p.buf);
 	i.pushValue(v);
 	return true;

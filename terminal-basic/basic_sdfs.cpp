@@ -30,13 +30,13 @@ namespace BASIC
 SDCard::File SDFSModule::_root;
 
 static const uint8_t sdfsCommands[] PROGMEM = {
-	'D', 'C', 'H', 'A', 'I', 'N'+0x80,
-	'D', 'I', 'R', 'E', 'C', 'T', 'O', 'R', 'Y'+0x80,
-	'D', 'L', 'O', 'A', 'D'+0x80,
-	'D', 'S', 'A', 'V', 'E'+0x80,
-	'H', 'E', 'A', 'D', 'E', 'R'+0x80,
-	'S', 'C', 'R', 'A', 'T', 'C', 'H'+0x80,
-	0
+	'D', 'C', 'H', 'A', 'I', 'N' ASCII_NUL,
+	'D', 'I', 'R', 'E', 'C', 'T', 'O', 'R', 'Y' ASCII_NUL,
+	'D', 'L', 'O', 'A', 'D' ASCII_NUL,
+	'D', 'S', 'A', 'V', 'E' ASCII_NUL,
+	'H', 'E', 'A', 'D', 'E', 'R' ASCII_NUL,
+	'S', 'C', 'R', 'A', 'T', 'C', 'H' ASCII_NUL,
+	ASCII_ETX
 };
 
 const FunctionBlock::function  SDFSModule::_commands[] PROGMEM = {

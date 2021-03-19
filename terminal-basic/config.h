@@ -64,12 +64,12 @@
 /**
  * Support of DATA/READ statements
  */
-#define USE_DATA             0
+#define USE_DATA             1
 
 /*
  * Support of DEF FN construct
  */
-#define USE_DEFFN            0
+#define USE_DEFFN            1
 
 /*
  * DELAY command, suspends execution for N ms
@@ -123,6 +123,27 @@
  */
 #define USESTOPCONT       1
 
-#define USE_PEEK_POKE 1
+#define LANG_EN 0
+#define LANG_RU 1
+
+/*
+ * Messages localization
+ */
+#define CONF_LANG LANG_EN
+
+/*
+ * Lexer localization
+ */
+#define CONF_LEXER_LANG LANG_EN
+
+/* Size of the string identifiers */
+#define STRING_SIZE 72
+
+/*
+ * High-level code optimisation mode
+ */
+#define OPT_SPEED     1 // Extensive use of switch/case constructs
+#define OPT_SIZE      2 // Use cascade of if/else if instead of switch/case
+#define OPT           OPT_SIZE // Selected mode
 
 #endif /* BASIC_CONFIG_H */

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "basic_common.hpp"
+#include "basic.hpp"
 
 #if USE_EXTEEPROM
 

@@ -141,7 +141,7 @@ Program::StackFrame::size(Type t)
 	else if (t == FOR_NEXT)
 		return (sizeof (Type) + sizeof (ForBody));
 	else if (t == STRING)
-		return (sizeof (Type) + STRINGSIZE);
+		return (sizeof (Type) + STRING_SIZE);
 	else if (t == ARRAY_DIMENSION)
 		return (sizeof (Type) + sizeof (uint16_t));
 	else if (t == ARRAY_DIMENSIONS)
@@ -337,73 +337,15 @@ Program::arrayByIndex(Pointer index)
 }
 
 bool
-Program::addLine(uint16_t num, const char *line)
+Program::addLine(uint16_t num, const uint8_t *line)
 {
-	uint16_t size;
-	char tempBuffer[PROGSTRINGSIZE];
+	uint8_t size;
+	uint8_t tempBuffer[2*PROGSTRINGSIZE];
 
-	Lexer _lexer;
-	_lexer.init(line);
-	uint8_t position = 0;
-	uint8_t lexerPosition = _lexer.getPointer();
+	Lexer lexer;
+	size = lexer.tokenize(tempBuffer, 2*PROGSTRINGSIZE, line);
 
-	while (_lexer.getNext()) {
-		if (position >= (PROGSTRINGSIZE-1))
-			return false;
-		
-		const Token tok = _lexer.getToken();
-		const uint8_t t = uint8_t(0x80) + uint8_t(tok);
-		if (tok < Token::RPAREN) { // One byte tokens
-			tempBuffer[position++] = t;
-			lexerPosition = _lexer.getPointer();
-			if (tok == Token::KW_REM) { // Save rem text as is
-				while (line[lexerPosition] == ' ' ||
-				    line[lexerPosition] == '\t')
-					++lexerPosition;
-				const uint8_t remaining = strlen(line) - lexerPosition;
-				memcpy(tempBuffer + position, line + lexerPosition,
-				    remaining);
-				position += remaining;
-				break;
-			}
-		} else if (tok == Token::C_INTEGER) {
-			tempBuffer[position++] = t;
-			if ((position + sizeof(INT)) >= PROGSTRINGSIZE-1)
-				return false;
-			const INT v = INT(_lexer.getValue());
-			*reinterpret_cast<INT*>(tempBuffer+position) = v;
-			position += sizeof(INT);
-			lexerPosition = _lexer.getPointer();
-		}
-#if USE_REALS
-		 else if (tok == Token::C_REAL) {
-			tempBuffer[position++] = t;
-			if ((position + sizeof(Real)) >= PROGSTRINGSIZE-1)
-				return false;
-			const Real v = Real(_lexer.getValue());
-			*reinterpret_cast<Real*>(tempBuffer+position) = v;
-			position += sizeof(Real);
-			lexerPosition = _lexer.getPointer();
-		}
-#endif // USE_REALS
-		else { // Other tokens
-			tempBuffer[position++] = ' ';
-			while (line[lexerPosition] == ' ' ||
-			    line[lexerPosition] == '\t')
-				++lexerPosition;
-			const uint8_t siz = _lexer.getPointer() - lexerPosition;
-			if ((position + siz) >= PROGSTRINGSIZE-1)
-				return false;
-			memcpy(tempBuffer + position, line + lexerPosition, siz);
-			position += siz;
-			lexerPosition = _lexer.getPointer();
-		}
-	}
-	tempBuffer[position++] = 0;
-	size = position;
-	line = tempBuffer;
-
-	return addLine(num, line, size);
+	return addLine(num, tempBuffer, size);
 }
 
 void
@@ -423,7 +365,7 @@ Program::removeLine(uint16_t num)
 }
 
 bool
-Program::addLine(uint16_t num, const char *text, uint16_t len)
+Program::addLine(uint16_t num, const uint8_t *text, uint8_t len)
 {
 	reset();
 
@@ -460,7 +402,7 @@ Program::addLine(uint16_t num, const char *text, uint16_t len)
 }
 
 bool
-Program::insert(uint16_t num, const char *text, uint8_t len)
+Program::insert(uint16_t num, const uint8_t *text, uint8_t len)
 {
 	assert(len <= PROGSTRINGSIZE);
 	const uint8_t strLen = sizeof(Line) + len;

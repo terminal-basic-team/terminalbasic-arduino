@@ -26,7 +26,7 @@
 
 #include <stdint.h>
 
-#include "basic_config.h"
+#include "config.h"
 
 namespace BASIC
 {
@@ -89,6 +89,10 @@ namespace BASIC
 	 */
 	#define USE_COLORATTRIBUTES       1
 	/*
+	 * Support of SPC(N) print command
+	 */
+	#define CONF_USE_SPC_PRINT_COM    1
+	/*
 	 * Set print zones width (tab spacing)
 	 */
 	#define SET_PRINTZNES             1
@@ -107,23 +111,9 @@ namespace BASIC
 #define AUTOCAPITALIZE    0
 
 /*
- * C++ level code optimisation mode
- */
-#define OPT_SPEED     1 // Extensive use of switch/case constructs
-#define OPT_SIZE      2 // Use cascade of if/else if instead of switch/case
-#define OPT           OPT_SIZE // Selected mode
-
-/*
  * SDcard module
  */
 #define USESD         0
-
-/*
- * Localization
- */
-#define LANG_EN 0
-#define LANG_RU 1
-#define LANG LANG_EN
 
 // Use text error strings
 #define CONF_ERROR_STRINGS 0
@@ -241,10 +231,7 @@ namespace BASIC
 /*
  * Max size of the program line
  */
-const uint8_t PROGSTRINGSIZE = 72;
-
-// Max size of the string constants/variables
-const uint8_t STRINGSIZE = 72;
+const uint8_t PROGSTRINGSIZE = 80;
 
 // Number of characters in variable name
 const uint8_t VARSIZE = 5;

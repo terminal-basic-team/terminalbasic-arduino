@@ -1,6 +1,6 @@
 /*
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2017-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2017-2019 Andrey V. Skvortsov <starling13@mail.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 
-#include "basic_common.hpp"
+#include "basic.hpp"
 
 #if USE_SAVE_LOAD
 #include <EEPROM.h>
@@ -117,12 +117,12 @@ Interpreter::valueFromVar(Parser::Value &v, const char *varName)
 		v = f->get<Real>();
 		break;
 #endif
-	case Parser::Value::BOOLEAN:
+	case Parser::Value::LOGICAL:
 		v = f->get<bool>();
 		break;
 	case Parser::Value::STRING:
 	{
-		v.type = Parser::Value::STRING;
+		v.setType(Parser::Value::STRING);
 		auto fr = _program.push(Program::StackFrame::STRING);
 		if (fr == nullptr) {
 			raiseError(DYNAMIC_ERROR, STACK_FRAME_ALLOCATION);
@@ -295,7 +295,7 @@ Interpreter::step()
 		if (s != nullptr && c != char(ASCII::EOT)) {
 			bool res;
 			if (!_parser.parse(s->text + _program._current.position,
-			    res))
+			    res, true))
 				_program.getNextLine();
 			else
 				_program._current.position += _lexer.getPointer();
@@ -313,7 +313,7 @@ Interpreter::step()
 void
 Interpreter::exec()
 {
-	_lexer.init(_inputBuffer);
+	_lexer.init(_inputBuffer, false);
 	if (_inputPosition == 0 && _lexer.getNext() &&
 	    (_lexer.getToken() == Token::C_INTEGER)) {
 		Integer pLine = Integer(_lexer.getValue());
@@ -331,7 +331,7 @@ Interpreter::exec()
 		}
 	} else {
 		bool res;
-		while (_parser.parse(_inputBuffer+_inputPosition, res)) {
+		while (_parser.parse(_inputBuffer+_inputPosition, res, false)) {
 			if (!res) {
 				raiseError(STATIC_ERROR);
 				break;
@@ -431,7 +431,7 @@ Interpreter::list(uint16_t start, uint16_t stop)
 		
 		Lexer lex;
 #if LOOP_INDENT
-                lex.init(s->text);
+                lex.init(s->text, true);
 		int8_t diff = 0;
                 while (lex.getNext()) {
 			if (lex.getToken() == Token::KW_REM)
@@ -455,7 +455,7 @@ Interpreter::list(uint16_t start, uint16_t stop)
 		if (diff > 0)
 			_loopIndent += diff;
 #endif // LOOP_INDENT
-		lex.init(s->text);
+		lex.init(s->text, true);
 		while (lex.getNext()) {
 			print(lex);
 			if (lex.getToken() == Token::KW_REM) {
@@ -553,8 +553,8 @@ Interpreter::print(const Parser::Value &v, VT100::TextAttr attr)
 {
 	AttrKeeper keeper(*this, attr);
 
-	switch (v.type) {
-	case Parser::Value::BOOLEAN:
+	switch (v.type()) {
+	case Parser::Value::LOGICAL:
 #if USE_REALS
 	case Parser::Value::REAL:
 #endif
@@ -562,7 +562,7 @@ Interpreter::print(const Parser::Value &v, VT100::TextAttr attr)
 	case Parser::Value::LONG_INTEGER:
 #endif
 	case Parser::Value::INTEGER:
-		_output.print(v), _output.write(' ');
+		v.printTo(_output), _output.write(' ');
 		break;
 	case Parser::Value::STRING:
 	{
@@ -697,9 +697,9 @@ Interpreter::run()
 void
 Interpreter::gotoLine(const Parser::Value &l)
 {
-	if (l.type != Parser::Value::INTEGER
+	if (l.type() != Parser::Value::INTEGER
 #if USE_LONGINT
-	&& l.type != Parser::Value::LONG_INTEGER
+	&& l.type() != Parser::Value::LONG_INTEGER
 #endif
 	) {
 		raiseError(DYNAMIC_ERROR, INTEGER_EXPRESSION_EXPECTED);
@@ -835,7 +835,7 @@ Interpreter::execFn(const char *name)
 	_program._current.position = ff->linePosition;
 	Program::Line *s = _program.current(_program._current);
 	if (s != nullptr)
-		_lexer.init(s->text + _program._current.position);
+		_lexer.init(s->text + _program._current.position, true);
 	else
 		raiseError(DYNAMIC_ERROR, INTERNAL_ERROR);
 }
@@ -922,7 +922,7 @@ Interpreter::returnFromFn()
 	}
 	Program::Line *s = _program.current(_program._current);
 	if (s != nullptr)
-		_lexer.init(s->text + _program._current.position);
+		_lexer.init(s->text + _program._current.position, true);
 	else {
 		raiseError(DYNAMIC_ERROR, INTERNAL_ERROR);
 		return;
@@ -1129,7 +1129,7 @@ void
 Interpreter::doInput()
 {
 	Lexer l;
-	l.init(_inputBuffer);
+	l.init(_inputBuffer, false);
 	Parser::Value v(Integer(0));
 	bool neg = false;
 
@@ -1164,7 +1164,7 @@ Interpreter::doInput()
 			}
 		}
 		if (neg)
-			v = -v;
+			v.switchSign();
 		setVariable(_inputVarName, v);
 		if (l.getNext()) {
 			if (l.getToken() == Token::COMMA)
@@ -1222,10 +1222,10 @@ VariableFrame::size(Parser::Value::Type t)
 	else if (t == Parser::Value::REAL)
 		res += sizeof(Real);
 #endif // USE_REALS
-	else if (t == Parser::Value::BOOLEAN)
+	else if (t == Parser::Value::LOGICAL)
 		res += sizeof(bool);
 	else if (t == Parser::Value::STRING)
-		res += STRINGSIZE;
+		res += STRING_SIZE;
 
 	return res;
 #endif // OPT
@@ -1235,7 +1235,7 @@ void
 Interpreter::set(VariableFrame &f, const Parser::Value &v)
 {
 	switch (f.type) {
-	case Parser::Value::BOOLEAN:
+	case Parser::Value::LOGICAL:
 	{
 		union
 		{
@@ -1381,7 +1381,7 @@ Interpreter::writePgm(ProgMemStrings index)
 void
 Interpreter::writePgm(PGM_P str)
 {
-	char buf[STRINGSIZE];
+	char buf[STRING_SIZE];
 	strcpy_P(buf, str);
 
 	_output.print(buf);
@@ -1434,20 +1434,14 @@ Interpreter::print(Token t)
 {
 	char buf[10];
 	
-	if (t < Token::STAR) {
-		const uint8_t *res = Lexer::getTokenString(t,
-		    reinterpret_cast<uint8_t*>(buf));
-		if (res != nullptr)
-			print(buf, VT100::TextAttr(uint8_t(VT100::BRIGHT) |
-			    uint8_t(VT100::C_GREEN)));
-		else
-			print(ProgMemStrings::S_ERROR, VT100::TextAttr(uint8_t(VT100::BRIGHT) |
-			    uint8_t(VT100::C_RED)));
-	} else {
-		strcpy_P(buf, (PGM_P)pgm_read_ptr(&(Lexer::tokenStrings[
-		    uint8_t(t)-uint8_t(Token::STAR)])));
-		print(buf);
-	}
+	const bool res = Lexer::getTokenString(t,
+	    reinterpret_cast<uint8_t*>(buf));
+	if (res)
+		print(buf, VT100::TextAttr(uint8_t(VT100::BRIGHT) |
+		    uint8_t(VT100::C_GREEN)));
+	else
+		print(ProgMemStrings::S_ERROR, VT100::TextAttr(uint8_t(VT100::BRIGHT) |
+		    uint8_t(VT100::C_RED)));
 }
 
 #if USE_DATA
@@ -1512,8 +1506,8 @@ Interpreter::printTab(const Parser::Value &v, bool flag)
 {
 	Integer tabs;
 #if USE_REALS
-	if (v.type == Parser::Value::REAL)
-		tabs = math<Real>::round(v.value.real);
+	if (v.type() == Parser::Value::REAL)
+		tabs = math<Real>::round(Real(v));
 	else
 #endif
 		tabs = Integer(v);
@@ -1766,8 +1760,8 @@ Interpreter::strConcat()
 		if ((ff != nullptr) && (ff->_type == Program::StackFrame::STRING)) {
 			uint8_t l1 = strlen(ff->body.string);
 			uint8_t l2 = strlen(str1);
-			if (l1 + l2 >= STRINGSIZE)
-				l2 = STRINGSIZE - l1 - 1;
+			if (l1 + l2 >= STRING_SIZE)
+				l2 = STRING_SIZE - l1 - 1;
 			strncpy(ff->body.string + l1, str1, l2);
 			ff->body.string[l1 + l2] = 0;
 			return;
@@ -1782,7 +1776,7 @@ Interpreter::strCmp()
 	if (popString(str1)) {
 		const char *str2;
 		if (popString(str2))
-			return strncmp(str1, str2, STRINGSIZE) == 0;
+			return strncmp(str1, str2, STRING_SIZE) == 0;
 	}
 	return false;
 }
@@ -1826,7 +1820,7 @@ ArrayFrame::dataSize() const
 		mul *= sizeof (Real);
 		break;
 #endif
-	case Parser::Value::BOOLEAN:
+	case Parser::Value::LOGICAL:
 	{
 		uint16_t s = mul / 8;
 		if ((mul % 8) != 0)
@@ -1859,7 +1853,7 @@ ArrayFrame::get(uint16_t index, Parser::Value& v) const
 			v = get<Real>(index);
 			return true;
 #endif
-		case Parser::Value::BOOLEAN:
+		case Parser::Value::LOGICAL:
 		{
 			const uint8_t _byte = data()[index / 8];
 			v = bool((_byte >> (index % 8)) & 1);
@@ -1891,7 +1885,7 @@ ArrayFrame::set(uint16_t index, const Parser::Value &v)
 			set(index, Real(v));
 			return true;
 #endif
-		case Parser::Value::BOOLEAN:
+		case Parser::Value::LOGICAL:
 		{
 			uint8_t &_byte = data()[index / uint8_t(8)];
 			const bool _v = bool(v);
@@ -1953,7 +1947,7 @@ Interpreter::addArray(const char *name, uint8_t dim, uint16_t num)
 		uint16_t s = num / 8;
 		if ((num % 8) != 0)
 			++s;
-		t = Parser::Value::BOOLEAN;
+		t = Parser::Value::LOGICAL;
 		num = s;
 	} else { // real
 #if USE_REALS
@@ -1993,7 +1987,7 @@ Interpreter::typeFromName(const char *fname)
 		if (endsWith(fname, '%')) {
 		t = Parser::Value::INTEGER;
 	} else if (endsWith(fname, '!')) {
-		t = Parser::Value::BOOLEAN;
+		t = Parser::Value::LOGICAL;
 	} else if (endsWith(fname, '$')) {
 		t = Parser::Value::STRING;
 	} else {

@@ -24,15 +24,15 @@ namespace BASIC
 {
 
 static const uint8_t gfxTokens[] PROGMEM = {
-	'B','O','X'+0x80,
-	'C','I','R','C','L','E'+0x80,
-	'C','O','L','O','R'+0x80,
-	'C','U','R','S','O','R'+0x80,
-	'L','I','N','E','T','O'+0x80,
-	'L','I','N','E'+0x80,
-	'P','O','I','N','T'+0x80,
-	'S','C','R','E','E','N'+0x80,
-	0
+	'B','O','X', ASCII_NUL,
+	'C','I','R','C','L','E', ASCII_NUL,
+	'C','O','L','O','R', ASCII_NUL,
+	'C','U','R','S','O','R', ASCII_NUL,
+	'L','I','N','E','T','O', ASCII_NUL,
+	'L','I','N','E', ASCII_NUL,
+	'P','O','I','N','T', ASCII_NUL,
+	'S','C','R','E','E','N', ASCII_NUL,
+	 ASCII_ETX
 };
 
 const FunctionBlock::function GFXModule::comms[] PROGMEM = {

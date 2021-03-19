@@ -26,6 +26,7 @@
 #include "basic_parser.hpp"
 #include "basic_parser_value.hpp"
 #include "helper.hpp"
+#include "basic_lexer.h"
 
 namespace BASIC
 {
@@ -53,7 +54,7 @@ public:
 	 * @brief initialize lexer session
 	 * @param str null-terminating string to extract tokens from
 	 */
-	void init(const char*);
+	void init(const uint8_t*, bool);
 	/**
 	 * @brief continue lexical analyze for next token
 	 * @return string end flag
@@ -63,45 +64,46 @@ public:
 	 * @brief get last extracted token
 	 * @return last token
 	 */
-	Token getToken() const { return _token; }
+	Token getToken() const { return Token(m_context.token); }
 	/**
 	 * @brief get last lexer error
 	 * @return error code
 	 */
-	Error getError() const { return _error; }
+	Error getError() const { return Error(m_context._error); }
 	/**
 	 * @brief get current value (numberm boolean...)
 	 * @return value, extracted from string
 	 */
-	const Parser::Value &getValue() const { return _value; }
+	const Parser::Value &getValue() const
+	{
+		return reinterpret_cast<const Parser::Value&>(m_context.value);
+	}
 	/**
 	 * @brief get current string (identifier)
 	 * @return identifier string
 	 */
-	const char *id() const { return _id; }
+	const char *id() const { return m_context._id; }
 	/**
 	 * @brief get current string position
 	 * @return string position index
 	 */
-	uint8_t getPointer() const { return _pointer; }
-	/**
-	 * @brief token strings array
-	 */
-	static PGM_P const tokenStrings[];
+	uint8_t getPointer() const { return m_context.string_pointer; }
 	/**
 	 * @brief Get null-terminated token string representation
 	 * @param token Token code
 	 * @param buf String buffer to copy to
 	 * @return buffer pointer or nullptr if error
 	 */
-	static const uint8_t *getTokenString(Token, uint8_t*);
+	static bool getTokenString(Token, uint8_t*);
+	
+	/**
+	 * 
+	 * @param dst
+	 * @param dstlen
+	 * @param src
+	 */
+	uint8_t tokenize(uint8_t*, uint8_t, const uint8_t*);
 private:
-
-	void pushSYM();
-	void next();
-
-	void fitst_LT();
-	void fitst_GT();
 	
 	// Parse decimal number
 	void decimalNumber();
@@ -114,18 +116,7 @@ private:
 	void ident();
 	void stringConst();
 	
-	// analyzed string
-	const char *_string;
-	// analysed string position
-	uint8_t _pointer;
-	// current value
-	Parser::Value _value;
-	// current identifier string
-	char _id[STRINGSIZE];
-	// identifier string pointer
-	uint8_t _valuePointer;
-	Token _token;
-	Error	_error;
+	basic_lexer_context_t m_context;
 };
 
 } // namespace BASIC

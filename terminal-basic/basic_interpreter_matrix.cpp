@@ -146,7 +146,7 @@ Interpreter::matrixDet(const char *name)
 		}
 		uint8_t *tbuf = reinterpret_cast<uint8_t*>(_program._text+
 		    _program._arraysEnd);
-		_result.type = array->type;
+		_result.setType(array->type);
 		switch (array->type) {
 		case Parser::Value::INTEGER: {
 			Integer r;
@@ -155,7 +155,7 @@ Interpreter::matrixDet(const char *name)
 			    array->dimension[0]+1, r,
 			    reinterpret_cast<Integer*>(tbuf)))
 				_result = false;
-			_result.value.integer = r;
+			_result = r;
 		}
 		break;
 #if USE_LONGINT
@@ -176,7 +176,7 @@ Interpreter::matrixDet(const char *name)
 			    array->dimension[0]+1, r,
 			    reinterpret_cast<Real*>(tbuf)))
 				_result = false;
-			_result.value.real = r;
+			_result = r;
 		}
 		break;
 #endif // USE_REALS

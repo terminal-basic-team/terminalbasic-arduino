@@ -23,7 +23,7 @@
 #include <inttypes.h>
 
 #include "arduinoext.hpp"
-#include "basic_common.hpp"
+#include "basic.hpp"
 #include "basic_internalfuncs.hpp"
 
 namespace BASIC
@@ -68,9 +68,10 @@ public:
 	 * @brief Parse a text string
 	 * @param str string to parse
 	 * @param ok successfull parsing flag
+	 * @param tok
 	 * @return end of parsed string
 	 */
-	bool parse(const char*, bool&);
+	bool parse(const uint8_t*, bool&, bool);
 
 	void stop();
 

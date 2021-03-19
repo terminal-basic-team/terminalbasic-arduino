@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "basic_common.hpp"
+#include "basic.hpp"
 
 #if USEMATH
 
@@ -32,34 +32,34 @@ namespace BASIC
 
 static const uint8_t mathTokens[] PROGMEM = {
 #if M_REVERSE_TRIGONOMETRIC
-	'A', 'C', 'S'+0x80,
-	'A', 'S', 'N'+0x80,
-	'A', 'T', 'N'+0x80,
+	'A', 'C', 'S', ASCII_NUL,
+	'A', 'S', 'N', ASCII_NUL,
+	'A', 'T', 'N', ASCII_NUL,
 #endif // M_REVERSE_TRIGONOMETRIC
 #if M_ADDITIONAL
-	'C', 'B', 'R'+0x80,
+	'C', 'B', 'R', ASCII_NUL,
 #endif
 #if M_HYPERBOLIC
-        'C', 'O', 'S', 'H'+0x80,
+        'C', 'O', 'S', 'H', ASCII_NUL,
 #endif
 #if M_TRIGONOMETRIC
-	'C', 'O', 'S'+0x80,
-	'C', 'O', 'T'+0x80,
+	'C', 'O', 'S', ASCII_NUL,
+	'C', 'O', 'T', ASCII_NUL,
 #endif // M_TRIGONOMETRIC
-	'E', 'X', 'P'+0x80,
-	'L', 'O', 'G'+0x80,
-	'P', 'I'+0x80,
+	'E', 'X', 'P', ASCII_NUL,
+	'L', 'O', 'G', ASCII_NUL,
+	'P', 'I', ASCII_NUL,
 #if M_HYPERBOLIC
-	'S', 'I', 'N', 'H'+0x80,
+	'S', 'I', 'N', 'H', ASCII_NUL,
 #endif
 #if M_TRIGONOMETRIC
-	'S', 'I', 'N'+0x80,
+	'S', 'I', 'N', ASCII_NUL,
 #endif
-	'S', 'Q', 'R'+0x80,
+	'S', 'Q', 'R', ASCII_NUL,
 #if M_TRIGONOMETRIC
-	'T', 'A', 'N'+0x80,
+	'T', 'A', 'N', ASCII_NUL,
 #endif
-	0
+	ASCII_ETX
 };
 
 const FunctionBlock::function Math::funcs[] PROGMEM = {
