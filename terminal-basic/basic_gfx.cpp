@@ -41,10 +41,10 @@ static const uint8_t gfxTokens[] PROGMEM = {
 	'E','L','L','I','P','S','E','C',ASCII_NUL,
 #endif
 	'E','L','L','I','P','S','E',ASCII_NUL,
-	'L','I','N','E','T','O', ASCII_NUL,
 #if GFX_EXP_COLOR
 	'L','I','N','E','C', ASCII_NUL,
 #endif
+	'L','I','N','E','T','O', ASCII_NUL,
 	'L','I','N','E', ASCII_NUL,
 #if GFX_EXP_COLOR
 	'P','O','I','N','T','C', ASCII_NUL,
@@ -69,10 +69,10 @@ const FunctionBlock::command GFXModule::comms[] PROGMEM = {
 	, GFXModule::command_ellipsec
 #endif
 	, GFXModule::command_ellipse
-	, GFXModule::command_lineto
 #if GFX_EXP_COLOR
 	, GFXModule::command_linec
 #endif
+	, GFXModule::command_lineto
 	, GFXModule::command_line
 #if GFX_EXP_COLOR
 	, GFXModule::command_pointc

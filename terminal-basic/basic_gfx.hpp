@@ -50,8 +50,8 @@ public:
 #if GFX_EXP_COLOR
 	static bool command_linec(Interpreter&);
 #endif
-	static bool command_line(Interpreter&);
 	static bool command_lineto(Interpreter&);
+	static bool command_line(Interpreter&);
 #if GFX_EXP_COLOR
 	static bool command_pointc(Interpreter&);
 #endif

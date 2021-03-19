@@ -1,3 +1,9 @@
+r2.2.1 (08.03.2020) As always dedicated to International women day.
+    Thank you, our sweets for frendship, love and children
+
+  * Fix bug with printing first command in module with fast module call mode
+  * Fix wrong order of GFX commands with explicit color commands enabled
+
 r2.2 (23.02.2020) Release, dedicated tpo the Day of the Soviet army and NAVY
 
   * Add support of the string arrays

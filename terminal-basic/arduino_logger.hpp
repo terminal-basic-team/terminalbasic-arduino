@@ -1,6 +1,5 @@
 /*
  * ArduinoExt is a set of utility libraries for Arduino
- * 
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  * Copyright (C) 2019,2020 Terminal-BASIC team
  *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>

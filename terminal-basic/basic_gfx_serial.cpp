@@ -83,6 +83,28 @@ GFXModule::command_ellipse(Interpreter &i)
 }
 
 bool
+GFXModule::command_circle(Interpreter &i)
+{
+	INT r;
+	if (getIntegerFromStack(i, r)) {
+		INT y;
+		if (getIntegerFromStack(i, y)) {
+			INT x;
+			if (getIntegerFromStack(i, x)) {
+				i.print(char(ASCII::DLE));
+				i.print(char(GFXTERM::Command::CIRCLEC));
+				write16(i, x);
+				write16(i, y);
+				write16(i, r);
+				return true;
+			}
+		}
+	}
+	
+	return false;
+}
+
+bool
 GFXModule::command_color(Interpreter &i)
 {
 	INT c, b;
