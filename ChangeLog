@@ -1,3 +1,8 @@
+r1.2 (16.02.2019)
+
+  * Add CURSOR gfx command (switch blinking cursor on and off)
+  * Add PEEK function and POKE command
+
 r1.2-rc2 (13.12.2018)
 
   * User defined functions may have the names of existing variables
