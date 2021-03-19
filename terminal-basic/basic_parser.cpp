@@ -296,7 +296,7 @@ Parser::fOperator()
 	}
 	case Token::KW_INPUT:
 		_lexer.getNext();
-#if INPUT_WITH_TEXT
+#if OPT_INPUT_WITH_TEXT
 		if (_lexer.getToken() == Token::C_STRING) {
 		    _interpreter.print(_lexer.id());
 			if (!_lexer.getNext() || _lexer.getToken() !=
@@ -305,7 +305,7 @@ Parser::fOperator()
 				return false;
 			}
 		}
-#endif // INPUT_WITH_TEXT
+#endif // OPT_INPUT_WITH_TEXT
 		if (!fVarList()) {
 			_error = VARIABLES_LIST_EXPECTED;
 			return false;
@@ -454,7 +454,7 @@ Parser::fOperator()
 //		return res;
 //	} else if (t == Token::KW_INPUT) {
 //		_lexer.getNext();
-//#if INPUT_WITH_TEXT
+//#if OPT_INPUT_WITH_TEXT
 //		if (_lexer.getToken() == Token::C_STRING) {
 //		    _interpreter.print(_lexer.id());
 //			if (!_lexer.getNext() || _lexer.getToken() !=
@@ -463,7 +463,7 @@ Parser::fOperator()
 //				return false;
 //			}
 //		}
-//#endif // INPUT_WITH_TEXT
+//#endif // OPT_INPUT_WITH_TEXT
 //		if (!fVarList()) {
 //			_error = VARIABLES_LIST_EXPECTED;
 //			return false;

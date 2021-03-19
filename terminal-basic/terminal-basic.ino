@@ -171,7 +171,7 @@ setup()
         ps2usartStream.begin();
 #endif
 #if USETVOUT
-	tvOut.selectFont(Font6x8_cyr);
+	tvOut.selectFont(Font6x8);
 	tvOut.begin(PAL, TVOUT_HORIZ, TVOUT_VERT, tvOutBuf);
 #elif USEUTFT
 	utftPrint.begin();

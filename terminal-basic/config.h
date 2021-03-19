@@ -33,14 +33,14 @@
  */
 #define USE_REALS            1
 #if USE_REALS
-#define USE_LONG_REALS       1
+#define USE_LONG_REALS       0
 #endif
 
 /*
  * Support of 4-byte integer datatype
  * Functions, variables and arrays of long integer type ends with double % mark
  */
-#define USE_LONGINT          1
+#define USE_LONGINT          0
 
 /**
  * DUMP command support
@@ -76,17 +76,17 @@
 /*
  * Allow GO TO OPERATOR in addition to GOTO
  */
-#define CONF_SEPARATE_GO_TO     0
+#define CONF_SEPARATE_GO_TO 0
 
 /*
  * Support of integer division and modulo operation
  */
-#define USE_INTEGER_DIV      1
+#define USE_INTEGER_DIV     1
 #if USE_INTEGER_DIV
 	/*
 	 * Use DIV keyword for integer division in addition to \ operation
 	 */
-	#define USE_DIV_KW   0
+	#define USE_DIV_KW  0
 #endif // USE_INTEGER_DIV
 
 /*
@@ -118,7 +118,7 @@
 /*
  * STOP and CONTINUE commands support
  */
-#define USESTOPCONT       1
+#define USESTOPCONT   1
 
 /**
  * PEEK FUNCTION, POKE command support

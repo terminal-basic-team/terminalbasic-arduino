@@ -60,4 +60,4 @@ TVoutPrint::clear()
 	TVoutEx::instance()->clearScreen();
 }
 
-#endif USETVOUT
+#endif // USETVOUT

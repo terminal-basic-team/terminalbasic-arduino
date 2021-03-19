@@ -28,7 +28,7 @@ namespace BASIC
 {
 
 #if USE_FILEOP
-static SDCard::File userFiles[5];
+static SDCard::File userFiles[FILE_NUMBER];
 #endif // USE_FILEOP
 
 SDCard::File SDFSModule::_root;
@@ -40,6 +40,7 @@ static const uint8_t sdfsCommands[] PROGMEM = {
 	'D', 'S', 'A', 'V', 'E', ASCII_NUL,
 #if USE_FILEOP
 	'F', 'C', 'L', 'O', 'S', 'E', ASCII_NUL,
+	'F', 'S', 'E', 'E', 'K', ASCII_NUL,
 	'F', 'W', 'R', 'I', 'T', 'E', ASCII_NUL,
 #endif
 	'H', 'E', 'A', 'D', 'E', 'R', ASCII_NUL,
@@ -64,6 +65,7 @@ const FunctionBlock::function  SDFSModule::_commands[] PROGMEM = {
 	SDFSModule::dsave,
 #if USE_FILEOP
 	SDFSModule::com_fclose,
+	SDFSModule::com_fseek,
 	SDFSModule::com_fwrite,
 #endif
 	SDFSModule::header,
@@ -123,7 +125,7 @@ SDFSModule::com_fclose(Interpreter& i)
 {
 	INT iv;
 	if (getIntegerFromStack(i, iv)) {
-		if (iv >= 0 && iv < 5) {
+		if (iv >= 0 && iv < FILE_NUMBER) {
 			if (userFiles[iv]) {
 				userFiles[iv].close();
 				return true;
@@ -134,17 +136,31 @@ SDFSModule::com_fclose(Interpreter& i)
 }
 
 bool
+SDFSModule::com_fseek(Interpreter& i)
+{
+	INT iv;
+	if (getIntegerFromStack(i, iv)) {
+		if (iv >= 0 && iv < FILE_NUMBER) {
+			if (userFiles[iv]) {
+				INT bv;
+				if (getIntegerFromStack(i, bv)) {
+					return userFiles[iv].seek(bv);
+				}
+			}
+		}
+	}
+}
+
+bool
 SDFSModule::com_fwrite(Interpreter& i)
 {
 	INT iv;
 	if (getIntegerFromStack(i, iv)) {
-		if (iv >= 0 && iv < 5) {
+		if (iv >= 0 && iv < FILE_NUMBER) {
 			if (userFiles[iv]) {
 				INT bv;
-				if (getIntegerFromStack(i, bv)) {
-					userFiles[iv].write(bv);
-					return true;
-				}
+				if (getIntegerFromStack(i, bv))
+					return (userFiles[iv].write(bv) == 1);
 			}
 		}
 	}
@@ -155,10 +171,10 @@ bool
 SDFSModule::func_fopen(Interpreter& i)
 {
 	uint8_t currentFile;
-	for (currentFile = 0; currentFile<5; ++currentFile)
+	for (currentFile = 0; currentFile<FILE_NUMBER; ++currentFile)
 		if (!userFiles[currentFile])
 			break;
-	if (currentFile < 5) {
+	if (currentFile < FILE_NUMBER) {
 		const char* s;
 		if (i.popString(s)) {
 			userFiles[currentFile] = SDCard::SDFS.open(s,
@@ -183,7 +199,7 @@ SDFSModule::func_fread(Interpreter& i)
 {
 	INT iv;
 	if (getIntegerFromStack(i, iv)) {
-		if (iv >= 0 && iv < 5) {
+		if (iv >= 0 && iv < FILE_NUMBER) {
 			if (userFiles[iv]) {
 				if (i.pushValue(INT(userFiles[iv].read())))
 					return true;
@@ -198,7 +214,7 @@ SDFSModule::func_fsize(Interpreter& i)
 {
 	INT iv;
 	if (getIntegerFromStack(i, iv)) {
-		if (iv >= 0 && iv < 5) {
+		if (iv >= 0 && iv < FILE_NUMBER) {
 			if (userFiles[iv]) {
 				if (i.pushValue(INT(userFiles[iv].size())))
 					return true;

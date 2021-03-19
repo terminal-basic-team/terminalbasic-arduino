@@ -1664,8 +1664,26 @@ Interpreter::setArrayElement(const char *name, const Parser::Value &v)
 {
 	ArrayFrame *f = _program.arrayByName(name);
 	if (f == nullptr) {
-		raiseError(DYNAMIC_ERROR, NO_SUCH_ARRAY);
-		return;
+#if OPT_IMPLICIT_ARRAYS
+		uint8_t dims = 0;
+		Program::StackFrame* sf;
+		Pointer index = _program._sp;
+		while (((sf = _program.stackFrameByIndex(index)) != nullptr) &&
+		    (sf->_type == Program::StackFrame::ARRAY_DIMENSION)) {
+			++dims;
+			pushDimension(10);
+			index += sf->size();
+		}
+		pushDimensions(dims);
+		newArray(name);
+		f = _program.arrayByName(name);
+		if (f == nullptr) {
+#endif
+			raiseError(DYNAMIC_ERROR, NO_SUCH_ARRAY);
+			return;
+#if OPT_IMPLICIT_ARRAYS
+		}
+#endif
 	}
 
 	uint16_t index;
@@ -1684,7 +1702,7 @@ Interpreter::newArray(const char *name)
 		uint8_t dimensions = f->body.arrayDimensions;
 		_program.pop();
 		uint16_t size = 1;
-		auto sp = _program._sp; // go on stack frames, containong dimesions
+		auto sp = _program._sp; // go on stack frames, containing dimesions
 		for (uint8_t dim = 0; dim < dimensions; ++dim) {
 			f = _program.stackFrameByIndex(sp);
 			if (f != nullptr && f->_type ==
@@ -1700,7 +1718,7 @@ Interpreter::newArray(const char *name)
 		if (array != nullptr) { // go on stack frames, containong dimesions once more
 			// now popping
 			for (uint8_t dim = dimensions; dim-- > 0;) {
-				f = _program.stackFrameByIndex(_program._sp);
+				f = _program.currentStackFrame();
 				array->dimension[dim] = f->body.arrayDimension;
 				_program.pop();
 			}
@@ -1770,7 +1788,9 @@ Interpreter::confirm()
 		char c = _input.read();
 		_output.print(c);
 		while (_input.available() <= 0);
-		if (_input.read() != int(ASCII::CR)) {
+		const char eol = _input.read();
+		if (eol != char(ASCII::CR) &&
+		    eol != char(ASCII::LF)) {
 			newline();
 			continue;
 		}
@@ -1966,7 +1986,7 @@ ArrayFrame::numElements() const
 	return mul;
 }
 
-ArrayFrame *
+ArrayFrame*
 Interpreter::addArray(const char *name, uint8_t dim, uint16_t num)
 {
 	Pointer index = _program._variablesEnd;
