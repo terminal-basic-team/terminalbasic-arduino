@@ -1,3 +1,12 @@
+r2.2.2 (06.04.2021)
+
+  * Fix bug in Lexer, which causes fake string overflow errors (backport from
+    2.3 branch)
+  * Fix bug in matrix assignment in the program line with colon separator
+     (backport from 2.3 branch)
+  * Fix buffer overflow in printing of double precision constants (backport from
+    2.3 branch)
+
 r2.2.1 (08.03.2020) As always dedicated to International women day.
     Thank you, our sweets for frendship, love and children
 
