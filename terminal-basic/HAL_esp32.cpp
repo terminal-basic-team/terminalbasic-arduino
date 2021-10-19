@@ -2,7 +2,7 @@
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
  * 
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
- * Copyright (C) 2019,2020 Terminal-BASIC team
+ * Copyright (C) 2019-2021 Terminal-BASIC team
  *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,7 +21,16 @@
 
 #ifdef ARDUINO_ARCH_ESP32
 
+#ifdef ODROID_ESP32
+#error 1
+#endif
+
 #include "HAL_esp32.h"
+
+#if HAL_ESP32_ODROIDGO
+void HAL_esp32_odroidgo_init();
+void HAL_esp32_odroidgo_update();
+#endif // HAL_ESP32_ODROIDGO
 
 #if HAL_ESP32_EXTMEM == HAL_ESP32_EXTEM_SD
 #include <SD.h>
@@ -56,26 +65,16 @@ __BEGIN_DECLS
 void
 HAL_initialize_concrete()
 {
+#if HAL_ESP32_ODROIDGO
+  HAL_esp32_odroidgo_init();
+#endif // HAL_ESP32_ODROIDGO
+  
 #if HAL_NVRAM || (HAL_ESP32_EXTMEM == HAL_ESP32_EXTEM_SPIFFS)
 	if (!SPIFFS.begin(true)) {
 		Serial.println("ERROR: SPIFFS.begin");
 		exit(1);
 	}
 #endif
-
-	/*Serial.println("Format? [y/n]");
-	while (true) {
-		while (Serial.available() < 1) delay(100);
-		auto r = Serial.read();
-		if (r == 'y') {
-			if (!SPIFFS.format()) {
-				Serial.println("ERROR: SPIFFS.format");
-				exit(2);
-			}
-			break;
-		} else if (r == 'n')
-			break;
-	}*/
 
 #if HAL_NVRAM
 
@@ -91,8 +90,8 @@ HAL_initialize_concrete()
 
 #endif // HAL_NVRAM
 
-#if HAL_ESP32_EXTMEM == HAL_ESP32_EXTEM_SD
-	if (!SD.begin(SS)) {
+#if HAL_EXTMEM && (HAL_ESP32_EXTMEM == HAL_ESP32_EXTEM_SD)
+	if (!SD.begin()) {
 		Serial.println("ERROR: SD.begin");
 		exit(3);
 	}
@@ -419,6 +418,9 @@ __BEGIN_DECLS
 void
 HAL_update_concrete()
 {
+#if HAL_ESP32_ODROIDGO
+  HAL_esp32_odroidgo_update();
+#endif // HAL_ESP32_ODROIDGO
 }
 
 __END_DECLS

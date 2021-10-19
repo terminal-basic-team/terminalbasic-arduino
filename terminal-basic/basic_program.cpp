@@ -377,7 +377,9 @@ Program::addLine(
 	lexer.init(tempBuffer, true);
 	while (lexer.getNext()) {
 		const auto token = lexer.getToken();
-		if (token >= Token::INTEGER_IDENT &&
+		if (token == Token::KW_REM)
+			break;
+		else if (token >= Token::INTEGER_IDENT &&
 		    token <= Token::BOOL_IDENT) {
 			auto c = parser.getCommand(lexer.id());
 			if (c != nullptr) {

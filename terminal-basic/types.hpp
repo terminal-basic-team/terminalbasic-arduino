@@ -108,4 +108,4 @@ public:
 	static constexpr bool isreal = false;
 };
 
-#endif
+#endif // TYPES_HPP

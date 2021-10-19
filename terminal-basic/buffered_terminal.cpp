@@ -1,7 +1,8 @@
 /*
  * ArduinoExt is a set of utility libraries for Arduino
+ * 
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
- * Copyright (C) 2019,2020 Terminal-BASIC team
+ * Copyright (C) 2019-2021 Terminal-BASIC team
  *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
  * This program is free software: is free software: you can redistribute it and/or
@@ -19,43 +20,43 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BYTEARRAY_HPP
-#define BYTEARRAY_HPP
+#include "buffered_terminal.hpp"
 
-#include <inttypes.h>
-
-#include "Printable.h"
-
-class ByteArray : public Printable
+void
+BufferedTerminal::begin(uint16_t rows, uint16_t columns)
 {
-public:
-	ByteArray();
-	ByteArray(const uint8_t*, size_t);
-	ByteArray(const char *c, size_t s) :
-	  ByteArray(reinterpret_cast<const uint8_t*>(c), s) {}
-	
-	void createData();
+	m_row = m_column = 0;
+	m_rows = rows, m_columns = columns;
+	m_attr = VT100::TextAttr::NO_ATTR;
+	m_lockCursor = false;
+	m_cursorState = true;
+}
 
-	size_t printTo(Print& p) const override;
+void
+BufferedTerminal::update()
+{
+	// If cursor is locked by the non-interrupt code - return
+	if (m_lockCursor)
+		return;
 
-	const uint8_t *data() const
-	{
-		return (_data);
-	}
-	
-	uint8_t *data()
-	{
-		return (_data);
-	}
+	// Count down cursor blank interrupt counter
+	if (--m_cursorCounter == 0) {
+		m_cursorCounter = m_cursorBlinkPeriod;
+	} else
+		return;
 
-	size_t size() const
-	{
-		return (_size);
-	}
-private:
-	uint8_t *_data;
-	size_t _size;
-	bool _ownsData;
-};
+	m_cursorState = !m_cursorState;
+	drawCursor(m_cursorState);
+}
 
-#endif // BYTEARRAY_HPP
+uint8_t
+BufferedTerminal::getCursorX()
+{
+	return m_column;
+}
+
+void
+BufferedTerminal::setCursorX(uint8_t x)
+{
+	setCursor(x, m_row);
+}

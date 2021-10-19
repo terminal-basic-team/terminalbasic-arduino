@@ -2,7 +2,7 @@
  * ArduinoExt is a set of utility libraries for Arduino
  * 
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
- * Copyright (C) 2019 Terminal-BASIC team
+ * Copyright (C) 2019-2021 Terminal-BASIC team
  *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
  * This program is free software: is free software: you can redistribute it and/or
@@ -30,7 +30,7 @@
 
 /**
  * @package VT100
- * @brief Package, implementing some vt100/ANSI terminal functions
+ * @brief Package, implementing some ANSI terminal functions
  */
 Package(VT100)
 {
@@ -62,6 +62,9 @@ public:
 		CB_WHITE = 0xF0,
 	};
 
+	/**
+	 * Colors used by the terminal
+	 */
 	enum Color : uint8_t
 	{
 		COLOR_BLACK = 0,
@@ -115,8 +118,9 @@ public:
 		void writeLbracket(uint8_t);
 		void writeFirstNum(uint8_t);
 		void writeSecondNum(uint8_t);
-
+		// FSM state
 		State_t _state;
+		// Parsed values
 		uint16_t _value, _value2;
 		// Print zone width
 		uint8_t _pZoneWidth;
@@ -139,4 +143,3 @@ inline VT100::TextAttr& operator &= (VT100::TextAttr& left, VT100::TextAttr righ
 }
 
 #endif // VT100_HPP
-

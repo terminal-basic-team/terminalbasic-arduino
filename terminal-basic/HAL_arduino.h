@@ -2,7 +2,7 @@
  * Terminal-BASIC is a lightweight BASIC-like language interpreter
  * 
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
- * Copyright (C) 2019,2020 Terminal-BASIC team
+ * Copyright (C) 2019-2021 Terminal-BASIC team
  *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -39,8 +39,11 @@
 /* Use Use TFT_eSPI library */
 #define HAL_ARDUINO_TERMINAL_OUTPUT_TFTeSPI 3
 
+/** Input devices **/
+
 #define HAL_ARDUINO_TERMINAL_INPUT_NONE 0
 #define HAL_ARDUINO_TERMINAL_INPUT_SERIAL 1
+#define HAL_ARDUINO_TERMINAL_INPUT_PS2KBD 2
 
 #define HAL_ARDUINO_TERMINAL_OUTPUT HAL_ARDUINO_TERMINAL_OUTPUT_SERIAL
 #define HAL_ARDUINO_TERMINAL_INPUT HAL_ARDUINO_TERMINAL_INPUT_SERIAL
@@ -64,6 +67,11 @@
 	#define TFT_RS 4
 #endif /* HAL_ARDUINO_TERMINAL_OUTPUT */
 
+#if HAL_ARDUINO_TERMINAL_INPUT == HAL_ARDUINO_TERMINAL_INPUT_PS2KBD
+#define HAL_ARDUINO_TERMINAL_INPUT_PS2KBD_DATAPIN 32
+#define HAL_ARDUINO_TERMINAL_INPUT_PS2KBD_CLKPIN 33
+#endif
+
 #if HAL_EXTMEM
 
 #define HAL_ARDUINO_EXTMEM_NONE 0
@@ -83,6 +91,7 @@
 
 #if HAL_GFX
 
+#define HAL_ARDUINO_GFX_NONE 1
 /* Serial 2-mode graphics protocol HAL GFX implementation */
 #define HAL_ARDUINO_GFX_SERIAL 1
 /* UTFT HAL GFX implementation */
@@ -93,9 +102,10 @@
 #define HAL_ARDUINO_GFX_TFTeSPI 4
 
 /*
- * SDL2 HAL_GFX implementation
+ * Used GFX implementation
  */
-#define HAL_ARDUINO_GFX HAL_ARDUINO_GFX_SERIAL
+#define HAL_ARDUINO_GFX HAL_ARDUINO_GFX_NONE
+
 #if HAL_ARDUINO_GFX == HAL_ARDUINO_GFX_SERIAL
 #define HAL_ARDUINO_GFX_SERIAL_TERMNO 0
 #endif

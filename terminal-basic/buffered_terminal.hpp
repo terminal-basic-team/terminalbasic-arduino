@@ -1,7 +1,8 @@
 /*
  * ArduinoExt is a set of utility libraries for Arduino
+ * 
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
- * Copyright (C) 2019,2020 Terminal-BASIC team
+ * Copyright (C) 2019-2021 Terminal-BASIC team
  *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
  *
  * This program is free software: is free software: you can redistribute it and/or
@@ -19,43 +20,46 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BYTEARRAY_HPP
-#define BYTEARRAY_HPP
+#ifndef BUFFERED_TERMINAL_HPP
+#define BUFFERED_TERMINAL_HPP
 
-#include <inttypes.h>
+#include "vt100.hpp"
 
-#include "Printable.h"
-
-class ByteArray : public Printable
+class BufferedTerminal : public VT100::Print
 {
+	EXT_NOTCOPYABLE(BufferedTerminal)
+
 public:
-	ByteArray();
-	ByteArray(const uint8_t*, size_t);
-	ByteArray(const char *c, size_t s) :
-	  ByteArray(reinterpret_cast<const uint8_t*>(c), s) {}
+	/**
+	 * @param rows
+	 * @param columns
+	 */
+	void begin(
+	    uint16_t,
+	    uint16_t);
 	
-	void createData();
+	void update();
 
-	size_t printTo(Print& p) const override;
-
-	const uint8_t *data() const
-	{
-		return (_data);
-	}
+protected:
 	
-	uint8_t *data()
-	{
-		return (_data);
-	}
+	virtual void drawCursor(bool) = 0;
+	
+	// Current row and column
+	uint16_t m_row, m_column;
+	// Number of rows and columns
+	uint16_t m_rows, m_columns;
+	// Cursor lock object and blinking cursor state
+	bool m_lockCursor, m_cursorState;
+	// Cursor counter and period
+	uint8_t m_cursorCounter, m_cursorBlinkPeriod = 20;
+	// Current attribute
+	VT100::TextAttr m_attr;
+	
+// VT100::Print interface
+protected:
+	uint8_t getCursorX() override;
 
-	size_t size() const
-	{
-		return (_size);
-	}
-private:
-	uint8_t *_data;
-	size_t _size;
-	bool _ownsData;
+	void setCursorX(uint8_t) override;
 };
 
-#endif // BYTEARRAY_HPP
+#endif // BUFFERED_TERMINAL_HPP
