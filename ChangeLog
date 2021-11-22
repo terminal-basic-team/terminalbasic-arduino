@@ -1,3 +1,9 @@
+r2.3-b2 (22.11.2021)
+
+  * Add VAL function
+  * Fix DATA ... READ with non-quoted strings
+  * Fix bug in ABS function with long REAL values
+
 r2.3-b1 (06.04.2021)
 
   // Platforms

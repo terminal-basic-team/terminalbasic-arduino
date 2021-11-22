@@ -1,9 +1,10 @@
 /*
- * Terminal-BASIC is a lightweight BASIC-like language interpreter
+ * This file is part of Terminal-BASIC: a lightweight BASIC-like language
+ * interpreter.
  * 
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
- * Copyright (C) 2019,2020 Terminal-BASIC team
- *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
+ * Copyright (C) 2019-2021 Terminal-BASIC team
+ *     <https://github.com/terminal-basic-team>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,7 +65,7 @@ int
 HALProxyStream::read()
 {
 	if (m_hasByte)
-		return  m_byte;
+		return m_byte;
 	else if (HAL_terminal_isdataready(m_term))
 		return HAL_terminal_read(m_term);
 	else

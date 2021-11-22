@@ -1,9 +1,10 @@
 /*
- * Terminal-BASIC is a lightweight BASIC-like language interpreter
+ * This file is part of Terminal-BASIC: a lightweight BASIC-like language
+ * interpreter.
  * 
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
- * Copyright (C) 2019,2020 Terminal-BASIC team
- *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
+ * Copyright (C) 2019-2021 Terminal-BASIC team
+ *     <https://github.com/terminal-basic-team>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,38 +23,58 @@
 #ifndef STRINGS_RU_KOI8R_HPP
 #define STRINGS_RU_KOI8R_HPP
 
-#define STR_NO_ERROR                  "οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½"
-#define STR_OPERATOR_EXPECTED         "οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½"
-#define STR_IDENTIFYER_EXPECTED       "οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½"
-#define STR_EXPRESSION_EXPECTED       "οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½"
-#define STR_INTEGER_CONSTANT_EXPECTED "οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½"
-#define STR_THEN_OR_GOTO_EXPECTED     "οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ THEN οΏ½οΏ½οΏ½ GOTO"
-#define STR_INVALID_DATA_EXPRESSION   "οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ DATA"
-#define STR_INVALID_READ_EXPRESSION   "οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ READ"
-#define STR_VARIABLES_LIST_EXPECTED   "οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½"
-#define STR_STRING_OVERFLOW           "οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½"
-#define STR_MISSING_RPAREN            "οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½"
-#define STR_INVALID_ONGOTO_INDEX      "οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ ON ... GOTO"
+#define STR_NO_ERROR                  "…’ "
+#define STR_OPERATOR_EXPECTED         "†„€‹‘ …€’"
+#define STR_IDENTIFYER_EXPECTED       "†„€‹‘ „…’”€’"
+#define STR_EXPRESSION_EXPECTED       "†„€‹‘ ‚›€†……"
+#define STR_INTEGER_CONSTANT_EXPECTED "†„€‹‘ –…‹…"
+#define STR_THEN_OR_GOTO_EXPECTED     "†„€‹‘ THEN ‹ GOTO"
+#define STR_INVALID_DATA_EXPRESSION   "…‚…… ‚›€†…… DATA"
+#define STR_INVALID_READ_EXPRESSION   "…‚…… ‚›€†…… READ"
+#define STR_VARIABLES_LIST_EXPECTED   "†„€…’‘ ‘‘ ………›•"
+#define STR_STRING_OVERFLOW           "……‹…… ‘’"
+#define STR_MISSING_RPAREN            "’‘“’‘’‚“…’ €‚€ €‚›—€"
+#define STR_INVALID_ONGOTO_INDEX      "…‚…›‰ „…‘ ON ... GOTO"
 
-#define STR_OUTTA_MEMORY              "οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½"
-#define STR_REDIMED_ARRAY             "οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½"
-#define STR_STACK_FRAME_ALLOC         "οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½"
-#define STR_MISING_STRING_FRAME       "οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½"
-#define STR_INVALID_NEXT              "οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ FOR ... NEXT"
-#define STR_RETURN_WO_GOSUB           "RETURN οΏ½οΏ½οΏ½ GOSUB"
-#define STR_NO_SUCH_LINE              "οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½"
-#define STR_INVALID_VALUE_TYPE        "οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½"
-#define STR_NO_SUCH_ARRAY             "οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½"
-#define STR_INTEGER_EXP_EXPECTED      "οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½"
-#define STR_BAD_CHECKSUM              "οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½"
-#define STR_INVALID_TAB               "οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½ TAB"
+#define STR_OUTTA_MEMORY              "…„‘’€’— €’"
+#define STR_REDIMED_ARRAY             "€‘‘‚ €…… ‚‹…"
+#define STR_STACK_FRAME_ALLOC         "…‚‡† ‚›„…‹’ €„ ‘’…€"
+#define STR_MISING_STRING_FRAME       "’‘“’‘’‚“…’ €„ ‘’"
+#define STR_INVALID_NEXT              "…‚…… €‘‹†…… FOR ... NEXT"
+#define STR_RETURN_WO_GOSUB           "RETURN …‡ GOSUB"
+#define STR_NO_SUCH_LINE              "…’ ’€‰ ‘’"
+#define STR_INVALID_VALUE_TYPE        "…‚…›‰ ’ „€›•"
+#define STR_NO_SUCH_ARRAY             "…’ ’€ƒ €‘‘‚€"
+#define STR_INTEGER_EXP_EXPECTED      "†„€‹‘ –…‹—‘‹…… ‡€—……"
+#define STR_BAD_CHECKSUM              "…‚…€ ’‹€ ‘“€"
+#define STR_INVALID_TAB               "…‚…… ‡€—…… ’€“‹–"
+#define STR_INVALID_ELEMENT_INDEX     "…‚…›‰ „…‘ ‹……’€"
+#define STR_SQUARE_MATRIX_EXPECTED    "†„€‹€‘ ‚€„€’€ €’–€"
+#define STR_DIMENSIONS_MISMATCH       "…‘’‚…’‘’‚… €‡…‘’"
+#define STR_COMMAND_FAILED            "€ ‚›‹… €„›"
+#define STR_VAR_DUPLICATE             "„“‹“™€‘ ………€"
+#define STR_FUNCTION_DUPLICATE        "„“‹“™€‘ ”“–"
+#define STR_NO_SUCH_FUNCION           "…’ ’€‰ ”“–"
+#define STR_INSUFFICIENT_DATA         "…„‘’€’— „€›• „‹ —’…"
 
-#define STR_ERROR      "οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½"
-#define STR_BYTES      "οΏ½οΏ½οΏ½οΏ½"
-#define STR_VERSION    "οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½"
-#define STR_AVAILABLE  "οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½"
-#define STR_CLI_PROMPT "οΏ½οΏ½οΏ½οΏ½οΏ½"
-#define STR_SYNTAX     "οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½"
-#define STR_SEMANTIC   "οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½οΏ½"
+#define STR_LICENSE_MESSAGE \
+"Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>\n" \
+"Copyright (C) 2019-2021 Terminal-BASIC team\n" \
+"    <https://github.com/terminal-basic-team>\n" \
+"β  ―ΰ®£ΰ ¬¬  ―®αβ Ά«ο¥βαο …‡ ‚‘• ƒ€€’‰.\n" \
+"β® αΆ®΅®¤­ ο ―ΰ®£ΰ ¬¬ , ¨ Άλ ¬®¦¥β¥ ―¥ΰ¥ΰ α―ΰ®αβΰ ­οβμ\n" \
+"¥¥ ¨/¨«¨ ¨§¬¥­οβμ ¥¥ ­  γα«®Ά¨οε ‘β ­¤ ΰβ­®© ®΅ι¥αβΆ¥­­®©\n" \
+"«¨ζ¥­§¨¨ GNU Ά β®¬ Ά¨¤¥, Ά ª ª®¬ ®­  ΅λ«  ®―γ΅«¨ª®Ά ­ \n" \
+"”®­¤®¬ αΆ®΅®¤­®£® ―ΰ®£ΰ ¬¬­®£® ®΅¥α―¥η¥­¨ο; «¨΅® Ά¥ΰα¨¨ 3\n" \
+"«¨ζ¥­§¨¨, «¨΅® (―® Ά θ¥¬γ Άλ΅®ΰγ) «ξ΅®© ΅®«¥¥ ―®§¤­¥© Ά¥ΰα¨¨."
+
+
+#define STR_ERROR      "€"
+#define STR_BYTES      "€‰’"
+#define STR_VERSION    "‚…‘"
+#define STR_AVAILABLE  "„‘’“"
+#define STR_CLI_PROMPT "ƒ’‚"
+#define STR_SYNTAX     "‘’€‘—…‘€"
+#define STR_SEMANTIC   "‘…€’—…‘€"
 
 #endif // STRINGS_RU_KOI8R_HPP

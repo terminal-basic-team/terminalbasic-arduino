@@ -1,9 +1,10 @@
 /*
- * Terminal-BASIC is a lightweight BASIC-like language interpreter
+ * This file is part of Terminal-BASIC: a lightweight BASIC-like language
+ * interpreter.
  * 
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
- * Copyright (C) 2019,2020 Terminal-BASIC team
- *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
+ * Copyright (C) 2019-2021 Terminal-BASIC team
+ *     <https://github.com/terminal-basic-team>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -339,6 +340,10 @@ void HAL_gfx_circle(uint16_t, uint16_t, uint16_t);
  * @param color
  */
 void HAL_gfx_circlec(uint16_t, uint16_t, uint16_t, HAL_gfx_color_t);
+
+void HAL_gfx_setCursor(BOOLEAN state);
+
+void HAL_gfx_setmode(uint8_t mode);
 
 #endif /* HAL_GFX */
 

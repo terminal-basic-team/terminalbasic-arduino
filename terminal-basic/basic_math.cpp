@@ -1,9 +1,10 @@
 /*
- * Terminal-BASIC is a lightweight BASIC-like language interpreter
+ * This file is part of Terminal-BASIC: a lightweight BASIC-like language
+ * interpreter.
  * 
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
- * Copyright (C) 2019,2020 Terminal-BASIC team
- *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
+ * Copyright (C) 2019-2021 Terminal-BASIC team
+ *     <https://github.com/terminal-basic-team>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,15 +44,15 @@ static const uint8_t mathTokens[] PROGMEM = {
 	'A', 'S', 'N', '!', ASCII_NUL,
 #endif
 	'A', 'S', 'N', ASCII_NUL,
-#if M_ADDITIONAL
 #if USE_LONG_REALS
 	'A', 'T', 'N', '!', ASCII_NUL,
 #endif
+#if M_ADDITIONAL
 #if USE_LONG_REALS
 	'A', 'T', 'N', '2', '!', ASCII_NUL,
 #endif
 	'A', 'T', 'N', '2', ASCII_NUL,
-#endif
+#endif // M_ADDITIONAL
 	'A', 'T', 'N', ASCII_NUL,
 #endif // M_REVERSE_TRIGONOMETRIC
 #if M_ADDITIONAL
@@ -64,13 +65,13 @@ static const uint8_t mathTokens[] PROGMEM = {
 #if USE_LONG_REALS
 	'C', 'O', 'S', '!', ASCII_NUL,
 #endif
-#endif
+#endif // M_TRIGONOMETRIC
 #if M_HYPERBOLIC
 #if USE_LONG_REALS
 	'C', 'O', 'S', 'H', '!', ASCII_NUL,
 #endif
         'C', 'O', 'S', 'H', ASCII_NUL,
-#endif
+#endif // M_HYPERBOLIC
 #if M_TRIGONOMETRIC
 	'C', 'O', 'S', ASCII_NUL,
 #if USE_LONG_REALS

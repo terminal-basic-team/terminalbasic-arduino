@@ -1,9 +1,10 @@
 /*
- * Terminal-BASIC is a lightweight BASIC-like language interpreter
+ * This file is part of Terminal-BASIC: a lightweight BASIC-like language
+ * interpreter.
  * 
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
- * Copyright (C) 2019,2020 Terminal-BASIC team
- *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
+ * Copyright (C) 2019-2021 Terminal-BASIC team
+ *     <https://github.com/terminal-basic-team>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,68 +48,20 @@
 	#define USE_WIRE 0
 #endif
 
-#if S_INPUT == SERIAL_I
-	#define SERIAL_PORT_I Serial
-#elif S_INPUT == SERIAL1_I
-	#define SERIAL_PORT_I Serial1
-#elif S_INPUT == SERIAL2_I
-	#define SERIAL_PORT_I Serial2
-#elif S_INPUT == SERIAL3_I
-	#define SERIAL_PORT_I Serial3
-#elif S_INPUT == SERIALL_I
-	#define SERIAL_PORT_I SerialL
-#elif S_INPUT == SERIALL1_I
-	#define SERIAL_PORT_I SerialL1
-#elif S_INPUT == SERIALL2_I
-	#define SERIAL_PORT_I SerialL2
-#elif S_INPUT == SERIALL3_I
-	#define SERIAL_PORT_I SerialL3
-#elif S_INPUT == PS2UARTKB_I
-	#undef USEPS2USARTKB
-	#define USEPS2USARTKB     1
-#elif S_INPUT == SDL_I
-	#define USE_SDL_ISTREAM 1
-#elif S_INPUT == HAL_I
+#if S_INPUT == HAL_I
 	#define SERIAL_PORT_I halproxy1
 #endif
 
 #ifdef SERIAL_PORT_I
-#define INPUT_STREAM SERIAL_PORT_I
+	#define INPUT_STREAM SERIAL_PORT_I
 #endif
 
-#if S_OUTPUT == SERIAL_O
-#define SERIAL_PORT_O Serial
-#elif S_OUTPUT == SERIAL1_O
-#define SERIAL_PORT_O Serial1
-#elif S_OUTPUT == SERIAL2_O
-#define SERIAL_PORT_O Serial2
-#elif S_OUTPUT == SERIAL3_O
-#define SERIAL_PORT_O Serial3
-#elif S_OUTPUT == SERIALL_O
-#define SERIAL_PORT_O SerialL
-#elif S_OUTPUT == SERIALL1_O
-#define SERIAL_PORT_O SerialL1
-#elif S_OUTPUT == SERIALL2_O
-#define SERIAL_PORT_O SerialL2
-#elif S_OUTPUT == SERIALL3_O
-#define SERIAL_PORT_O SerialL3
-#elif S_OUTPUT == UTFT_O
-#undef USEUTFT
-#define USEUTFT            1
-#elif S_OUTPUT == TVOUT_O
-#undef USETVOUT
-#define USETVOUT           1
-#elif S_OUTPUT == LIQCR_O
-#undef USELIQUIDCRYSTAL
-#define USELIQUIDCRYSTAL   1
-#elif S_OUTPUT == SDL_O
-	#define USE_SDL_OSTREAM 1
-#elif S_OUTPUT == HAL_O
+#if S_OUTPUT == HAL_O
 	#define SERIAL_PORT_O halproxy1
 #endif // S_OUTPUT
 
 #ifdef SERIAL_PORT_O
-#define OUTPUT_PRINT SERIAL_PORT_O
+	#define OUTPUT_PRINT SERIAL_PORT_O
 #endif
 
 #ifdef true

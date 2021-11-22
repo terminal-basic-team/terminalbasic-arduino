@@ -1,9 +1,10 @@
 /*
- * Terminal-BASIC is a lightweight BASIC-like language interpreter
+ * This file is part of Terminal-BASIC: a lightweight BASIC-like language
+ * interpreter.
  * 
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
- * Copyright (C) 2019,2020 Terminal-BASIC team
- *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
+ * Copyright (C) 2019-2021 Terminal-BASIC team
+ *     <https://github.com/terminal-basic-team>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,6 +75,11 @@ static const char strucBASIC[] PROGMEM = "BASIC";
 static const char strVERSION[] PROGMEM = STR_VERSION;
 static const char strTEXT[] PROGMEM = "TEXT";
 static const char strOF[] PROGMEM = "OF";
+
+#if LICENSE_TEXT_ON_START
+static const char strLicenseMessage[] = STR_LICENSE_MESSAGE;
+#endif
+
 #if USE_DUMP
 static const char strVARS[] PROGMEM = "VARS";
 static const char strARRAYS[] PROGMEM = "ARRAYS";
@@ -148,10 +154,10 @@ static PGM_P const progmemStrings[uint8_t(ProgMemStrings::NUM_STRINGS)] PROGMEM 
 	strVT100_WHITE
 #endif // USE_COLORATTRIBUTES
 #endif // USE_TEXTATTRIBUTES
+	    
 };
 
 #if CONF_ERROR_STRINGS
-
 static const char noerror[] PROGMEM = STR_NO_ERROR;
 static const char outtamemerror[] PROGMEM = STR_OUTTA_MEMORY;
 static const char strRedimedArray[] PROGMEM = STR_REDIMED_ARRAY;
@@ -169,37 +175,62 @@ static const char strBadChecksum[] PROGMEM = STR_BAD_CHECKSUM;
 #if USE_TEXTATTRIBUTES
 static const char strInvalidTab[] PROGMEM = STR_INVALID_TAB;
 #endif
-/*
-		INVALID_ELEMENT_INDEX = 14,
+static const char strInvElmIndex[] PROGMEM = STR_INVALID_ELEMENT_INDEX;
 #if USE_MATRIX
-		SQUARE_MATRIX_EXPECTED = 15,
+static const char strSqrMatExp[] PROGMEM = STR_SQUARE_MATRIX_EXPECTED;
+static const char strDimMismatch[] PROGMEM = STR_DIMENSIONS_MISMATCH;
 #endif
-		DIMENSIONS_MISMATCH = 16,
-		COMMAND_FAILED = 17,
+static const char strCommandFailed[] PROGMEM = STR_COMMAND_FAILED;
+static const char strVarDuplicate[] PROGMEM = STR_VAR_DUPLICATE;
 #if USE_DEFFN
-		VAR_DUPLICATE = 18,
-		FUNCTION_DUPLICATE = 19,
-		NO_SUCH_FUNCION = 20,
+static const char strFunctionDuplicate[] PROGMEM = STR_FUNCTION_DUPLICATE;
+static const char strNoSuchFunction[] PROGMEM = STR_NO_SUCH_FUNCION;
+#endif // USE_DEFFN
+#if USE_DATA
+static const char strInsufficientData[] PROGMEM = STR_INSUFFICIENT_DATA;
 #endif
-		INTERNAL_ERROR = 255*/
 
 PGM_P const Interpreter::errorStrings[] PROGMEM = {
-	noerror,
-	outtamemerror,
-	strRedimedArray,
-	stackFrameAlloc,
-	strStringFrameMiss,
-	strInvalidNext,
-	strReturnWOGosub,
-	strNoSuchLine,
-	strInvalidVal,
-	strNoSuchArray,
-	strInegerExpExpected,
+	noerror,              // 0
+	outtamemerror,        // 1
+	strRedimedArray,      // 2
+	stackFrameAlloc,      // 3
+	strStringFrameMiss,   // 4
+	strInvalidNext,       // 5
+	strReturnWOGosub,     // 6
+	strNoSuchLine,        // 7
+	strInvalidVal,        // 8
+	strNoSuchArray,       // 9
+	strInegerExpExpected, // 10
 #if SAVE_LOAD_CHECKSUM
-	strBadChecksum,
+	strBadChecksum,       // 11
+#else
+	nullptr,
 #endif
 #if USE_TEXTATTRIBUTES
-	strInvalidTab
+	strInvalidTab,        // 12
+#else
+	nullptr,
+#endif
+	strInvElmIndex,       // 13
+#if USE_MATRIX
+	strSqrMatExp,         // 14
+	strDimMismatch,       // 15
+#else
+	nullptr,
+	nullptr,
+#endif
+	strCommandFailed,     // 16
+	strVarDuplicate,      // 17
+#if USE_DEFFN
+	strFunctionDuplicate, // 18
+	strNoSuchFunction,    // 19
+#else
+	nullptr,
+	nullptr,
+#endif
+#if USE_DATA
+	strInsufficientData   // 20
 #endif
 };
 
@@ -304,6 +335,10 @@ Interpreter::init()
 	newline();
 	print(ProgMemStrings::S_VERSION);
 	print(VERSION, VT100::BRIGHT), newline();
+#if LICENSE_TEXT_ON_START
+	print(strLicenseMessage);
+	newline();
+#endif
 #if BASIC_MULTITERMINAL
 	print(ProgMemStrings::TERMINAL, VT100::NO_ATTR),
 	    print(Integer(_termno), VT100::BRIGHT),
@@ -1646,6 +1681,7 @@ Interpreter::read(Parser::Value &value)
 			_program.getNextLine(_program._dataCurrent);
 			
 	}
+	raiseError(ErrorType::DYNAMIC_ERROR, ErrorCodes::INSUFFICIENT_DATA);
 	return false;
 }
 #endif // USE_DATA

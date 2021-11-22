@@ -1,6 +1,10 @@
 /*
- * Terminal-BASIC is a lightweight BASIC-like language interpreter
- * Copyright (C) 2017-2020 Andrey V. Skvortsov <starling13@mail.ru>
+ * This file is part of Terminal-BASIC: a lightweight BASIC-like language
+ * interpreter.
+ * 
+ * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
+ * Copyright (C) 2019-2021 Terminal-BASIC team
+ *     <https://github.com/terminal-basic-team>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,92 +28,91 @@
 typedef enum basic_token
 {
 	BASIC_TOKEN_NOTOKEN = 0,  // 0
-	BASIC_TOKEN_OP_AND,       // 1
+	BASIC_TOKEN_KW_GOTO,      // 1
+	BASIC_TOKEN_KW_GOSUB,     // 2
+	BASIC_TOKEN_KW_THEN,      // 3
+	BASIC_TOKEN_OP_AND,       // 4
 #if USE_DUMP
-	BASIC_TOKEN_KW_ARRAYS,    // 2
+	BASIC_TOKEN_KW_ARRAYS,    // 5
 #endif
 #if USE_SAVE_LOAD
-	BASIC_TOKEN_COM_CHAIN,     // 3
+	BASIC_TOKEN_COM_CHAIN,    // 6
 #endif
 #if USE_TEXTATTRIBUTES
-	BASIC_TOKEN_COM_CLS,       // 4
+	BASIC_TOKEN_COM_CLS,      // 7
 #endif
 #if USESTOPCONT
-	BASIC_TOKEN_COM_CONT,      // 6
+	BASIC_TOKEN_COM_CONT,     // 8
 #endif
 #if USE_MATRIX
-	BASIC_TOKEN_KW_CON,        // 7
+	BASIC_TOKEN_KW_CON,       // 9
 #endif
 #if USE_DATA
-	BASIC_TOKEN_KW_DATA,       // 8
+	BASIC_TOKEN_KW_DATA,      // 10
 #endif
 #if USE_DEFFN
-	BASIC_TOKEN_KW_DEF,        // 9
+	BASIC_TOKEN_KW_DEF,       // 11
 #endif
 #if USE_DELAY
-	BASIC_TOKEN_COM_DELAY,     // 10
+	BASIC_TOKEN_COM_DELAY,    // 12
 #endif
 #if USE_MATRIX
-	BASIC_TOKEN_KW_DET,        // 11
+	BASIC_TOKEN_KW_DET,       // 13
 #endif
-	BASIC_TOKEN_KW_DIM,        // 12
+	BASIC_TOKEN_KW_DIM,       // 14
 #if USE_DIV_KW
-	BASIC_TOKEN_KW_DIV,        // 13
+	BASIC_TOKEN_KW_DIV,       // 15
 #endif
 #if USE_DUMP
-	BASIC_TOKEN_COM_DUMP,      // 15
+	BASIC_TOKEN_COM_DUMP,     // 16
 #endif
-	BASIC_TOKEN_KW_FALSE,      // 17
-	BASIC_TOKEN_KW_END,        // 16
+#if CONF_USE_ON_GOTO
+	BASIC_TOKEN_KW_ON,        // 17
+#endif
+	BASIC_TOKEN_KW_FALSE,     // 18
+	BASIC_TOKEN_KW_END,       // 19
 #if USE_DEFFN
-	BASIC_TOKEN_KW_FN,         // 18
+	BASIC_TOKEN_KW_FN,        // 20
 #endif
-	BASIC_TOKEN_KW_GOSUB,      // 20
-	BASIC_TOKEN_KW_GOTO,       // 21
 #if CONF_SEPARATE_GO_TO
-	BASIC_TOKEN_KW_GO,         // 22
+	BASIC_TOKEN_KW_GO,        // 21
 #endif
 #if USE_MATRIX
-	BASIC_TOKEN_KW_IDN,        // 23
+	BASIC_TOKEN_KW_IDN,       // 22
 #endif
-	BASIC_TOKEN_KW_IF,         // 24
-	BASIC_TOKEN_KW_INPUT,      // 25
+	BASIC_TOKEN_KW_INPUT,     // 23
 #if USE_MATRIX
-	BASIC_TOKEN_KW_INV,        // 26
+	BASIC_TOKEN_KW_INV,       // 24
 #endif
-	BASIC_TOKEN_KW_TO,         // 53
-	BASIC_TOKEN_KW_LET,        // 27
-	BASIC_TOKEN_COM_LIST,      // 28
+	BASIC_TOKEN_KW_TO,        // 25
+	BASIC_TOKEN_KW_LET,       // 26
+	BASIC_TOKEN_COM_LIST,     // 27
 #if USE_SAVE_LOAD
-	BASIC_TOKEN_COM_LOAD,      // 29
+	BASIC_TOKEN_COM_LOAD,     // 28
 #endif
 #if USE_TEXTATTRIBUTES
-	BASIC_TOKEN_COM_LOCATE,    // 30
+	BASIC_TOKEN_COM_LOCATE,   // 29
 #endif
 #if USE_MATRIX
-	BASIC_TOKEN_KW_MAT,        // 32
+	BASIC_TOKEN_KW_MAT,       // 30
 #endif
 #if USE_INTEGER_DIV
-	BASIC_TOKEN_KW_MOD,        // 33
+	BASIC_TOKEN_KW_MOD,       // 31
 #endif
-	BASIC_TOKEN_COM_NEW,
-	BASIC_TOKEN_KW_NEXT,
-	BASIC_TOKEN_OP_NOT,
-#if CONF_USE_ON_GOTO
-	BASIC_TOKEN_KW_ON,
-#endif
+	BASIC_TOKEN_COM_NEW,      // 32
+	BASIC_TOKEN_OP_NOT,       // 34
 //	KW_OPTION,
 	BASIC_TOKEN_OP_OR,
 #if USE_PEEK_POKE
 	BASIC_TOKEN_KW_POKE,
 #endif
-	BASIC_TOKEN_KW_FOR,        // 19
-	BASIC_TOKEN_KW_PRINT,      // 40
+	BASIC_TOKEN_KW_FOR,        // 36
+	BASIC_TOKEN_KW_PRINT,      // 37
 #if USE_RANDOM
-	BASIC_TOKEN_KW_RANDOMIZE,  // 41
+	BASIC_TOKEN_KW_RANDOMIZE,  // 38
 #endif
 #if USE_DATA
-	BASIC_TOKEN_KW_READ,       // 42
+	BASIC_TOKEN_KW_READ,       // 39
 #endif
 	BASIC_TOKEN_KW_REM,        // 43
 #if USE_DATA
@@ -120,6 +123,7 @@ typedef enum basic_token
 #if USE_SAVE_LOAD
 	BASIC_TOKEN_COM_SAVE,      // 47
 #endif
+	BASIC_TOKEN_KW_IF,         // 22
 #if CONF_USE_SPC_PRINT_COM
 	BASIC_TOKEN_KW_SPC,        // 48
 #endif
@@ -127,10 +131,10 @@ typedef enum basic_token
 #if USESTOPCONT
 	BASIC_TOKEN_KW_STOP,       // 50
 #endif
+	BASIC_TOKEN_KW_NEXT,       // 33
 #if USE_TEXTATTRIBUTES
 	BASIC_TOKEN_KW_TAB,        // 51
 #endif
-	BASIC_TOKEN_KW_THEN,       // 52
 #if USE_MATRIX
 	BASIC_TOKEN_KW_TRN,        // 54
 #endif

@@ -1,7 +1,7 @@
 /*
  * This file is part of Terminal-BASIC: a lightweight BASIC-like language
  * interpreter.
- * 
+ *
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  * Copyright (C) 2019-2021 Terminal-BASIC team
  *     <https://github.com/terminal-basic-team>
@@ -20,34 +20,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file basic_exteeprom.hpp
- * @brief I2C/SPI external eeprom functions and commands
+#ifndef _BASIC_CONFIG_H
+#define _BASIC_CONFIG_H
+
+/*
+ * Language constants for later usage
  */
+#define LANG_EN 0 /* English */
+#define LANG_RU 1 /* Russian */
+#define LANG_FR 3 /* French */
 
-#ifndef BASIC_EXTEEPROM_HPP
-#define BASIC_EXTEEPROM_HPP
+#define OPT_SPEED 1 /* Extensive usage of switch/case constructs */
+#define OPT_SIZE  2 /* Use cascade of if/else if instead of switch/case */
 
-#include "basic_functionblock.hpp"
+#endif /* _BASIC_CONFIG_H */
 
-namespace BASIC
-{
-
-class ExtEEPROM : public FunctionBlock
-{
-public:
-	explicit ExtEEPROM();
-private:
-	static bool com_echain(Interpreter&);
-	static bool com_eload(Interpreter&);
-	static bool com_esave(Interpreter&);
-	
-	static const FunctionBlock::command _commands[] PROGMEM;
-// FunctionBlock interface
-protected:
-	void _init() override;
-};
-
-} // namespace BASIC
-
-#endif // BASIC_EXTEEPROM_HPP

@@ -1,15 +1,16 @@
 /*
- * Terminal-BASIC is a lightweight BASIC-like language interpreter
+ * This file is part of Terminal-BASIC: a lightweight BASIC-like language
+ * interpreter.
  * 
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  * Copyright (C) 2019-2021 Terminal-BASIC team
- *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
- * 
+ *     <https://github.com/terminal-basic-team>
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -67,16 +68,18 @@
 	#define USE_ASC     1
 	// LEN function, returns length of the string
 	#define USE_LEN     1
-	// LEFT$ function, return leftmost part of the string
+	// LEFT$ function, returns leftmost part of the string
 	#define USE_LEFT    1
-	// RIGHT$ function, return rightmost part of the string
+	// RIGHT$ function, returns rightmost part of the string
 	#define USE_RIGHT   1
-	// MID$ function, return middle part of the string
+	// MID$ function, returns middle part of the string
 	#define USE_MID     1
-	// A variant of MID$ equivalent
+	// An alias for MID$
 	#define USE_SEG     1
-	// HEX$ function, return string with hexsadecimal representation of the expression value
+	// HEX$ function, returns string with hexsadecimal representation of the expression value
 	#define USE_HEX     1
+	// VAL function, returns numeric value from string
+	#define USE_VAL     1
 #endif // USE_STRINGOPS
 /*
  * Clear program memory on NEW command
@@ -89,7 +92,7 @@
 /**
  * Implicit arrays without DIM statement
  */
-#define OPT_IMPLICIT_ARRAYS  1
+#define OPT_IMPLICIT_ARRAYS  0
 
 #if USE_TEXTATTRIBUTES
 	/*
@@ -108,7 +111,7 @@
 
 #if USE_SAVE_LOAD
 	// Compute checksums while SAVE, LOAD and CHAIN
-	#define SAVE_LOAD_CHECKSUM   0
+	#define SAVE_LOAD_CHECKSUM   1
 #endif // USE_SAVE_LOAD
 
 // Convert all input to upper register
@@ -130,7 +133,7 @@
 #define CONF_MODULE_ARDUINOIO      0
 #if CONF_MODULE_ARDUINOIO
 	// TONE command support
-	#define CONF_MODULE_ARDUINOIO_TONE 1
+	#define CONF_MODULE_ARDUINOIO_TONE 0
 	// BEEP command
 	#if CONF_MODULE_ARDUINOIO_TONE
 		#define CONF_BEEP     1
@@ -195,48 +198,10 @@
  */
 
 // Input variants
-#define SERIAL_I    1  // Serial input
-#define SERIAL1_I   2  // Serial1 input
-#define SERIAL2_I   3  // Serial2 input
-#define SERIAL3_I   4  // Serial3 input
-#ifdef ARDUINO_ARCH_AVR
-#define SERIALL_I   5  // SerialL input (non-buffering, interrupt-free)
-#define SERIALL1_I  6  // SerialL1 input (non-buffering, interrupt-free)
-#define SERIALL2_I  7  // SerialL2 input (non-buffering, interrupt-free)
-#define SERIALL3_I  8  // SerialL3 input (non-buffering, interrupt-free)
-#endif // ARDUINO_ARCH_AVR
-	#define SERIAL_I_BR 115200
-#define PS2UARTKB_I 9  // PS/2 keyboard through USART
-#define SDL_I       10  // SDL input on PC
 #define HAL_I       11
 
 // Output variants
-#define SERIAL_O   1 // Serial output
-#define SERIAL1_O  2 // Serial1 output
-#define SERIAL2_O  3 // Serial2 output
-#define SERIAL3_O  4 // Serial3 output
-#ifdef ARDUINO_ARCH_AVR
-#define SERIALL_O  5 // SerialL output (non-buffering, interrupt-free)
-#define SERIALL1_O 6 // SerialL1 output (non-buffering, interrupt-free)
-#define SERIALL2_O 7 // SerialL2 output (non-buffering, interrupt-free)
-#define SERIALL3_O 8 // SerialL3 output (non-buffering, interrupt-free)
-#endif // ARDUINO_ARCH_AVR
-	#define SERIAL_O_BR 115200
-#define UTFT_O     9 // UTFT library output
-#define TVOUT_O    10 // TVoutEx library output
-	#define TVOUT_HORIZ 240
-	#define TVOUT_VERT 192
-#define LIQCR_O    11 // LiquidCrystal library output
-	#define LIQCR_HORIZ 20
-	#define LIQCR_VERT 4
-	#define LIQCR_RS 12
-	#define LIQCR_E 11
-	#define LIQCR_D0 5
-	#define LIQCR_D1 4
-	#define LIQCR_D2 3
-	#define LIQCR_D3 2
-#define SDL_O       12
-#define HAL_O         13
+#define HAL_O       13
 
 // Input select
 #define S_INPUT HAL_I
@@ -260,5 +225,8 @@
 
 // Number of characters in variable name
 #define VARSIZE 5
+
+// Show license message on start
+#define LICENSE_TEXT_ON_START 0
 
 #endif // CONFIG_HPP

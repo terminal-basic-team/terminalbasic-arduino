@@ -1,9 +1,10 @@
 /*
- * Terminal-BASIC is a lightweight BASIC-like language interpreter
+ * This file is part of Terminal-BASIC: a lightweight BASIC-like language
+ * interpreter.
  * 
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
- * Copyright (C) 2019,2020 Terminal-BASIC team
- *     <https://bitbucket.org/%7Bf50d6fee-8627-4ce4-848d-829168eedae5%7D/>
+ * Copyright (C) 2019-2021 Terminal-BASIC team
+ *     <https://github.com/terminal-basic-team>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,6 +69,11 @@ DataParser::readValue(Parser::Value &value)
 			value.switchSign();
 		if (_lexer.getToken() == Token::C_STRING)
 			_interpreter.pushString(_lexer.id());
+		return true;
+	} else if ((_lexer.getToken() >= Token::INTEGER_IDENT)
+		&& (_lexer.getToken() <= Token::BOOL_IDENT)) {
+		value.setType(Parser::Value::Type::STRING);
+		_interpreter.pushString(_lexer.id());
 		return true;
 	}
 	return false;
