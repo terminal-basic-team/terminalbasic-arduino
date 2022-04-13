@@ -66,8 +66,9 @@ public:
 public:
 	int available() override
 	{
-		return HAL_extmem_getfilesize(m_file)-
-		    HAL_extmem_getfileposition(m_file);
+    const auto fsize = HAL_extmem_getfilesize(m_file);
+    const auto fpos = HAL_extmem_getfileposition(m_file);
+		return fsize - fpos;
 	}
 	
 	void flush() override
@@ -76,8 +77,8 @@ public:
 	
 	int peek() override
 	{
-		auto pos = HAL_extmem_getfileposition(m_file);
-		int res = HAL_extmem_readfromfile(m_file);
+		const auto pos = HAL_extmem_getfileposition(m_file);
+		const int res = HAL_extmem_readfromfile(m_file);
 		HAL_extmem_setfileposition(m_file, pos);
 		return res;
 	}

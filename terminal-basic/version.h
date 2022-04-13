@@ -1,1 +1,1 @@
-#define VERSION "2.3-b2-246"
+#define VERSION "2.3-rc1-1403"

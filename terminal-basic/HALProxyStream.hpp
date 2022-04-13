@@ -1,7 +1,7 @@
 /*
  * This file is part of Terminal-BASIC: a lightweight BASIC-like language
  * interpreter.
- * 
+ *
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  * Copyright (C) 2019-2021 Terminal-BASIC team
  *     <https://github.com/terminal-basic-team>
@@ -32,30 +32,30 @@ namespace BASIC
 class HALProxyStream : public Stream
 {
 public:
-	
+
 	HALProxyStream(uint8_t);
-	
+
 	void begin(int) {}
-	
+
 private:
-	
+
 	const uint8_t m_term;
-	
+
 	bool m_hasByte;
-	
+
 	uint8_t m_byte;
-	
+
 // Stream interface
 public:
-	
+
 	int available() override;
-	
+
 	size_t write(uint8_t) override;
-	
+
 	void flush() override;
-	
+
 	int peek() override;
-	
+
 	int read() override;
 };
 

@@ -1,7 +1,7 @@
 /*
  * This file is part of Terminal-BASIC: a lightweight BASIC-like language
  * interpreter.
- * 
+ *
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  * Copyright (C) 2019-2021 Terminal-BASIC team
  *     <https://github.com/terminal-basic-team>
@@ -32,7 +32,7 @@
 
 /*
  * 1. Real arithmetics
- * 
+ *
  * Support of operations with real numbers.
  * When enabled, all variables and arrays, which names are not ending with "$ ! %"
  * are treated as reals. Mathematical functions support depend on this option
@@ -43,13 +43,13 @@
 #if USE_REALS
     /**
      * 1.1 Long real numbers
-     * 
+     *
      * Support of long real numbers.  Arrays, variables and functions, ending
      * with "!" character are long real.
      * This type is 8-byte binary floating point (C/C++ double). This means
      * it can't be used on systems w/o double type support, such as 8-bit AVR
      * arduino boards (UNO/NANO/PRO mini/Mega...)
-     * 
+     *
      * All real number constants (1e6, 0.5, 3., .04 ... ) treated as long reals
      */
 #define USE_LONG_REALS       0
@@ -57,8 +57,8 @@
 
 /*
  * Support of 4-byte integer datatype
- * 
- * Default integer constants are 2-byte signed [-32768 .. 32768), but this 
+ *
+ * Default integer constants are 2-byte signed [-32768 .. 32768), but this
  * option enables 4-byte signed type.
  * Functions, variables and arrays of long integer type ends with double "%!"
  * symbols will be treated as long integers
@@ -99,7 +99,7 @@
 /*
  * Allow ON ... GOTO ... statements
  */
-#define CONF_USE_ON_GOTO    1
+#define CONF_USE_ON_GOTO    0
 
 /*
  * Allow GO TO OPERATOR in addition to GOTO
@@ -112,9 +112,9 @@
 #define FAST_MODULE_CALL    1
 
 /*
- * Support of integer division and modulo operation
+ * Support of integer division '\' and modulo 'MOD' operation
  */
-#define USE_INTEGER_DIV     1
+#define USE_INTEGER_DIV     0
 #if USE_INTEGER_DIV
 	/*
 	 * Use DIV keyword for integer division in addition to \ operation

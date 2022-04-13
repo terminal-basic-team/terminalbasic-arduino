@@ -1,7 +1,7 @@
 /*
  * This file is part of Terminal-BASIC: a lightweight BASIC-like language
  * interpreter.
- * 
+ *
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  * Copyright (C) 2019-2021 Terminal-BASIC team
  *     <https://github.com/terminal-basic-team>
@@ -42,7 +42,7 @@ class Program
 {
 	friend class Interpreter;
 public:
-	
+
 	/**
 	 * @brief BASIC program string object
 	 */
@@ -55,7 +55,7 @@ public:
 		// string body
 		uint8_t text[];
 	};
-	
+
 	/**
 	 * @brief BASIC program position marker
 	 */
@@ -110,7 +110,7 @@ public:
 			Parser::Value	finalvalue;
 		};
 		static_assert (sizeof (ForBody) <= UINT8_MAX, "bad size");
-		
+
 		/**
 		 * @brief Subprogram return address frame body
 		 */
@@ -121,7 +121,7 @@ public:
 			// Position in the program string
 			uint8_t	textPosition;
 		};
-		
+
 		/**
 		 * @brief Input object frame body
 		 */
@@ -136,7 +136,7 @@ public:
 		};
 
 		static uint8_t size(Type);
-		
+
 		uint8_t size() const { return size(this->_type); }
 
 		Type _type;
@@ -169,7 +169,7 @@ public:
 	 */
 	void newProg();
 	/**
-	 * @brief reset program 
+	 * @brief reset program
 	 * @brief newSize 0 if use existing program, text size if clear vars
 	 *   and arrays
 	 */
@@ -197,12 +197,12 @@ public:
 	Line *current(const Position&) const;
 	/**
 	 * @brief Get first stored program line
-	 * @return 
+	 * @return
 	 */
 	Line *first() const;
-	
+
 	Line *last() const;
-	
+
 	void jump(Pointer);
 	/**
 	 * @brief program line at given address
@@ -229,10 +229,10 @@ public:
 #if USE_DEFFN
 	VariableFrame *functionByName(const char*);
 #endif
-	
+
 	ArrayFrame *arrayByIndex(Pointer);
 	ArrayFrame *arrayByName(const char*);
-	
+
 	Pointer objectIndex(const void*) const;
 
 	StackFrame *stackFrameByIndex(Pointer);
@@ -275,31 +275,31 @@ public:
 	    uint16_t,
 	    const uint8_t*,
 	    uint8_t);
-	
+
 #if CONF_USE_ALIGN
 	/**
 	 * @brief Align variables
 	 * @param index address of the first variable frame to align from
 	 */
 	bool alignVars(Pointer);
-	
+
 	bool alignArrays(Pointer);
-	
+
 	int8_t alignPointer(
 	    Pointer,
 	    Parser::Value::Type);
 #endif
-	
+
 #if USE_EXTMEM
 	char *_text;
 #else
 	char _text[SINGLE_PROGSIZE];
-#endif
+#endif // USE_EXTMEM
 	const Pointer programSize;
 private:
-	
+
 	void _reset();
-	
+
 	void pushBottom(StackFrame*);
 	/**
 	 * @brief Add tokenized program line
@@ -309,7 +309,7 @@ private:
 	 * @return flag of success
 	 */
 	bool addLine(uint16_t, const uint8_t*, uint8_t);
-	
+
 	// End of program text
 	Pointer _textEnd;
 	// End of variables area

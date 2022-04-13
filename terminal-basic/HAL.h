@@ -1,7 +1,7 @@
 /*
  * This file is part of Terminal-BASIC: a lightweight BASIC-like language
  * interpreter.
- * 
+ *
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  * Copyright (C) 2019-2021 Terminal-BASIC team
  *     <https://github.com/terminal-basic-team>
@@ -59,7 +59,7 @@ typedef uint32_t HAL_nvram_address_t;
 
 /**
  * @brief Get NVRAM size
- * @return 
+ * @return
  */
 HAL_nvram_address_t HAL_nvram_getsize();
 
@@ -78,7 +78,7 @@ void HAL_nvram_write(HAL_nvram_address_t, uint8_t);
 uint8_t HAL_nvram_read(HAL_nvram_address_t);
 
 /**
- * 
+ *
  * @param address
  * @param buf
  * @param length
@@ -86,7 +86,7 @@ uint8_t HAL_nvram_read(HAL_nvram_address_t);
 void HAL_nvram_read_buf(HAL_nvram_address_t, void*, uint32_t);
 
 /**
- * 
+ *
  * @param address
  * @param buf
  * @param length
@@ -165,7 +165,7 @@ uint8_t HAL_extmem_readfromfile(HAL_extmem_file_t);
 void HAL_extmem_writetofile(HAL_extmem_file_t, uint8_t);
 
 /**
- * @brief 
+ * @brief
  * @param handle
  * @return position
  */
@@ -187,27 +187,27 @@ HAL_extmem_fileposition_t HAL_extmem_getfilesize(HAL_extmem_file_t);
 
 /**
  * @brief
- * @return 
+ * @return
  */
 uint32_t HAL_extmem_getfreespace();
 
 /**
- * @brief Get number of 
+ * @brief Get number of
  * @return number of files
  */
 uint16_t HAL_extmem_getnumfiles();
 
 /**
  * @brief Get file name in a directory
- * @param num [in] entry number 
+ * @param num [in] entry number
  * @param name [out]
  */
 void HAL_extmem_getfilename(uint16_t, char[13]);
 
 /**
  * @brief
- * @param fname 
- * @return 
+ * @param fname
+ * @return
  */
 BOOLEAN HAL_extmem_fileExists(const char[13]);
 
@@ -236,16 +236,30 @@ uint32_t HAL_random_generate(uint32_t);
 
 typedef enum {
 	HAL_GFX_NOTACOLOR = 0,
-	HAL_GFX_COLOR_WHITE,
-	HAL_GFX_COLOR_BLACK,
-	HAL_GFX_COLOR_RED,
-	HAL_GFX_COLOR_GREEN,
-	HAL_GFX_COLOR_BLUE,
-	HAL_GFX_COLOR_CYAN,
-	HAL_GFX_COLOR_MAGENTA,
-	HAL_GFX_COLOR_YELLOW,
-	HAL_GFX_COLOR_GRAY,
-		
+#if HAL_GFX_COLOR >= HAL_GFX_COLOR_MONO
+	HAL_GFX_COLOR_WHITE,     /* 1, 1, 1 */
+	HAL_GFX_COLOR_BLACK,     /* 0, 0, 0 */
+#if HAL_GFX_COLOR >= HAL_GFX_COLOR_1BITPERC
+	HAL_GFX_COLOR_RED,       /* 1, 0, 0 */
+	HAL_GFX_COLOR_LIME,      /* 0, 1, 0 */
+	HAL_GFX_COLOR_BLUE,      /* 0, 0, 1 */
+	HAL_GFX_COLOR_AQUA,      /* 0, 1, 1 */
+	HAL_GFX_COLOR_FUCHSIA,   /* 1, 0, 1 */
+	HAL_GFX_COLOR_YELLOW,    /* 1, 1, 0 */
+#if HAL_GFX_COLOR >= HAL_GFX_COLOR_2BITPERC
+	HAL_GFX_COLOR_GREEN,     /* 0, 0.5, 0.5 */
+	HAL_GFX_COLOR_NAVY,      /* 0, 0, 0.5 */
+	HAL_GFX_COLOR_MAROON,    /* 0.5, 0, 0 */
+	HAL_GFX_COLOR_OLIVE,     /* 0.5, 0.5, 0 */
+	HAL_GFX_COLOR_TEAL,      /* 0, 0.5, 0.5 */
+	HAL_GFX_COLOR_PURPLE,    /* 0.5, 0, 0.5 */
+	HAL_GFX_COLOR_GRAY,      /* 0.5, 0.5, 0.5 */
+#if HAL_GFX_COLOR >= HAL_GFX_COLOR_HIGH
+	HAL_GFX_COLOR_SILVER,    /*  */
+#endif /* HAL_GFX_COLOR_HIGH */
+#endif /* HAL_GFX_COLOR_2BITPERC */
+#endif /* HAL_GFX_COLOR_1BITPERC */
+#endif /* HAL_GFX_COLOR_MONO */
 	HAL_GFX_NUMCOLORS
 } HAL_gfx_color_t;
 
@@ -362,7 +376,7 @@ BOOLEAN HAL_gpio_readPin(uint8_t);
 #if HAL_BUZZER
 /**
  * @brief
- * 
+ *
  * @param ch channel
  * @param freq Frequency (HZ)
  * @param dur duration (ms) 0 - endless
@@ -370,7 +384,7 @@ BOOLEAN HAL_gpio_readPin(uint8_t);
 void HAL_buzzer_tone(uint8_t, uint16_t, uint16_t);
 
 /**
- * 
+ *
  */
 void HAL_buzzer_notone(uint8_t);
 

@@ -1,7 +1,7 @@
 /*
  * This file is part of Terminal-BASIC: a lightweight BASIC-like language
  * interpreter.
- * 
+ *
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  * Copyright (C) 2019-2021 Terminal-BASIC team
  *     <https://github.com/terminal-basic-team>
@@ -29,11 +29,17 @@
 
 #include "HAL.h"
 
-#define HAL_ARDUINO_AVR8_TERMINAL_NONE 0
+#define HAL_ARDUINO_AVR8_TERMINAL_OUTPUT_NONE 0
 /* Use SerialL[N] objects for terminal */
-#define HAL_ARDUINO_AVR8_TERMINAL_SERIALLIGHT 1
+#define HAL_ARDUINO_AVR8_TERMINAL_OUTPUT_SERIALLIGHT 1
 
-#define HAL_ARDUINO_AVR8_TERMINAL HAL_ARDUINO_AVR8_TERMINAL_SERIALLIGHT
+#define HAL_ARDUINO_AVR8_TERMINAL_OUTPUT HAL_ARDUINO_AVR8_TERMINAL_OUTPUT_SERIALLIGHT
+
+#define HAL_ARDUINO_AVR8_TERMINAL_INPUT_NONE 0
+/* Use SerialL[N] objects for terminal */
+#define HAL_ARDUINO_AVR8_TERMINAL_INPUT_SERIALLIGHT 1
+
+#define HAL_ARDUINO_AVR8_TERMINAL_INPUT HAL_ARDUINO_AVR8_TERMINAL_INPUT_SERIALLIGHT
 
 #if HAL_ARDUINO_AVR8_TERMINAL == HAL_ARDUINO_AVR8_TERMINAL_SERIALLIGHT
 #define HAL_ARDUINO_AVR8_TERMINAL_SERIAL_0_BR 115200
@@ -48,7 +54,7 @@
 #endif /* HAL_TERMINAL_NUM */
 #endif /* HAL_ARDUINO_AVR8_TERMINAL */
 
-// Use ATMega128/2560 external memory interface
-#define HAL_ARDUINO_AVR8_EXTMEM 1
+// Use ATMega128/2560 external memory (SRAM) interface
+#define HAL_ARDUINO_AVR8_EXTMEM 0
 
 #endif /* HAL_ARDUINO_H */

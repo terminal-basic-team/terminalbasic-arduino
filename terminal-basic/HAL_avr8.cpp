@@ -1,7 +1,7 @@
 /*
  * This file is part of Terminal-BASIC: a lightweight BASIC-like language
  * interpreter.
- * 
+ *
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  * Copyright (C) 2019-2021 Terminal-BASIC team
  *     <https://github.com/terminal-basic-team>
@@ -27,7 +27,11 @@
 
 #include "HAL_avr8.h"
 
-#if HAL_ARDUINO_AVR8_TERMINAL == HAL_ARDUINO_AVR8_TERMINAL_SERIALLIGHT
+#define _SERIALLIGHT_USED \
+	(HAL_ARDUINO_AVR8_TERMINAL_OUTPUT == HAL_ARDUINO_AVR8_TERMINAL_OUTPUT_SERIALLIGHT) || \
+	(HAL_ARDUINO_AVR8_TERMINAL_INPUT == HAL_ARDUINO_AVR8_TERMINAL_INPUT_SERIALLIGHT)
+
+#if _SERIALLIGHT_USED
 #include "seriallight.hpp"
 #endif
 
@@ -35,7 +39,7 @@ __BEGIN_DECLS
 void
 HAL_initialize_concrete()
 {
-#if HAL_ARDUINO_AVR8_TERMINAL == HAL_ARDUINO_AVR8_TERMINAL_SERIALLIGHT
+#if _SERIALLIGHT_USED
 	SerialL.begin(HAL_ARDUINO_AVR8_TERMINAL_SERIAL_0_BR);
 #if defined(HAVE_HWSERIAL1) && (HAL_TERMINAL_NUM > 0)
 	SerialL1.begin(HAL_ARDUINO_AVR8_TERMINAL_SERIAL_1_BR);
@@ -47,10 +51,10 @@ HAL_initialize_concrete()
 	SerialL3.begin(HAL_ARDUINO_AVR8_TERMINAL_SERIAL_3_BR);
 #endif
 #endif // HAL_ARDUINO_AVR8_TERMINAL
-#if USE_EXTMEM
+#if HAL_ARDUINO_AVR8_EXTMEM
 	XMCRA |= 1ul<<7; // Switch ext mem iface on
 	XMCRB = 0;
-#endif // USE_EXTMEM
+#endif // HAL_ARDUINO_AVR8_EXTMEM
 }
 __END_DECLS
 
@@ -78,7 +82,7 @@ void HAL_nvram_write(HAL_nvram_address_t addr, uint8_t byte)
 
 #endif // HAL_NVRAM
 
-#if HAL_ARDUINO_AVR8_TERMINAL == HAL_ARDUINO_AVR8_TERMINAL_SERIALLIGHT
+#if HAL_ARDUINO_AVR8_TERMINAL_OUTPUT == HAL_ARDUINO_AVR8_TERMINAL_OUTPUT_SERIALLIGHT
 
 void
 HAL_terminal_write(HAL_terminal_t t, uint8_t b)
@@ -90,6 +94,10 @@ HAL_terminal_write(HAL_terminal_t t, uint8_t b)
 		SerialL1.write(b);
 #endif
 }
+
+#endif // HAL_ARDUINO_AVR8_TERMINAL_OUTPUT
+
+#if HAL_ARDUINO_AVR8_TERMINAL_INPUT == HAL_ARDUINO_AVR8_TERMINAL_INPUT_SERIALLIGHT
 
 uint8_t
 HAL_terminal_read(HAL_terminal_t t)
@@ -114,7 +122,7 @@ HAL_terminal_isdataready(HAL_terminal_t t)
 #endif
 	return FALSE;
 }
-#endif // HAL_ARDUINO_AVR8_TERMINAL
+#endif // HAL_ARDUINO_AVR8_TERMINAL_INPUT
 
 __BEGIN_DECLS
 void

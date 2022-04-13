@@ -28,27 +28,25 @@
 #define HAL_ARDUINO_H
 
 #include "HAL.h"
+#include "_HAL_arduino.h"
 
-/** Output devices **/
-
-/* Output not used */
-#define HAL_ARDUINO_TERMINAL_OUTPUT_NONE 0
-/* Use Serial[N] objects for output */
-#define HAL_ARDUINO_TERMINAL_OUTPUT_SERIAL 1
-/* Use Adafruit GFX library for 240x320 ILI9341 tft displays */
-#define HAL_ARDUINO_TERMINAL_OUTPUT_ILI9341 2
-/* Use Use TFT_eSPI library */
-#define HAL_ARDUINO_TERMINAL_OUTPUT_TFTeSPI 3
-
-/* Active output device */
+/**
+ * Output devices
+ *
+ * HAL_ARDUINO_TERMINAL_OUTPUT_NONE - output not used (implemented outside aeduino module)
+ * HAL_ARDUINO_TERMINAL_OUTPUT_SERIAL - Serial[N] objects from arduino library
+ * HAL_ARDUINO_TERMINAL_OUTPUT_ILI9341 - Use Adafruit GFX library for 240x320 ILI9341 tft displays
+ * HAL_ARDUINO_TERMINAL_OUTPUT_TFTeSPI - Use Use TFT_eSPI library
+ */
 #define HAL_ARDUINO_TERMINAL_OUTPUT HAL_ARDUINO_TERMINAL_OUTPUT_NONE
 
-/** Input devices **/
-
-#define HAL_ARDUINO_TERMINAL_INPUT_NONE 0
-#define HAL_ARDUINO_TERMINAL_INPUT_SERIAL 1
-#define HAL_ARDUINO_TERMINAL_INPUT_PS2KBD 2
-
+/**
+ * Input devices
+ *
+ * HAL_ARDUINO_TERMINAL_INPUT_NONE
+ * HAL_ARDUINO_TERMINAL_INPUT_SERIAL
+ * HAL_ARDUINO_TERMINAL_INPUT_PS2KBD
+ */
 #define HAL_ARDUINO_TERMINAL_INPUT HAL_ARDUINO_TERMINAL_INPUT_NONE
 
 #if (HAL_ARDUINO_TERMINAL_OUTPUT == HAL_ARDUINO_TERMINAL_OUTPUT_SERIAL) || \
@@ -77,37 +75,30 @@
 
 #if HAL_EXTMEM
 
-#define HAL_ARDUINO_EXTMEM_NONE 0
-/* Standart SD library implementation */
-#define HAL_ARDUINO_EXTMEM_SD 1
-/* SDFS HAL extmem implementation */
-#define HAL_ARDUINO_EXTMEM_SDFS 2
-/* I2C eeprom HAL extmem implementation */
-#define HAL_ARDUINO_EXTMEM_I2CEEPROM 3
-
 /*
- * Used HAL extmem omplementation
+ * External memory (storage) implementation
+ *
+ * HAL_ARDUINO_EXTMEM_NONE - No extmem implementation
+ * HAL_ARDUINO_EXTMEM_SD - Standard SD library implementation
+ * HAL_ARDUINO_EXTMEM_SDFS - SDFS library implememntation
+ * HAL_ARDUINO_EXTMEM_I2CEEPROM - I2C eeprom HAL extmem implementation
  */
-#define HAL_ARDUINO_EXTMEM HAL_ARDUINO_EXTMEM_NONE
+#define HAL_ARDUINO_EXTMEM HAL_ARDUINO_EXTMEM_SDFS
 
 #endif /* HAL_EXTMEM */
 
 #if HAL_GFX
 
-#define HAL_ARDUINO_GFX_NONE 1
-/* Serial 2-mode graphics protocol HAL GFX implementation */
-#define HAL_ARDUINO_GFX_SERIAL 1
-/* UTFT HAL GFX implementation */
-#define HAL_ARDUINO_GFX_UTFT 2
-
-#define HAL_ARDUINO_GFX_ILI9341 3
-
-#define HAL_ARDUINO_GFX_TFTeSPI 4
-
 /*
  * Used GFX implementation
+ *
+ * HAL_ARDUINO_GFX_NONE - No GFX implementation (implemented outside)
+ * HAL_ARDUINO_GFX_SERIAL - Serial binary protocol implementation
+ * HAL_ARDUINO_GFX_UTFT - UTFT HAL GFX implementation
+ * HAL_ARDUINO_GFX_ILI9341 - Implementation based on Adafruit lib for ILI9341 displays
+ * HAL_ARDUINO_GFX_TFTeSPI - TFTeSPI library implementation
  */
-#define HAL_ARDUINO_GFX HAL_ARDUINO_GFX_NONE
+#define HAL_ARDUINO_GFX HAL_ARDUINO_GFX_SERIAL
 
 #if HAL_ARDUINO_GFX == HAL_ARDUINO_GFX_SERIAL
 #define HAL_ARDUINO_GFX_SERIAL_TERMNO 0
@@ -116,21 +107,19 @@
 #endif /* HAL_GFX */
 
 #if HAL_GPIO
-
-#define HAL_GPIO_ARDUINO_NONE 0
-#define HAL_GPIO_ARDUINO_CORE 1
-
+/**
+ * HAL_GPIO_ARDUINO_NONE - No GPIO implementation
+ * HAL_GPIO_ARDUINO_CORE - Implementation based on Arduino-core functions (digitalRead, digitalWrite...)
+ */
 #define HAL_GPIO_ARDUINO HAL_GPIO_ARDUINO_CORE
-
 #endif /* HAL_GPIO */
 
 #if HAL_BUZZER
-
-#define HAL_BUZZER_ARDUINO_NONE 0
-#define HAL_BUZZER_ARDUINO_TONE 1
-
-#define HAL_BUZZER_ARDUINO HAL_BUZZER_ARDUINO_NONE
-
+/**
+ * HAL_BUZZER_ARDUINO_NONE - No buzzer implementation
+ * HAL_BUZZER_ARDUINO_TONE - Implementation, base4d on tone function
+ */
+#define HAL_BUZZER_ARDUINO HAL_BUZZER_ARDUINO_TONE
 #endif /* HAL_BUZZER */
 
 #endif /* HAL_ARDUINO_H */

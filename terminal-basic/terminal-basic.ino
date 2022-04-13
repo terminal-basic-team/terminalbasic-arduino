@@ -241,6 +241,7 @@ setup()
 #endif
 	
 #if CONF_USE_EXTMEMFS
+	basic.setSDFSModule(&sdfs);
 	basic.addModule(&sdfs);
 #endif
 	

@@ -1,7 +1,7 @@
 /*
  * This file is part of Terminal-BASIC: a lightweight BASIC-like language
  * interpreter.
- * 
+ *
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  * Copyright (C) 2019-2021 Terminal-BASIC team
  *     <https://github.com/terminal-basic-team>
@@ -47,7 +47,7 @@ struct PACKED VariableFrame
 	 * @return size in bytes
 	 */
 	uint8_t size() const;
-	
+
 	static uint8_t size(Parser::Value::Type);
 
 	/**
@@ -180,7 +180,7 @@ public:
 		REDIMED_ARRAY = 2,		// Attempt to define existing array
 		STACK_FRAME_ALLOCATION = 3,	// Unable to allocate stack frame
 		STRING_FRAME_SEARCH = 4,	// Missing string frame
-		INVALID_NEXT = 5,		// 
+		INVALID_NEXT = 5,		//
 		RETURN_WO_GOSUB = 6,
 		NO_SUCH_LINE = 7,
 		INVALID_VALUE_TYPE = 8,
@@ -241,7 +241,7 @@ public:
 		MEMORY, VARS, ARRAYS
 	};
 #endif //USE_DUMP
-	
+
 	/**
 	 * @brief constructor
 	 * @param stream Boundary output object
@@ -280,22 +280,22 @@ public:
 #if USE_INKEY
 	uint8_t lastKey();
 #endif
-	
+
 #if USE_DELAY
 	void delay(uint16_t);
 #endif
-	
+
 #if USE_TEXTATTRIBUTES
 	void locate(Integer, Integer);
 #endif
-	
+
 	// New print line
 	void newline();
-	
+
 	void print(char);
 	// Execute command by function pointer
 	void execCommand(FunctionBlock::command);
-	
+
 #if USE_PEEK_POKE
 	void poke(Pointer, Integer);
 #endif
@@ -314,7 +314,7 @@ public:
 		MO_TRANSPOSE,
 		MO_INVERT
 	};
-	
+
 	void zeroMatrix(const char*);
 	void onesMatrix(const char*);
 	void identMatrix(const char*);
@@ -337,7 +337,7 @@ public:
 #if USE_DATA
 	bool read(Parser::Value&);
 #endif
-	
+
 	void print(Integer, VT100::TextAttr = VT100::NO_ATTR);
 #if USE_TEXTATTRIBUTES
 	/**
@@ -352,13 +352,25 @@ public:
 	void writePgm(ProgMemStrings);
 	void writePgm(PGM_P);
 	void print(Token);
-	void print(const char *, VT100::TextAttr = VT100::NO_ATTR);
+	void print(
+	    const char*,
+	    VT100::TextAttr = VT100::NO_ATTR,
+	    bool = true);
 	// print value
-	void print(const Parser::Value&, VT100::TextAttr = VT100::NO_ATTR);
+	/**
+	 * @brief Print Value polymorphic object
+	 * @param value -- object to print
+	 * @param attr -- text attributes
+	 * @param trspace -- trailing space
+	 */
+	void print(
+	    const Parser::Value&,
+	    VT100::TextAttr = VT100::NO_ATTR,
+	    bool = true);
 
 	void printEsc(const char*);
 	void printEsc(ProgMemStrings);
-        
+
 	// run program
 	void run();
 	// goto new line
@@ -375,13 +387,13 @@ public:
 	Program::StackFrame *pushForLoop(const char*, uint8_t, const Parser::Value&,
 	    const Parser::Value&);
 	bool pushValue(const Parser::Value&);
-	
+
 	void pushInputObject(const char*);
-	
+
 	bool popValue(Parser::Value&);
-	
+
 	bool popString(const char*&);
-	
+
 	void randomize();
 #if USE_DEFFN
 	void execFn(const char*);
@@ -469,7 +481,7 @@ public:
 	 * @param num number of dimensions
 	 */
 	void pushDimensions(uint8_t);
-        
+
 	bool pushResult();
 
 #if USE_STRINGOPS
@@ -478,7 +490,7 @@ public:
 #endif
 	/**
 	 * @brief request user confirmation
-	 * @return 
+	 * @return
 	 */
 	bool confirm();
 
@@ -486,7 +498,7 @@ public:
 	{
 		_parser.stop();
 	}
-	
+
 #if USE_DEFFN
 	/**
 	 * @brief Create new function frame
@@ -496,15 +508,15 @@ public:
 #endif // USE_DEFFN
 
 	Program _program;
-	
+
 	Parser& parser() { return _parser; }
-	
+
 #if CONF_USE_EXTMEMFS
 	void setSDFSModule(BASIC::ExtmemFSModule* newVal) { m_sdfs = newVal; }
 #endif
-	
+
 private:
-	
+
 	class AttrKeeper;
 #if USE_MATRIX
 	/**
@@ -514,7 +526,7 @@ private:
 	 */
 	void fillMatrix(const char*, const Parser::Value&);
 	/**
-	 * 
+	 *
 	 * @param frame
 	 * @param rows
 	 * @param columns
@@ -522,26 +534,26 @@ private:
 	void setMatrixSize(ArrayFrame&, uint16_t, uint16_t);
 	/**
 	 * @brief Get 2 dimensional array from stack
-	 * 
+	 *
 	 * Returns nullptr if there is no such array or if that array is not
 	 * 2 dimensional. Raises corresponding error.
-	 * 
+	 *
 	 * @param array name
 	 * @return frame pointer
 	 */
 	ArrayFrame *get2DArray(const char*);
 	/**
 	 * @brief Get 2 dimensional square array from stack
-	 * 
+	 *
 	 * Returns nullptr if there is no such array or if that array is not
 	 * 2 dimensional or if it's not square. Raises corresponding error.
-	 * 
+	 *
 	 * @param array name
 	 * @return frame pointer
 	 */
 	ArrayFrame *getSquareArray(const char*);
 #endif // USE_MATRIX
-	
+
 	// Get next input object from stack
 	bool nextInput();
 	// Place input values to objects
@@ -560,7 +572,7 @@ private:
 	 * @param name name of the array (also defines type of the elements)
 	 * @param dim number of dimensions
 	 * @param num overall elements number
-	 * @return 
+	 * @return
 	 */
 	ArrayFrame *addArray(const char*, uint8_t, uint16_t);
 

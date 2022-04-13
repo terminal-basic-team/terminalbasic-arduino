@@ -1,3 +1,12 @@
+r.2.3-rc1 (12.04.2022)
+
+  * Program text output changed: extra spaces were removed
+  * Fix AVR8 external memory support
+  * Fix support of the SD-card on Arduino platforms
+  * Fix Arduino library-based implementation of the NOTONE command
+  * Fix control of the active terminal on multiple I/O devices systems
+  * Fix regression in AUTORUN.BAS support
+
 r2.3-b2 (22.11.2021)
 
   * Add VAL function

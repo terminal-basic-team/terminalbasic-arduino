@@ -211,7 +211,7 @@ bool
 ExtmemFSModule::directory(Interpreter &i)
 {
 	static const char str[] PROGMEM = "SD CARD CONTENTS";
-	
+
 	uint16_t startFile = 0;
 	uint16_t endFile = 65535;
 	INT iv;
@@ -222,12 +222,12 @@ ExtmemFSModule::directory(Interpreter &i)
 			startFile = iv;
 		}
 	}
-	
+
 	char buf[17];
 	strcpy_P(buf, (PGM_P)str);
 	i.print(buf);
 	i.newline();
-	
+
 	const uint16_t numFiles = HAL_extmem_getnumfiles();
 	char fname[13];
 	for (uint16_t index=0; index<numFiles; ++index) {
@@ -271,13 +271,13 @@ ExtmemFSModule::dchain(Interpreter &i)
 	char ss[16];
 	if (!getFileName(i, ss))
 		return false;
-	
+
 	HAL_extmem_file_t f = HAL_extmem_openfile(ss);
 	if (f == 0)
 		return false;
-	
+
 	FileStream fs(f);
-	
+
 	i._program.clearProg();
 	i._program.moveData(0);
 	i._program.jump(0);
@@ -289,7 +289,7 @@ bool
 ExtmemFSModule::dsave(Interpreter &i)
 {
 	FileStream fs;
-	
+
 	{ // Stack section 1
 		char ss[16];
 		if (getFileName(i, ss))
@@ -299,7 +299,7 @@ ExtmemFSModule::dsave(Interpreter &i)
 			return false;
 		fs.setFile(f);
 	} // Stack section 1
-	
+
 	i._program.reset();
 	{ // Stack section 2
 	Lexer lex;
@@ -377,8 +377,8 @@ ExtmemFSModule::_loadText(FileStream &f, Interpreter &i)
 				buf[res++] = c;
 		}
 		if (res > 0) {
-                	if (buf[res-1] == '\r')
-                        	buf[res-1] = 0;
+			if (buf[res-1] == '\r')
+				buf[res-1] = 0;
 			Lexer lex;
 			lex.init((uint8_t*)buf, false);
 			if (!lex.getNext() || lex.getToken() !=
@@ -390,10 +390,10 @@ ExtmemFSModule::_loadText(FileStream &f, Interpreter &i)
 		} else
 			break;
 	}
-	
+
 	f.close();
 	i._program.reset();
-	
+
 	return true;
 }
 
@@ -403,17 +403,14 @@ ExtmemFSModule::dload(Interpreter &i)
 	char ss[16];
 	if (!getFileName(i, ss))
 		return false;
-	
-	if (!HAL_extmem_fileExists(ss))
-		return false;
+  
 	HAL_extmem_file_t f = HAL_extmem_openfile(ss);
 	if (f == 0)
 		return false;
-	
+
 	FileStream fs(f);
-	
 	i._program.newProg();
-	
+
 	return _loadText(fs, i);
 }
 
@@ -435,7 +432,7 @@ bool
 ExtmemFSModule::getFileName(Interpreter &i, char ss[])
 {
 	static const char strBAS[] PROGMEM = ".BAS";
-	
+
 	const char *s;
 	if (!i.popString(s))
 		return false;

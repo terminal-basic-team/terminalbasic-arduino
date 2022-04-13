@@ -1,7 +1,7 @@
 /*
  * This file is part of Terminal-BASIC: a lightweight BASIC-like language
  * interpreter.
- * 
+ *
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  * Copyright (C) 2019-2021 Terminal-BASIC team
  *     <https://github.com/terminal-basic-team>
@@ -21,6 +21,10 @@
  */
 
 #include "HAL.h"
+
+#if HAL_TERMINAL_STDIO >= HAL_TERMINAL_NUM
+#error STDIO terminal index is greater then number of terminals
+#endif
 
 #if HAL_NVRAM
 
@@ -82,5 +86,5 @@ HAL_gfx_setColors(HAL_gfx_color_t fgColor, HAL_gfx_color_t bgColor)
     HAL_gfx_setColor(fgColor);
     HAL_gfx_setBgColor(bgColor);
 }
-   
+
 #endif /* HAL_GFX */

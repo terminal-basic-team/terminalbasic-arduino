@@ -1,7 +1,7 @@
 /*
  * This file is part of Terminal-BASIC: a lightweight BASIC-like language
  * interpreter.
- * 
+ *
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  * Copyright (C) 2019-2021 Terminal-BASIC team
  *     <https://github.com/terminal-basic-team>
@@ -49,7 +49,7 @@
 		/*
 		 * ACS ASN ATN
 		 */
-		#define M_REVERSE_TRIGONOMETRIC 1
+		#define M_REVERSE_TRIGONOMETRIC 0
 		/*
 		 * CBR (cubic root) ...
 		 */
@@ -61,7 +61,7 @@
 #define USE_STRINGOPS      1
 #if USE_STRINGOPS
 	// GET$ function, returns string from last pressed key symbol
-	#define USE_INKEY   1
+	#define USE_INKEY   0
 	// CHR$ function, returns string from the parameter ASCII code
 	#define USE_CHR     1
 	// ASC function, returns code of the first symbol in a string
@@ -69,17 +69,17 @@
 	// LEN function, returns length of the string
 	#define USE_LEN     1
 	// LEFT$ function, returns leftmost part of the string
-	#define USE_LEFT    1
+	#define USE_LEFT    0
 	// RIGHT$ function, returns rightmost part of the string
-	#define USE_RIGHT   1
+	#define USE_RIGHT   0
 	// MID$ function, returns middle part of the string
 	#define USE_MID     1
 	// An alias for MID$
 	#define USE_SEG     1
 	// HEX$ function, returns string with hexsadecimal representation of the expression value
-	#define USE_HEX     1
+	#define USE_HEX     0
 	// VAL function, returns numeric value from string
-	#define USE_VAL     1
+	#define USE_VAL     0
 #endif // USE_STRINGOPS
 /*
  * Clear program memory on NEW command
@@ -102,16 +102,16 @@
 	/*
 	 * Set print zones width (tab spacing)
 	 */
-	#define SET_PRINTZNES             1
+	#define SET_PRINTZNES             0
 	#if SET_PRINTZNES
-		#define PRINT_ZONE_WIDTH 16
+		#define PRINT_ZONE_WIDTH 12
 		#define PRINT_ZONES_NUMBER 5
 	#endif // SET_PRINTZNES
 #endif // USE_TEXTATTRIBUTES
 
 #if USE_SAVE_LOAD
 	// Compute checksums while SAVE, LOAD and CHAIN
-	#define SAVE_LOAD_CHECKSUM   1
+	#define SAVE_LOAD_CHECKSUM   0
 #endif // USE_SAVE_LOAD
 
 // Convert all input to upper register
@@ -172,12 +172,10 @@
 /*
  * GFX module
  */
-#define USE_GFX          0
+#define USE_GFX        0
 #if USE_GFX
 // Use drawing functions with explisit color setting
 #define GFX_EXP_COLOR 1
-// Serial binary graphics protocol
-#define SERIAL_GFX    0
 #endif
 
 /*

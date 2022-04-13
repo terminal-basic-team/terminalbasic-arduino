@@ -9,12 +9,12 @@
  * modify it under the terms of the GNU Lesser General Public License
  * as published by the Free Software Foundation, either version 3 of
  * the License, or (at your option) any later version.
-
+ *
  * ArduinoExt library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with Posixcpp library. If not, see
  * <http://www.gnu.org/licenses/>.
@@ -29,9 +29,9 @@
 Package(GFXTERM)
 {
 	EXT_PACKAGE(GFXTERM)
-	    
+
 public:
-	
+
 	enum class Command : uint8_t
 	{
 		NONE = 0x00,
@@ -83,7 +83,7 @@ public:
 		// Set ink color and draw point
 		// param int16_t x,y, uint8_t ink
 		POINTC,
-		
+
 		NUM_COMMANDS
 	};
 };

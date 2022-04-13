@@ -1,7 +1,7 @@
 /*
  * This file is part of Terminal-BASIC: a lightweight BASIC-like language
  * interpreter.
- * 
+ *
  * Copyright (C) 2016-2018 Andrey V. Skvortsov <starling13@mail.ru>
  * Copyright (C) 2019-2021 Terminal-BASIC team
  *     <https://github.com/terminal-basic-team>
@@ -30,6 +30,9 @@
 
 #include "basic_config.hpp"
 #include "basic.h"
+#ifdef ARDUINO_ARCH_AVR
+#include "HAL_avr8.h"
+#endif
 
 /**
  * Parameters
@@ -62,11 +65,13 @@
 #endif // BASIC_MULTITERMINAL
 
 // Use external memory
-#define USE_EXTMEM                0
-#if USE_EXTMEM
+#if HAL_ARDUINO_AVR8_EXTMEM
+#define USE_EXTMEM 1
 #define EXTMEM_ADDRESS 0x8000
 #define EXTMEM_SIZE    32768
-#endif
+#else
+#define USE_EXTMEM 0
+#endif // HAL_ARDUINO_AVR8_EXTMEM
 
 namespace BASIC
 {
